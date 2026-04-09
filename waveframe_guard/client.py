@@ -18,7 +18,7 @@ class WaveframeGuard:
         self,
         api_key: Optional[str] = None,
         policy: Optional[Dict[str, Any]] = None,
-        debug: bool = True,  # 👈 enable debug visibility
+        debug: bool = True,
     ) -> None:
         self.api_key = api_key
         self.debug = debug
@@ -40,7 +40,6 @@ class WaveframeGuard:
         execute_fn: Callable[[Dict[str, Any]], Any],
         context: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
-
         if not isinstance(action, dict):
             return self._blocked("Invalid action format (must be dict)")
 
@@ -53,12 +52,13 @@ class WaveframeGuard:
         mutation = self._normalize_mutation(action)
 
         # --------------------------------------------------
-        # Step 2: Build run_context with identities
+        # Step 2: Build kernel-compatible run_context
         # --------------------------------------------------
-        run_context = context.copy() if context else {}
-
-        identities = self._build_identities(actor, roles)
-        run_context["identities"] = identities
+        run_context = self._build_run_context(
+            actor=actor,
+            roles=roles,
+            context=context,
+        )
 
         # --------------------------------------------------
         # Step 3: Build canonical proposal
@@ -104,11 +104,11 @@ class WaveframeGuard:
         if result["commit_allowed"]:
             return {
                 "allowed": True,
-                "result": result.get("result"),
+                "result": result.get("execution_result"),
                 "reason": "Execution permitted",
             }
 
-        return self._blocked(result.get("summary", "Execution blocked"))
+        return self._blocked(result.get("result").summary if result.get("result") else result.get("summary", "Execution blocked"))
 
     # ---------------------------------------------------------------------
     # Internal
@@ -134,6 +134,33 @@ class WaveframeGuard:
             **{k: v for k, v in action.items() if k != "type"},
         }
 
+    def _build_run_context(
+        self,
+        actor: str,
+        roles: Optional[Dict[str, str]],
+        context: Optional[Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        """
+        Construct the minimal run_context shape expected by CRI-CORE.
+
+        Product rule:
+        users should not have to know CRI-CORE's required context structure.
+        """
+
+        incoming = dict(context) if context else {}
+
+        run_context: Dict[str, Any] = {
+            "identities": self._build_identities(actor, roles),
+            "integrity": {},
+            "publication": {},
+        }
+
+        # Allow caller-provided context to extend/override defaults
+        for key, value in incoming.items():
+            run_context[key] = value
+
+        return run_context
+
     def _build_identities(
         self,
         actor: str,
@@ -141,26 +168,21 @@ class WaveframeGuard:
     ) -> Dict[str, Any]:
         """
         Construct identity structure for CRI-CORE enforcement.
-
-        CRITICAL: We align structure with expected role separation logic.
         """
 
         identities: Dict[str, Any] = {}
 
         if roles:
-            # 👇 Explicit role mapping (important for separation_of_duties)
             for role, identity in roles.items():
                 identities[role] = {
                     "id": identity,
                     "type": "agent" if "ai" in identity else "human",
                 }
 
-            # 👇 ALSO include top-level actor (important for some kernels)
             identities["actor"] = {
                 "id": actor,
                 "type": "agent",
             }
-
         else:
             identities["actor"] = {
                 "id": actor,
