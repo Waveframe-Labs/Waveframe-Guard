@@ -5,7 +5,7 @@ Execution-gated interface for AI actions using CRI-CORE,
 proposal normalizer, and contract compiler.
 """
 
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, List, Optional
 from uuid import uuid4
 
 from cricore.interface.governed_execute import governed_execute
@@ -46,23 +46,9 @@ class WaveframeGuard:
         if not actor:
             return self._blocked("Actor is required")
 
-        # --------------------------------------------------
-        # Step 1: Normalize mutation
-        # --------------------------------------------------
         mutation = self._normalize_mutation(action)
+        run_context = self._build_run_context(actor=actor, roles=roles, context=context)
 
-        # --------------------------------------------------
-        # Step 2: Build kernel-compatible run_context
-        # --------------------------------------------------
-        run_context = self._build_run_context(
-            actor=actor,
-            roles=roles,
-            context=context,
-        )
-
-        # --------------------------------------------------
-        # Step 3: Build canonical proposal
-        # --------------------------------------------------
         proposal = build_proposal(
             proposal_id=str(uuid4()),
             actor={
@@ -79,15 +65,9 @@ class WaveframeGuard:
             print("\n[DEBUG] Proposal:")
             print(proposal)
 
-        # --------------------------------------------------
-        # Step 4: Wrap execution
-        # --------------------------------------------------
         def wrapped_execute_fn(proposal_input: Dict[str, Any]):
             return execute_fn(action)
 
-        # --------------------------------------------------
-        # Step 5: Enforcement
-        # --------------------------------------------------
         result = governed_execute(
             proposal=proposal,
             policy=self._compiled_contract,
@@ -98,9 +78,6 @@ class WaveframeGuard:
             print("\n[DEBUG] Enforcement Result:")
             print(result)
 
-        # --------------------------------------------------
-        # Step 6: Normalize output
-        # --------------------------------------------------
         if result["commit_allowed"]:
             return {
                 "allowed": True,
@@ -108,7 +85,11 @@ class WaveframeGuard:
                 "reason": "Execution permitted",
             }
 
-        return self._blocked(result.get("result").summary if result.get("result") else result.get("summary", "Execution blocked"))
+        evaluation_result = result.get("result")
+        if evaluation_result is not None:
+            return self._blocked(evaluation_result.summary)
+
+        return self._blocked("Execution blocked")
 
     # ---------------------------------------------------------------------
     # Internal
@@ -142,9 +123,6 @@ class WaveframeGuard:
     ) -> Dict[str, Any]:
         """
         Construct the minimal run_context shape expected by CRI-CORE.
-
-        Product rule:
-        users should not have to know CRI-CORE's required context structure.
         """
 
         incoming = dict(context) if context else {}
@@ -155,7 +133,6 @@ class WaveframeGuard:
             "publication": {},
         }
 
-        # Allow caller-provided context to extend/override defaults
         for key, value in incoming.items():
             run_context[key] = value
 
@@ -167,29 +144,71 @@ class WaveframeGuard:
         roles: Optional[Dict[str, str]],
     ) -> Dict[str, Any]:
         """
-        Construct identity structure for CRI-CORE enforcement.
+        Construct identity structure in the exact format expected by
+        CRI-CORE independence enforcement.
+
+        Expected shape:
+        {
+            "actors": [
+                {"id": "...", "type": "...", "role": "..."},
+                ...
+            ],
+            "required_roles": [...],
+            "conflict_flags": {}
+        }
         """
 
-        identities: Dict[str, Any] = {}
+        if not roles:
+            return {
+                "actors": [
+                    {
+                        "id": actor,
+                        "type": "agent",
+                        "role": "actor",
+                    }
+                ],
+                "conflict_flags": {},
+            }
 
-        if roles:
-            for role, identity in roles.items():
-                identities[role] = {
+        actors: List[Dict[str, str]] = []
+        for role, identity in roles.items():
+            actors.append(
+                {
                     "id": identity,
                     "type": "agent" if "ai" in identity else "human",
+                    "role": role,
                 }
+            )
 
-            identities["actor"] = {
-                "id": actor,
-                "type": "agent",
-            }
-        else:
-            identities["actor"] = {
-                "id": actor,
-                "type": "agent",
-            }
+        return {
+            "actors": actors,
+            "required_roles": self._extract_required_roles(),
+            "conflict_flags": {},
+        }
 
-        return identities
+    def _extract_required_roles(self) -> List[str]:
+        """
+        Derive required roles from compiled contract invariants.
+
+        Current compiler emits separation rules under:
+        compiled_contract["invariants"]["separation_of_duties"]
+        """
+
+        invariants = self._compiled_contract.get("invariants", {})
+        separation_rules = invariants.get("separation_of_duties", [])
+
+        required_roles: List[str] = []
+        seen = set()
+
+        if isinstance(separation_rules, list):
+            for rule in separation_rules:
+                if isinstance(rule, list):
+                    for role in rule:
+                        if isinstance(role, str) and role not in seen:
+                            seen.add(role)
+                            required_roles.append(role)
+
+        return required_roles
 
     def _compile_policy(self, policy: Dict[str, Any]) -> Dict[str, Any]:
         try:
@@ -209,6 +228,7 @@ class WaveframeGuard:
             "contract_id": "default",
             "contract_version": "0.1.0",
             "contract_hash": "dev",
+            "invariants": {},
         }
 
     def _blocked(self, reason: str) -> Dict[str, Any]:
