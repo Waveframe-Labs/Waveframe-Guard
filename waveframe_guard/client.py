@@ -14,10 +14,6 @@ READ_ONLY_ACTIONS = {
 }
 
 
-def _safe_dict(value) -> Dict:
-    return value if isinstance(value, dict) else {}
-
-
 def _validate_action(action: Any) -> Optional[str]:
     if not isinstance(action, dict):
         return "Invalid action: must be a dictionary"
@@ -49,7 +45,6 @@ def _translate_failure(result) -> str:
 
 
 class WaveframeGuard:
-
     def __init__(
         self,
         policy: Dict,
@@ -66,17 +61,20 @@ class WaveframeGuard:
         actor: str,
         context: Optional[Any] = None,
     ) -> Dict[str, Any]:
-
         # -----------------------------
-        # Normalize inputs
+        # Validate context
         # -----------------------------
+        if context is not None and not isinstance(context, dict):
+            return {
+                "allowed": False,
+                "reason": "Invalid context: must be a dictionary",
+            }
 
-        context = _safe_dict(context)
+        context = context or {}
 
         # -----------------------------
         # Validate action
         # -----------------------------
-
         error = _validate_action(action)
         if error:
             return {
@@ -89,7 +87,6 @@ class WaveframeGuard:
         # -----------------------------
         # Read-only shortcut
         # -----------------------------
-
         if _is_read_only(action_type):
             return {
                 "allowed": True,
@@ -101,7 +98,6 @@ class WaveframeGuard:
         # -----------------------------
         # Approval enforcement
         # -----------------------------
-
         if not approved_by:
             return {
                 "allowed": False,
@@ -117,7 +113,6 @@ class WaveframeGuard:
         # -----------------------------
         # Build proposal safely
         # -----------------------------
-
         try:
             proposal = self._build_proposal(
                 action=action,
@@ -136,7 +131,6 @@ class WaveframeGuard:
         # -----------------------------
         # Translate result
         # -----------------------------
-
         if result.commit_allowed:
             return {
                 "allowed": True,
@@ -155,7 +149,6 @@ class WaveframeGuard:
         actor: str,
         approved_by: str,
     ) -> Dict[str, Any]:
-
         return {
             "proposal_id": "generated",
             "timestamp": "now",
