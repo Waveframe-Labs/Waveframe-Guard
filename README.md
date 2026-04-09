@@ -1,225 +1,183 @@
 # Waveframe Guard
 
-**Stop bad AI actions before they execute.**
-
-Waveframe Guard is a drop-in execution gate that decides:
-
-- ✅ allow the action  
-- ❌ block it before it happens  
-
-No alerts. No audits. No “we’ll catch it later.”
-
-The action either executes — or it doesn’t.
+Stop unsafe AI financial actions before they execute.
 
 ---
 
-## The Problem
+## The problem
 
-AI systems don’t fail when they think.
+AI systems can propose actions.
 
-They fail when they act.
+But nothing actually stops them from executing a bad one.
 
-Most “AI governance” tools:
-- log decisions
-- flag risks
-- generate reports
+Examples:
+- Reallocating budget without approval
+- Transferring funds without oversight
+- Acting outside defined authority
 
-But they **don’t stop execution**.
+Most systems:
+- log it
+- flag it
+- explain it
 
-That means:
-- money can still move
-- code can still deploy
-- systems can still change state
+But they still let it happen.
 
 ---
 
-## The Solution
+## The solution
 
 Waveframe Guard sits at the execution boundary.
 
-Every action must pass through it.
+Every action is evaluated before it happens.
 
-```python
-guard.execute(...)
-````
+The result is binary:
 
-If the action is not admissible:
-
-→ it never runs
+- allowed → execution proceeds
+- blocked → execution never occurs
 
 ---
 
-## Example
-
-### Without Waveframe Guard
-
-```python
-execute_budget_transfer(...)
-```
-
-💥 Executes immediately
-💥 No enforcement
-💥 No guarantees
-
----
-
-### With Waveframe Guard
+## What this looks like
 
 ```python
 from waveframe_guard import WaveframeGuard
 
-guard = WaveframeGuard(policy=policy)
+guard = WaveframeGuard(policy="finance-policy.json")
 
 result = guard.execute(
-    action={
-        "type": "reallocate_budget",
-        "amount": 2_000_000
-    },
+    action={"type": "transfer", "amount": 5000},
     actor="ai-agent",
-    roles={
-        "proposer": "ai-agent",
-        "approver": "ai-agent"
-    },
-    execute_fn=execute_budget_transfer
+    context={"approved_by": "human-123"}
+)
+
+print(result)
+````
+
+Output:
+
+```python
+{'allowed': True, 'reason': 'Execution permitted'}
+```
+
+---
+
+## Without approval
+
+```python
+result = guard.execute(
+    action={"type": "transfer", "amount": 5000},
+    actor="ai-agent"
 )
 ```
 
-### Result
-
-```
-❌ BLOCKED
-Reason: identity reused across required roles
-```
-
----
-
-### Valid Case
+Output:
 
 ```python
-roles = {
-    "proposer": "ai-agent",
-    "approver": "human-123"
-}
-```
-
-```
-✅ ALLOWED
-Execution permitted
+{'allowed': False, 'reason': 'Blocked: approval required for financial action'}
 ```
 
 ---
 
-## What This Actually Does
+## What it enforces
 
-Waveframe Guard enforces:
+* Separation of duties
+* Approval requirements
+* Action-level constraints
+* Deterministic execution control
 
-* role separation
-* structural integrity
-* execution admissibility
+No warnings.
+No post-hoc analysis.
 
-Before anything mutates real state.
-
-It uses a deterministic enforcement engine underneath.
-
-No AI. No heuristics. No interpretation.
+The action either happens — or it doesn’t.
 
 ---
 
 ## Install
 
 ```bash
-pip install waveframe-guard
+pip install -e .
 ```
 
 ---
 
-## Minimal Usage
+## Run the test
 
-```python
-from waveframe_guard import WaveframeGuard
-
-guard = WaveframeGuard(policy=policy)
-
-result = guard.execute(
-    action=action,
-    actor="ai-agent",
-    roles=roles,
-    execute_fn=my_function
-)
+```bash
+python test_guard.py
 ```
 
 ---
 
-## Policy Example
+## How it works (simple)
+
+1. AI proposes an action
+2. Guard evaluates it against governance rules
+3. Returns:
 
 ```python
-policy = {
-    "contract_id": "finance-policy",
-    "contract_version": "0.1.0",
-    "constraints": [
-        {
-            "type": "separation_of_duties",
-            "roles": ["proposer", "approver"]
-        }
-    ]
+{
+  "allowed": bool,
+  "reason": str
 }
 ```
 
----
-
-## What You Get
-
-* deterministic execution control
-* enforced role separation
-* prevention instead of detection
-* zero dependency on AI models
+4. Your system decides whether to execute
 
 ---
 
-## What This Is Not
+## Policy (governance rules)
 
-Waveframe Guard is not:
+Policies define what is allowed.
 
-* a monitoring tool
-* a logging system
-* a workflow engine
-* a policy suggestion layer
+Example:
 
-It does not advise.
+```python
+guard = WaveframeGuard(policy="finance-policy.json")
+```
 
-It **decides**.
+This represents compiled governance rules such as:
 
----
-
-## Where It Runs
-
-Waveframe Guard sits directly in your system:
-
-* AI agents
-* backend services
-* CI/CD pipelines
-* automation workflows
-
-Anywhere an action can execute.
+* who can approve actions
+* what actions require approval
+* role separation requirements
 
 ---
 
-## Product Direction
+## Where this fits
 
-Waveframe Guard is the execution layer.
+Waveframe Guard is the enforcement layer.
 
-Upcoming:
+It does not:
 
-* hosted policy management
-* audit visibility
-* execution dashboards
-* usage-based billing
+* run workflows
+* manage approvals
+* store policies
+
+It decides one thing:
+
+👉 can this action execute or not?
+
+---
+
+## Use cases
+
+* AI-driven finance systems
+* autonomous agents with spending authority
+* internal tooling with automated decisions
+* any system where actions must be controlled
+
+---
+
+## Status
+
+Active development.
+Focused on financial governance use cases.
 
 ---
 
 ## License
 
-Proprietary (Waveframe Labs)
+Proprietary / Commercial (pending final terms)
 
 ---
 
