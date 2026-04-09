@@ -42,14 +42,18 @@ class WaveframeGuard:
             return self._blocked("Actor is required")
 
         # --------------------------------------------------
-        # Step 1: Build run_context with identities
+        # Step 1: Normalize mutation (CRITICAL FIX)
+        # --------------------------------------------------
+        mutation = self._normalize_mutation(action)
+
+        # --------------------------------------------------
+        # Step 2: Build run_context with identities
         # --------------------------------------------------
         run_context = context.copy() if context else {}
-
         run_context["identities"] = self._build_identities(actor, roles)
 
         # --------------------------------------------------
-        # Step 2: Build canonical proposal
+        # Step 3: Build canonical proposal
         # --------------------------------------------------
         proposal = build_proposal(
             proposal_id=str(uuid4()),
@@ -58,19 +62,19 @@ class WaveframeGuard:
                 "type": "agent",
             },
             artifact_paths=[],
-            mutation=action,
+            mutation=mutation,
             contract=self._map_contract(self._compiled_contract),
             run_context=run_context,
         )
 
         # --------------------------------------------------
-        # Step 3: Wrap execution
+        # Step 4: Wrap execution
         # --------------------------------------------------
         def wrapped_execute_fn(proposal_input: Dict[str, Any]):
             return execute_fn(action)
 
         # --------------------------------------------------
-        # Step 4: Enforcement
+        # Step 5: Enforcement
         # --------------------------------------------------
         result = governed_execute(
             proposal=proposal,
@@ -79,7 +83,7 @@ class WaveframeGuard:
         )
 
         # --------------------------------------------------
-        # Step 5: Normalize output
+        # Step 6: Normalize output
         # --------------------------------------------------
         if result["commit_allowed"]:
             return {
@@ -93,6 +97,28 @@ class WaveframeGuard:
     # ---------------------------------------------------------------------
     # Internal
     # ---------------------------------------------------------------------
+
+    def _normalize_mutation(self, action: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Convert user-friendly action into canonical mutation format
+        required by the proposal normalizer.
+        """
+
+        # Already valid
+        if all(k in action for k in ("domain", "resource", "action")):
+            return action
+
+        action_type = action.get("type")
+        if not action_type:
+            raise ValueError("Action must include 'type'")
+
+        # Minimal deterministic mapping (can evolve later)
+        return {
+            "domain": "finance",
+            "resource": "budget",
+            "action": action_type,
+            **{k: v for k, v in action.items() if k != "type"},
+        }
 
     def _build_identities(
         self,
@@ -112,7 +138,6 @@ class WaveframeGuard:
                     "type": "agent" if "ai" in identity else "human",
                 }
         else:
-            # fallback: single actor acting alone
             identities["actor"] = {
                 "id": actor,
                 "type": "agent",
