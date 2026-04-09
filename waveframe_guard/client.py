@@ -4,7 +4,7 @@ title: "Waveframe Guard Client"
 filetype: "source"
 type: "sdk"
 domain: "execution"
-version: "0.2.0"
+version: "0.3.0"
 status: "Active"
 created: "2026-04-09"
 updated: "2026-04-09"
@@ -20,7 +20,7 @@ license: "Apache-2.0"
 ai_assisted: "partial"
 
 anchors:
-  - "Waveframe-Guard-Client-v0.2.0"
+  - "Waveframe-Guard-Client-v0.3.0"
 ---
 """
 
@@ -30,7 +30,7 @@ from cricore.interface.evaluate_proposal import evaluate_proposal
 
 
 # -----------------------------
-# Human-readable translation layer
+# Human-readable translation
 # -----------------------------
 
 def _translate_failure(result) -> str:
@@ -49,7 +49,6 @@ def _translate_failure(result) -> str:
         "publication-commit": "Blocked: action failed governance checks",
     }
 
-    # Return first meaningful failure
     for stage in result.failed_stages:
         if stage in stage_map:
             return stage_map[stage]
@@ -79,7 +78,7 @@ class WaveframeGuard:
         self.default_domain = default_domain
 
     # -----------------------------
-    # Core execution decision
+    # Core decision function
     # -----------------------------
 
     def execute(
@@ -92,18 +91,7 @@ class WaveframeGuard:
         """
         Evaluate whether an action is allowed.
 
-        Parameters
-        ----------
-        action : dict
-            The requested action (e.g., transfer funds)
-        actor : str
-            The entity initiating the action
-        context : dict, optional
-            Additional governance context (e.g., approvals)
-
-        Returns
-        -------
-        dict:
+        Returns:
             {
                 "allowed": bool,
                 "reason": str
@@ -111,15 +99,35 @@ class WaveframeGuard:
         """
 
         context = context or {}
+        approved_by = context.get("approved_by")
 
         # -----------------------------
-        # Build canonical proposal
+        # HARD GUARANTEE (product-level invariant)
+        # -----------------------------
+        # Enforce separation-of-duties BEFORE kernel
+        # This ensures correctness even if upstream contracts drift
+        # -----------------------------
+
+        if approved_by is None:
+            return {
+                "allowed": False,
+                "reason": "Blocked: approval required for this action",
+            }
+
+        if approved_by == actor:
+            return {
+                "allowed": False,
+                "reason": "Blocked: same actor cannot propose and approve",
+            }
+
+        # -----------------------------
+        # Build proposal
         # -----------------------------
 
         proposal = self._build_proposal(
             action=action,
             actor=actor,
-            context=context,
+            approved_by=approved_by,
         )
 
         # -----------------------------
@@ -152,33 +160,14 @@ class WaveframeGuard:
         *,
         action: Dict,
         actor: str,
-        context: Dict[str, Any],
+        approved_by: str,
     ) -> Dict[str, Any]:
         """
-        Convert simple inputs into canonical proposal structure.
+        Convert inputs into canonical proposal structure.
         """
 
-        approved_by = context.get("approved_by")
-
-        actors = [
-            {
-                "id": actor,
-                "type": "agent",
-                "role": "proposer",
-            }
-        ]
-
-        if approved_by:
-            actors.append(
-                {
-                    "id": approved_by,
-                    "type": "human",
-                    "role": "approver",
-                }
-            )
-
         proposal = {
-            "proposal_id": "generated",  # lightweight placeholder
+            "proposal_id": "generated",
             "timestamp": "now",
             "actor": {
                 "id": actor,
@@ -197,7 +186,18 @@ class WaveframeGuard:
             "artifacts": [],
             "run_context": {
                 "identities": {
-                    "actors": actors,
+                    "actors": [
+                        {
+                            "id": actor,
+                            "type": "agent",
+                            "role": "proposer",
+                        },
+                        {
+                            "id": approved_by,
+                            "type": "human",
+                            "role": "approver",
+                        },
+                    ],
                     "required_roles": ["proposer", "approver"],
                     "conflict_flags": {},
                 },
