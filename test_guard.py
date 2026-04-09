@@ -80,3 +80,31 @@ run_scenario(
     action={"type": "get_balance"},
     actor="ai-agent",
 )
+
+# -----------------------------
+# Edge Case 1: Empty action
+# -----------------------------
+run_scenario(
+    "Edge Case 1: Empty action",
+    action={},
+    actor="ai-agent",
+)
+
+# -----------------------------
+# Edge Case 2: Missing type
+# -----------------------------
+run_scenario(
+    "Edge Case 2: Missing type",
+    action={"amount": 100},
+    actor="ai-agent",
+)
+
+# -----------------------------
+# Edge Case 3: Garbage context
+# -----------------------------
+run_scenario(
+    "Edge Case 3: Garbage context",
+    action={"type": "transfer"},
+    actor="ai-agent",
+    context="not a dict",
+)

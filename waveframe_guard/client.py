@@ -1,18 +1,11 @@
 """
----
-title: "Waveframe Guard Client"
-version: "0.4.0"
----
+Waveframe Guard Client (Hardened)
 """
 
 from typing import Any, Dict, Optional
 
 from cricore.interface.evaluate_proposal import evaluate_proposal
 
-
-# -----------------------------
-# Helpers
-# -----------------------------
 
 READ_ONLY_ACTIONS = {
     "get_balance",
@@ -21,11 +14,11 @@ READ_ONLY_ACTIONS = {
 }
 
 
-def _is_read_only(action: Dict[str, Any]) -> bool:
-    return action.get("type") in READ_ONLY_ACTIONS
+def _safe_dict(value) -> Dict:
+    return value if isinstance(value, dict) else {}
 
 
-def _validate_action(action: Dict[str, Any]) -> Optional[str]:
+def _validate_action(action: Any) -> Optional[str]:
     if not isinstance(action, dict):
         return "Invalid action: must be a dictionary"
 
@@ -36,6 +29,10 @@ def _validate_action(action: Dict[str, Any]) -> Optional[str]:
         return "Invalid action: 'type' must be a non-empty string"
 
     return None
+
+
+def _is_read_only(action_type: str) -> bool:
+    return action_type in READ_ONLY_ACTIONS
 
 
 def _translate_failure(result) -> str:
@@ -51,10 +48,6 @@ def _translate_failure(result) -> str:
     return "Blocked: governance requirements not satisfied"
 
 
-# -----------------------------
-# Guard
-# -----------------------------
-
 class WaveframeGuard:
 
     def __init__(
@@ -69,12 +62,16 @@ class WaveframeGuard:
     def execute(
         self,
         *,
-        action: Dict,
+        action: Any,
         actor: str,
-        context: Optional[Dict[str, Any]] = None,
+        context: Optional[Any] = None,
     ) -> Dict[str, Any]:
 
-        context = context or {}
+        # -----------------------------
+        # Normalize inputs
+        # -----------------------------
+
+        context = _safe_dict(context)
 
         # -----------------------------
         # Validate action
@@ -90,10 +87,10 @@ class WaveframeGuard:
         action_type = action["type"]
 
         # -----------------------------
-        # Read-only actions (auto allow)
+        # Read-only shortcut
         # -----------------------------
 
-        if _is_read_only(action):
+        if _is_read_only(action_type):
             return {
                 "allowed": True,
                 "reason": "Execution permitted (read-only action)",
@@ -102,7 +99,7 @@ class WaveframeGuard:
         approved_by = context.get("approved_by")
 
         # -----------------------------
-        # Approval required for mutations
+        # Approval enforcement
         # -----------------------------
 
         if not approved_by:
@@ -118,16 +115,27 @@ class WaveframeGuard:
             }
 
         # -----------------------------
-        # Build proposal
+        # Build proposal safely
         # -----------------------------
 
-        proposal = self._build_proposal(
-            action=action,
-            actor=actor,
-            approved_by=approved_by,
-        )
+        try:
+            proposal = self._build_proposal(
+                action=action,
+                actor=actor,
+                approved_by=approved_by,
+            )
 
-        result = evaluate_proposal(proposal, self.policy)
+            result = evaluate_proposal(proposal, self.policy)
+
+        except Exception:
+            return {
+                "allowed": False,
+                "reason": "Blocked: internal validation error",
+            }
+
+        # -----------------------------
+        # Translate result
+        # -----------------------------
 
         if result.commit_allowed:
             return {
@@ -139,10 +147,6 @@ class WaveframeGuard:
             "allowed": False,
             "reason": _translate_failure(result),
         }
-
-    # -----------------------------
-    # Proposal builder
-    # -----------------------------
 
     def _build_proposal(
         self,
