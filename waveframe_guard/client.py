@@ -30,6 +30,7 @@ class WaveframeGuard:
         self,
         action: Dict[str, Any],
         actor: str,
+        roles: Optional[Dict[str, str]],
         execute_fn: Callable[[Dict[str, Any]], Any],
         context: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
@@ -41,7 +42,14 @@ class WaveframeGuard:
             return self._blocked("Actor is required")
 
         # --------------------------------------------------
-        # Step 1: Build canonical proposal
+        # Step 1: Build run_context with identities
+        # --------------------------------------------------
+        run_context = context.copy() if context else {}
+
+        run_context["identities"] = self._build_identities(actor, roles)
+
+        # --------------------------------------------------
+        # Step 2: Build canonical proposal
         # --------------------------------------------------
         proposal = build_proposal(
             proposal_id=str(uuid4()),
@@ -52,17 +60,17 @@ class WaveframeGuard:
             artifact_paths=[],
             mutation=action,
             contract=self._map_contract(self._compiled_contract),
-            run_context=context or {},
+            run_context=run_context,
         )
 
         # --------------------------------------------------
-        # Step 2: Wrap execution
+        # Step 3: Wrap execution
         # --------------------------------------------------
         def wrapped_execute_fn(proposal_input: Dict[str, Any]):
             return execute_fn(action)
 
         # --------------------------------------------------
-        # Step 3: Enforcement
+        # Step 4: Enforcement
         # --------------------------------------------------
         result = governed_execute(
             proposal=proposal,
@@ -71,7 +79,7 @@ class WaveframeGuard:
         )
 
         # --------------------------------------------------
-        # Step 4: Normalize output
+        # Step 5: Normalize output
         # --------------------------------------------------
         if result["commit_allowed"]:
             return {
@@ -86,6 +94,32 @@ class WaveframeGuard:
     # Internal
     # ---------------------------------------------------------------------
 
+    def _build_identities(
+        self,
+        actor: str,
+        roles: Optional[Dict[str, str]],
+    ) -> Dict[str, Any]:
+        """
+        Construct identity structure for CRI-CORE enforcement.
+        """
+
+        identities: Dict[str, Any] = {}
+
+        if roles:
+            for role, identity in roles.items():
+                identities[role] = {
+                    "id": identity,
+                    "type": "agent" if "ai" in identity else "human",
+                }
+        else:
+            # fallback: single actor acting alone
+            identities["actor"] = {
+                "id": actor,
+                "type": "agent",
+            }
+
+        return identities
+
     def _compile_policy(self, policy: Dict[str, Any]) -> Dict[str, Any]:
         try:
             return compile_policy(policy)
@@ -93,10 +127,6 @@ class WaveframeGuard:
             raise ValueError(f"Invalid policy: {str(e)}") from e
 
     def _map_contract(self, compiled: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Map compiled contract → proposal contract format
-        """
-
         return {
             "id": compiled["contract_id"],
             "version": compiled["contract_version"],
