@@ -1,7 +1,8 @@
 """
 Waveframe Guard — Client Interface
 
-Execution-gated interface for AI actions using CRI-CORE.
+Execution-gated interface for AI actions using CRI-CORE,
+proposal normalizer, and contract compiler.
 """
 
 from typing import Any, Callable, Dict, Optional
@@ -9,6 +10,7 @@ from uuid import uuid4
 
 from cricore.interface.governed_execute import governed_execute
 from proposal_normalizer.build_proposal import build_proposal
+from compiler.compile_policy import compile_policy, PolicyCompilationError
 
 
 class WaveframeGuard:
@@ -18,7 +20,11 @@ class WaveframeGuard:
         policy: Optional[Dict[str, Any]] = None,
     ) -> None:
         self.api_key = api_key
-        self.policy = policy or {}
+
+        if policy is None:
+            self._compiled_contract = self._default_contract()
+        else:
+            self._compiled_contract = self._compile_policy(policy)
 
     def execute(
         self,
@@ -35,7 +41,7 @@ class WaveframeGuard:
             return self._blocked("Actor is required")
 
         # --------------------------------------------------
-        # Step 1: Build canonical proposal via normalizer
+        # Step 1: Build canonical proposal
         # --------------------------------------------------
         proposal = build_proposal(
             proposal_id=str(uuid4()),
@@ -45,7 +51,7 @@ class WaveframeGuard:
             },
             artifact_paths=[],
             mutation=action,
-            contract=self._default_contract(),
+            contract=self._map_contract(self._compiled_contract),
             run_context=context or {},
         )
 
@@ -60,7 +66,7 @@ class WaveframeGuard:
         # --------------------------------------------------
         result = governed_execute(
             proposal=proposal,
-            policy=self.policy,
+            policy=self._compiled_contract,
             execute_fn=wrapped_execute_fn,
         )
 
@@ -77,20 +83,31 @@ class WaveframeGuard:
         return self._blocked(result.get("summary", "Execution blocked"))
 
     # ---------------------------------------------------------------------
+    # Internal
+    # ---------------------------------------------------------------------
+
+    def _compile_policy(self, policy: Dict[str, Any]) -> Dict[str, Any]:
+        try:
+            return compile_policy(policy)
+        except PolicyCompilationError as e:
+            raise ValueError(f"Invalid policy: {str(e)}") from e
+
+    def _map_contract(self, compiled: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Map compiled contract → proposal contract format
+        """
+
+        return {
+            "id": compiled["contract_id"],
+            "version": compiled["contract_version"],
+            "hash": compiled["contract_hash"],
+        }
 
     def _default_contract(self) -> Dict[str, Any]:
-        """
-        Temporary contract placeholder.
-
-        Will later be replaced by:
-        - compiled contracts
-        - policy selection
-        - dashboard configuration
-        """
         return {
-            "id": "default",
-            "version": "0.1.0",
-            "hash": "dev",
+            "contract_id": "default",
+            "contract_version": "0.1.0",
+            "contract_hash": "dev",
         }
 
     def _blocked(self, reason: str) -> Dict[str, Any]:
