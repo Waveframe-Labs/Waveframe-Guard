@@ -1,74 +1,112 @@
 """
-Waveframe Guard — Finance Demo
+Waveframe Guard — Finance Demo (Role-Aware)
 
-This demo shows how Waveframe Guard prevents unsafe AI actions
-at the moment of execution.
+Demonstrates deterministic enforcement of separation-of-duties.
 
-No internal knowledge of CRI-CORE is required.
+Same action:
+- Blocked when roles are violated
+- Allowed when roles are valid
 """
 
 from waveframe_guard import WaveframeGuard
 
 
+def perform_mutation(action):
+    # Simulated execution
+    return {
+        "status": "executed",
+        "action": action
+    }
+
+
 def run_demo():
-    print("\nWaveframe Guard — Finance Execution Demo")
-    print("=" * 50)
-
-    guard = WaveframeGuard()
+    print("\nWaveframe Guard — Role-Based Enforcement Demo")
+    print("=" * 60)
 
     # --------------------------------------------------
-    # Scenario 1: Unsafe Action (Should be BLOCKED)
+    # Define policy (what governance requires)
     # --------------------------------------------------
-    print("\nScenario 1: Unauthorized Financial Action")
-    print("-" * 50)
+    policy = {
+        "contract_id": "finance-policy",
+        "contract_version": "0.1.0",
+        "constraints": [
+            {
+                "type": "separation_of_duties",
+                "roles": ["proposer", "approver"]
+            }
+        ]
+    }
+
+    guard = WaveframeGuard(policy=policy)
 
     action = {
         "type": "reallocate_budget",
         "amount": 2_000_000
     }
 
+    # --------------------------------------------------
+    # Scenario 1 — VIOLATION (same actor)
+    # --------------------------------------------------
+    print("\nScenario 1: Role Violation (Same Actor)")
+    print("-" * 60)
+
+    roles = {
+        "proposer": "ai-agent",
+        "approver": "ai-agent"
+    }
+
     result = guard.execute(
         action=action,
-        actor="ai-agent"
+        actor="ai-agent",
+        roles=roles,
+        execute_fn=perform_mutation
     )
 
     print("\nAction:")
     print("AI attempts to reallocate $2,000,000")
 
+    print("\nRoles:")
+    print(roles)
+
     if result["allowed"]:
-        print("\n✅ ALLOWED")
+        print("\n⚠️ UNEXPECTED: ALLOWED")
     else:
-        print("\n❌ BLOCKED")
+        print("\n✅ BLOCKED (Expected)")
 
     print(f"Reason: {result['reason']}")
 
     # --------------------------------------------------
-    # Scenario 2: Safe Action (Should be ALLOWED)
+    # Scenario 2 — VALID (separate actors)
     # --------------------------------------------------
-    print("\nScenario 2: Approved Financial Action")
-    print("-" * 50)
+    print("\nScenario 2: Valid Separation of Duties")
+    print("-" * 60)
 
-    action = {
-        "type": "reallocate_budget",
-        "amount": 50_000
+    roles = {
+        "proposer": "ai-agent",
+        "approver": "human-123"
     }
 
     result = guard.execute(
         action=action,
-        actor="ai-agent"
+        actor="ai-agent",
+        roles=roles,
+        execute_fn=perform_mutation
     )
 
     print("\nAction:")
-    print("AI attempts to reallocate $50,000")
+    print("AI attempts to reallocate $2,000,000")
+
+    print("\nRoles:")
+    print(roles)
 
     if result["allowed"]:
-        print("\n✅ ALLOWED")
+        print("\n✅ ALLOWED (Expected)")
     else:
-        print("\n❌ BLOCKED")
+        print("\n❌ UNEXPECTED: BLOCKED")
 
     print(f"Reason: {result['reason']}")
 
-    print("\n" + "=" * 50)
+    print("\n" + "=" * 60)
     print("Demo complete\n")
 
 
