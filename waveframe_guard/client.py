@@ -18,13 +18,19 @@ class WaveframeGuard:
         self,
         api_key: Optional[str] = None,
         policy: Optional[Dict[str, Any]] = None,
+        debug: bool = True,  # 👈 enable debug visibility
     ) -> None:
         self.api_key = api_key
+        self.debug = debug
 
         if policy is None:
             self._compiled_contract = self._default_contract()
         else:
             self._compiled_contract = self._compile_policy(policy)
+
+        if self.debug:
+            print("\n[DEBUG] Compiled Contract:")
+            print(self._compiled_contract)
 
     def execute(
         self,
@@ -42,7 +48,7 @@ class WaveframeGuard:
             return self._blocked("Actor is required")
 
         # --------------------------------------------------
-        # Step 1: Normalize mutation (CRITICAL FIX)
+        # Step 1: Normalize mutation
         # --------------------------------------------------
         mutation = self._normalize_mutation(action)
 
@@ -50,7 +56,9 @@ class WaveframeGuard:
         # Step 2: Build run_context with identities
         # --------------------------------------------------
         run_context = context.copy() if context else {}
-        run_context["identities"] = self._build_identities(actor, roles)
+
+        identities = self._build_identities(actor, roles)
+        run_context["identities"] = identities
 
         # --------------------------------------------------
         # Step 3: Build canonical proposal
@@ -67,6 +75,10 @@ class WaveframeGuard:
             run_context=run_context,
         )
 
+        if self.debug:
+            print("\n[DEBUG] Proposal:")
+            print(proposal)
+
         # --------------------------------------------------
         # Step 4: Wrap execution
         # --------------------------------------------------
@@ -81,6 +93,10 @@ class WaveframeGuard:
             policy=self._compiled_contract,
             execute_fn=wrapped_execute_fn,
         )
+
+        if self.debug:
+            print("\n[DEBUG] Enforcement Result:")
+            print(result)
 
         # --------------------------------------------------
         # Step 6: Normalize output
@@ -104,7 +120,6 @@ class WaveframeGuard:
         required by the proposal normalizer.
         """
 
-        # Already valid
         if all(k in action for k in ("domain", "resource", "action")):
             return action
 
@@ -112,7 +127,6 @@ class WaveframeGuard:
         if not action_type:
             raise ValueError("Action must include 'type'")
 
-        # Minimal deterministic mapping (can evolve later)
         return {
             "domain": "finance",
             "resource": "budget",
@@ -127,16 +141,26 @@ class WaveframeGuard:
     ) -> Dict[str, Any]:
         """
         Construct identity structure for CRI-CORE enforcement.
+
+        CRITICAL: We align structure with expected role separation logic.
         """
 
         identities: Dict[str, Any] = {}
 
         if roles:
+            # 👇 Explicit role mapping (important for separation_of_duties)
             for role, identity in roles.items():
                 identities[role] = {
                     "id": identity,
                     "type": "agent" if "ai" in identity else "human",
                 }
+
+            # 👇 ALSO include top-level actor (important for some kernels)
+            identities["actor"] = {
+                "id": actor,
+                "type": "agent",
+            }
+
         else:
             identities["actor"] = {
                 "id": actor,
