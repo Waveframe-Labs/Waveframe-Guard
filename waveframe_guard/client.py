@@ -1,26 +1,7 @@
 """
 ---
 title: "Waveframe Guard Client"
-filetype: "source"
-type: "sdk"
-domain: "execution"
-version: "0.3.0"
-status: "Active"
-created: "2026-04-09"
-updated: "2026-04-09"
-
-author:
-  name: "Shawn C. Wright"
-
-maintainer:
-  name: "Waveframe Labs"
-
-license: "Apache-2.0"
-
-ai_assisted: "partial"
-
-anchors:
-  - "Waveframe-Guard-Client-v0.3.0"
+version: "0.4.0"
 ---
 """
 
@@ -30,43 +11,51 @@ from cricore.interface.evaluate_proposal import evaluate_proposal
 
 
 # -----------------------------
-# Human-readable translation
+# Helpers
 # -----------------------------
 
-def _translate_failure(result) -> str:
-    """
-    Convert CRI-CORE failures into business-readable language.
-    """
+READ_ONLY_ACTIONS = {
+    "get_balance",
+    "view_account",
+    "read_data",
+}
 
+
+def _is_read_only(action: Dict[str, Any]) -> bool:
+    return action.get("type") in READ_ONLY_ACTIONS
+
+
+def _validate_action(action: Dict[str, Any]) -> Optional[str]:
+    if not isinstance(action, dict):
+        return "Invalid action: must be a dictionary"
+
+    if "type" not in action:
+        return "Invalid action: missing 'type' field"
+
+    if not isinstance(action["type"], str) or not action["type"].strip():
+        return "Invalid action: 'type' must be a non-empty string"
+
+    return None
+
+
+def _translate_failure(result) -> str:
     if not result.failed_stages:
         return "Execution permitted"
 
-    stage_map = {
-        "independence": "Blocked: same actor cannot propose and approve",
-        "integrity": "Blocked: required integrity data missing",
-        "integrity-finalization": "Blocked: integrity checks not finalized",
-        "publication": "Blocked: execution context incomplete",
-        "publication-commit": "Blocked: action failed governance checks",
-    }
+    if "independence" in result.failed_stages:
+        return "Blocked: same actor cannot propose and approve"
 
-    for stage in result.failed_stages:
-        if stage in stage_map:
-            return stage_map[stage]
+    if "integrity" in result.failed_stages:
+        return "Blocked: required execution data missing"
 
     return "Blocked: governance requirements not satisfied"
 
 
 # -----------------------------
-# Guard Client
+# Guard
 # -----------------------------
 
 class WaveframeGuard:
-    """
-    Waveframe Guard SDK
-
-    Determines whether an action is allowed to execute.
-    Does NOT execute the action.
-    """
 
     def __init__(
         self,
@@ -77,10 +66,6 @@ class WaveframeGuard:
         self.policy = policy
         self.default_domain = default_domain
 
-    # -----------------------------
-    # Core decision function
-    # -----------------------------
-
     def execute(
         self,
         *,
@@ -88,30 +73,42 @@ class WaveframeGuard:
         actor: str,
         context: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
-        """
-        Evaluate whether an action is allowed.
-
-        Returns:
-            {
-                "allowed": bool,
-                "reason": str
-            }
-        """
 
         context = context or {}
+
+        # -----------------------------
+        # Validate action
+        # -----------------------------
+
+        error = _validate_action(action)
+        if error:
+            return {
+                "allowed": False,
+                "reason": error,
+            }
+
+        action_type = action["type"]
+
+        # -----------------------------
+        # Read-only actions (auto allow)
+        # -----------------------------
+
+        if _is_read_only(action):
+            return {
+                "allowed": True,
+                "reason": "Execution permitted (read-only action)",
+            }
+
         approved_by = context.get("approved_by")
 
         # -----------------------------
-        # HARD GUARANTEE (product-level invariant)
-        # -----------------------------
-        # Enforce separation-of-duties BEFORE kernel
-        # This ensures correctness even if upstream contracts drift
+        # Approval required for mutations
         # -----------------------------
 
-        if approved_by is None:
+        if not approved_by:
             return {
                 "allowed": False,
-                "reason": "Blocked: approval required for this action",
+                "reason": "Blocked: approval required for financial action",
             }
 
         if approved_by == actor:
@@ -130,15 +127,7 @@ class WaveframeGuard:
             approved_by=approved_by,
         )
 
-        # -----------------------------
-        # Evaluate via CRI-CORE
-        # -----------------------------
-
         result = evaluate_proposal(proposal, self.policy)
-
-        # -----------------------------
-        # Translate result
-        # -----------------------------
 
         if result.commit_allowed:
             return {
@@ -152,7 +141,7 @@ class WaveframeGuard:
         }
 
     # -----------------------------
-    # Internal proposal builder
+    # Proposal builder
     # -----------------------------
 
     def _build_proposal(
@@ -162,11 +151,8 @@ class WaveframeGuard:
         actor: str,
         approved_by: str,
     ) -> Dict[str, Any]:
-        """
-        Convert inputs into canonical proposal structure.
-        """
 
-        proposal = {
+        return {
             "proposal_id": "generated",
             "timestamp": "now",
             "actor": {
@@ -180,7 +166,7 @@ class WaveframeGuard:
             },
             "requested_mutation": {
                 "domain": self.default_domain,
-                "resource": action.get("type", "unknown"),
+                "resource": action.get("type"),
                 "action": action.get("type"),
             },
             "artifacts": [],
@@ -205,5 +191,3 @@ class WaveframeGuard:
                 "publication": {},
             },
         }
-
-        return proposal

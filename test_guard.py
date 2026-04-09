@@ -79,4 +79,14 @@ Scenario 2:
 
 Scenario 3:
 {'allowed': True, 'reason': 'Execution permitted'}
+
+# Scenario 4: Read-only action
+
+result_4 = guard.execute(
+    action={"type": "get_balance"},
+    actor="ai-agent",
+)
+
+print("\nScenario 4: Read-only action")
+print(result_4)
 """
