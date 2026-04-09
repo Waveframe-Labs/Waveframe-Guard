@@ -5,23 +5,18 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "waveframe-guard"
 version = "0.1.0"
-description = "Drop-in execution gate that prevents unsafe AI actions before they occur."
+description = "Stop unsafe AI actions before they execute"
 authors = [
-    { name = "Shawn C. Wright", email = "swright@waveframelabs.org" }
+    { name = "Shawn Wright", email = "swright@waveframelabs.org" }
 ]
 readme = "README.md"
 requires-python = ">=3.10"
+
+# 🔒 Proprietary license
 license = { text = "Proprietary" }
 
 dependencies = [
-    "cricore>=0.6.0"
-]
-
-keywords = ["ai", "governance", "security", "execution", "enforcement"]
-
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "Operating System :: OS Independent"
+    "cricore"
 ]
 
 [tool.setuptools.packages.find]
