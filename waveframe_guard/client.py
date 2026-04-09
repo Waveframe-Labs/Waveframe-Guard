@@ -1,15 +1,14 @@
 """
 Waveframe Guard — Client Interface
 
-Execution-gated interface for AI actions.
-
-This implementation uses CRI-CORE's governed_execute to ensure that
-actions only execute if they pass deterministic enforcement.
+Execution-gated interface for AI actions using CRI-CORE.
 """
 
 from typing import Any, Callable, Dict, Optional
+from uuid import uuid4
 
 from cricore.interface.governed_execute import governed_execute
+from proposal_normalizer.build_proposal import build_proposal
 
 
 class WaveframeGuard:
@@ -28,22 +27,6 @@ class WaveframeGuard:
         execute_fn: Callable[[Dict[str, Any]], Any],
         context: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
-        """
-        Execute an action through the governance gate.
-
-        Args:
-            action: Proposed action
-            actor: Actor performing the action
-            execute_fn: Function that performs the actual mutation
-            context: Optional metadata
-
-        Returns:
-            {
-                "allowed": bool,
-                "result": Any,
-                "reason": str
-            }
-        """
 
         if not isinstance(action, dict):
             return self._blocked("Invalid action format (must be dict)")
@@ -52,12 +35,18 @@ class WaveframeGuard:
             return self._blocked("Actor is required")
 
         # --------------------------------------------------
-        # Step 1: Build proposal (minimal for now)
+        # Step 1: Build canonical proposal via normalizer
         # --------------------------------------------------
-        proposal = self._build_proposal(
-            action=action,
-            actor=actor,
-            context=context or {},
+        proposal = build_proposal(
+            proposal_id=str(uuid4()),
+            actor={
+                "id": actor,
+                "type": "agent",
+            },
+            artifact_paths=[],
+            mutation=action,
+            contract=self._default_contract(),
+            run_context=context or {},
         )
 
         # --------------------------------------------------
@@ -67,7 +56,7 @@ class WaveframeGuard:
             return execute_fn(action)
 
         # --------------------------------------------------
-        # Step 3: Call CRI-CORE enforcement
+        # Step 3: Enforcement
         # --------------------------------------------------
         result = governed_execute(
             proposal=proposal,
@@ -88,31 +77,20 @@ class WaveframeGuard:
         return self._blocked(result.get("summary", "Execution blocked"))
 
     # ---------------------------------------------------------------------
-    # Internal
-    # ---------------------------------------------------------------------
 
-    def _build_proposal(
-        self,
-        action: Dict[str, Any],
-        actor: str,
-        context: Dict[str, Any],
-    ) -> Dict[str, Any]:
+    def _default_contract(self) -> Dict[str, Any]:
         """
-        Minimal proposal builder.
+        Temporary contract placeholder.
 
-        This will later integrate with:
-        - proposal normalizer
-        - contract compiler
+        Will later be replaced by:
+        - compiled contracts
+        - policy selection
+        - dashboard configuration
         """
-
         return {
-            "proposal_id": "temp-id",
-            "actor": {
-                "id": actor,
-                "type": "agent",
-            },
-            "requested_mutation": action,
-            "context": context,
+            "id": "default",
+            "version": "0.1.0",
+            "hash": "dev",
         }
 
     def _blocked(self, reason: str) -> Dict[str, Any]:
