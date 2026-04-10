@@ -1,69 +1,47 @@
-"""
-Waveframe Guard Client (Hardened)
-"""
-
 from typing import Any, Dict, Optional
+import uuid
+import tempfile
+import json
+import os
 
+from compiler.compile_policy_file import compile_policy_file
+from proposal_normalizer import build_proposal
 from cricore.interface.evaluate_proposal import evaluate_proposal
 
 
-READ_ONLY_ACTIONS = {
-    "get_balance",
-    "view_account",
-    "read_data",
-}
-
-
-def _validate_action(action: Any) -> Optional[str]:
-    if not isinstance(action, dict):
-        return "Invalid action: must be a dictionary"
-
-    if "type" not in action:
-        return "Invalid action: missing 'type' field"
-
-    if not isinstance(action["type"], str) or not action["type"].strip():
-        return "Invalid action: 'type' must be a non-empty string"
-
-    return None
-
-
-def _is_read_only(action_type: str) -> bool:
-    return action_type in READ_ONLY_ACTIONS
-
-
-def _translate_failure(result) -> str:
-    if not result.failed_stages:
-        return "Execution permitted"
-
-    if "independence" in result.failed_stages:
-        return "Blocked: same actor cannot propose and approve"
-
-    if "integrity" in result.failed_stages:
-        return "Blocked: required execution data missing"
-
-    return "Blocked: governance requirements not satisfied"
-
-
 class WaveframeGuard:
-    def __init__(
-        self,
-        policy: Dict,
-        *,
-        default_domain: str = "finance",
-    ):
-        self.policy = policy
-        self.default_domain = default_domain
+    """
+    Waveframe Guard
+
+    Evaluates whether an AI-generated action is allowed to execute
+    using CRI-CORE enforcement.
+    """
+
+    def __init__(self, policy: Any):
+        self.policy_path = self._resolve_policy_path(policy)
+        self.compiled_contract = self._compile_policy(self.policy_path)
+
+    # --------------------------------------------------
+    # Public API
+    # --------------------------------------------------
 
     def execute(
         self,
-        *,
-        action: Any,
+        action: Dict[str, Any],
         actor: str,
-        context: Optional[Any] = None,
+        context: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
+
         # -----------------------------
-        # Validate context
+        # Input validation
         # -----------------------------
+
+        if not isinstance(action, dict) or "type" not in action:
+            return {
+                "allowed": False,
+                "reason": "Invalid action: missing 'type' field",
+            }
+
         if context is not None and not isinstance(context, dict):
             return {
                 "allowed": False,
@@ -72,119 +50,123 @@ class WaveframeGuard:
 
         context = context or {}
 
-        # -----------------------------
-        # Validate action
-        # -----------------------------
-        error = _validate_action(action)
-        if error:
-            return {
-                "allowed": False,
-                "reason": error,
-            }
-
-        action_type = action["type"]
-
-        # -----------------------------
-        # Read-only shortcut
-        # -----------------------------
-        if _is_read_only(action_type):
-            return {
-                "allowed": True,
-                "reason": "Execution permitted (read-only action)",
-            }
-
         approved_by = context.get("approved_by")
 
         # -----------------------------
-        # Approval enforcement
+        # Build run_context
         # -----------------------------
-        if not approved_by:
-            return {
-                "allowed": False,
-                "reason": "Blocked: approval required for financial action",
-            }
 
-        if approved_by == actor:
-            return {
-                "allowed": False,
-                "reason": "Blocked: same actor cannot propose and approve",
-            }
+        identities = []
+
+        identities.append({
+            "id": actor,
+            "type": "agent",
+            "role": "proposer"
+        })
+
+        if approved_by:
+            identities.append({
+                "id": approved_by,
+                "type": "human",
+                "role": "approver"
+            })
+
+        run_context = {
+            "identities": {
+                "actors": identities,
+                "required_roles": ["proposer", "approver"],
+                "conflict_flags": {}
+            },
+            "integrity": {},
+            "publication": {}
+        }
 
         # -----------------------------
-        # Build proposal safely
+        # Build proposal
         # -----------------------------
+
+        proposal = build_proposal(
+            proposal_id=str(uuid.uuid4()),
+            actor={"id": actor, "type": "agent"},
+            artifact_paths=[],
+            mutation=action,
+            contract=self.compiled_contract,
+            run_context=run_context
+        )
+
+        # -----------------------------
+        # Evaluate with CRI-CORE
+        # -----------------------------
+
         try:
-            proposal = self._build_proposal(
-                action=action,
-                actor=actor,
-                approved_by=approved_by,
-            )
-
-            result = evaluate_proposal(proposal, self.policy)
-
+            result = evaluate_proposal(proposal)
         except Exception:
             return {
                 "allowed": False,
-                "reason": "Blocked: internal validation error",
+                "reason": "Blocked: internal enforcement error",
             }
 
         # -----------------------------
         # Translate result
         # -----------------------------
-        if result.commit_allowed:
+
+        if result.get("commit_allowed") is True:
             return {
                 "allowed": True,
                 "reason": "Execution permitted",
             }
 
+        # Extract useful failure reason
+        failure_reason = self._extract_reason(result)
+
         return {
             "allowed": False,
-            "reason": _translate_failure(result),
+            "reason": failure_reason,
         }
 
-    def _build_proposal(
-        self,
-        *,
-        action: Dict,
-        actor: str,
-        approved_by: str,
-    ) -> Dict[str, Any]:
-        return {
-            "proposal_id": "generated",
-            "timestamp": "now",
-            "actor": {
-                "id": actor,
-                "type": "agent",
-            },
-            "contract": {
-                "id": self.policy.get("contract_id"),
-                "version": self.policy.get("contract_version"),
-                "hash": self.policy.get("contract_hash"),
-            },
-            "requested_mutation": {
-                "domain": self.default_domain,
-                "resource": action.get("type"),
-                "action": action.get("type"),
-            },
-            "artifacts": [],
-            "run_context": {
-                "identities": {
-                    "actors": [
-                        {
-                            "id": actor,
-                            "type": "agent",
-                            "role": "proposer",
-                        },
-                        {
-                            "id": approved_by,
-                            "type": "human",
-                            "role": "approver",
-                        },
-                    ],
-                    "required_roles": ["proposer", "approver"],
-                    "conflict_flags": {},
-                },
-                "integrity": {},
-                "publication": {},
-            },
-        }
+    # --------------------------------------------------
+    # Internal helpers
+    # --------------------------------------------------
+
+    def _resolve_policy_path(self, policy: Any) -> str:
+        if isinstance(policy, str):
+            if not os.path.exists(policy):
+                raise FileNotFoundError(f"Policy file not found: {policy}")
+            return policy
+
+        if isinstance(policy, dict):
+            # Write temp file
+            temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".json")
+            with open(temp_file.name, "w") as f:
+                json.dump(policy, f)
+            return temp_file.name
+
+        raise ValueError("Policy must be dict or file path")
+
+    def _compile_policy(self, policy_path: str) -> Dict[str, Any]:
+        temp_output = tempfile.NamedTemporaryFile(delete=False, suffix=".json")
+        output_path = compile_policy_file(policy_path, temp_output.name)
+
+        with open(output_path, "r") as f:
+            return json.load(f)
+
+    def _extract_reason(self, result: Dict[str, Any]) -> str:
+        """
+        Convert CRI-CORE output into human-readable reason
+        """
+
+        try:
+            failed = result.get("result").failed_stages
+        except Exception:
+            return "Blocked: policy enforcement failed"
+
+        if not failed:
+            return "Blocked: policy violation"
+
+        if "independence" in failed:
+            return "Blocked: same actor cannot propose and approve"
+
+        if "publication-commit" in failed:
+            return "Blocked: approval required for financial action"
+
+        return "Blocked: policy violation"
