@@ -3,6 +3,7 @@ import uuid
 import tempfile
 import json
 import os
+from pathlib import Path
 
 from compiler.compile_policy_file import compile_policy_file
 from proposal_normalizer import build_proposal
@@ -49,34 +50,27 @@ class WaveframeGuard:
             }
 
         context = context or {}
-
         approved_by = context.get("approved_by")
 
         # -----------------------------
-        # Build run_context
+        # Build run_context (FIXED SHAPE)
         # -----------------------------
 
-        identities = []
-
-        identities.append({
-            "id": actor,
-            "type": "agent",
-            "role": "proposer"
-        })
+        identities = {
+            "proposer": {
+                "id": actor,
+                "type": "agent"
+            }
+        }
 
         if approved_by:
-            identities.append({
+            identities["approver"] = {
                 "id": approved_by,
-                "type": "human",
-                "role": "approver"
-            })
+                "type": "human"
+            }
 
         run_context = {
-            "identities": {
-                "actors": identities,
-                "required_roles": ["proposer", "approver"],
-                "conflict_flags": {}
-            },
+            "identities": identities,
             "integrity": {},
             "publication": {}
         }
@@ -116,52 +110,43 @@ class WaveframeGuard:
                 "reason": "Execution permitted",
             }
 
-        # Extract useful failure reason
-        failure_reason = self._extract_reason(result)
-
         return {
             "allowed": False,
-            "reason": failure_reason,
+            "reason": self._extract_reason(result),
         }
 
     # --------------------------------------------------
     # Internal helpers
     # --------------------------------------------------
 
-    def _resolve_policy_path(self, policy: Any) -> str:
+    def _resolve_policy_path(self, policy: Any) -> Path:
         if isinstance(policy, str):
-            if not os.path.exists(policy):
+            path = Path(policy)
+            if not path.exists():
                 raise FileNotFoundError(f"Policy file not found: {policy}")
-            return policy
+            return path
 
         if isinstance(policy, dict):
-            # Write temp file
             temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".json")
             with open(temp_file.name, "w") as f:
                 json.dump(policy, f)
-            return temp_file.name
+            return Path(temp_file.name)
 
         raise ValueError("Policy must be dict or file path")
 
-    def _compile_policy(self, policy_path: str) -> Dict[str, Any]:
+    def _compile_policy(self, policy_path: Path) -> Dict[str, Any]:
         temp_output = tempfile.NamedTemporaryFile(delete=False, suffix=".json")
-        output_path = compile_policy_file(policy_path, temp_output.name)
+
+        output_path = compile_policy_file(policy_path, Path(temp_output.name))
 
         with open(output_path, "r") as f:
             return json.load(f)
 
     def _extract_reason(self, result: Dict[str, Any]) -> str:
-        """
-        Convert CRI-CORE output into human-readable reason
-        """
-
         try:
             failed = result.get("result").failed_stages
         except Exception:
             return "Blocked: policy enforcement failed"
-
-        if not failed:
-            return "Blocked: policy violation"
 
         if "independence" in failed:
             return "Blocked: same actor cannot propose and approve"
