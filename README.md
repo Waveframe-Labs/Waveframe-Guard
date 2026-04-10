@@ -1,50 +1,64 @@
 # Waveframe Guard
 
-Stop unsafe AI financial actions in one function call.
+Deterministic execution control for AI agents.
+
+Stop unauthorized AI actions—from rogue financial transfers to unapproved budget reallocations—in a single function call.
+
+Prevent costly mistakes before they hit production systems.
 
 ---
 
-## The problem
+## The execution boundary
 
-AI systems can propose actions.
+Most AI governance tools act as monitors: they log, flag, and alert after a mistake has already happened.
 
-But nothing actually stops them from executing a bad one.
+Waveframe Guard sits directly at the execution boundary. It evaluates every proposed action before it ever reaches your backend or mutates state.
 
-Examples:
-- Reallocating budget without approval  
-- Transferring funds without oversight  
-- Acting outside defined authority  
+The evaluation is deterministic and the result is binary:
 
-Most systems:
-- log it  
-- flag it  
-- explain it  
+- **Allowed** → execution proceeds seamlessly  
+- **Blocked** → execution is stopped before it reaches your system  
 
-But they still let it happen.
+No warnings. No post-hoc analysis. The action either happens, or it doesn’t.
 
 ---
 
-## The solution
+## A drop-in execution gate
 
-Waveframe Guard sits at the execution boundary.
+Integrate Waveframe Guard into your workflow in minutes.
 
-Every action is evaluated before it happens.
-
-The result is binary:
-
-- allowed → execution proceeds  
-- blocked → execution never occurs  
-
----
-
-## What this looks like
+Initialize the SDK with your compiled governance policy, pass the proposed AI action, and let Guard handle the evaluation.
 
 ```python
 from waveframe_guard import WaveframeGuard
 
 guard = WaveframeGuard(policy="finance-policy.json")
 
-result = guard.execute(
+
+def execute_transfer(action):
+    return {
+        "status": "executed",
+        "details": action
+    }
+
+
+def process_ai_action(action, actor, context=None):
+    decision = guard.execute(
+        action=action,
+        actor=actor,
+        context=context
+    )
+
+    if decision["allowed"]:
+        return execute_transfer(action)
+    else:
+        return {
+            "status": "blocked",
+            "reason": decision["reason"]
+        }
+
+
+result = process_ai_action(
     action={"type": "transfer", "amount": 5000},
     actor="ai-agent",
     context={"approved_by": "human-123"}
@@ -53,56 +67,86 @@ result = guard.execute(
 print(result)
 ````
 
-Output:
+Waveframe Guard does not execute actions.
 
-```python
-{'allowed': True, 'reason': 'Allowed: execution permitted'}
+It decides whether execution is allowed.
+
+---
+
+## Predictable, standardized outputs
+
+Guard returns a strict, predictable response so your application can route logic deterministically.
+
+**Authorized attempt:**
+
+```json
+{
+  "allowed": true,
+  "reason": "Allowed: execution permitted"
+}
 ```
 
 ---
 
-## Without approval
+**Unauthorized attempt (missing approval):**
 
-```python
-result = guard.execute(
-    action={"type": "transfer", "amount": 5000},
-    actor="ai-agent"
-)
-```
-
-Output:
-
-```python
-{'allowed': False, 'reason': 'Blocked: approval required (no approver provided)'}
+```json
+{
+  "allowed": false,
+  "reason": "Blocked: approval required (no approver provided)"
+}
 ```
 
 ---
 
-## What it enforces
+## Built for financial-grade governance
 
-* Separation of duties
-* Approval requirements
-* Action-level constraints
-* Deterministic execution control
+Waveframe Guard is designed for high-stakes autonomous systems.
 
-No warnings.
-No post-hoc analysis.
+* **Separation of duties**
+  The actor proposing an action cannot approve it.
 
-The action either happens — or it doesn’t.
+* **Approval requirements**
+  Human authorization is required for sensitive actions.
+
+* **Action-level constraints**
+  Define exactly what an agent is allowed to do.
+
+* **No state stored**
+  Your system remains in full control.
 
 ---
 
-## Install
+## Clear boundaries
+
+Waveframe Guard focuses on one responsibility:
+
+👉 deciding whether an action can execute
+
+It does not:
+
+* run workflows
+* manage approvals
+* store policies
+* maintain system state
+
+---
+
+## Getting started
+
+Waveframe Guard is in active development, focused on financial governance and autonomous agent control.
+
+### Local installation
 
 ```bash
 pip install -e .
 ```
 
-(temporary — PyPI release coming next)
+*(PyPI release coming soon)*
 
 ---
 
-## Run the example
+### Run the example
 
 ```bash
 python examples/finance_usage.py
@@ -110,32 +154,15 @@ python examples/finance_usage.py
 
 ---
 
-## How it works
-
-1. AI proposes an action
-2. Guard evaluates it against governance rules
-3. Returns:
-
-```python
-{
-  "allowed": bool,
-  "reason": str
-}
-```
-
-4. Your system decides whether to execute
-
----
-
 ## Policy
 
-Policies define what is allowed.
+Policies represent compiled governance rules.
 
 ```python
 guard = WaveframeGuard(policy="finance-policy.json")
 ```
 
-This represents compiled governance rules such as:
+These rules define:
 
 * who can approve actions
 * what actions require approval
@@ -143,44 +170,9 @@ This represents compiled governance rules such as:
 
 ---
 
-## Where this fits
-
-Waveframe Guard is the enforcement layer.
-
-It does not:
-
-* run workflows
-* manage approvals
-* store policies
-
-It decides one thing:
-
-👉 can this action execute or not?
-
----
-
-## Use cases
-
-* AI-driven finance systems
-* autonomous agents with spending authority
-* internal tools with automated decisions
-* any system where actions must be controlled
-
----
-
-## Status
-
-Active development.
-Focused on financial governance.
-
----
-
-## License
-
-Proprietary / Commercial (pending final terms)
-
----
-
 <div align="center">
+  <sub><b>Proprietary / Commercial License (Pending)</b></sub>
+  <br>
   <sub>© 2026 Waveframe Labs</sub>
 </div>
+
