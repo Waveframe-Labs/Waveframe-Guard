@@ -139,10 +139,8 @@ Waveframe Guard is in active development, focused on financial governance and au
 ### Local installation
 
 ```bash
-pip install -e .
+pip install waveframe-guard
 ```
-
-*(PyPI release coming soon)*
 
 ---
 
