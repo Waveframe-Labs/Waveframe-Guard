@@ -15,8 +15,8 @@ class WaveframeGuard:
     """
     Waveframe Guard
 
-    Product-facing SDK that hides compiler + normalizer + CRI-CORE complexity
-    behind a simple execution decision interface.
+    Product-facing SDK that evaluates whether an AI-generated action
+    is allowed to execute using CRI-CORE enforcement.
     """
 
     def __init__(self, policy: Any):
@@ -34,25 +34,27 @@ class WaveframeGuard:
         actor: str,
         context: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
+
         # -----------------------------
         # Input validation
         # -----------------------------
+
         if not isinstance(action, dict):
             return {
                 "allowed": False,
-                "reason": "Invalid action: must be a dictionary",
+                "reason": "Invalid request: action must be a dictionary",
             }
 
         if "type" not in action:
             return {
                 "allowed": False,
-                "reason": "Invalid action: missing 'type' field",
+                "reason": "Invalid request: action must include a 'type' field",
             }
 
         if context is not None and not isinstance(context, dict):
             return {
                 "allowed": False,
-                "reason": "Invalid context: must be a dictionary",
+                "reason": "Invalid request: context must be a dictionary",
             }
 
         context = context or {}
@@ -60,8 +62,9 @@ class WaveframeGuard:
         approved_by = context.get("approved_by")
 
         # -----------------------------
-        # Read raw policy business rules
+        # Read policy rules
         # -----------------------------
+
         rules = self.raw_policy.get("rules", {})
         action_rules = rules.get(action_type, {})
 
@@ -69,43 +72,52 @@ class WaveframeGuard:
         read_only = action_rules.get("read_only", False)
 
         # -----------------------------
-        # Product-level fast checks
+        # Read-only shortcut
         # -----------------------------
+
         if read_only:
             return {
                 "allowed": True,
-                "reason": "Execution permitted (read-only action)",
+                "reason": "Allowed: read-only action",
             }
 
+        # -----------------------------
+        # Approval enforcement
+        # -----------------------------
+
         if requires_approval:
+
             if not approved_by:
                 return {
                     "allowed": False,
-                    "reason": "Blocked: approval required for financial action",
+                    "reason": "Blocked: approval required (no approver provided)",
                 }
 
             if approved_by == actor:
                 return {
                     "allowed": False,
-                    "reason": "Blocked: same actor cannot propose and approve",
+                    "reason": "Blocked: separation of duties violated (proposer cannot approve)",
                 }
 
         # -----------------------------
-        # Normalize action -> mutation
+        # Normalize action → mutation
         # -----------------------------
+
         mutation = self._normalize_action(action)
 
         # -----------------------------
-        # Build kernel-native run_context
+        # Build run_context
         # -----------------------------
+
         run_context = self._build_run_context(
             actor=actor,
             approved_by=approved_by,
         )
 
         # -----------------------------
-        # Build canonical proposal via normalizer
+        # Build proposal
         # -----------------------------
+
         try:
             proposal = build_proposal(
                 proposal_id=str(uuid.uuid4()),
@@ -118,27 +130,29 @@ class WaveframeGuard:
         except Exception:
             return {
                 "allowed": False,
-                "reason": "Blocked: internal proposal construction error",
+                "reason": "Blocked: proposal construction failed",
             }
 
         # -----------------------------
         # Evaluate with CRI-CORE
         # -----------------------------
+
         try:
             result = evaluate_proposal(proposal, self.compiled_contract)
         except Exception:
             return {
                 "allowed": False,
-                "reason": "Blocked: internal enforcement error",
+                "reason": "Blocked: enforcement execution failed",
             }
 
         # -----------------------------
         # Translate result
         # -----------------------------
+
         if getattr(result, "commit_allowed", False):
             return {
                 "allowed": True,
-                "reason": "Execution permitted",
+                "reason": "Allowed: execution permitted",
             }
 
         return {
@@ -181,10 +195,6 @@ class WaveframeGuard:
             return json.load(f)
 
     def _proposal_contract_binding(self, compiled_contract: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Translate compiler output into the exact contract shape expected by
-        proposal_normalizer.bind_contract().
-        """
         return {
             "id": compiled_contract["contract_id"],
             "version": compiled_contract["contract_version"],
@@ -192,10 +202,6 @@ class WaveframeGuard:
         }
 
     def _normalize_action(self, action: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Translate product-facing action input into the canonical mutation shape
-        expected by proposal_normalizer.bind_mutation().
-        """
         action_type = action["type"]
 
         if action_type == "transfer":
@@ -223,9 +229,7 @@ class WaveframeGuard:
         actor: str,
         approved_by: Optional[str],
     ) -> Dict[str, Any]:
-        """
-        Build the identity structure expected by CRI-CORE independence enforcement.
-        """
+
         actors = [
             {
                 "id": actor,
@@ -254,9 +258,6 @@ class WaveframeGuard:
         }
 
     def _extract_reason(self, result: Any) -> str:
-        """
-        Translate CRI-CORE failure stages into business-readable output.
-        """
         failed_stages = getattr(result, "failed_stages", None)
         summary = getattr(result, "summary", None)
 
@@ -264,10 +265,10 @@ class WaveframeGuard:
             return summary or "Blocked: policy violation"
 
         if "independence" in failed_stages:
-            return "Blocked: same actor cannot propose and approve"
+            return "Blocked: separation of duties violated (proposer cannot approve)"
 
         if "publication-commit" in failed_stages:
-            return "Blocked: approval required for financial action"
+            return "Blocked: approval required (no approver provided)"
 
         if "integrity" in failed_stages:
             return "Blocked: required execution data missing"
