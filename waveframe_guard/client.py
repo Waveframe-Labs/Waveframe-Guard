@@ -2,7 +2,6 @@ from typing import Any, Dict, Optional
 import uuid
 import tempfile
 import json
-import os
 from pathlib import Path
 
 from compiler.compile_policy_file import compile_policy_file
@@ -53,7 +52,13 @@ class WaveframeGuard:
         approved_by = context.get("approved_by")
 
         # -----------------------------
-        # Build run_context (FIXED SHAPE)
+        # Normalize action → mutation (FIX)
+        # -----------------------------
+
+        mutation = self._normalize_action(action)
+
+        # -----------------------------
+        # Build run_context
         # -----------------------------
 
         identities = {
@@ -83,13 +88,13 @@ class WaveframeGuard:
             proposal_id=str(uuid.uuid4()),
             actor={"id": actor, "type": "agent"},
             artifact_paths=[],
-            mutation=action,
+            mutation=mutation,
             contract=self.compiled_contract,
             run_context=run_context
         )
 
         # -----------------------------
-        # Evaluate with CRI-CORE
+        # Evaluate
         # -----------------------------
 
         try:
@@ -100,10 +105,6 @@ class WaveframeGuard:
                 "reason": "Blocked: internal enforcement error",
             }
 
-        # -----------------------------
-        # Translate result
-        # -----------------------------
-
         if result.get("commit_allowed") is True:
             return {
                 "allowed": True,
@@ -113,6 +114,34 @@ class WaveframeGuard:
         return {
             "allowed": False,
             "reason": self._extract_reason(result),
+        }
+
+    # --------------------------------------------------
+    # Action → Mutation Adapter (CRITICAL)
+    # --------------------------------------------------
+
+    def _normalize_action(self, action: Dict[str, Any]) -> Dict[str, Any]:
+        action_type = action["type"]
+
+        if action_type == "transfer":
+            return {
+                "domain": "finance",
+                "resource": "funds",
+                "action": "transfer"
+            }
+
+        if action_type == "get_balance":
+            return {
+                "domain": "finance",
+                "resource": "account",
+                "action": "read"
+            }
+
+        # default fallback
+        return {
+            "domain": "general",
+            "resource": "unknown",
+            "action": action_type
         }
 
     # --------------------------------------------------
