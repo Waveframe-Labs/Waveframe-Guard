@@ -1,6 +1,6 @@
 # Waveframe Guard
 
-Stop unsafe AI financial actions before they execute.
+Stop unsafe AI financial actions in one function call.
 
 ---
 
@@ -11,14 +11,14 @@ AI systems can propose actions.
 But nothing actually stops them from executing a bad one.
 
 Examples:
-- Reallocating budget without approval
-- Transferring funds without oversight
-- Acting outside defined authority
+- Reallocating budget without approval  
+- Transferring funds without oversight  
+- Acting outside defined authority  
 
 Most systems:
-- log it
-- flag it
-- explain it
+- log it  
+- flag it  
+- explain it  
 
 But they still let it happen.
 
@@ -32,8 +32,8 @@ Every action is evaluated before it happens.
 
 The result is binary:
 
-- allowed → execution proceeds
-- blocked → execution never occurs
+- allowed → execution proceeds  
+- blocked → execution never occurs  
 
 ---
 
@@ -56,7 +56,7 @@ print(result)
 Output:
 
 ```python
-{'allowed': True, 'reason': 'Execution permitted'}
+{'allowed': True, 'reason': 'Allowed: execution permitted'}
 ```
 
 ---
@@ -73,7 +73,7 @@ result = guard.execute(
 Output:
 
 ```python
-{'allowed': False, 'reason': 'Blocked: approval required for financial action'}
+{'allowed': False, 'reason': 'Blocked: approval required (no approver provided)'}
 ```
 
 ---
@@ -98,17 +98,19 @@ The action either happens — or it doesn’t.
 pip install -e .
 ```
 
+(temporary — PyPI release coming next)
+
 ---
 
-## Run the test
+## Run the example
 
 ```bash
-python test_guard.py
+python examples/finance_usage.py
 ```
 
 ---
 
-## How it works (simple)
+## How it works
 
 1. AI proposes an action
 2. Guard evaluates it against governance rules
@@ -125,11 +127,9 @@ python test_guard.py
 
 ---
 
-## Policy (governance rules)
+## Policy
 
 Policies define what is allowed.
-
-Example:
 
 ```python
 guard = WaveframeGuard(policy="finance-policy.json")
@@ -163,7 +163,7 @@ It decides one thing:
 
 * AI-driven finance systems
 * autonomous agents with spending authority
-* internal tooling with automated decisions
+* internal tools with automated decisions
 * any system where actions must be controlled
 
 ---
@@ -171,7 +171,7 @@ It decides one thing:
 ## Status
 
 Active development.
-Focused on financial governance use cases.
+Focused on financial governance.
 
 ---
 
@@ -182,5 +182,5 @@ Proprietary / Commercial (pending final terms)
 ---
 
 <div align="center">
-  <sub>© 2026 Waveframe Labs — Independent Open-Science Research Entity</sub>
+  <sub>© 2026 Waveframe Labs</sub>
 </div>
