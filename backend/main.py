@@ -42,11 +42,6 @@ def summarize_action(action: Dict[str, Any]) -> str:
 
 
 def build_contract_binding(compiled_contract: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Inject required contract fields: id, version, hash
-    """
-
-    # Deterministic hash
     contract_json = json.dumps(compiled_contract, sort_keys=True).encode()
     contract_hash = hashlib.sha256(contract_json).hexdigest()
 
@@ -78,7 +73,7 @@ def run_validation(policy: Dict, action: Dict, actor: str, context: Dict | None)
         with open(contract_path, "r") as f:
             compiled_contract = json.load(f)
 
-        # --- 3. Bind contract (FIX) ---
+        # --- 3. Bind contract ---
         contract = build_contract_binding(compiled_contract)
 
         # --- 4. Build proposal ---
@@ -95,8 +90,8 @@ def run_validation(policy: Dict, action: Dict, actor: str, context: Dict | None)
             run_context=context or {},
         )
 
-        # --- 5. Evaluate ---
-        result = evaluate_proposal(proposal)
+        # --- 5. Evaluate (FIXED SIGNATURE) ---
+        result = evaluate_proposal(proposal, contract)
 
         allowed = result.get("allowed", False)
         reason = result.get("reason", "Unknown")
@@ -136,7 +131,7 @@ async def validate(request: Request):
 
 
 # ---------------------------
-# UI (Product surface)
+# UI
 # ---------------------------
 
 @app.get("/", response_class=HTMLResponse)
@@ -153,10 +148,6 @@ def ui():
             color: white;
             margin: 0;
             padding: 40px;
-        }
-
-        h1 {
-            margin-bottom: 10px;
         }
 
         .container {
