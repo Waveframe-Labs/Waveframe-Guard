@@ -22,7 +22,7 @@ app = FastAPI(
 
 
 # ---------------------------
-# Core logic
+# Helpers
 # ---------------------------
 
 def summarize_action(action: Dict[str, Any]) -> str:
@@ -40,17 +40,27 @@ def summarize_action(action: Dict[str, Any]) -> str:
     return f"AI attempted action: {action_type or 'unknown'}"
 
 
+# ---------------------------
+# Core validation pipeline
+# ---------------------------
+
 def run_validation(policy: Dict, action: Dict, actor: str, context: Dict | None):
     try:
-        # 1. Compile policy → contract
+        # --- 1. Write policy JSON → temp file ---
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".json", mode="w") as policy_file:
+            json.dump(policy, policy_file)
+            policy_path = Path(policy_file.name)
+
+        # --- 2. Compile policy → contract ---
         with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
             output_path = Path(tmp.name)
 
-        contract_path = compile_policy_file(policy, output_path)
+        contract_path = compile_policy_file(policy_path, output_path)
+
         with open(contract_path, "r") as f:
             compiled_contract = json.load(f)
 
-        # 2. Build proposal
+        # --- 3. Build proposal ---
         proposal = build_proposal(
             proposal_id=str(uuid.uuid4()),
             actor={"id": actor, "type": "agent"},
@@ -64,7 +74,7 @@ def run_validation(policy: Dict, action: Dict, actor: str, context: Dict | None)
             run_context=context or {},
         )
 
-        # 3. Evaluate
+        # --- 4. Evaluate ---
         result = evaluate_proposal(proposal)
 
         allowed = result.get("allowed", False)
@@ -85,7 +95,7 @@ def run_validation(policy: Dict, action: Dict, actor: str, context: Dict | None)
 
 
 # ---------------------------
-# API endpoint
+# API
 # ---------------------------
 
 @app.post("/validate")
@@ -105,7 +115,7 @@ async def validate(request: Request):
 
 
 # ---------------------------
-# UI (product interface)
+# UI (product surface)
 # ---------------------------
 
 @app.get("/", response_class=HTMLResponse)
@@ -198,33 +208,39 @@ def ui():
 
 <script>
 async function runValidation() {
-    const policy = JSON.parse(document.getElementById("policy").value);
-    const action = JSON.parse(document.getElementById("action").value);
+    try {
+        const policy = JSON.parse(document.getElementById("policy").value);
+        const action = JSON.parse(document.getElementById("action").value);
 
-    const res = await fetch("/validate", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            policy,
-            action,
-            actor: "ai-agent",
-            context: {}
-        })
-    });
+        const res = await fetch("/validate", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                policy,
+                action,
+                actor: "ai-agent",
+                context: {}
+            })
+        });
 
-    const data = await res.json();
+        const data = await res.json();
 
-    const div = document.getElementById("output");
+        const div = document.getElementById("output");
 
-    div.className = "result " + (data.allowed ? "allowed" : "blocked");
+        div.className = "result " + (data.allowed ? "allowed" : "blocked");
 
-    div.innerHTML = `
-        <h2>${data.allowed ? "ALLOWED" : "BLOCKED"}</h2>
-        <p><strong>${data.summary}</strong></p>
-        <p>${data.reason}</p>
-    `;
+        div.innerHTML = `
+            <h2>${data.allowed ? "ALLOWED" : "BLOCKED"}</h2>
+            <p><strong>${data.summary}</strong></p>
+            <p>${data.reason}</p>
+        `;
+    } catch (err) {
+        const div = document.getElementById("output");
+        div.className = "result blocked";
+        div.innerHTML = `<h2>ERROR</h2><p>${err}</p>`;
+    }
 }
 </script>
 
