@@ -3,13 +3,14 @@ from __future__ import annotations
 import json
 import tempfile
 import uuid
+import hashlib
 from pathlib import Path
 from typing import Any, Dict
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
-# --- Your components ---
+# --- Core components ---
 from compiler.compile_policy_file import compile_policy_file
 from proposal_normalizer.build_proposal import build_proposal
 from cricore.interface.evaluate_proposal import evaluate_proposal
@@ -40,18 +41,35 @@ def summarize_action(action: Dict[str, Any]) -> str:
     return f"AI attempted action: {action_type or 'unknown'}"
 
 
+def build_contract_binding(compiled_contract: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Inject required contract fields: id, version, hash
+    """
+
+    # Deterministic hash
+    contract_json = json.dumps(compiled_contract, sort_keys=True).encode()
+    contract_hash = hashlib.sha256(contract_json).hexdigest()
+
+    return {
+        "id": "user-policy",
+        "version": compiled_contract.get("contract_version", "1.0.0"),
+        "hash": contract_hash,
+        **compiled_contract,
+    }
+
+
 # ---------------------------
 # Core validation pipeline
 # ---------------------------
 
 def run_validation(policy: Dict, action: Dict, actor: str, context: Dict | None):
     try:
-        # --- 1. Write policy JSON → temp file ---
+        # --- 1. Write policy → temp file ---
         with tempfile.NamedTemporaryFile(delete=False, suffix=".json", mode="w") as policy_file:
             json.dump(policy, policy_file)
             policy_path = Path(policy_file.name)
 
-        # --- 2. Compile policy → contract ---
+        # --- 2. Compile policy ---
         with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
             output_path = Path(tmp.name)
 
@@ -60,7 +78,10 @@ def run_validation(policy: Dict, action: Dict, actor: str, context: Dict | None)
         with open(contract_path, "r") as f:
             compiled_contract = json.load(f)
 
-        # --- 3. Build proposal ---
+        # --- 3. Bind contract (FIX) ---
+        contract = build_contract_binding(compiled_contract)
+
+        # --- 4. Build proposal ---
         proposal = build_proposal(
             proposal_id=str(uuid.uuid4()),
             actor={"id": actor, "type": "agent"},
@@ -70,11 +91,11 @@ def run_validation(policy: Dict, action: Dict, actor: str, context: Dict | None)
                 "resource": "account",
                 "action": action,
             },
-            contract=compiled_contract,
+            contract=contract,
             run_context=context or {},
         )
 
-        # --- 4. Evaluate ---
+        # --- 5. Evaluate ---
         result = evaluate_proposal(proposal)
 
         allowed = result.get("allowed", False)
@@ -115,7 +136,7 @@ async def validate(request: Request):
 
 
 # ---------------------------
-# UI (product surface)
+# UI (Product surface)
 # ---------------------------
 
 @app.get("/", response_class=HTMLResponse)
