@@ -53,6 +53,29 @@ def build_contract_binding(compiled_contract: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+def extract_result(result: Any) -> tuple[bool, str]:
+    """
+    Normalize EvaluationResult → (allowed, reason)
+    """
+
+    # Try common fields
+    allowed = getattr(result, "allowed", None)
+
+    if allowed is None:
+        allowed = getattr(result, "commit_allowed", None)
+
+    if allowed is None:
+        allowed = getattr(result, "passed", False)
+
+    # Reason
+    reason = getattr(result, "reason", None)
+
+    if reason is None:
+        reason = "Execution permitted" if allowed else "Blocked by policy"
+
+    return bool(allowed), str(reason)
+
+
 # ---------------------------
 # Core validation pipeline
 # ---------------------------
@@ -90,11 +113,11 @@ def run_validation(policy: Dict, action: Dict, actor: str, context: Dict | None)
             run_context=context or {},
         )
 
-        # --- 5. Evaluate (FIXED SIGNATURE) ---
+        # --- 5. Evaluate ---
         result = evaluate_proposal(proposal, contract)
 
-        allowed = result.get("allowed", False)
-        reason = result.get("reason", "Unknown")
+        # --- 6. Normalize result ---
+        allowed, reason = extract_result(result)
 
         return {
             "allowed": allowed,
