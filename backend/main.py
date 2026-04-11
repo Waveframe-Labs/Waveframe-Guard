@@ -1,26 +1,32 @@
 from __future__ import annotations
 
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import HTMLResponse
+import json
+import tempfile
+import uuid
+from pathlib import Path
+from typing import Any, Dict
 
-from waveframe_guard import WaveframeGuard
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import HTMLResponse, JSONResponse
 
-from .models import EvaluateRequest, EvaluateResponse, EventRecord
-from .store import EventStore
+# --- Your components ---
+from compiler.compile_policy_file import compile_policy_file
+from proposal_normalizer.build_proposal import build_proposal
+from cricore.interface.evaluate_proposal import evaluate_proposal
 
 
 app = FastAPI(
-    title="Waveframe Guard Control Plane",
-    version="0.1.0",
-    description="Backend API for evaluating and recording AI action enforcement decisions.",
+    title="Waveframe Guard",
+    version="1.0.0",
 )
 
-store = EventStore(db_path="waveframe_guard.db")
 
+# ---------------------------
+# Core logic
+# ---------------------------
 
-def format_event_summary(event: EventRecord) -> str:
-    action_type = event.action_type
-    action = event.action
+def summarize_action(action: Dict[str, Any]) -> str:
+    action_type = action.get("type")
 
     if action_type == "transfer":
         amount = action.get("amount")
@@ -31,275 +37,197 @@ def format_event_summary(event: EventRecord) -> str:
     if action_type == "get_balance":
         return "AI attempted to check account balance"
 
-    if action_type == "reallocate_budget":
-        amount = action.get("amount")
-        if isinstance(amount, (int, float)):
-            return f"AI attempted to reallocate ${amount:,.0f} in budget"
-        return "AI attempted to reallocate budget"
-
-    return f"AI attempted action: {action_type}"
+    return f"AI attempted action: {action_type or 'unknown'}"
 
 
-@app.get("/health")
-def health() -> dict[str, str]:
-    return {"status": "ok"}
-
-
-@app.post("/evaluate", response_model=EvaluateResponse)
-def evaluate(request: EvaluateRequest) -> EvaluateResponse:
-    """
-    Evaluate an action through Waveframe Guard and persist the result.
-    """
+def run_validation(policy: Dict, action: Dict, actor: str, context: Dict | None):
     try:
-        guard = WaveframeGuard(policy=request.policy)
-    except Exception as exc:
-        raise HTTPException(status_code=400, detail=f"Policy initialization failed: {exc}") from exc
+        # 1. Compile policy → contract
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
+            output_path = Path(tmp.name)
 
-    decision = guard.execute(
-        action=request.action,
-        actor=request.actor,
-        context=request.context,
-    )
+        contract_path = compile_policy_file(policy, output_path)
+        with open(contract_path, "r") as f:
+            compiled_contract = json.load(f)
 
-    event = EventRecord.create(
-        actor=request.actor,
-        action=request.action,
-        context=request.context,
-        allowed=decision["allowed"],
-        reason=decision["reason"],
-        policy=request.policy,
-    )
+        # 2. Build proposal
+        proposal = build_proposal(
+            proposal_id=str(uuid.uuid4()),
+            actor={"id": actor, "type": "agent"},
+            artifact_paths=[],
+            mutation={
+                "domain": "finance",
+                "resource": "account",
+                "action": action,
+            },
+            contract=compiled_contract,
+            run_context=context or {},
+        )
 
-    store.insert_event(event)
+        # 3. Evaluate
+        result = evaluate_proposal(proposal)
 
-    return EvaluateResponse(
-        event_id=event.event_id,
-        timestamp=event.timestamp,
-        allowed=event.allowed,
-        reason=event.reason,
-    )
+        allowed = result.get("allowed", False)
+        reason = result.get("reason", "Unknown")
 
+        return {
+            "allowed": allowed,
+            "reason": reason,
+            "summary": summarize_action(action),
+        }
 
-@app.get("/events")
-def list_events(limit: int = 100) -> list[dict]:
-    """
-    Return recent enforcement events as JSON.
-    """
-    events = store.list_events(limit=limit)
-    output = []
-
-    for event in events:
-        item = event.model_dump()
-        item["status"] = "ALLOWED" if event.allowed else "BLOCKED"
-        item["summary"] = format_event_summary(event)
-        output.append(item)
-
-    return output
+    except Exception as e:
+        return {
+            "allowed": False,
+            "reason": f"Validation error: {str(e)}",
+            "summary": summarize_action(action),
+        }
 
 
-@app.get("/events/{event_id}")
-def get_event(event_id: str) -> dict:
-    """
-    Return a single enforcement event by ID.
-    """
-    event = store.get_event(event_id)
-    if event is None:
-        raise HTTPException(status_code=404, detail="Event not found")
+# ---------------------------
+# API endpoint
+# ---------------------------
 
-    item = event.model_dump()
-    item["status"] = "ALLOWED" if event.allowed else "BLOCKED"
-    item["summary"] = format_event_summary(event)
-    return item
+@app.post("/validate")
+async def validate(request: Request):
+    body = await request.json()
+
+    try:
+        policy = body["policy"]
+        action = body["action"]
+        actor = body.get("actor", "ai-agent")
+        context = body.get("context", {})
+    except KeyError as e:
+        raise HTTPException(status_code=400, detail=f"Missing field: {e}")
+
+    result = run_validation(policy, action, actor, context)
+    return JSONResponse(result)
 
 
-@app.get("/dashboard", response_class=HTMLResponse)
-def dashboard(limit: int = 50) -> str:
-    """
-    Human-readable dashboard for recent enforcement events.
-    """
-    events = store.list_events(limit=limit)
+# ---------------------------
+# UI (product interface)
+# ---------------------------
 
-    cards = []
+@app.get("/", response_class=HTMLResponse)
+def ui():
+    return """
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Waveframe Guard</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #0f1115;
+            color: white;
+            margin: 0;
+            padding: 40px;
+        }
 
-    for event in events:
-        status = "ALLOWED" if event.allowed else "BLOCKED"
-        badge_class = "allowed" if event.allowed else "blocked"
-        summary = format_event_summary(event)
-        reason = event.reason
-        timestamp = event.timestamp
-        actor = event.actor
+        h1 {
+            margin-bottom: 10px;
+        }
 
-        card_html = f"""
-        <div class="card">
-            <div class="badge {badge_class}">{status}</div>
-            <div class="summary">{summary}</div>
-            <div class="meta">Actor: {actor}</div>
-            <div class="reason">Reason: {reason}</div>
-            <div class="time">{timestamp}</div>
-        </div>
-        """
-        cards.append(card_html)
+        .container {
+            display: flex;
+            gap: 40px;
+        }
 
-    if not cards:
-        cards_html = """
-        <div class="empty">
-            No events yet. Send a request to <code>/evaluate</code> to see activity here.
-        </div>
-        """
-    else:
-        cards_html = "\n".join(cards)
+        textarea {
+            width: 100%;
+            height: 300px;
+            background: #1a1d24;
+            color: white;
+            border: 1px solid #333;
+            padding: 10px;
+        }
 
-    html = f"""
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Waveframe Guard Dashboard</title>
-        <style>
-            :root {{
-                --bg: #0f1115;
-                --panel: #171a21;
-                --text: #f5f7fb;
-                --muted: #98a2b3;
-                --border: #2a3140;
-                --blocked: #ff7a00;
-                --allowed: #2fbf71;
-            }}
+        .panel {
+            flex: 1;
+        }
 
-            * {{
-                box-sizing: border-box;
-            }}
+        button {
+            margin-top: 20px;
+            padding: 12px 20px;
+            background: orange;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
 
-            body {{
-                margin: 0;
-                padding: 0;
-                font-family: Arial, Helvetica, sans-serif;
-                background: var(--bg);
-                color: var(--text);
-            }}
+        .result {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 8px;
+        }
 
-            .wrap {{
-                max-width: 960px;
-                margin: 0 auto;
-                padding: 32px 20px 80px;
-            }}
+        .blocked {
+            background: rgba(255,100,0,0.2);
+            border: 1px solid orange;
+        }
 
-            .header {{
-                margin-bottom: 28px;
-            }}
+        .allowed {
+            background: rgba(0,200,100,0.2);
+            border: 1px solid green;
+        }
+    </style>
+</head>
 
-            .eyebrow {{
-                color: var(--muted);
-                font-size: 13px;
-                text-transform: uppercase;
-                letter-spacing: 0.08em;
-                margin-bottom: 8px;
-            }}
+<body>
 
-            h1 {{
-                margin: 0 0 8px;
-                font-size: 36px;
-                line-height: 1.1;
-            }}
+<h1>Waveframe Guard</h1>
+<p>Validate AI actions before they execute.</p>
 
-            .sub {{
-                color: var(--muted);
-                font-size: 18px;
-                line-height: 1.5;
-                max-width: 760px;
-            }}
+<div class="container">
 
-            .grid {{
-                display: grid;
-                gap: 16px;
-            }}
+    <div class="panel">
+        <h3>Policy</h3>
+        <textarea id="policy">{}</textarea>
+    </div>
 
-            .card {{
-                background: var(--panel);
-                border: 1px solid var(--border);
-                border-radius: 14px;
-                padding: 18px 18px 16px;
-            }}
+    <div class="panel">
+        <h3>Action</h3>
+        <textarea id="action">{ "type": "transfer", "amount": 5000 }</textarea>
+    </div>
 
-            .badge {{
-                display: inline-block;
-                font-size: 12px;
-                font-weight: 700;
-                letter-spacing: 0.06em;
-                text-transform: uppercase;
-                padding: 6px 10px;
-                border-radius: 999px;
-                margin-bottom: 12px;
-            }}
+</div>
 
-            .badge.blocked {{
-                background: rgba(255, 122, 0, 0.14);
-                color: var(--blocked);
-                border: 1px solid rgba(255, 122, 0, 0.35);
-            }}
+<button onclick="runValidation()">Validate Action</button>
 
-            .badge.allowed {{
-                background: rgba(47, 191, 113, 0.14);
-                color: var(--allowed);
-                border: 1px solid rgba(47, 191, 113, 0.35);
-            }}
+<div id="output"></div>
 
-            .summary {{
-                font-size: 22px;
-                font-weight: 700;
-                line-height: 1.3;
-                margin-bottom: 10px;
-            }}
+<script>
+async function runValidation() {
+    const policy = JSON.parse(document.getElementById("policy").value);
+    const action = JSON.parse(document.getElementById("action").value);
 
-            .meta {{
-                color: var(--muted);
-                font-size: 14px;
-                margin-bottom: 8px;
-            }}
+    const res = await fetch("/validate", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            policy,
+            action,
+            actor: "ai-agent",
+            context: {}
+        })
+    });
 
-            .reason {{
-                font-size: 16px;
-                line-height: 1.5;
-                margin-bottom: 10px;
-            }}
+    const data = await res.json();
 
-            .time {{
-                color: var(--muted);
-                font-size: 13px;
-            }}
+    const div = document.getElementById("output");
 
-            .empty {{
-                background: var(--panel);
-                border: 1px dashed var(--border);
-                border-radius: 14px;
-                padding: 22px;
-                color: var(--muted);
-            }}
+    div.className = "result " + (data.allowed ? "allowed" : "blocked");
 
-            code {{
-                background: rgba(255,255,255,0.06);
-                padding: 2px 6px;
-                border-radius: 6px;
-            }}
-        </style>
-    </head>
-    <body>
-        <div class="wrap">
-            <div class="header">
-                <div class="eyebrow">Waveframe Guard</div>
-                <h1>Live enforcement decisions</h1>
-                <div class="sub">
-                    See every AI action that was evaluated, whether it was allowed or blocked,
-                    and why the decision was made.
-                </div>
-            </div>
+    div.innerHTML = `
+        <h2>${data.allowed ? "ALLOWED" : "BLOCKED"}</h2>
+        <p><strong>${data.summary}</strong></p>
+        <p>${data.reason}</p>
+    `;
+}
+</script>
 
-            <div class="grid">
-                {cards_html}
-            </div>
-        </div>
-    </body>
-    </html>
-    """
-    return html
+</body>
+</html>
+"""
