@@ -288,12 +288,15 @@ def ui():
     <title>Waveframe Guard</title>
     <style>
         body { font-family: Arial; background: #0f1115; color: white; padding: 40px; }
-        textarea { width: 100%; height: 300px; background: #1a1d24; color: white; border: 1px solid #333; padding: 10px; }
+        textarea { width: 100%; height: 250px; background: #1a1d24; color: white; border: 1px solid #333; padding: 10px; }
+        input { width: 100%; padding: 10px; background: #1a1d24; color: white; border: 1px solid #333; }
         .container { display: flex; gap: 30px; }
-        button { margin-top: 20px; padding: 12px; background: orange; border: none; font-weight: bold; }
+        .section { flex: 1; }
+        button { margin-top: 20px; padding: 12px; background: orange; border: none; font-weight: bold; cursor: pointer; }
         .result { margin-top: 20px; padding: 20px; border-radius: 8px; }
         .blocked { background: rgba(255,100,0,0.2); border: 1px solid orange; }
         .allowed { background: rgba(0,200,100,0.2); border: 1px solid green; }
+        .context { margin-top: 30px; }
     </style>
 </head>
 <body>
@@ -302,14 +305,44 @@ def ui():
 <p>Validate AI actions before they execute.</p>
 
 <div class="container">
-    <div>
+    <div class="section">
         <h3>Policy</h3>
-        <textarea id="policy">{}</textarea>
+        <textarea id="policy">
+{
+  "contract_id": "finance-raci",
+  "contract_version": "0.1.0",
+  "roles": {
+    "required": ["proposer", "responsible", "accountable"]
+  },
+  "constraints": [
+    {
+      "type": "separation_of_duties",
+      "roles": ["responsible", "accountable"]
+    }
+  ]
+}
+        </textarea>
     </div>
-    <div>
+
+    <div class="section">
         <h3>Action</h3>
-        <textarea id="action">{ "type": "transfer", "amount": 5000 }</textarea>
+        <textarea id="action">
+{ "type": "transfer", "amount": 5000 }
+        </textarea>
     </div>
+</div>
+
+<div class="context">
+    <h3>Governance Context (who is involved)</h3>
+
+    <label>Responsible</label>
+    <input id="responsible" placeholder="e.g. ops-manager-1" />
+
+    <label style="margin-top:10px;">Accountable</label>
+    <input id="accountable" placeholder="e.g. finance-director-1" />
+
+    <label style="margin-top:10px;">Approved By (optional)</label>
+    <input id="approved_by" placeholder="e.g. human-approver-1" />
 </div>
 
 <button onclick="runValidation()">Validate Action</button>
@@ -321,6 +354,16 @@ async function runValidation() {
     const policy = JSON.parse(document.getElementById("policy").value);
     const action = JSON.parse(document.getElementById("action").value);
 
+    const responsible = document.getElementById("responsible").value;
+    const accountable = document.getElementById("accountable").value;
+    const approved_by = document.getElementById("approved_by").value;
+
+    const context = {};
+
+    if (responsible) context.responsible = responsible;
+    if (accountable) context.accountable = accountable;
+    if (approved_by) context.approved_by = approved_by;
+
     const res = await fetch("/validate", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
@@ -328,7 +371,7 @@ async function runValidation() {
             policy,
             action,
             actor: "ai-agent",
-            context: {}
+            context
         })
     });
 
