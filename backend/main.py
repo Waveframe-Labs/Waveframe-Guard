@@ -17,7 +17,7 @@ from cricore.interface.evaluate_proposal import evaluate_proposal
 
 app = FastAPI(
     title="Waveframe Guard",
-    version="1.1.1",
+    version="1.2.0",
 )
 
 
@@ -56,9 +56,11 @@ def summarize_action(action: Dict[str, Any]) -> str:
 
     if action_type == "transfer":
         amount = action.get("amount")
-        if isinstance(amount, (int, float)):
-            return f"AI attempted to transfer ${amount:,.0f}"
-        return "AI attempted to transfer funds"
+        return f"AI attempted to transfer ${amount:,.0f}"
+
+    if action_type == "reallocate_budget":
+        amount = action.get("amount")
+        return f"AI attempted to reallocate ${amount:,.0f}"
 
     return f"AI attempted action: {action_type or 'unknown'}"
 
@@ -81,60 +83,46 @@ def extract_stage_messages(result: Any) -> List[str]:
 
     messages: List[str] = []
     for stage in stage_results:
-        stage_messages = getattr(stage, "messages", None)
-        if stage_messages:
-            messages.extend([str(m) for m in stage_messages])
+        if getattr(stage, "messages", None):
+            messages.extend([str(m) for m in stage.messages])
     return messages
 
 
 def interpret_reason(result: Any) -> str:
-    failed_stages = getattr(result, "failed_stages", None) or []
-    summary = getattr(result, "summary", "") or ""
     messages = extract_stage_messages(result)
-    combined = " ".join([summary] + messages).lower()
+    combined = " ".join(messages).lower()
 
     if "separation_of_duties" in combined:
-        return "Blocked: same individual assigned to conflicting governance roles"
+        return "Blocked: same individual assigned to conflicting roles"
 
-    if "identity reused across required roles" in combined:
-        return "Blocked: same individual assigned to multiple required roles"
-
-    if "required role not satisfied" in combined:
-        return "Blocked: required governance roles are missing"
-
-    if "multiple candidates" in combined:
-        return "Blocked: governance role assignment is ambiguous"
-
-    if "approval" in combined and "required" in combined:
+    if "approval" in combined:
         return "Blocked: approval required but not provided"
 
-    if "independence" in failed_stages:
-        return "Blocked: governance independence requirements not satisfied"
+    if "required role" in combined:
+        return "Blocked: required governance roles missing"
 
     return "Blocked: policy requirements were not satisfied"
 
 
 def extract_result(result: Any) -> tuple[bool, str]:
     allowed = getattr(result, "allowed", None)
-
     if allowed is None:
-        allowed = getattr(result, "commit_allowed", None)
+        allowed = getattr(result, "commit_allowed", False)
 
-    if allowed is None:
-        allowed = getattr(result, "passed", False)
-
-    if bool(allowed):
-        return True, "Allowed: roles verified and policy conditions satisfied"
+    if allowed:
+        return True, "Allowed: policy conditions satisfied"
 
     return False, interpret_reason(result)
 
 
 def normalize_mutation(action: Dict[str, Any]) -> Dict[str, Any]:
-    return {
-        "domain": "finance",
-        "resource": "funds",
-        "action": "transfer",
-    }
+    if action["type"] == "transfer":
+        return {"domain": "finance", "resource": "funds", "action": "transfer"}
+
+    if action["type"] == "reallocate_budget":
+        return {"domain": "finance", "resource": "budget", "action": "reallocate"}
+
+    return {"domain": "general", "resource": "unknown", "action": "unknown"}
 
 
 # ---------------------------
@@ -144,64 +132,41 @@ def normalize_mutation(action: Dict[str, Any]) -> Dict[str, Any]:
 def enforce_required_roles(policy: Dict[str, Any], context: Dict[str, Any]) -> tuple[bool, str | None]:
     required_roles = policy.get("roles", {}).get("required", [])
 
-    if not required_roles:
-        return True, None
-
     provided_roles = {"proposer"}
 
-    if context.get("responsible") and context.get("responsible").strip():
+    if context.get("responsible", "").strip():
         provided_roles.add("responsible")
 
-    if context.get("accountable") and context.get("accountable").strip():
+    if context.get("accountable", "").strip():
         provided_roles.add("accountable")
 
-    if context.get("approved_by") and context.get("approved_by").strip():
+    if context.get("approved_by", "").strip():
         provided_roles.add("approver")
 
     missing = [r for r in required_roles if r not in provided_roles]
 
     if missing:
-        return False, f"Blocked: required governance roles missing: {', '.join(missing)}"
+        return False, f"Blocked: required roles missing: {', '.join(missing)}"
 
     return True, None
 
 
-def normalize_context(actor: str, context: Dict[str, Any] | None) -> Dict[str, Any]:
-    context = context or {}
+def normalize_context(actor: str, context: Dict[str, Any]) -> Dict[str, Any]:
+    actors = [{"id": normalize_id(actor), "type": "agent", "role": "proposer"}]
 
-    actor_id = normalize_id(actor)
+    if context.get("responsible"):
+        actors.append({"id": normalize_id(context["responsible"]), "type": "human", "role": "responsible"})
 
-    actors = [
-        {"id": actor_id, "type": "agent", "role": "proposer"}
-    ]
+    if context.get("accountable"):
+        actors.append({"id": normalize_id(context["accountable"]), "type": "human", "role": "accountable"})
 
-    if context.get("responsible") and context.get("responsible").strip():
-        actors.append({
-            "id": normalize_id(context["responsible"]),
-            "type": "human",
-            "role": "responsible",
-        })
-
-    if context.get("accountable") and context.get("accountable").strip():
-        actors.append({
-            "id": normalize_id(context["accountable"]),
-            "type": "human",
-            "role": "accountable",
-        })
-
-    if context.get("approved_by") and context.get("approved_by").strip():
-        actors.append({
-            "id": normalize_id(context["approved_by"]),
-            "type": "human",
-            "role": "approver",
-        })
-
-    required_roles = list(dict.fromkeys(a["role"] for a in actors))
+    if context.get("approved_by"):
+        actors.append({"id": normalize_id(context["approved_by"]), "type": "human", "role": "approver"})
 
     return {
         "identities": {
             "actors": actors,
-            "required_roles": required_roles,
+            "required_roles": [a["role"] for a in actors],
             "conflict_flags": {},
         },
         "integrity": {},
@@ -213,69 +178,47 @@ def normalize_context(actor: str, context: Dict[str, Any] | None) -> Dict[str, A
 # Core validation pipeline
 # ---------------------------
 
-def run_validation(policy: Dict, action: Dict, actor: str, context: Dict | None):
-    context = context or {}
+def run_validation(policy: Dict, action: Dict, actor: str, context: Dict):
+    valid, error = enforce_required_roles(policy, context)
+    if not valid:
+        return {"allowed": False, "reason": error, "summary": summarize_action(action)}
 
-    try:
-        valid, error = enforce_required_roles(policy, context)
-        if not valid:
-            return {
-                "allowed": False,
-                "reason": error,
-                "summary": summarize_action(action),
-            }
+    for c in policy.get("constraints", []):
+        if c.get("type") == "approval_required":
+            if action["amount"] > c["threshold"] and not context.get("approved_by"):
+                return {
+                    "allowed": False,
+                    "reason": f"Blocked: approval required above ${c['threshold']:,.0f}",
+                    "summary": summarize_action(action),
+                }
 
-        constraints = policy.get("constraints", [])
-        for c in constraints:
-            if c.get("type") == "approval_required":
-                threshold = c.get("threshold", 0)
-                amount = action.get("amount", 0)
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".json", mode="w") as f:
+        json.dump(policy, f)
+        policy_path = Path(f.name)
 
-                if amount > threshold and not context.get("approved_by"):
-                    return {
-                        "allowed": False,
-                        "reason": f"Blocked: approval required above ${threshold:,.0f}",
-                        "summary": summarize_action(action),
-                    }
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
+        output_path = Path(tmp.name)
 
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".json", mode="w", encoding="utf-8") as policy_file:
-            json.dump(policy, policy_file)
-            policy_path = Path(policy_file.name)
+    contract_path = compile_policy_file(policy_path, output_path)
 
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
-            output_path = Path(tmp.name)
+    with open(contract_path) as f:
+        compiled = json.load(f)
 
-        contract_path = compile_policy_file(policy_path, output_path)
+    contract = build_contract_binding(compiled)
 
-        with open(contract_path, "r", encoding="utf-8") as f:
-            compiled_contract = json.load(f)
+    proposal = build_proposal(
+        proposal_id=str(uuid.uuid4()),
+        actor={"id": normalize_id(actor), "type": "agent"},
+        artifact_paths=[],
+        mutation=normalize_mutation(action),
+        contract=contract,
+        run_context=normalize_context(actor, context),
+    )
 
-        contract = build_contract_binding(compiled_contract)
+    result = evaluate_proposal(proposal, compiled)
+    allowed, reason = extract_result(result)
 
-        proposal = build_proposal(
-            proposal_id=str(uuid.uuid4()),
-            actor={"id": normalize_id(actor), "type": "agent"},
-            artifact_paths=[],
-            mutation=normalize_mutation(action),
-            contract=contract,
-            run_context=normalize_context(actor, context),
-        )
-
-        result = evaluate_proposal(proposal, compiled_contract)
-        allowed, reason = extract_result(result)
-
-        return {
-            "allowed": allowed,
-            "reason": reason,
-            "summary": summarize_action(action),
-        }
-
-    except Exception as e:
-        return {
-            "allowed": False,
-            "reason": f"Validation error: {str(e)}",
-            "summary": summarize_action(action),
-        }
+    return {"allowed": allowed, "reason": reason, "summary": summarize_action(action)}
 
 
 # ---------------------------
@@ -285,16 +228,7 @@ def run_validation(policy: Dict, action: Dict, actor: str, context: Dict | None)
 @app.post("/validate")
 async def validate(request: Request):
     body = await request.json()
-
-    try:
-        policy = body["policy"]
-        action = body["action"]
-        actor = body.get("actor", "ai-agent")
-        context = body.get("context", {})
-    except KeyError as e:
-        raise HTTPException(status_code=400, detail=f"Missing field: {e}")
-
-    return JSONResponse(run_validation(policy, action, actor, context))
+    return JSONResponse(run_validation(body["policy"], body["action"], body.get("actor", "ai-agent"), body.get("context", {})))
 
 
 # ---------------------------
@@ -307,61 +241,15 @@ def ui():
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Waveframe Guard</title>
-    <style>
-        body {
-            font-family: Arial;
-            background: #0f1115;
-            color: white;
-            padding: 40px;
-            max-width: 900px;
-            margin: auto;
-        }
-
-        .form-group { margin-bottom: 18px; }
-        label { display: block; margin-bottom: 6px; color: #b8c0cc; }
-
-        input, select {
-            width: 100%;
-            padding: 12px;
-            background: #1a1d24;
-            color: white;
-            border: 1px solid #333;
-            border-radius: 6px;
-        }
-
-        button {
-            margin-top: 20px;
-            padding: 14px;
-            width: 100%;
-            background: orange;
-            border: none;
-            font-weight: bold;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
-        .result {
-            margin-top: 30px;
-            padding: 24px;
-            border-radius: 10px;
-        }
-
-        .blocked {
-            border: 1px solid orange;
-            background: rgba(255,100,0,0.15);
-        }
-
-        .allowed {
-            border: 1px solid green;
-            background: rgba(0,200,100,0.15);
-        }
-
-        hr {
-            margin: 28px 0;
-            border-color: #222;
-        }
-    </style>
+<title>Waveframe Guard</title>
+<style>
+body { font-family: Arial; background:#0f1115; color:white; padding:40px; max-width:900px; margin:auto; }
+input, select { width:100%; padding:10px; margin-bottom:12px; background:#1a1d24; color:white; border:1px solid #333; }
+button { padding:14px; width:100%; background:orange; border:none; font-weight:bold; }
+.box { margin-top:20px; padding:20px; border-radius:8px; }
+.allowed { border:1px solid green; background:rgba(0,200,100,0.15); }
+.blocked { border:1px solid orange; background:rgba(255,100,0,0.15); }
+</style>
 </head>
 
 <body>
@@ -370,108 +258,78 @@ def ui():
 <p>Stop unsafe AI actions before they execute.</p>
 
 <h3>Action</h3>
+<select id="actionType">
+<option value="transfer">Transfer Funds</option>
+<option value="reallocate_budget">Reallocate Budget</option>
+</select>
+<input id="amount" type="number" value="5000" />
 
-<div class="form-group">
-    <label>Amount ($)</label>
-    <input id="amount" type="number" value="5000" />
-</div>
+<h3>Roles</h3>
+<input id="responsible" placeholder="Responsible">
+<input id="accountable" placeholder="Accountable">
+<input id="approved_by" placeholder="Approver">
 
-<hr>
+<h3>Policy</h3>
+<label><input type="checkbox" id="requireApproval" checked> Require approval</label>
+<input id="threshold" type="number" value="5000">
 
-<h3>Governance Roles</h3>
+<div id="rules" style="margin-top:15px;"></div>
 
-<div class="form-group">
-    <label>Responsible</label>
-    <input id="responsible" placeholder="e.g. ops-manager" />
-</div>
+<button onclick="run()">Check if this action will execute</button>
 
-<div class="form-group">
-    <label>Accountable</label>
-    <input id="accountable" placeholder="e.g. finance-director" />
-</div>
-
-<div class="form-group">
-    <label>Approved By</label>
-    <input id="approved_by" placeholder="Required if threshold exceeded" />
-</div>
-
-<hr>
-
-<h3>Policy Controls</h3>
-
-<div class="form-group">
-    <label>
-        <input type="checkbox" id="requireApproval" checked />
-        Require human approval
-    </label>
-</div>
-
-<div class="form-group">
-    <label>Approval required above ($)</label>
-    <input id="approvalThreshold" type="number" value="5000" />
-</div>
-
-<button onclick="runValidation()">Check if this action will execute</button>
-
-<div id="output"></div>
+<div id="out"></div>
 
 <script>
-async function runValidation() {
-    const amount = parseFloat(document.getElementById("amount").value);
+function updateRules(){
+    const threshold = document.getElementById("threshold").value;
+    document.getElementById("rules").innerHTML = `
+        <strong>Enforced Rules</strong>
+        <ul>
+            <li>Roles must be assigned</li>
+            <li>Responsible and Accountable must be different</li>
+            <li>Approval required above $${Number(threshold).toLocaleString()}</li>
+        </ul>
+    `;
+}
+updateRules();
 
-    const responsible = document.getElementById("responsible").value;
-    const accountable = document.getElementById("accountable").value;
-    const approved_by = document.getElementById("approved_by").value;
+async function run(){
+    updateRules();
 
-    const requireApproval = document.getElementById("requireApproval").checked;
-    const threshold = parseFloat(document.getElementById("approvalThreshold").value || 0);
-
-    const policy = {
-        contract_id: "dynamic-policy",
-        contract_version: "1.0.0",
-        roles: {
-            required: ["proposer", "responsible", "accountable"]
-        },
-        constraints: [
-            {
-                type: "separation_of_duties",
-                roles: ["responsible", "accountable"]
+    const res = await fetch("/validate",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+            policy:{
+                contract_id:"dynamic",
+                contract_version:"1.0",
+                roles:{required:["proposer","responsible","accountable"]},
+                constraints:[
+                    {type:"separation_of_duties",roles:["responsible","accountable"]},
+                    {type:"approval_required",threshold:Number(document.getElementById("threshold").value)}
+                ]
+            },
+            action:{
+                type:document.getElementById("actionType").value,
+                amount:Number(document.getElementById("amount").value)
+            },
+            context:{
+                responsible:document.getElementById("responsible").value,
+                accountable:document.getElementById("accountable").value,
+                approved_by:document.getElementById("approved_by").value
             }
-        ]
-    };
-
-    if (requireApproval) {
-        policy.constraints.push({
-            type: "approval_required",
-            threshold: threshold
-        });
-    }
-
-    const context = {};
-    if (responsible) context.responsible = responsible;
-    if (accountable) context.accountable = accountable;
-    if (approved_by) context.approved_by = approved_by;
-
-    const res = await fetch("/validate", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-            policy,
-            action: { type: "transfer", amount },
-            actor: "ai-agent",
-            context
         })
     });
 
-    const data = await res.json();
-    const div = document.getElementById("output");
+    const d = await res.json();
 
-    div.className = "result " + (data.allowed ? "allowed" : "blocked");
-    div.innerHTML = `
-        <h2>${data.allowed ? "ALLOWED" : "BLOCKED"}</h2>
-        <p><strong>${data.summary}</strong></p>
-        <p>${data.reason}</p>
-        <p style="opacity:0.6;">Decision made at execution boundary</p>
+    document.getElementById("out").innerHTML = `
+        <div class="box ${d.allowed ? "allowed":"blocked"}">
+            <h2>${d.allowed ? "ALLOWED":"BLOCKED"}</h2>
+            <p><strong>${d.summary}</strong></p>
+            <p>${d.reason}</p>
+            <p style="opacity:0.6;">Decision made at execution boundary</p>
+        </div>
     `;
 }
 </script>
