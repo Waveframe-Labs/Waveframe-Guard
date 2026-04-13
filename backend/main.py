@@ -17,12 +17,12 @@ from cricore.interface.evaluate_proposal import evaluate_proposal
 
 app = FastAPI(
     title="Waveframe Guard",
-    version="1.1.0",
+    version="1.1.1",
 )
 
 
 # ---------------------------
-# Identity normalization (IMPROVED)
+# Identity normalization
 # ---------------------------
 
 def normalize_id(value: str) -> str:
@@ -36,7 +36,7 @@ def normalize_id(value: str) -> str:
         "two": "2",
         "three": "3",
         "four": "4",
-        "five": "5"
+        "five": "5",
     }
 
     for word, num in number_map.items():
@@ -124,7 +124,7 @@ def extract_result(result: Any) -> tuple[bool, str]:
         allowed = getattr(result, "passed", False)
 
     if bool(allowed):
-        return True, "Allowed: no policy violations detected"
+        return True, "Allowed: roles verified and policy conditions satisfied"
 
     return False, interpret_reason(result)
 
@@ -149,13 +149,13 @@ def enforce_required_roles(policy: Dict[str, Any], context: Dict[str, Any]) -> t
 
     provided_roles = {"proposer"}
 
-    if context.get("responsible"):
+    if context.get("responsible") and context.get("responsible").strip():
         provided_roles.add("responsible")
 
-    if context.get("accountable"):
+    if context.get("accountable") and context.get("accountable").strip():
         provided_roles.add("accountable")
 
-    if context.get("approved_by"):
+    if context.get("approved_by") and context.get("approved_by").strip():
         provided_roles.add("approver")
 
     missing = [r for r in required_roles if r not in provided_roles]
@@ -175,32 +175,26 @@ def normalize_context(actor: str, context: Dict[str, Any] | None) -> Dict[str, A
         {"id": actor_id, "type": "agent", "role": "proposer"}
     ]
 
-    if context.get("responsible"):
-        actors.append(
-            {
-                "id": normalize_id(context["responsible"]),
-                "type": "human",
-                "role": "responsible",
-            }
-        )
+    if context.get("responsible") and context.get("responsible").strip():
+        actors.append({
+            "id": normalize_id(context["responsible"]),
+            "type": "human",
+            "role": "responsible",
+        })
 
-    if context.get("accountable"):
-        actors.append(
-            {
-                "id": normalize_id(context["accountable"]),
-                "type": "human",
-                "role": "accountable",
-            }
-        )
+    if context.get("accountable") and context.get("accountable").strip():
+        actors.append({
+            "id": normalize_id(context["accountable"]),
+            "type": "human",
+            "role": "accountable",
+        })
 
-    if context.get("approved_by"):
-        actors.append(
-            {
-                "id": normalize_id(context["approved_by"]),
-                "type": "human",
-                "role": "approver",
-            }
-        )
+    if context.get("approved_by") and context.get("approved_by").strip():
+        actors.append({
+            "id": normalize_id(context["approved_by"]),
+            "type": "human",
+            "role": "approver",
+        })
 
     required_roles = list(dict.fromkeys(a["role"] for a in actors))
 
@@ -314,71 +308,166 @@ def ui():
 <html>
 <head>
     <title>Waveframe Guard</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #0f1115;
+            color: white;
+            padding: 40px;
+            max-width: 900px;
+            margin: auto;
+        }
+
+        .form-group { margin-bottom: 18px; }
+        label { display: block; margin-bottom: 6px; color: #b8c0cc; }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            background: #1a1d24;
+            color: white;
+            border: 1px solid #333;
+            border-radius: 6px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 14px;
+            width: 100%;
+            background: orange;
+            border: none;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 24px;
+            border-radius: 10px;
+        }
+
+        .blocked {
+            border: 1px solid orange;
+            background: rgba(255,100,0,0.15);
+        }
+
+        .allowed {
+            border: 1px solid green;
+            background: rgba(0,200,100,0.15);
+        }
+
+        hr {
+            margin: 28px 0;
+            border-color: #222;
+        }
+    </style>
 </head>
 
-<body style="font-family: Arial; background:#0f1115; color:white; padding:40px; max-width:900px; margin:auto;">
+<body>
 
 <h1>Waveframe Guard</h1>
 <p>Stop unsafe AI actions before they execute.</p>
 
 <h3>Action</h3>
-<input id="amount" type="number" value="5000" />
 
-<h3>Roles</h3>
-<input id="responsible" placeholder="Responsible" />
-<input id="accountable" placeholder="Accountable" />
-<input id="approved_by" placeholder="Approver (if required)" />
+<div class="form-group">
+    <label>Amount ($)</label>
+    <input id="amount" type="number" value="5000" />
+</div>
 
-<h3>Policy</h3>
-<label><input type="checkbox" id="requireApproval" checked /> Require approval</label>
-<input id="approvalThreshold" type="number" value="5000" />
+<hr>
+
+<h3>Governance Roles</h3>
+
+<div class="form-group">
+    <label>Responsible</label>
+    <input id="responsible" placeholder="e.g. ops-manager" />
+</div>
+
+<div class="form-group">
+    <label>Accountable</label>
+    <input id="accountable" placeholder="e.g. finance-director" />
+</div>
+
+<div class="form-group">
+    <label>Approved By</label>
+    <input id="approved_by" placeholder="Required if threshold exceeded" />
+</div>
+
+<hr>
+
+<h3>Policy Controls</h3>
+
+<div class="form-group">
+    <label>
+        <input type="checkbox" id="requireApproval" checked />
+        Require human approval
+    </label>
+</div>
+
+<div class="form-group">
+    <label>Approval required above ($)</label>
+    <input id="approvalThreshold" type="number" value="5000" />
+</div>
 
 <button onclick="runValidation()">Check if this action will execute</button>
 
-<div id="output" style="margin-top:20px;"></div>
+<div id="output"></div>
 
 <script>
 async function runValidation() {
     const amount = parseFloat(document.getElementById("amount").value);
 
+    const responsible = document.getElementById("responsible").value;
+    const accountable = document.getElementById("accountable").value;
+    const approved_by = document.getElementById("approved_by").value;
+
+    const requireApproval = document.getElementById("requireApproval").checked;
+    const threshold = parseFloat(document.getElementById("approvalThreshold").value || 0);
+
     const policy = {
         contract_id: "dynamic-policy",
         contract_version: "1.0.0",
         roles: {
-            required: ["proposer","responsible","accountable"]
+            required: ["proposer", "responsible", "accountable"]
         },
         constraints: [
-            { type: "separation_of_duties", roles: ["responsible","accountable"] }
+            {
+                type: "separation_of_duties",
+                roles: ["responsible", "accountable"]
+            }
         ]
     };
 
-    if (document.getElementById("requireApproval").checked) {
+    if (requireApproval) {
         policy.constraints.push({
             type: "approval_required",
-            threshold: parseFloat(document.getElementById("approvalThreshold").value)
+            threshold: threshold
         });
     }
 
-    const context = {
-        responsible: document.getElementById("responsible").value,
-        accountable: document.getElementById("accountable").value,
-        approved_by: document.getElementById("approved_by").value
-    };
+    const context = {};
+    if (responsible) context.responsible = responsible;
+    if (accountable) context.accountable = accountable;
+    if (approved_by) context.approved_by = approved_by;
 
     const res = await fetch("/validate", {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
             policy,
-            action:{type:"transfer",amount},
-            actor:"ai-agent",
+            action: { type: "transfer", amount },
+            actor: "ai-agent",
             context
         })
     });
 
     const data = await res.json();
+    const div = document.getElementById("output");
 
-    document.getElementById("output").innerHTML = `
+    div.className = "result " + (data.allowed ? "allowed" : "blocked");
+    div.innerHTML = `
         <h2>${data.allowed ? "ALLOWED" : "BLOCKED"}</h2>
         <p><strong>${data.summary}</strong></p>
         <p>${data.reason}</p>
