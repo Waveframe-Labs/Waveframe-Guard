@@ -17,19 +17,33 @@ from cricore.interface.evaluate_proposal import evaluate_proposal
 
 app = FastAPI(
     title="Waveframe Guard",
-    version="1.0.0",
+    version="1.1.0",
 )
 
 
 # ---------------------------
-# Identity normalization
+# Identity normalization (IMPROVED)
 # ---------------------------
 
 def normalize_id(value: str) -> str:
     if not value:
         return ""
+
     normalized = value.strip().lower().replace("_", "-")
+
+    number_map = {
+        "one": "1",
+        "two": "2",
+        "three": "3",
+        "four": "4",
+        "five": "5"
+    }
+
+    for word, num in number_map.items():
+        normalized = normalized.replace(word, num)
+
     normalized = normalized.replace("-0", "-")
+
     return normalized
 
 
@@ -45,15 +59,6 @@ def summarize_action(action: Dict[str, Any]) -> str:
         if isinstance(amount, (int, float)):
             return f"AI attempted to transfer ${amount:,.0f}"
         return "AI attempted to transfer funds"
-
-    if action_type == "get_balance":
-        return "AI attempted to check account balance"
-
-    if action_type == "reallocate_budget":
-        amount = action.get("amount")
-        if isinstance(amount, (int, float)):
-            return f"AI attempted to reallocate ${amount:,.0f} in budget"
-        return "AI attempted to reallocate budget"
 
     return f"AI attempted action: {action_type or 'unknown'}"
 
@@ -119,39 +124,16 @@ def extract_result(result: Any) -> tuple[bool, str]:
         allowed = getattr(result, "passed", False)
 
     if bool(allowed):
-        return True, "Allowed: roles verified and policy conditions satisfied"
+        return True, "Allowed: no policy violations detected"
 
     return False, interpret_reason(result)
 
 
 def normalize_mutation(action: Dict[str, Any]) -> Dict[str, Any]:
-    action_type = action.get("type")
-
-    if action_type == "transfer":
-        return {
-            "domain": "finance",
-            "resource": "funds",
-            "action": "transfer",
-        }
-
-    if action_type == "get_balance":
-        return {
-            "domain": "finance",
-            "resource": "account",
-            "action": "read",
-        }
-
-    if action_type == "reallocate_budget":
-        return {
-            "domain": "finance",
-            "resource": "budget",
-            "action": "reallocate",
-        }
-
     return {
-        "domain": "general",
-        "resource": "unknown",
-        "action": str(action_type or "unknown"),
+        "domain": "finance",
+        "resource": "funds",
+        "action": "transfer",
     }
 
 
@@ -241,7 +223,6 @@ def run_validation(policy: Dict, action: Dict, actor: str, context: Dict | None)
     context = context or {}
 
     try:
-        # 1) Required roles first
         valid, error = enforce_required_roles(policy, context)
         if not valid:
             return {
@@ -250,7 +231,6 @@ def run_validation(policy: Dict, action: Dict, actor: str, context: Dict | None)
                 "summary": summarize_action(action),
             }
 
-        # 2) Approval threshold second
         constraints = policy.get("constraints", [])
         for c in constraints:
             if c.get("type") == "approval_required":
@@ -260,11 +240,10 @@ def run_validation(policy: Dict, action: Dict, actor: str, context: Dict | None)
                 if amount > threshold and not context.get("approved_by"):
                     return {
                         "allowed": False,
-                        "reason": f"Blocked: approval required for transfers above ${threshold:,.0f}",
+                        "reason": f"Blocked: approval required above ${threshold:,.0f}",
                         "summary": summarize_action(action),
                     }
 
-        # 3) Compile policy
         with tempfile.NamedTemporaryFile(delete=False, suffix=".json", mode="w", encoding="utf-8") as policy_file:
             json.dump(policy, policy_file)
             policy_path = Path(policy_file.name)
@@ -279,7 +258,6 @@ def run_validation(policy: Dict, action: Dict, actor: str, context: Dict | None)
 
         contract = build_contract_binding(compiled_contract)
 
-        # 4) Build proposal
         proposal = build_proposal(
             proposal_id=str(uuid.uuid4()),
             actor={"id": normalize_id(actor), "type": "agent"},
@@ -289,7 +267,6 @@ def run_validation(policy: Dict, action: Dict, actor: str, context: Dict | None)
             run_context=normalize_context(actor, context),
         )
 
-        # 5) Evaluate
         result = evaluate_proposal(proposal, compiled_contract)
         allowed, reason = extract_result(result)
 
@@ -326,16 +303,6 @@ async def validate(request: Request):
     return JSONResponse(run_validation(policy, action, actor, context))
 
 
-@app.post("/api/log")
-async def receive_log(request: Request):
-    data = await request.json()
-
-    print(f"\n🚨 [TELEMETRY] Actor: {data.get('actor')} | Allowed: {data.get('allowed')}")
-    print(f"Reason: {data.get('reason')}\n")
-
-    return JSONResponse({"status": "logged"})
-
-
 # ---------------------------
 # UI
 # ---------------------------
@@ -347,185 +314,75 @@ def ui():
 <html>
 <head>
     <title>Waveframe Guard</title>
-    <style>
-        body {
-            font-family: Arial;
-            background: #0f1115;
-            color: white;
-            padding: 40px;
-            max-width: 900px;
-            margin: auto;
-        }
-
-        .form-group { margin-bottom: 18px; }
-        label { display: block; margin-bottom: 6px; color: #b8c0cc; }
-
-        input, select {
-            width: 100%;
-            padding: 12px;
-            background: #1a1d24;
-            color: white;
-            border: 1px solid #333;
-            border-radius: 6px;
-        }
-
-        input::placeholder {
-            color: #555;
-        }
-
-        button {
-            margin-top: 20px;
-            padding: 14px;
-            width: 100%;
-            background: orange;
-            border: none;
-            font-weight: bold;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
-        .result {
-            margin-top: 30px;
-            padding: 24px;
-            border-radius: 10px;
-        }
-
-        .blocked {
-            border: 1px solid orange;
-            background: rgba(255,100,0,0.15);
-        }
-
-        .allowed {
-            border: 1px solid green;
-            background: rgba(0,200,100,0.15);
-        }
-
-        hr {
-            margin: 28px 0;
-            border-color: #222;
-        }
-    </style>
 </head>
 
-<body>
+<body style="font-family: Arial; background:#0f1115; color:white; padding:40px; max-width:900px; margin:auto;">
 
 <h1>Waveframe Guard</h1>
 <p>Stop unsafe AI actions before they execute.</p>
 
 <h3>Action</h3>
+<input id="amount" type="number" value="5000" />
 
-<div class="form-group">
-    <label>Type</label>
-    <select id="actionType">
-        <option value="transfer">Transfer Funds</option>
-    </select>
-</div>
+<h3>Roles</h3>
+<input id="responsible" placeholder="Responsible" />
+<input id="accountable" placeholder="Accountable" />
+<input id="approved_by" placeholder="Approver (if required)" />
 
-<div class="form-group">
-    <label>Amount ($)</label>
-    <input id="amount" type="number" value="5000" />
-</div>
+<h3>Policy</h3>
+<label><input type="checkbox" id="requireApproval" checked /> Require approval</label>
+<input id="approvalThreshold" type="number" value="5000" />
 
-<hr>
+<button onclick="runValidation()">Check if this action will execute</button>
 
-<h3>Governance Roles</h3>
-
-<div class="form-group">
-    <label>Responsible</label>
-    <input id="responsible" placeholder="Required (e.g. ops-manager)" />
-</div>
-
-<div class="form-group">
-    <label>Accountable</label>
-    <input id="accountable" placeholder="Required (e.g. finance-director)" />
-</div>
-
-<div class="form-group">
-    <label>Approved By</label>
-    <input id="approved_by" placeholder="Optional unless threshold met" />
-</div>
-
-<hr>
-
-<h3>Policy Controls</h3>
-
-<div class="form-group">
-    <label>
-        <input type="checkbox" id="requireApproval" />
-        Require human approval
-    </label>
-</div>
-
-<div class="form-group">
-    <label>Approval required above ($)</label>
-    <input id="approvalThreshold" type="number" value="0" />
-</div>
-
-<button onclick="runValidation()">Try Action</button>
-
-<div id="output"></div>
+<div id="output" style="margin-top:20px;"></div>
 
 <script>
 async function runValidation() {
     const amount = parseFloat(document.getElementById("amount").value);
 
-    const responsible = document.getElementById("responsible").value;
-    const accountable = document.getElementById("accountable").value;
-    const approved_by = document.getElementById("approved_by").value;
-
-    const requireApproval = document.getElementById("requireApproval").checked;
-    const threshold = parseFloat(document.getElementById("approvalThreshold").value || 0);
-
     const policy = {
         contract_id: "dynamic-policy",
         contract_version: "1.0.0",
         roles: {
-            required: ["proposer", "responsible", "accountable"]
+            required: ["proposer","responsible","accountable"]
         },
         constraints: [
-            {
-                type: "separation_of_duties",
-                roles: ["responsible", "accountable"]
-            }
+            { type: "separation_of_duties", roles: ["responsible","accountable"] }
         ]
     };
 
-    if (requireApproval) {
+    if (document.getElementById("requireApproval").checked) {
         policy.constraints.push({
             type: "approval_required",
-            threshold: threshold
+            threshold: parseFloat(document.getElementById("approvalThreshold").value)
         });
     }
 
-    const action = {
-        type: "transfer",
-        amount: amount
+    const context = {
+        responsible: document.getElementById("responsible").value,
+        accountable: document.getElementById("accountable").value,
+        approved_by: document.getElementById("approved_by").value
     };
 
-    const context = {};
-    if (responsible) context.responsible = responsible;
-    if (accountable) context.accountable = accountable;
-    if (approved_by) context.approved_by = approved_by;
-
     const res = await fetch("/validate", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
             policy,
-            action,
-            actor: "ai-agent",
+            action:{type:"transfer",amount},
+            actor:"ai-agent",
             context
         })
     });
 
     const data = await res.json();
-    const div = document.getElementById("output");
 
-    div.className = "result " + (data.allowed ? "allowed" : "blocked");
-    div.innerHTML = `
+    document.getElementById("output").innerHTML = `
         <h2>${data.allowed ? "ALLOWED" : "BLOCKED"}</h2>
         <p><strong>${data.summary}</strong></p>
         <p>${data.reason}</p>
+        <p style="opacity:0.6;">Decision made at execution boundary</p>
     `;
 }
 </script>
