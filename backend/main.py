@@ -205,6 +205,20 @@ def normalize_context(actor: str, context: Dict[str, Any] | None) -> Dict[str, A
 def run_validation(policy: Dict, action: Dict, actor: str, context: Dict | None):
     context = context or {}
 
+    # 🔥 Approval enforcement (manual layer)
+    constraints = policy.get("constraints", [])
+    for c in constraints:
+        if c.get("type") == "approval_required":
+            threshold = c.get("threshold", 0)
+            amount = action.get("amount", 0)
+
+            if amount > threshold and not context.get("approved_by"):
+                return {
+                    "allowed": False,
+                    "reason": "Blocked: approval required for this transaction amount",
+                    "summary": summarize_action(action),
+                }
+
     try:
         # 🔥 PRE-CHECK (NEW)
         valid, error = enforce_required_roles(policy, context)
@@ -262,6 +276,7 @@ def run_validation(policy: Dict, action: Dict, actor: str, context: Dict | None)
 
 @app.post("/validate")
 async def validate(request: Request):
+    """The Sandbox Endpoint: Compiles and evaluates rules on the fly for the web UI."""
     body = await request.json()
 
     try:
@@ -273,6 +288,19 @@ async def validate(request: Request):
         raise HTTPException(status_code=400, detail=f"Missing field: {e}")
 
     return JSONResponse(run_validation(policy, action, actor, context))
+
+
+@app.post("/api/log")
+async def receive_log(request: Request):
+    """The Telemetry Endpoint: Catches live execution logs from installed SDKs."""
+    data = await request.json()
+    
+    # Print the incoming log to the server terminal so you can see it working
+    print(f"\n🚨 [TELEMETRY CAUGHT] Agent: '{data.get('actor')}' | Allowed: {data.get('allowed')}")
+    print(f"   Reason: {data.get('reason')}\n")
+    
+    # In the future, this is where you write the data to your Postgres/SQLite database (store.py)
+    return JSONResponse({"status": "logged"})
 
 
 # ---------------------------
@@ -288,7 +316,7 @@ def ui():
     <title>Waveframe Guard</title>
     <style>
         body {
-            font-family: Arial, Helvetica, sans-serif;
+            font-family: Arial;
             background: #0f1115;
             color: white;
             padding: 40px;
@@ -296,25 +324,8 @@ def ui():
             margin: auto;
         }
 
-        h1 {
-            margin-bottom: 8px;
-        }
-
-        p.sub {
-            color: #b8c0cc;
-            margin-bottom: 30px;
-        }
-
-        .form-group {
-            margin-bottom: 18px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 14px;
-            color: #b8c0cc;
-        }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; margin-bottom: 6px; color: #b8c0cc; }
 
         input, select {
             width: 100%;
@@ -342,35 +353,20 @@ def ui():
             border-radius: 10px;
         }
 
-        .blocked {
-            background: rgba(255,100,0,0.15);
-            border: 1px solid orange;
-        }
-
-        .allowed {
-            background: rgba(0,200,100,0.15);
-            border: 1px solid #22c55e;
-        }
-
-        .headline {
-            font-size: 20px;
-            margin-bottom: 10px;
-        }
-
-        .reason {
-            margin-top: 10px;
-            color: #d1d5db;
-        }
+        .blocked { border: 1px solid orange; background: rgba(255,100,0,0.15); }
+        .allowed { border: 1px solid green; background: rgba(0,200,100,0.15); }
     </style>
 </head>
 
 <body>
 
 <h1>Waveframe Guard</h1>
-<p class="sub">Stop unsafe AI actions before they execute.</p>
+<p>Stop unsafe AI actions before they execute.</p>
+
+<h3>Action</h3>
 
 <div class="form-group">
-    <label>Action</label>
+    <label>Type</label>
     <select id="actionType">
         <option value="transfer">Transfer Funds</option>
     </select>
@@ -381,23 +377,39 @@ def ui():
     <input id="amount" type="number" value="5000" />
 </div>
 
-<hr style="margin:30px 0; border-color:#222;">
+<hr>
 
-<h3>Who is involved</h3>
+<h3>Governance Roles</h3>
 
 <div class="form-group">
-    <label>Responsible (executes the action)</label>
-    <input id="responsible" placeholder="e.g. ops-manager" />
+    <label>Responsible</label>
+    <input id="responsible" />
 </div>
 
 <div class="form-group">
-    <label>Accountable (final authority)</label>
-    <input id="accountable" placeholder="e.g. finance-director" />
+    <label>Accountable</label>
+    <input id="accountable" />
 </div>
 
 <div class="form-group">
-    <label>Approved By (optional)</label>
-    <input id="approved_by" placeholder="e.g. human-approver" />
+    <label>Approved By</label>
+    <input id="approved_by" />
+</div>
+
+<hr>
+
+<h3>Policy Controls</h3>
+
+<div class="form-group">
+    <label>
+        <input type="checkbox" id="requireApproval" />
+        Require human approval
+    </label>
+</div>
+
+<div class="form-group">
+    <label>Approval required above ($)</label>
+    <input id="approvalThreshold" type="number" value="0" />
 </div>
 
 <button onclick="runValidation()">Evaluate Action</button>
@@ -406,17 +418,19 @@ def ui():
 
 <script>
 async function runValidation() {
-    const actionType = document.getElementById("actionType").value;
     const amount = parseFloat(document.getElementById("amount").value);
 
     const responsible = document.getElementById("responsible").value;
     const accountable = document.getElementById("accountable").value;
     const approved_by = document.getElementById("approved_by").value;
 
-    // 🔥 Backend still expects structured data → we build it silently
+    const requireApproval = document.getElementById("requireApproval").checked;
+    const threshold = parseFloat(document.getElementById("approvalThreshold").value || 0);
+
+    // 🔥 Build policy dynamically
     const policy = {
-        contract_id: "finance-raci",
-        contract_version: "0.1.0",
+        contract_id: "dynamic-policy",
+        contract_version: "1.0.0",
         roles: {
             required: ["proposer", "responsible", "accountable"]
         },
@@ -428,8 +442,16 @@ async function runValidation() {
         ]
     };
 
+    // 🔥 Add approval constraint dynamically
+    if (requireApproval) {
+        policy.constraints.push({
+            type: "approval_required",
+            threshold: threshold
+        });
+    }
+
     const action = {
-        type: actionType,
+        type: "transfer",
         amount: amount
     };
 
@@ -441,9 +463,7 @@ async function runValidation() {
 
     const res = await fetch("/validate", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
             policy,
             action,
@@ -458,9 +478,9 @@ async function runValidation() {
     div.className = "result " + (data.allowed ? "allowed" : "blocked");
 
     div.innerHTML = `
-        <div class="headline">${data.allowed ? "ALLOWED" : "BLOCKED"}</div>
-        <div><strong>${data.summary}</strong></div>
-        <div class="reason">${data.reason}</div>
+        <h2>${data.allowed ? "ALLOWED" : "BLOCKED"}</h2>
+        <p><strong>${data.summary}</strong></p>
+        <p>${data.reason}</p>
     `;
 }
 </script>
