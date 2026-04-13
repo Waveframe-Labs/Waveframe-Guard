@@ -205,22 +205,8 @@ def normalize_context(actor: str, context: Dict[str, Any] | None) -> Dict[str, A
 def run_validation(policy: Dict, action: Dict, actor: str, context: Dict | None):
     context = context or {}
 
-    # 🔥 Approval enforcement (manual layer)
-    constraints = policy.get("constraints", [])
-    for c in constraints:
-        if c.get("type") == "approval_required":
-            threshold = c.get("threshold", 0)
-            amount = action.get("amount", 0)
-
-            if amount > threshold and not context.get("approved_by"):
-                return {
-                    "allowed": False,
-                    "reason": "Blocked: approval required for this transaction amount",
-                    "summary": summarize_action(action),
-                }
-
     try:
-        # 🔥 PRE-CHECK (NEW)
+        # 1️⃣ Role enforcement FIRST
         valid, error = enforce_required_roles(policy, context)
         if not valid:
             return {
@@ -228,6 +214,20 @@ def run_validation(policy: Dict, action: Dict, actor: str, context: Dict | None)
                 "reason": error,
                 "summary": summarize_action(action),
             }
+
+        # 2️⃣ Approval enforcement SECOND
+        constraints = policy.get("constraints", [])
+        for c in constraints:
+            if c.get("type") == "approval_required":
+                threshold = c.get("threshold", 0)
+                amount = action.get("amount", 0)
+
+                if amount > threshold and not context.get("approved_by"):
+                    return {
+                        "allowed": False,
+                        "reason": f"Blocked: approval required for transfers above ${threshold:,.0f}",
+                        "summary": summarize_action(action),
+                    }
 
         # --- Compile policy ---
         with tempfile.NamedTemporaryFile(delete=False, suffix=".json", mode="w", encoding="utf-8") as policy_file:
@@ -295,11 +295,9 @@ async def receive_log(request: Request):
     """The Telemetry Endpoint: Catches live execution logs from installed SDKs."""
     data = await request.json()
     
-    # Print the incoming log to the server terminal so you can see it working
     print(f"\n🚨 [TELEMETRY CAUGHT] Agent: '{data.get('actor')}' | Allowed: {data.get('allowed')}")
     print(f"   Reason: {data.get('reason')}\n")
     
-    # In the future, this is where you write the data to your Postgres/SQLite database (store.py)
     return JSONResponse({"status": "logged"})
 
 
@@ -335,6 +333,8 @@ def ui():
             border: 1px solid #333;
             border-radius: 6px;
         }
+        
+        input::placeholder { color: #555; }
 
         button {
             margin-top: 20px;
@@ -383,17 +383,17 @@ def ui():
 
 <div class="form-group">
     <label>Responsible</label>
-    <input id="responsible" />
+    <input id="responsible" placeholder="Required (e.g., system-admin)" />
 </div>
 
 <div class="form-group">
     <label>Accountable</label>
-    <input id="accountable" />
+    <input id="accountable" placeholder="Required (e.g., finance-vp)" />
 </div>
 
 <div class="form-group">
     <label>Approved By</label>
-    <input id="approved_by" />
+    <input id="approved_by" placeholder="Optional unless threshold met" />
 </div>
 
 <hr>
@@ -412,7 +412,7 @@ def ui():
     <input id="approvalThreshold" type="number" value="0" />
 </div>
 
-<button onclick="runValidation()">Evaluate Action</button>
+<button onclick="runValidation()">Try Action</button>
 
 <div id="output"></div>
 
