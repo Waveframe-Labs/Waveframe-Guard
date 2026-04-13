@@ -287,76 +287,151 @@ def ui():
 <head>
     <title>Waveframe Guard</title>
     <style>
-        body { font-family: Arial; background: #0f1115; color: white; padding: 40px; }
-        textarea { width: 100%; height: 250px; background: #1a1d24; color: white; border: 1px solid #333; padding: 10px; }
-        input { width: 100%; padding: 10px; background: #1a1d24; color: white; border: 1px solid #333; }
-        .container { display: flex; gap: 30px; }
-        .section { flex: 1; }
-        button { margin-top: 20px; padding: 12px; background: orange; border: none; font-weight: bold; cursor: pointer; }
-        .result { margin-top: 20px; padding: 20px; border-radius: 8px; }
-        .blocked { background: rgba(255,100,0,0.2); border: 1px solid orange; }
-        .allowed { background: rgba(0,200,100,0.2); border: 1px solid green; }
-        .context { margin-top: 30px; }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #0f1115;
+            color: white;
+            padding: 40px;
+            max-width: 900px;
+            margin: auto;
+        }
+
+        h1 {
+            margin-bottom: 8px;
+        }
+
+        p.sub {
+            color: #b8c0cc;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: #b8c0cc;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            background: #1a1d24;
+            color: white;
+            border: 1px solid #333;
+            border-radius: 6px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 14px;
+            width: 100%;
+            background: orange;
+            border: none;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .result {
+            margin-top: 30px;
+            padding: 24px;
+            border-radius: 10px;
+        }
+
+        .blocked {
+            background: rgba(255,100,0,0.15);
+            border: 1px solid orange;
+        }
+
+        .allowed {
+            background: rgba(0,200,100,0.15);
+            border: 1px solid #22c55e;
+        }
+
+        .headline {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .reason {
+            margin-top: 10px;
+            color: #d1d5db;
+        }
     </style>
 </head>
+
 <body>
 
 <h1>Waveframe Guard</h1>
-<p>Validate AI actions before they execute.</p>
+<p class="sub">Stop unsafe AI actions before they execute.</p>
 
-<div class="container">
-    <div class="section">
-        <h3>Policy</h3>
-        <textarea id="policy">
-{
-  "contract_id": "finance-raci",
-  "contract_version": "0.1.0",
-  "roles": {
-    "required": ["proposer", "responsible", "accountable"]
-  },
-  "constraints": [
-    {
-      "type": "separation_of_duties",
-      "roles": ["responsible", "accountable"]
-    }
-  ]
-}
-        </textarea>
-    </div>
-
-    <div class="section">
-        <h3>Action</h3>
-        <textarea id="action">
-{ "type": "transfer", "amount": 5000 }
-        </textarea>
-    </div>
+<div class="form-group">
+    <label>Action</label>
+    <select id="actionType">
+        <option value="transfer">Transfer Funds</option>
+    </select>
 </div>
 
-<div class="context">
-    <h3>Governance Context (who is involved)</h3>
-
-    <label>Responsible</label>
-    <input id="responsible" placeholder="e.g. ops-manager-1" />
-
-    <label style="margin-top:10px;">Accountable</label>
-    <input id="accountable" placeholder="e.g. finance-director-1" />
-
-    <label style="margin-top:10px;">Approved By (optional)</label>
-    <input id="approved_by" placeholder="e.g. human-approver-1" />
+<div class="form-group">
+    <label>Amount ($)</label>
+    <input id="amount" type="number" value="5000" />
 </div>
 
-<button onclick="runValidation()">Validate Action</button>
+<hr style="margin:30px 0; border-color:#222;">
+
+<h3>Who is involved</h3>
+
+<div class="form-group">
+    <label>Responsible (executes the action)</label>
+    <input id="responsible" placeholder="e.g. ops-manager" />
+</div>
+
+<div class="form-group">
+    <label>Accountable (final authority)</label>
+    <input id="accountable" placeholder="e.g. finance-director" />
+</div>
+
+<div class="form-group">
+    <label>Approved By (optional)</label>
+    <input id="approved_by" placeholder="e.g. human-approver" />
+</div>
+
+<button onclick="runValidation()">Evaluate Action</button>
 
 <div id="output"></div>
 
 <script>
 async function runValidation() {
-    const policy = JSON.parse(document.getElementById("policy").value);
-    const action = JSON.parse(document.getElementById("action").value);
+    const actionType = document.getElementById("actionType").value;
+    const amount = parseFloat(document.getElementById("amount").value);
 
     const responsible = document.getElementById("responsible").value;
     const accountable = document.getElementById("accountable").value;
     const approved_by = document.getElementById("approved_by").value;
+
+    // 🔥 Backend still expects structured data → we build it silently
+    const policy = {
+        contract_id: "finance-raci",
+        contract_version: "0.1.0",
+        roles: {
+            required: ["proposer", "responsible", "accountable"]
+        },
+        constraints: [
+            {
+                type: "separation_of_duties",
+                roles: ["responsible", "accountable"]
+            }
+        ]
+    };
+
+    const action = {
+        type: actionType,
+        amount: amount
+    };
 
     const context = {};
 
@@ -366,7 +441,9 @@ async function runValidation() {
 
     const res = await fetch("/validate", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
+        headers: {
+            "Content-Type": "application/json"
+        },
         body: JSON.stringify({
             policy,
             action,
@@ -381,9 +458,9 @@ async function runValidation() {
     div.className = "result " + (data.allowed ? "allowed" : "blocked");
 
     div.innerHTML = `
-        <h2>${data.allowed ? "ALLOWED" : "BLOCKED"}</h2>
-        <p><strong>${data.summary}</strong></p>
-        <p>${data.reason}</p>
+        <div class="headline">${data.allowed ? "ALLOWED" : "BLOCKED"}</div>
+        <div><strong>${data.summary}</strong></div>
+        <div class="reason">${data.reason}</div>
     `;
 }
 </script>
