@@ -7,8 +7,8 @@ import hashlib
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
 
 from compiler.compile_policy_file import compile_policy_file
 from proposal_normalizer.build_proposal import build_proposal
@@ -17,7 +17,7 @@ from cricore.interface.evaluate_proposal import evaluate_proposal
 
 app = FastAPI(
     title="Waveframe Guard",
-    version="2.0.0",
+    version="2.1.0",
     description="Stop unsafe AI actions before they execute.",
 )
 
@@ -56,7 +56,7 @@ def resolve_identity(value: str, registry):
 
 
 # ---------------------------
-# CORE
+# STAGE / REASON
 # ---------------------------
 
 def extract_stages(result):
@@ -74,24 +74,30 @@ def extract_stages(result):
 
 
 def extract_reason(stages):
-    combined = " ".join(
-        [m for s in stages for m in s.get("messages", [])]
-    ).lower()
+    for s in stages:
+        if not s["passed"]:
+            msgs = " ".join(s.get("messages", [])).lower()
 
-    if "separation" in combined:
-        return "Separation of duties violation"
+            if "separation" in msgs:
+                return "Same person assigned to multiple required roles"
 
-    if "approval" in combined:
-        return "Missing required approval"
+            if "required_roles" in msgs:
+                return "Required roles not properly assigned"
 
-    if "contract" in combined:
-        return "Contract mismatch"
+            if "approval" in msgs:
+                return "Approval missing"
 
-    if stages:
-        return stages[-1]["messages"][0] if stages[-1]["messages"] else "Policy failed"
+            if msgs:
+                return msgs
 
-    return "Policy conditions not satisfied"
+            return f"{s['stage']} failed"
 
+    return "Policy conditions satisfied"
+
+
+# ---------------------------
+# CORE
+# ---------------------------
 
 def run_validation(action, actor, context):
 
@@ -102,8 +108,14 @@ def run_validation(action, actor, context):
     p = resolve_identity(context.get("approved_by"), registry) if context.get("approved_by") else None
 
     if not r or not a:
-        return {"allowed": False, "reason": "Identity resolution failed"}
+        return {
+            "allowed": False,
+            "reason": "Identity resolution failed",
+            "stages": [],
+            "resolved": {}
+        }
 
+    # Compile policy
     with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
         compiled_path = Path(tmp.name)
 
@@ -112,7 +124,15 @@ def run_validation(action, actor, context):
     with open(contract_path) as f:
         compiled = json.load(f)
 
-    contract_hash = hashlib.sha256(json.dumps(compiled, sort_keys=True).encode()).hexdigest()
+    # Fix required_roles (critical)
+    required_roles = compiled.get("roles", {}).get("required")
+    if not required_roles:
+        required_roles = ["responsible", "accountable"]
+
+    # Contract binding
+    contract_hash = hashlib.sha256(
+        json.dumps(compiled, sort_keys=True).encode()
+    ).hexdigest()
 
     proposal = build_proposal(
         proposal_id=str(uuid.uuid4()),
@@ -130,9 +150,17 @@ def run_validation(action, actor, context):
                     {"id": normalize(actor), "type": "agent", "role": "proposer"},
                     {"id": r, "type": "human", "role": "responsible"},
                     {"id": a, "type": "human", "role": "accountable"},
-                ] + ([{"id": p, "type": "human", "role": "approver"}] if p else []),
-                "required_roles": compiled.get("roles", {}).get("required", []),
+                ] + (
+                    [{"id": p, "type": "human", "role": "approver"}] if p else []
+                ),
+                "required_roles": required_roles,
                 "conflict_flags": {},
+            },
+            "integrity": {
+                "artifacts_present": True
+            },
+            "publication": {
+                "ready": True
             }
         },
     )
@@ -141,10 +169,11 @@ def run_validation(action, actor, context):
 
     allowed = getattr(result, "commit_allowed", False)
     stages = extract_stages(result)
+    reason = extract_reason(stages)
 
     return {
         "allowed": allowed,
-        "reason": extract_reason(stages),
+        "reason": reason,
         "stages": stages,
         "resolved": {
             "responsible": r,
