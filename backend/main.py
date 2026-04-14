@@ -287,3 +287,27 @@ async def validate(request: Request):
         raise HTTPException(status_code=400, detail=f"Missing field: {e}")
 
     return JSONResponse(run_validation(policy, action, actor, context))
+
+# ----------
+# IDENTITES
+# ----------
+
+@app.get("/identities")
+def get_identities():
+    try:
+        registry = load_identity_registry()
+        identities = registry.get("identities", {})
+
+        result = []
+
+        for identity in identities.values():
+            result.append({
+                "id": identity["canonical_id"],
+                "name": identity.get("display_name", identity["canonical_id"]),
+                "type": identity.get("type", "unknown")
+            })
+
+        return {"identities": result}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
