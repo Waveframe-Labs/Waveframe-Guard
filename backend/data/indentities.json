@@ -1,0 +1,35 @@
+{
+  "identities": {
+    "user-2": {
+      "canonical_id": "user-2",
+      "display_name": "User 2",
+      "type": "human",
+      "aliases": ["user-2", "u2", "user2", "user_2"]
+    },
+    "user-3": {
+      "canonical_id": "user-3",
+      "display_name": "User 3",
+      "type": "human",
+      "aliases": ["user-3", "u3", "user3"]
+    },
+    "approver-1": {
+      "canonical_id": "approver-1",
+      "display_name": "Approver 1",
+      "type": "human",
+      "aliases": ["approver-1", "approver1", "ap1"]
+    }
+  },
+  "positions": {
+    "finance-director": {
+      "name": "Finance Director"
+    },
+    "ops-manager": {
+      "name": "Operations Manager"
+    }
+  },
+  "assignments": {
+    "user-2": ["ops-manager"],
+    "user-3": ["finance-director"],
+    "approver-1": ["finance-director"]
+  }
+}
