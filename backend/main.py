@@ -17,7 +17,7 @@ from cricore.interface.evaluate_proposal import evaluate_proposal
 
 app = FastAPI(
     title="Waveframe Guard",
-    version="1.2.2",
+    version="1.2.3",
 )
 
 
@@ -88,14 +88,14 @@ def interpret_reason(result: Any) -> str:
     messages = extract_stage_messages(result)
     combined = " ".join(messages).lower()
 
-    if "separation_of_duties" in combined:
-        return "Blocked: same individual assigned to conflicting roles"
+    if "separation_of_duties" in combined or "conflict" in combined:
+        return "Blocked: same individual assigned to multiple required roles"
 
     if "approval" in combined:
         return "Blocked: approval required but not provided"
 
-    if "required role" in combined or "required roles" in combined:
-        return "Blocked: required governance roles missing"
+    if "required role" in combined:
+        return "Blocked: required roles not properly assigned"
 
     return "Blocked: policy requirements were not satisfied"
 
@@ -147,40 +147,45 @@ def enforce_required_roles(policy: Dict[str, Any], context: Dict[str, Any]) -> t
     return True, None
 
 
+def detect_identity_conflict(context: Dict[str, Any]) -> bool:
+    ids = []
+
+    for role in ["responsible", "accountable"]:
+        value = context.get(role, "").strip()
+        if value:
+            ids.append(normalize_id(value))
+
+    return len(ids) != len(set(ids))
+
+
 def normalize_context(actor: str, context: Dict[str, Any], policy: Dict[str, Any]) -> Dict[str, Any]:
     actors = [{"id": normalize_id(actor), "type": "agent", "role": "proposer"}]
 
-    responsible = context.get("responsible", "").strip()
-    accountable = context.get("accountable", "").strip()
-    approved_by = context.get("approved_by", "").strip()
-
-    if responsible:
+    if context.get("responsible"):
         actors.append({
-            "id": normalize_id(responsible),
+            "id": normalize_id(context["responsible"]),
             "type": "human",
-            "role": "responsible",
+            "role": "responsible"
         })
 
-    if accountable:
+    if context.get("accountable"):
         actors.append({
-            "id": normalize_id(accountable),
+            "id": normalize_id(context["accountable"]),
             "type": "human",
-            "role": "accountable",
+            "role": "accountable"
         })
 
-    if approved_by:
+    if context.get("approved_by"):
         actors.append({
-            "id": normalize_id(approved_by),
+            "id": normalize_id(context["approved_by"]),
             "type": "human",
-            "role": "approver",
+            "role": "approver"
         })
-
-    required_roles = policy.get("roles", {}).get("required", [])
 
     return {
         "identities": {
             "actors": actors,
-            "required_roles": required_roles,
+            "required_roles": policy.get("roles", {}).get("required", []),
             "conflict_flags": {},
         },
         "integrity": {},
@@ -192,7 +197,17 @@ def normalize_context(actor: str, context: Dict[str, Any], policy: Dict[str, Any
 # Core validation pipeline
 # ---------------------------
 
-def run_validation(policy: Dict[str, Any], action: Dict[str, Any], actor: str, context: Dict[str, Any]):
+def run_validation(policy: Dict, action: Dict, actor: str, context: Dict):
+    
+    # 🔴 Identity conflict check (fast fail, user-visible)
+    if detect_identity_conflict(context):
+        return {
+            "allowed": False,
+            "reason": "Blocked: same individual assigned to multiple required roles",
+            "summary": summarize_action(action),
+        }
+
+    # Required roles check
     valid, error = enforce_required_roles(policy, context)
     if not valid:
         return {
@@ -201,20 +216,18 @@ def run_validation(policy: Dict[str, Any], action: Dict[str, Any], actor: str, c
             "summary": summarize_action(action),
         }
 
-    for constraint in policy.get("constraints", []):
-        if constraint.get("type") == "approval_required":
-            threshold = constraint.get("threshold", 0)
-            amount = action.get("amount", 0)
-            approved_by = context.get("approved_by", "").strip()
-
-            if amount > threshold and not approved_by:
+    # Approval constraint
+    for c in policy.get("constraints", []):
+        if c.get("type") == "approval_required":
+            if action["amount"] > c["threshold"] and not context.get("approved_by"):
                 return {
                     "allowed": False,
-                    "reason": f"Blocked: approval required above ${threshold:,.0f}",
+                    "reason": f"Blocked: approval required above ${c['threshold']:,.0f}",
                     "summary": summarize_action(action),
                 }
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".json", mode="w", encoding="utf-8") as f:
+    # Compile policy
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".json", mode="w") as f:
         json.dump(policy, f)
         policy_path = Path(f.name)
 
@@ -223,7 +236,7 @@ def run_validation(policy: Dict[str, Any], action: Dict[str, Any], actor: str, c
 
     contract_path = compile_policy_file(policy_path, output_path)
 
-    with open(contract_path, "r", encoding="utf-8") as f:
+    with open(contract_path) as f:
         compiled = json.load(f)
 
     contract = build_contract_binding(compiled)
@@ -254,16 +267,14 @@ def run_validation(policy: Dict[str, Any], action: Dict[str, Any], actor: str, c
 @app.post("/validate")
 async def validate(request: Request):
     body = await request.json()
-
-    try:
-        policy = body["policy"]
-        action = body["action"]
-        actor = body.get("actor", "ai-agent")
-        context = body.get("context", {})
-    except KeyError as e:
-        raise HTTPException(status_code=400, detail=f"Missing field: {e}")
-
-    return JSONResponse(run_validation(policy, action, actor, context))
+    return JSONResponse(
+        run_validation(
+            body["policy"],
+            body["action"],
+            body.get("actor", "ai-agent"),
+            body.get("context", {}),
+        )
+    )
 
 
 # ---------------------------
@@ -315,17 +326,13 @@ button { padding:14px; width:100%; background:orange; border:none; font-weight:b
 <div id="out"></div>
 
 <script>
-function updateRules() {
+function updateRules(){
     const threshold = Number(document.getElementById("threshold").value);
     const requireApproval = document.getElementById("requireApproval").checked;
 
-    let approvalRule = "";
-
-    if (requireApproval) {
-        approvalRule = `<li>Approval required above $${threshold.toLocaleString()}</li>`;
-    } else {
-        approvalRule = `<li>No approval required</li>`;
-    }
+    let approvalRule = requireApproval
+        ? `<li>Approval required above $${threshold.toLocaleString()}</li>`
+        : `<li>No approval required</li>`;
 
     document.getElementById("rules").innerHTML = `
         <strong>Enforced Rules</strong>
@@ -339,39 +346,38 @@ function updateRules() {
 
 updateRules();
 
-async function run() {
+async function run(){
     updateRules();
 
     const constraints = [
-        { type: "separation_of_duties", roles: ["responsible", "accountable"] }
+        {type:"separation_of_duties",roles:["responsible","accountable"]}
     ];
 
     if (document.getElementById("requireApproval").checked) {
         constraints.push({
-            type: "approval_required",
-            threshold: Number(document.getElementById("threshold").value)
+            type:"approval_required",
+            threshold:Number(document.getElementById("threshold").value)
         });
     }
 
-    const res = await fetch("/validate", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-            policy: {
-                contract_id: "dynamic",
-                contract_version: "1.0.0",
-                roles: { required: ["proposer", "responsible", "accountable"] },
+    const res = await fetch("/validate",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+            policy:{
+                contract_id:"dynamic",
+                contract_version:"1.0.0",
+                roles:{required:["proposer","responsible","accountable"]},
                 constraints: constraints
             },
-            action: {
-                type: document.getElementById("actionType").value,
-                amount: Number(document.getElementById("amount").value)
+            action:{
+                type:document.getElementById("actionType").value,
+                amount:Number(document.getElementById("amount").value)
             },
-            actor: "ai-agent",
-            context: {
-                responsible: document.getElementById("responsible").value,
-                accountable: document.getElementById("accountable").value,
-                approved_by: document.getElementById("approved_by").value
+            context:{
+                responsible:document.getElementById("responsible").value,
+                accountable:document.getElementById("accountable").value,
+                approved_by:document.getElementById("approved_by").value
             }
         })
     });
@@ -379,8 +385,8 @@ async function run() {
     const d = await res.json();
 
     document.getElementById("out").innerHTML = `
-        <div class="box ${d.allowed ? "allowed" : "blocked"}">
-            <h2>${d.allowed ? "ALLOWED" : "BLOCKED"}</h2>
+        <div class="box ${d.allowed ? "allowed":"blocked"}">
+            <h2>${d.allowed ? "ALLOWED":"BLOCKED"}</h2>
             <p><strong>${d.summary}</strong></p>
             <p>${d.reason}</p>
             <p style="opacity:0.6;">Decision made at execution boundary</p>
