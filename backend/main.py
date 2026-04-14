@@ -17,7 +17,7 @@ from cricore.interface.evaluate_proposal import evaluate_proposal
 
 app = FastAPI(
     title="Waveframe Guard",
-    version="1.2.0",
+    version="1.2.1",
 )
 
 
@@ -52,17 +52,13 @@ def normalize_id(value: str) -> str:
 # ---------------------------
 
 def summarize_action(action: Dict[str, Any]) -> str:
-    action_type = action.get("type")
+    if action["type"] == "transfer":
+        return f"AI attempted to transfer ${action['amount']:,.0f}"
 
-    if action_type == "transfer":
-        amount = action.get("amount")
-        return f"AI attempted to transfer ${amount:,.0f}"
+    if action["type"] == "reallocate_budget":
+        return f"AI attempted to reallocate ${action['amount']:,.0f}"
 
-    if action_type == "reallocate_budget":
-        amount = action.get("amount")
-        return f"AI attempted to reallocate ${amount:,.0f}"
-
-    return f"AI attempted action: {action_type or 'unknown'}"
+    return "AI attempted action"
 
 
 def build_contract_binding(compiled_contract: Dict[str, Any]) -> Dict[str, Any]:
@@ -270,8 +266,8 @@ button { padding:14px; width:100%; background:orange; border:none; font-weight:b
 <input id="approved_by" placeholder="Approver">
 
 <h3>Policy</h3>
-<label><input type="checkbox" id="requireApproval" checked> Require approval</label>
-<input id="threshold" type="number" value="5000">
+<label><input type="checkbox" id="requireApproval" checked onchange="updateRules()"> Require approval</label>
+<input id="threshold" type="number" value="5000" onchange="updateRules()">
 
 <div id="rules" style="margin-top:15px;"></div>
 
@@ -281,20 +277,42 @@ button { padding:14px; width:100%; background:orange; border:none; font-weight:b
 
 <script>
 function updateRules(){
-    const threshold = document.getElementById("threshold").value;
+    const threshold = Number(document.getElementById("threshold").value);
+    const requireApproval = document.getElementById("requireApproval").checked;
+
+    let approvalRule = "";
+
+    if (requireApproval) {
+        approvalRule = `<li>Approval required above $${threshold.toLocaleString()}</li>`;
+    } else {
+        approvalRule = `<li>No approval required</li>`;
+    }
+
     document.getElementById("rules").innerHTML = `
         <strong>Enforced Rules</strong>
         <ul>
             <li>Roles must be assigned</li>
             <li>Responsible and Accountable must be different</li>
-            <li>Approval required above $${Number(threshold).toLocaleString()}</li>
+            ${approvalRule}
         </ul>
     `;
 }
+
 updateRules();
 
 async function run(){
     updateRules();
+
+    const constraints = [
+        {type:"separation_of_duties",roles:["responsible","accountable"]}
+    ];
+
+    if (document.getElementById("requireApproval").checked) {
+        constraints.push({
+            type:"approval_required",
+            threshold:Number(document.getElementById("threshold").value)
+        });
+    }
 
     const res = await fetch("/validate",{
         method:"POST",
@@ -304,10 +322,7 @@ async function run(){
                 contract_id:"dynamic",
                 contract_version:"1.0",
                 roles:{required:["proposer","responsible","accountable"]},
-                constraints:[
-                    {type:"separation_of_duties",roles:["responsible","accountable"]},
-                    {type:"approval_required",threshold:Number(document.getElementById("threshold").value)}
-                ]
+                constraints: constraints
             },
             action:{
                 type:document.getElementById("actionType").value,
