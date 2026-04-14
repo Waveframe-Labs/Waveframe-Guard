@@ -17,181 +17,120 @@ from cricore.interface.evaluate_proposal import evaluate_proposal
 
 app = FastAPI(
     title="Waveframe Guard",
-    version="1.4.0",
+    version="2.0.0",
     description="Stop unsafe AI actions before they execute.",
 )
 
 # ---------------------------
-# Paths
+# PATHS
 # ---------------------------
 
-BASE_DIR = Path(__file__).resolve().parent.parent  # <-- IMPORTANT FIX
+BASE_DIR = Path(__file__).resolve().parent.parent
 POLICY_PATH = BASE_DIR / "finance-policy.json"
-
 IDENTITY_PATH = Path(__file__).resolve().parent / "data" / "identities.json"
 
 
 # ---------------------------
-# Identity Resolver
+# IDENTITY
 # ---------------------------
 
-def load_identity_registry() -> Dict[str, Any]:
-    if not IDENTITY_PATH.exists():
-        raise FileNotFoundError(f"Identity registry not found: {IDENTITY_PATH}")
-
-    with open(IDENTITY_PATH, "r", encoding="utf-8") as f:
+def load_identity_registry():
+    with open(IDENTITY_PATH) as f:
         return json.load(f)
 
 
-def normalize_lookup_key(value: Optional[str]) -> str:
-    if not value:
+def normalize(v: Optional[str]) -> str:
+    if not v:
         return ""
-    return value.strip().lower().replace("_", "-")
+    return v.strip().lower().replace("_", "-")
 
 
-def resolve_identity(raw_value: Optional[str], registry: Dict[str, Any]) -> Dict[str, Any]:
-    lookup = normalize_lookup_key(raw_value)
+def resolve_identity(value: str, registry):
+    key = normalize(value)
 
-    identities = registry.get("identities", {})
+    for k, v in registry["identities"].items():
+        if key == k or key in [normalize(a) for a in v.get("aliases", [])]:
+            return v["canonical_id"]
 
-    if lookup in identities:
-        record = identities[lookup]
-        return {"found": True, "canonical_id": record["canonical_id"]}
-
-    for record in identities.values():
-        if lookup in [normalize_lookup_key(a) for a in record.get("aliases", [])]:
-            return {"found": True, "canonical_id": record["canonical_id"]}
-
-    return {"found": False}
+    return None
 
 
-def resolve_context(context: Dict[str, Any]):
+# ---------------------------
+# CORE
+# ---------------------------
+
+def extract_stages(result):
+    stages = getattr(result, "stage_results", [])
+    out = []
+
+    for s in stages:
+        out.append({
+            "stage": getattr(s, "stage_id", "unknown"),
+            "passed": getattr(s, "passed", False),
+            "messages": getattr(s, "messages", []),
+        })
+
+    return out
+
+
+def extract_reason(stages):
+    combined = " ".join(
+        [m for s in stages for m in s.get("messages", [])]
+    ).lower()
+
+    if "separation" in combined:
+        return "Separation of duties violation"
+
+    if "approval" in combined:
+        return "Missing required approval"
+
+    if "contract" in combined:
+        return "Contract mismatch"
+
+    if stages:
+        return stages[-1]["messages"][0] if stages[-1]["messages"] else "Policy failed"
+
+    return "Policy conditions not satisfied"
+
+
+def run_validation(action, actor, context):
+
     registry = load_identity_registry()
 
     r = resolve_identity(context.get("responsible"), registry)
     a = resolve_identity(context.get("accountable"), registry)
+    p = resolve_identity(context.get("approved_by"), registry) if context.get("approved_by") else None
 
-    if not r["found"]:
-        return False, None, "Blocked: responsible not found"
-    if not a["found"]:
-        return False, None, "Blocked: accountable not found"
+    if not r or not a:
+        return {"allowed": False, "reason": "Identity resolution failed"}
 
-    ap = None
-    if context.get("approved_by"):
-        ap = resolve_identity(context["approved_by"], registry)
-        if not ap["found"]:
-            return False, None, "Blocked: approver not found"
-
-    return True, {
-        "responsible": r["canonical_id"],
-        "accountable": a["canonical_id"],
-        "approved_by": ap["canonical_id"] if ap else None,
-    }, None
-
-
-# ---------------------------
-# Helpers
-# ---------------------------
-
-def summarize(action: Dict[str, Any]) -> str:
-    return f"AI attempted to transfer ${action.get('amount', 0):,.0f}"
-
-
-def normalize_mutation(action: Dict[str, Any]) -> Dict[str, Any]:
-    return {"domain": "finance", "resource": "funds", "action": "transfer"}
-
-
-def extract_stage_messages(result: Any) -> List[str]:
-    stage_results = getattr(result, "stage_results", None)
-    if not stage_results:
-        return []
-
-    messages: List[str] = []
-    for stage in stage_results:
-        if getattr(stage, "messages", None):
-            messages.extend([str(m) for m in stage.messages])
-
-    return messages
-
-
-def interpret_reason(result: Any) -> str:
-    messages = extract_stage_messages(result)
-    combined = " ".join(messages).lower()
-
-    if "separation_of_duties" in combined:
-        return "Blocked: same individual assigned to multiple required roles"
-
-    if "approval" in combined:
-        return "Blocked: approval required but not provided"
-
-    if "required role" in combined:
-        return "Blocked: required roles not properly assigned"
-
-    # fallback — but still useful
-    if messages:
-        return "Blocked: " + messages[0]
-
-    return "Blocked: policy conditions not satisfied"
-
-
-def extract_result(result: Any):
-    allowed = getattr(result, "commit_allowed", False)
-
-    if allowed:
-        return True, "Allowed: policy conditions satisfied"
-
-    return False, interpret_reason(result)
-
-
-def build_contract_binding(compiled: Dict[str, Any]) -> Dict[str, Any]:
-    h = hashlib.sha256(json.dumps(compiled, sort_keys=True).encode()).hexdigest()
-
-    return {
-        "id": compiled["contract_id"],
-        "version": compiled["contract_version"],
-        "hash": h,
-    }
-
-
-# ---------------------------
-# CORE PIPELINE (FIXED)
-# ---------------------------
-
-def run_validation(action: Dict, actor: str, context: Dict):
-
-    ok, resolved, error = resolve_context(context)
-
-    if not ok:
-        return {"allowed": False, "reason": error, "summary": summarize(action)}
-
-    # 🔥 LOAD REAL POLICY FILE (THIS FIXES YOUR BUG)
-    with open(POLICY_PATH, "r") as f:
-        policy = json.load(f)
-
-    # Compile
     with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
-        output_path = Path(tmp.name)
+        compiled_path = Path(tmp.name)
 
-    contract_path = compile_policy_file(POLICY_PATH, output_path)
+    contract_path = compile_policy_file(POLICY_PATH, compiled_path)
 
     with open(contract_path) as f:
         compiled = json.load(f)
 
-    contract = build_contract_binding(compiled)
+    contract_hash = hashlib.sha256(json.dumps(compiled, sort_keys=True).encode()).hexdigest()
 
     proposal = build_proposal(
         proposal_id=str(uuid.uuid4()),
-        actor={"id": normalize_lookup_key(actor), "type": "agent"},
+        actor={"id": normalize(actor), "type": "agent"},
         artifact_paths=[],
-        mutation=normalize_mutation(action),
-        contract=contract,
+        mutation={"domain": "finance", "resource": "funds", "action": "transfer"},
+        contract={
+            "id": compiled["contract_id"],
+            "version": compiled["contract_version"],
+            "hash": contract_hash,
+        },
         run_context={
             "identities": {
                 "actors": [
-                    {"id": normalize_lookup_key(actor), "type": "agent", "role": "proposer"},
-                    {"id": resolved["responsible"], "type": "human", "role": "responsible"},
-                    {"id": resolved["accountable"], "type": "human", "role": "accountable"},
-                ],
+                    {"id": normalize(actor), "type": "agent", "role": "proposer"},
+                    {"id": r, "type": "human", "role": "responsible"},
+                    {"id": a, "type": "human", "role": "accountable"},
+                ] + ([{"id": p, "type": "human", "role": "approver"}] if p else []),
                 "required_roles": compiled.get("roles", {}).get("required", []),
                 "conflict_flags": {},
             }
@@ -199,12 +138,19 @@ def run_validation(action: Dict, actor: str, context: Dict):
     )
 
     result = evaluate_proposal(proposal, compiled)
-    allowed, reason = extract_result(result)
+
+    allowed = getattr(result, "commit_allowed", False)
+    stages = extract_stages(result)
 
     return {
         "allowed": allowed,
-        "reason": reason,
-        "summary": summarize(action),
+        "reason": extract_reason(stages),
+        "stages": stages,
+        "resolved": {
+            "responsible": r,
+            "accountable": a,
+            "approver": p,
+        },
     }
 
 
@@ -216,12 +162,10 @@ def run_validation(action: Dict, actor: str, context: Dict):
 async def validate(request: Request):
     body = await request.json()
 
-    return JSONResponse(
-        run_validation(
-            action=body["action"],
-            actor=body.get("actor", "ai-agent"),
-            context=body.get("context", {}),
-        )
+    return run_validation(
+        action=body.get("action", {}),
+        actor="ai-agent",
+        context=body.get("context", {}),
     )
 
 
@@ -231,10 +175,7 @@ def identities():
 
     return {
         "identities": [
-            {
-                "id": v["canonical_id"],
-                "name": v.get("display_name", v["canonical_id"]),
-            }
+            {"id": v["canonical_id"], "name": v.get("display_name", v["canonical_id"])}
             for v in registry["identities"].values()
         ]
     }
@@ -247,63 +188,129 @@ def identities():
 @app.get("/", response_class=HTMLResponse)
 def ui():
     return """
-    <html>
-    <body style="background:#111;color:white;font-family:Arial;padding:40px;">
+<html>
+<head>
+<title>Waveframe Guard</title>
+<style>
+body { background:#0e0e0e; color:white; font-family:Arial; padding:20px; }
+.container { display:flex; gap:20px; }
+.left { flex:3; }
+.right { flex:1; background:#1a1a1a; padding:10px; }
+.section { margin-bottom:20px; padding:15px; background:#151515; }
+select, button { width:100%; padding:10px; margin-top:5px; }
+button { background:orange; border:none; font-weight:bold; }
+.allowed { color:lime; font-size:20px; }
+.blocked { color:red; font-size:20px; }
+.stage { margin-top:5px; padding:5px; background:#222; }
+</style>
+</head>
 
-    <h2>Waveframe Guard</h2>
+<body>
 
-    <label>Responsible</label><br/>
-    <select id="r"></select><br/>
+<h1>Waveframe Guard</h1>
 
-    <label>Accountable</label><br/>
-    <select id="a"></select><br/>
+<div class="container">
 
-    <label>Approver</label><br/>
-    <select id="p"></select><br/><br/>
+<div class="left">
 
-    <button onclick="run()">Check</button>
+<div class="section">
+<h3>AI Action</h3>
+Transfer $1 from Marketing → Operations
+</div>
 
-    <pre id="out"></pre>
+<div class="section">
+<h3>Actors</h3>
 
-    <script>
-    async function load(){
-        const res = await fetch("/identities");
-        const data = await res.json();
+<label>Responsible</label>
+<select id="r"></select>
 
-        ["r","a","p"].forEach(id=>{
-            const el = document.getElementById(id);
-            el.innerHTML = "<option value=''>Select</option>";
-            data.identities.forEach(i=>{
-                el.innerHTML += `<option value="${i.id}">${i.name}</option>`;
-            });
+<label>Accountable</label>
+<select id="a"></select>
+
+<label>Approver</label>
+<select id="p"></select>
+
+<button onclick="run()">Evaluate</button>
+</div>
+
+<div class="section">
+<h3>Decision</h3>
+<div id="decision"></div>
+<div id="reason"></div>
+</div>
+
+<div class="section">
+<h3>Execution Stages</h3>
+<div id="stages"></div>
+</div>
+
+</div>
+
+<div class="right">
+<h3>Resolved Identities</h3>
+<div id="identitiesPanel"></div>
+</div>
+
+</div>
+
+<script>
+
+async function load() {
+    const res = await fetch("/identities");
+    const data = await res.json();
+
+    ["r","a","p"].forEach(id => {
+        const el = document.getElementById(id);
+        el.innerHTML = "<option value=''>Select</option>";
+
+        data.identities.forEach(i => {
+            el.innerHTML += `<option value="${i.id}">${i.name}</option>`;
         });
-    }
+    });
+}
 
-    async function run(){
-        const res = await fetch("/validate",{
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body: JSON.stringify({
-                action:{type:"transfer",amount:1},
-                context:{
-                    responsible: r.value,
-                    accountable: a.value,
-                    approved_by: p.value
-                }
-            })
-        });
+async function run() {
 
-        const d = await res.json();
+    const res = await fetch("/validate", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({
+            action:{type:"transfer", amount:1},
+            context:{
+                responsible: r.value,
+                accountable: a.value,
+                approved_by: p.value
+            }
+        })
+    });
 
-        out.textContent =
-            (d.allowed?"ALLOWED":"BLOCKED") +
-            "\\n" + d.summary +
-            "\\n" + d.reason;
-    }
+    const d = await res.json();
 
-    load();
-    </script>
+    document.getElementById("decision").innerHTML =
+        `<div class="${d.allowed ? "allowed" : "blocked"}">
+            ${d.allowed ? "ALLOWED" : "BLOCKED"}
+        </div>`;
 
-    </body>
-    </html>
-    """
+    document.getElementById("reason").innerText = d.reason;
+
+    document.getElementById("stages").innerHTML =
+        d.stages.map(s =>
+            `<div class="stage">
+                ${s.stage} → ${s.passed ? "PASS" : "FAIL"}
+                <br/>${(s.messages || []).join(", ")}
+            </div>`
+        ).join("");
+
+    document.getElementById("identitiesPanel").innerHTML =
+        Object.entries(d.resolved).map(([k,v]) =>
+            `<div>${k}: ${v || "None"}</div>`
+        ).join("");
+}
+
+load();
+
+</script>
+
+</body>
+</html>
+"""
