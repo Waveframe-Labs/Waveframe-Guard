@@ -1,35 +1,34 @@
 {
+  "version": "1.0.0",
   "identities": {
+    "user-1": {
+      "canonical_id": "user-1",
+      "display_name": "User 1",
+      "type": "human",
+      "aliases": ["user-1", "user1", "u1"]
+    },
     "user-2": {
       "canonical_id": "user-2",
       "display_name": "User 2",
       "type": "human",
-      "aliases": ["user-2", "u2", "user2", "user_2"]
+      "aliases": ["user-2", "user2", "u2"]
     },
-    "user-3": {
-      "canonical_id": "user-3",
-      "display_name": "User 3",
-      "type": "human",
-      "aliases": ["user-3", "u3", "user3"]
-    },
-    "approver-1": {
-      "canonical_id": "approver-1",
-      "display_name": "Approver 1",
-      "type": "human",
-      "aliases": ["approver-1", "approver1", "ap1"]
+    "ai-agent": {
+      "canonical_id": "ai-agent",
+      "display_name": "AI Agent",
+      "type": "agent",
+      "aliases": ["ai", "agent", "ai-agent"]
     }
   },
-  "positions": {
-    "finance-director": {
-      "name": "Finance Director"
+  "roles": {
+    "responsible": {
+      "description": "Executes or proposes the action"
     },
-    "ops-manager": {
-      "name": "Operations Manager"
+    "accountable": {
+      "description": "Owns the decision and outcome"
+    },
+    "approver": {
+      "description": "Provides explicit approval when required"
     }
-  },
-  "assignments": {
-    "user-2": ["ops-manager"],
-    "user-3": ["finance-director"],
-    "approver-1": ["finance-director"]
   }
 }
