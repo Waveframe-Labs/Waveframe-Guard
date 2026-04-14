@@ -17,7 +17,7 @@ from cricore.interface.evaluate_proposal import evaluate_proposal
 
 app = FastAPI(
     title="Waveframe Guard",
-    version="1.2.3",
+    version="1.2.4",
 )
 
 
@@ -130,13 +130,13 @@ def enforce_required_roles(policy: Dict[str, Any], context: Dict[str, Any]) -> t
 
     provided_roles = {"proposer"}
 
-    if context.get("responsible", "").strip():
+    if context.get("responsible"):
         provided_roles.add("responsible")
 
-    if context.get("accountable", "").strip():
+    if context.get("accountable"):
         provided_roles.add("accountable")
 
-    if context.get("approved_by", "").strip():
+    if context.get("approved_by"):
         provided_roles.add("approver")
 
     missing = [r for r in required_roles if r not in provided_roles]
@@ -151,7 +151,7 @@ def detect_identity_conflict(context: Dict[str, Any]) -> bool:
     ids = []
 
     for role in ["responsible", "accountable"]:
-        value = context.get(role, "").strip()
+        value = context.get(role)
         if value:
             ids.append(normalize_id(value))
 
@@ -198,8 +198,23 @@ def normalize_context(actor: str, context: Dict[str, Any], policy: Dict[str, Any
 # ---------------------------
 
 def run_validation(policy: Dict, action: Dict, actor: str, context: Dict):
-    
-    # 🔴 Identity conflict check (fast fail, user-visible)
+
+    # ---------------------------
+    # Normalize inputs (SAFE)
+    # ---------------------------
+    responsible = (context.get("responsible") or "").strip()
+    accountable = (context.get("accountable") or "").strip()
+    approved_by = (context.get("approved_by") or "").strip()
+
+    context = {
+        "responsible": responsible or None,
+        "accountable": accountable or None,
+        "approved_by": approved_by or None,
+    }
+
+    # ---------------------------
+    # Identity conflict check
+    # ---------------------------
     if detect_identity_conflict(context):
         return {
             "allowed": False,
@@ -207,7 +222,9 @@ def run_validation(policy: Dict, action: Dict, actor: str, context: Dict):
             "summary": summarize_action(action),
         }
 
+    # ---------------------------
     # Required roles check
+    # ---------------------------
     valid, error = enforce_required_roles(policy, context)
     if not valid:
         return {
@@ -216,17 +233,25 @@ def run_validation(policy: Dict, action: Dict, actor: str, context: Dict):
             "summary": summarize_action(action),
         }
 
-    # Approval constraint
+    # ---------------------------
+    # Approval enforcement (FIXED)
+    # ---------------------------
     for c in policy.get("constraints", []):
         if c.get("type") == "approval_required":
-            if action["amount"] > c["threshold"] and not context.get("approved_by"):
-                return {
-                    "allowed": False,
-                    "reason": f"Blocked: approval required above ${c['threshold']:,.0f}",
-                    "summary": summarize_action(action),
-                }
+            threshold = c.get("threshold", 0)
+            amount = action.get("amount", 0)
 
+            if amount > threshold:
+                if not context.get("approved_by"):
+                    return {
+                        "allowed": False,
+                        "reason": f"Blocked: approval required above ${threshold:,.0f}",
+                        "summary": summarize_action(action),
+                    }
+
+    # ---------------------------
     # Compile policy
+    # ---------------------------
     with tempfile.NamedTemporaryFile(delete=False, suffix=".json", mode="w") as f:
         json.dump(policy, f)
         policy_path = Path(f.name)
@@ -267,14 +292,16 @@ def run_validation(policy: Dict, action: Dict, actor: str, context: Dict):
 @app.post("/validate")
 async def validate(request: Request):
     body = await request.json()
-    return JSONResponse(
-        run_validation(
-            body["policy"],
-            body["action"],
-            body.get("actor", "ai-agent"),
-            body.get("context", {}),
-        )
-    )
+
+    try:
+        policy = body["policy"]
+        action = body["action"]
+        actor = body.get("actor", "ai-agent")
+        context = body.get("context", {})
+    except KeyError as e:
+        raise HTTPException(status_code=400, detail=f"Missing field: {e}")
+
+    return JSONResponse(run_validation(policy, action, actor, context))
 
 
 # ---------------------------
