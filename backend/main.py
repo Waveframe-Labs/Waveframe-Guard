@@ -17,35 +17,23 @@ from cricore.interface.evaluate_proposal import evaluate_proposal
 
 app = FastAPI(
     title="Waveframe Guard",
-    version="1.3.1",
+    version="1.4.0",
     description="Stop unsafe AI actions before they execute.",
 )
 
 # ---------------------------
-# Identity Resolver (FIXED PATH)
+# Identity Resolver
 # ---------------------------
 
 BASE_DIR = Path(__file__).resolve().parent
-
-PRIMARY_IDENTITY_PATH = BASE_DIR / "data" / "identities.json"
-FALLBACK_IDENTITY_PATH = BASE_DIR / "identities.json"
+IDENTITY_PATH = BASE_DIR / "data" / "identities.json"
 
 
 def load_identity_registry() -> Dict[str, Any]:
-    path = None
+    if not IDENTITY_PATH.exists():
+        raise FileNotFoundError(f"Identity registry not found: {IDENTITY_PATH}")
 
-    if PRIMARY_IDENTITY_PATH.exists():
-        path = PRIMARY_IDENTITY_PATH
-    elif FALLBACK_IDENTITY_PATH.exists():
-        path = FALLBACK_IDENTITY_PATH
-    else:
-        raise FileNotFoundError(
-            f"Identity registry not found. Checked:\n"
-            f"- {PRIMARY_IDENTITY_PATH}\n"
-            f"- {FALLBACK_IDENTITY_PATH}"
-        )
-
-    with open(path, "r", encoding="utf-8") as f:
+    with open(IDENTITY_PATH, "r", encoding="utf-8") as f:
         data = json.load(f)
 
     if not isinstance(data, dict):
@@ -57,68 +45,43 @@ def load_identity_registry() -> Dict[str, Any]:
 def normalize_lookup_key(value: Optional[str]) -> str:
     if not value:
         return ""
-
     return value.strip().lower().replace("_", "-")
 
 
 def resolve_identity(raw_value: Optional[str], registry: Dict[str, Any]) -> Dict[str, Any]:
     lookup = normalize_lookup_key(raw_value)
-
-    if not lookup:
-        return {"found": False, "reason": "blank identity"}
-
     identities = registry.get("identities", {})
 
-    # Direct match
     if lookup in identities:
         record = identities[lookup]
-        return {
-            "found": True,
-            "canonical_id": record["canonical_id"],
-            "record": record,
-        }
+        return {"found": True, "canonical_id": record["canonical_id"]}
 
-    # Alias match
     for record in identities.values():
-        aliases = record.get("aliases", [])
-        normalized_aliases = [normalize_lookup_key(a) for a in aliases]
+        aliases = [normalize_lookup_key(a) for a in record.get("aliases", [])]
+        if lookup in aliases:
+            return {"found": True, "canonical_id": record["canonical_id"]}
 
-        if lookup in normalized_aliases:
-            return {
-                "found": True,
-                "canonical_id": record["canonical_id"],
-                "record": record,
-            }
-
-    return {
-        "found": False,
-        "reason": f"unknown identity: {lookup}",
-    }
+    return {"found": False}
 
 
-def resolve_context_identities(context: Dict[str, Any]) -> tuple[bool, Dict[str, Any] | None, str | None]:
+def resolve_context_identities(context: Dict[str, Any]):
     registry = load_identity_registry()
 
-    responsible = resolve_identity(context.get("responsible"), registry)
-    accountable = resolve_identity(context.get("accountable"), registry)
+    r = resolve_identity(context.get("responsible"), registry)
+    a = resolve_identity(context.get("accountable"), registry)
+    ap = resolve_identity(context.get("approved_by"), registry) if context.get("approved_by") else None
 
-    if not responsible["found"]:
+    if not r["found"]:
         return False, None, "Blocked: responsible actor could not be resolved"
-
-    if not accountable["found"]:
+    if not a["found"]:
         return False, None, "Blocked: accountable actor could not be resolved"
-
-    approver = None
-    if context.get("approved_by"):
-        approver = resolve_identity(context.get("approved_by"), registry)
-
-        if not approver["found"]:
-            return False, None, "Blocked: approver actor could not be resolved"
+    if context.get("approved_by") and not ap["found"]:
+        return False, None, "Blocked: approver actor could not be resolved"
 
     return True, {
-        "responsible": responsible["canonical_id"],
-        "accountable": accountable["canonical_id"],
-        "approved_by": approver["canonical_id"] if approver else None,
+        "responsible": r["canonical_id"],
+        "accountable": a["canonical_id"],
+        "approved_by": ap["canonical_id"] if ap else None,
     }, None
 
 
@@ -129,71 +92,27 @@ def resolve_context_identities(context: Dict[str, Any]) -> tuple[bool, Dict[str,
 def summarize_action(action: Dict[str, Any]) -> str:
     if action["type"] == "transfer":
         return f"AI attempted to transfer ${action['amount']:,.0f}"
-
-    if action["type"] == "reallocate_budget":
-        return f"AI attempted to reallocate ${action['amount']:,.0f}"
-
     return "AI attempted action"
 
 
 def build_contract_binding(compiled_contract: Dict[str, Any]) -> Dict[str, Any]:
     contract_json = json.dumps(compiled_contract, sort_keys=True).encode()
-    contract_hash = hashlib.sha256(contract_json).hexdigest()
-
     return {
         "id": compiled_contract.get("contract_id", "user-policy"),
         "version": compiled_contract.get("contract_version", "1.0.0"),
-        "hash": contract_hash,
+        "hash": hashlib.sha256(contract_json).hexdigest(),
     }
 
 
-def extract_stage_messages(result: Any) -> List[str]:
-    stage_results = getattr(result, "stage_results", None)
-    if not stage_results:
-        return []
-
-    messages: List[str] = []
-    for stage in stage_results:
-        if getattr(stage, "messages", None):
-            messages.extend([str(m) for m in stage.messages])
-    return messages
-
-
-def interpret_reason(result: Any) -> str:
-    messages = extract_stage_messages(result)
-    combined = " ".join(messages).lower()
-
-    if "separation_of_duties" in combined:
-        return "Blocked: same individual assigned to multiple required roles"
-
-    if "approval" in combined:
-        return "Blocked: approval required but not provided"
-
-    if "required role" in combined:
-        return "Blocked: required roles not properly assigned"
-
-    return "Blocked: policy requirements were not satisfied"
-
-
-def extract_result(result: Any) -> tuple[bool, str]:
-    allowed = getattr(result, "allowed", None)
-    if allowed is None:
-        allowed = getattr(result, "commit_allowed", False)
-
+def extract_result(result: Any):
+    allowed = getattr(result, "commit_allowed", False)
     if allowed:
-        return True, "Allowed: policy conditions satisfied"
-
-    return False, interpret_reason(result)
+        return True, "Allowed"
+    return False, "Blocked"
 
 
 def normalize_mutation(action: Dict[str, Any]) -> Dict[str, Any]:
-    if action["type"] == "transfer":
-        return {"domain": "finance", "resource": "funds", "action": "transfer"}
-
-    if action["type"] == "reallocate_budget":
-        return {"domain": "finance", "resource": "budget", "action": "reallocate"}
-
-    return {"domain": "general", "resource": "unknown", "action": "unknown"}
+    return {"domain": "finance", "resource": "funds", "action": "transfer"}
 
 
 # ---------------------------
@@ -201,73 +120,44 @@ def normalize_mutation(action: Dict[str, Any]) -> Dict[str, Any]:
 # ---------------------------
 
 def run_validation(policy: Dict, action: Dict, actor: str, context: Dict):
-    context = context or {}
+    ok, resolved, error = resolve_context_identities(context)
 
-    try:
-        ok, resolved_context, error = resolve_context_identities(context)
+    if not ok:
+        return {"allowed": False, "reason": error, "summary": summarize_action(action)}
 
-        if not ok:
-            return {
-                "allowed": False,
-                "reason": error,
-                "summary": summarize_action(action),
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".json", mode="w") as f:
+        json.dump(policy, f)
+        policy_path = Path(f.name)
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
+        output_path = Path(tmp.name)
+
+    contract_path = compile_policy_file(policy_path, output_path)
+
+    with open(contract_path) as f:
+        compiled = json.load(f)
+
+    proposal = build_proposal(
+        proposal_id=str(uuid.uuid4()),
+        actor={"id": actor, "type": "agent"},
+        artifact_paths=[],
+        mutation=normalize_mutation(action),
+        contract=build_contract_binding(compiled),
+        run_context={
+            "identities": {
+                "actors": [
+                    {"id": actor, "type": "agent", "role": "proposer"},
+                    {"id": resolved["responsible"], "type": "human", "role": "responsible"},
+                    {"id": resolved["accountable"], "type": "human", "role": "accountable"},
+                ]
             }
+        },
+    )
 
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".json", mode="w") as f:
-            json.dump(policy, f)
-            policy_path = Path(f.name)
+    result = evaluate_proposal(proposal, compiled)
+    allowed, reason = extract_result(result)
 
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
-            output_path = Path(tmp.name)
-
-        contract_path = compile_policy_file(policy_path, output_path)
-
-        with open(contract_path) as f:
-            compiled = json.load(f)
-
-        contract = build_contract_binding(compiled)
-
-        proposal = build_proposal(
-            proposal_id=str(uuid.uuid4()),
-            actor={"id": normalize_lookup_key(actor), "type": "agent"},
-            artifact_paths=[],
-            mutation=normalize_mutation(action),
-            contract=contract,
-            run_context={
-                "identities": {
-                    "actors": [
-                        {"id": normalize_lookup_key(actor), "type": "agent", "role": "proposer"},
-                        {"id": resolved_context["responsible"], "type": "human", "role": "responsible"},
-                        {"id": resolved_context["accountable"], "type": "human", "role": "accountable"},
-                    ]
-                    + (
-                        [{"id": resolved_context["approved_by"], "type": "human", "role": "approver"}]
-                        if resolved_context.get("approved_by")
-                        else []
-                    ),
-                    "required_roles": policy.get("roles", {}).get("required", []),
-                    "conflict_flags": {},
-                },
-                "integrity": {},
-                "publication": {},
-            },
-        )
-
-        result = evaluate_proposal(proposal, compiled)
-        allowed, reason = extract_result(result)
-
-        return {
-            "allowed": allowed,
-            "reason": reason,
-            "summary": summarize_action(action),
-        }
-
-    except Exception as e:
-        return {
-            "allowed": False,
-            "reason": f"Validation error: {str(e)}",
-            "summary": summarize_action(action),
-        }
+    return {"allowed": allowed, "reason": reason, "summary": summarize_action(action)}
 
 
 # ---------------------------
@@ -277,37 +167,86 @@ def run_validation(policy: Dict, action: Dict, actor: str, context: Dict):
 @app.post("/validate")
 async def validate(request: Request):
     body = await request.json()
+    return JSONResponse(run_validation(
+        body["policy"],
+        body["action"],
+        body.get("actor", "ai-agent"),
+        body.get("context", {})
+    ))
 
-    try:
-        policy = body["policy"]
-        action = body["action"]
-        actor = body.get("actor", "ai-agent")
-        context = body.get("context", {})
-    except KeyError as e:
-        raise HTTPException(status_code=400, detail=f"Missing field: {e}")
-
-    return JSONResponse(run_validation(policy, action, actor, context))
-
-# ----------
-# IDENTITES
-# ----------
 
 @app.get("/identities")
 def get_identities():
-    try:
-        registry = load_identity_registry()
-        identities = registry.get("identities", {})
+    registry = load_identity_registry()
+    return {
+        "identities": [
+            {
+                "id": i["canonical_id"],
+                "name": i.get("display_name", i["canonical_id"]),
+            }
+            for i in registry.get("identities", {}).values()
+        ]
+    }
 
-        result = []
 
-        for identity in identities.values():
-            result.append({
-                "id": identity["canonical_id"],
-                "name": identity.get("display_name", identity["canonical_id"]),
-                "type": identity.get("type", "unknown")
-            })
+# ---------------------------
+# UI (single source of truth)
+# ---------------------------
 
-        return {"identities": result}
+@app.get("/", response_class=HTMLResponse)
+def ui():
+    return """
+    <html>
+    <body style="font-family: Arial; padding: 40px; background: #111; color: white;">
+        <h2>Waveframe Guard</h2>
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        <label>Responsible</label><br>
+        <select id="r"></select><br><br>
+
+        <label>Accountable</label><br>
+        <select id="a"></select><br><br>
+
+        <button onclick="run()">Check</button>
+
+        <pre id="out"></pre>
+
+        <script>
+            async function load() {
+                const res = await fetch("/identities");
+                const data = await res.json();
+
+                ["r","a"].forEach(id => {
+                    const el = document.getElementById(id);
+                    data.identities.forEach(i => {
+                        const o = document.createElement("option");
+                        o.value = i.id;
+                        o.textContent = i.name;
+                        el.appendChild(o);
+                    });
+                });
+            }
+
+            async function run() {
+                const res = await fetch("/validate", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({
+                        policy: { roles: { required: ["responsible","accountable"] }},
+                        action: { type: "transfer", amount: 1 },
+                        context: {
+                            responsible: document.getElementById("r").value,
+                            accountable: document.getElementById("a").value
+                        }
+                    })
+                });
+
+                const data = await res.json();
+                document.getElementById("out").textContent =
+                    (data.allowed ? "ALLOWED" : "BLOCKED") + "\\n" + data.reason;
+            }
+
+            load();
+        </script>
+    </body>
+    </html>
+    """
