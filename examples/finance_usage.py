@@ -1,121 +1,59 @@
-"""
-Waveframe Guard — Production Usage Example
-
-This shows how a backend service would use Waveframe Guard
-to evaluate AI-generated financial actions BEFORE execution.
-
-Run:
-    python examples/finance_usage.py
-"""
-
-from waveframe_guard import WaveframeGuard
+from waveframe_guard.client import Guard
 
 
-# --------------------------------------------------
-# Load compiled governance policy
-# --------------------------------------------------
+# ---------------------------
+# Example execution function
+# ---------------------------
 
-# In production, this would come from a file or config system
-policy = "finance-policy.json"
-
-guard = WaveframeGuard(policy=policy)
-
-
-# --------------------------------------------------
-# Simulated execution layer (your actual system)
-# --------------------------------------------------
-
-def execute_transfer(action: dict):
-    """
-    This represents your real system performing the action.
-    Only called if guard allows execution.
-    """
-    return {
-        "status": "executed",
-        "details": action
-    }
+def transfer_funds():
+    print("💸 Transfer executed")
+    return {"status": "success", "amount": 5000}
 
 
-# --------------------------------------------------
-# Core evaluation wrapper
-# --------------------------------------------------
+# ---------------------------
+# Setup Guard
+# ---------------------------
 
-def process_action(action: dict, actor: str, context: dict | None = None):
-    """
-    Standard pattern:
+guard = Guard(
+    base_url="http://localhost:8000",
+    policy_ref="finance-core-v1",
+)
 
-    1. Evaluate with Waveframe Guard
-    2. If allowed → execute
-    3. If blocked → stop
-    """
+# ---------------------------
+# Scenario 1 — VALID
+# ---------------------------
 
-    decision = guard.execute(
-        action=action,
-        actor=actor,
-        context=context
-    )
+print("\n--- Scenario 1: Valid Roles ---")
 
-    if not decision["allowed"]:
-        return {
-            "status": "blocked",
-            "reason": decision["reason"]
-        }
+result = guard.execute(
+    action={"type": "transfer", "amount": 5000},
+    actor="ai-agent-v2",
+    context={
+        "responsible": "user-alice",
+        "accountable": "user-bob",
+        "approved_by": "user-alice",
+    },
+    execute_fn=transfer_funds,
+)
 
-    result = execute_transfer(action)
-
-    return {
-        "status": "executed",
-        "result": result
-    }
+print(result)
 
 
-# --------------------------------------------------
-# Example scenarios (real-world style)
-# --------------------------------------------------
+# ---------------------------
+# Scenario 2 — INVALID
+# ---------------------------
 
-def main():
+print("\n--- Scenario 2: Role Violation ---")
 
-    print("\n--- Scenario 1: Missing approval ---")
+result = guard.execute(
+    action={"type": "transfer", "amount": 5000},
+    actor="ai-agent-v2",
+    context={
+        "responsible": "user-bob",
+        "accountable": "user-alice",
+        "approved_by": "user-bob",  # ❌ same as responsible
+    },
+    execute_fn=transfer_funds,
+)
 
-    result_1 = process_action(
-        action={"type": "transfer", "amount": 5000},
-        actor="ai-agent"
-    )
-
-    print(result_1)
-
-
-    print("\n--- Scenario 2: Invalid approval (same actor) ---")
-
-    result_2 = process_action(
-        action={"type": "transfer", "amount": 5000},
-        actor="ai-agent",
-        context={"approved_by": "ai-agent"}
-    )
-
-    print(result_2)
-
-
-    print("\n--- Scenario 3: Valid approval ---")
-
-    result_3 = process_action(
-        action={"type": "transfer", "amount": 5000},
-        actor="ai-agent",
-        context={"approved_by": "human-123"}
-    )
-
-    print(result_3)
-
-
-    print("\n--- Scenario 4: Read-only action ---")
-
-    result_4 = process_action(
-        action={"type": "get_balance"},
-        actor="ai-agent"
-    )
-
-    print(result_4)
-
-
-if __name__ == "__main__":
-    main()
+print(result)
