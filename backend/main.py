@@ -37,6 +37,7 @@ def load_identity_registry() -> Dict[str, Any]:
         "identities": {
             "user-alice": {"canonical_id": "usr_111", "aliases": ["alice"]},
             "user-bob": {"canonical_id": "usr_222", "aliases": ["bob"]},
+            "user-charlie": {"canonical_id": "usr_333", "aliases": ["charlie"]},
             "ai-agent-v2": {"canonical_id": "agt_999", "aliases": ["agent"]}
         }
     }
@@ -322,6 +323,7 @@ def ui():
                 <select id="responsible">
                     <option value="user-alice" selected>Alice (Admin)</option>
                     <option value="user-bob">Bob (Finance)</option>
+                    <option value="user-charlie">Charlie (Auditor)</option>
                 </select>
             </div>
             <div class="form-group">
@@ -329,6 +331,7 @@ def ui():
                 <select id="accountable">
                     <option value="user-alice">Alice (Admin)</option>
                     <option value="user-bob">Bob (Finance)</option>
+                    <option value="user-charlie">Charlie (Auditor)</option>
                 </select>
             </div>
             <div class="form-group">
@@ -337,6 +340,7 @@ def ui():
                     <option value="">-- None --</option>
                     <option value="user-alice">Alice (Admin)</option>
                     <option value="user-bob">Bob (Finance)</option>
+                    <option value="user-charlie">Charlie (Auditor)</option>
                 </select>
             </div>
         </div>
