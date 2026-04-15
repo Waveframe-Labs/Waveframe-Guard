@@ -8,6 +8,6 @@ Users should only need to import from here:
     from waveframe_guard import WaveframeGuard
 """
 
-from .client import WaveframeGuard
+from .client import Guard
 
-__all__ = ["WaveframeGuard"]
+__all__ = ["Guard"]
