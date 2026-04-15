@@ -1,26 +1,35 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "identities": {
-    "user-1": {
-      "canonical_id": "user-1",
-      "display_name": "User 1",
+    "user-alice": {
+      "canonical_id": "user-alice",
+      "display_name": "Alice (Admin)",
       "type": "human",
-      "aliases": ["user-1", "user1", "u1"]
+      "aliases": ["alice", "user1", "u1"]
     },
-    "user-2": {
-      "canonical_id": "user-2",
-      "display_name": "User 2",
+    "user-bob": {
+      "canonical_id": "user-bob",
+      "display_name": "Bob (Finance)",
       "type": "human",
-      "aliases": ["user-2", "user2", "u2"]
+      "aliases": ["bob", "user2", "u2"]
     },
-    "ai-agent": {
-      "canonical_id": "ai-agent",
-      "display_name": "AI Agent",
+    "user-charlie": {
+      "canonical_id": "user-charlie",
+      "display_name": "Charlie (Approver)",
+      "type": "human",
+      "aliases": ["charlie", "approver", "user3"]
+    },
+    "ai-agent-v2": {
+      "canonical_id": "ai-agent-v2",
+      "display_name": "AI Agent v2",
       "type": "agent",
       "aliases": ["ai", "agent", "ai-agent"]
     }
   },
   "roles": {
+    "proposer": {
+      "description": "Originates the action"
+    },
     "responsible": {
       "description": "Executes or proposes the action"
     },
