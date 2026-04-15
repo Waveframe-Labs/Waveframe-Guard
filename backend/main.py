@@ -7,7 +7,7 @@ import hashlib
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 
 from compiler.compile_policy_file import compile_policy_file
@@ -191,6 +191,40 @@ async def validate(request: Request):
         actor=body.get("actor", "ai-agent-v2"),
         context=body.get("context", {}),
     ))
+
+@app.post("/v1/enforce")
+async def enforce(request: Request):
+    """The Production Endpoint: Used by customer SDKs to evaluate actions against saved policies."""
+    body = await request.json()
+    
+    policy_ref = body.get("policy_ref")
+    
+    # 1. Mock Database Lookup: Fetch the policy based on the ID the SDK sent
+    if policy_ref == "finance-core-v1":
+        policy = {
+            "contract_id": "finance-core-v1",
+            "contract_version": "1.0.0",
+            "roles": {"required": ["proposer", "responsible", "accountable"]},
+            "constraints": [
+                {"type": "separation_of_duties", "roles": ["responsible", "accountable"]},
+                {"type": "approval_required", "threshold": 1000}
+            ]
+        }
+    else:
+        raise HTTPException(status_code=404, detail=f"Policy '{policy_ref}' not found.")
+
+    # 2. Run the CRI-CORE evaluation
+    decision = run_validation(
+        policy=policy,
+        action=body.get("action", {}),
+        actor=body.get("actor", "ai-agent-v2"),
+        context=body.get("context", {}),
+    )
+    
+    # 3. TELEMETRY: Log the result automatically so it shows up on their dashboard
+    print(f"\n📈 [AUDIT LOG SAVED] Action: {decision['summary']} | Status: {'ALLOWED' if decision['allowed'] else 'BLOCKED'}\n")
+
+    return JSONResponse(decision)
 
 @app.post("/api/log")
 async def receive_log(request: Request):

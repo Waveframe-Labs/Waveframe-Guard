@@ -80,7 +80,7 @@ class Guard:
             headers["Authorization"] = f"Bearer {self.api_key}"
 
         res = requests.post(
-            f"{self.base_url}/validate",
+            f"{self.base_url}/v1/enforce",
             json=payload,
             headers=headers,
             timeout=10,
