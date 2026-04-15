@@ -1,4 +1,4 @@
-from waveframe_guard.client import Guard
+from waveframe_guard import Guard
 
 
 # ---------------------------
@@ -31,7 +31,7 @@ result = guard.execute(
     context={
         "responsible": "user-alice",
         "accountable": "user-bob",
-        "approved_by": "user-alice",
+        "approved_by": "user-charlie",  # ✅ FIXED (independent approver)
     },
     execute_fn=transfer_funds,
 )

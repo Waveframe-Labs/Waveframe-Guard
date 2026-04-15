@@ -28,19 +28,12 @@ def load_identity_registry() -> Dict[str, Any]:
     """Safely loads identities, with a fallback so the app doesn't crash if the file is missing."""
     identity_path = Path(__file__).resolve().parent / "data" / "identities.json"
     
-    if identity_path.exists():
-        with open(identity_path, "r", encoding="utf-8") as f:
-            return json.load(f)
-            
-    # Default fallback registry for the Sandbox
-    return {
-        "identities": {
-            "user-alice": {"canonical_id": "usr_111", "aliases": ["alice"]},
-            "user-bob": {"canonical_id": "usr_222", "aliases": ["bob"]},
-            "user-charlie": {"canonical_id": "usr_333", "aliases": ["charlie"]},
-            "ai-agent-v2": {"canonical_id": "agt_999", "aliases": ["agent"]}
-        }
-    }
+    if not identity_path.exists():
+        raise RuntimeError("identities.json is required but missing")
+
+    with open(identity_path, "r", encoding="utf-8") as f:
+        return json.load(f)
+        
 
 def normalize(v: Optional[str]) -> str:
     if not v:
