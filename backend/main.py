@@ -229,6 +229,59 @@ async def validate(request: Request):
         context=body.get("context", {}),
     ))
 
+from fastapi import HTTPException
+
+
+@app.post("/v1/enforce")
+async def enforce(request: Request):
+    """
+    Production endpoint used by SDK.
+    Accepts policy_ref instead of full policy.
+    """
+
+    body = await request.json()
+    policy_ref = body.get("policy_ref")
+
+    # ---------------------------
+    # Mock policy store (for now)
+    # ---------------------------
+    if policy_ref == "finance-core-v1":
+        policy = {
+            "contract_id": "finance-core-v1",
+            "contract_version": "1.0.0",
+            "roles": {
+                "required": ["proposer", "responsible", "accountable"]
+            },
+            "constraints": [
+                {
+                    "type": "separation_of_duties",
+                    "roles": ["responsible", "accountable"]
+                },
+                {
+                    "type": "approval_required",
+                    "threshold": 1000
+                }
+            ]
+        }
+    else:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Policy '{policy_ref}' not found."
+        )
+
+    decision = run_validation(
+        policy=policy,
+        action=body.get("action", {}),
+        actor=body.get("actor", "ai-agent-v2"),
+        context=body.get("context", {}),
+    )
+
+    print(
+        f"\n📈 [AUDIT LOG] {decision['summary']} | "
+        f"{'ALLOWED' if decision['allowed'] else 'BLOCKED'}\n"
+    )
+
+    return JSONResponse(decision)
 
 @app.post("/api/log")
 async def receive_log(request: Request):
