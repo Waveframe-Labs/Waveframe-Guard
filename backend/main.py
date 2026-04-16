@@ -199,10 +199,41 @@ def run_validation(
     stages = extract_stages(result)
     reason = extract_reason(stages)
 
+    amount = action.get("amount", 0)
+
+    impact = []
+
+    if not allowed:
+        # Build real-world consequence framing
+        if "separation" in reason.lower():
+            impact = [
+                "violated separation of duties",
+                "same individual attempted to control and approve the action",
+                "created audit and fraud risk"
+            ]
+        elif "approval" in reason.lower():
+            impact = [
+                "bypassed required approval threshold",
+                "executed financial change without authorization",
+                "created compliance exposure"
+            ]
+        else:
+            impact = [
+                "failed governance validation",
+                "action did not meet required execution constraints"
+            ]
+    else:
+        impact = [
+            "roles properly separated",
+            "approval conditions satisfied",
+            "action aligned with policy"
+        ]
+
     return {
         "allowed": allowed,
-        "summary": f"AI attempted to transfer ${action.get('amount', 0):,.0f}",
+        "summary": f"AI attempted to transfer ${amount:,.0f}",
         "reason": reason,
+        "impact": impact,
         "decision_trace": stages,
         "resolved_identities": {
             "proposer": normalize(actor),
@@ -1001,14 +1032,33 @@ async function runValidation() {
 
         document.getElementById("resTitle").innerHTML =
             allowed
-                ? `✅ ALLOWED <small>action executed</small>`
-                : `🚫 BLOCKED <small>action did not execute</small>`;
+                ? `✅ ALLOWED <small>action executed safely</small>`
+                : `🚫 BLOCKED <small>execution prevented</small>`;
+
+        const amount = document.getElementById("amount").value;
 
         document.getElementById("resSummary").innerHTML =
-            `<strong>${escapeHtml(data.summary || "AI action evaluated")}</strong>`;
+            `<strong>AI attempted to transfer $${Number(amount).toLocaleString()}</strong>`;
 
-        document.getElementById("resReason").textContent =
-            data.reason || "No reason provided";
+        const reasonBox = document.getElementById("resReason");
+
+    let impactHtml = "";
+
+    if (data.impact && data.impact.length > 0) {
+        impactHtml = `
+            <div style="margin-top:12px;">
+                <strong>This would have:</strong>
+                <ul style="margin:8px 0 0 16px; padding:0;">
+                    ${data.impact.map(i => `<li>${escapeHtml(i)}</li>`).join("")}
+                </ul>
+            </div>
+    `;
+}
+
+reasonBox.innerHTML = `
+    <div>${escapeHtml(data.reason || "No reason provided")}</div>
+    ${impactHtml}
+`;
 
         document.getElementById("withoutGuardText").textContent =
             `This $${amount.toLocaleString()} transfer would have continued toward execution.`;
