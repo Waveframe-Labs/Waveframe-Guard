@@ -855,25 +855,18 @@ def ui():
 
             <div id="outputCard" class="panel decision-card">
                 <div class="panel-header">
-                    <h3 class="panel-title">Decision</h3>
-                    <p class="panel-subtitle">
-                        The action either executes or it does not. This surface shows what happened and why.
-                    </p>
+                   <h3 class="panel-title">Decision</h3>
+                   <p class="panel-subtitle">
+                       Execution outcome at the boundary.
+                  </p>
                 </div>
                 <div class="panel-body">
                     <div class="decision-status" id="resTitle"></div>
                     <p class="decision-summary" id="resSummary"></p>
-                    <div class="reason-box" id="resReason"></div>
 
-                    <div class="impact-grid">
-                        <div class="impact-box">
-                            <h4>Without Guard</h4>
-                            <p id="withoutGuardText">This action would have been allowed to continue toward execution.</p>
-                        </div>
-                        <div class="impact-box">
-                            <h4>With Guard</h4>
-                            <p id="withGuardText">Execution outcome pending.</p>
-                        </div>
+                    <div class="reason-box">
+                        <div id="resReasonTitle" style="font-weight:600; margin-bottom:8px;"></div>
+                        <ul id="resReasonList" style="margin:0; padding-left:18px;"></ul>
                     </div>
                 </div>
             </div>
@@ -1126,33 +1119,50 @@ async function runValidation() {
         document.getElementById("resSummary").innerHTML =
             `<strong>AI attempted to transfer $${Number(amountElement).toLocaleString()}</strong>`;
 
-        const reasonBox = document.getElementById("resReason");
+        const reasonTitle = document.getElementById("resReasonTitle");
+        const reasonList = document.getElementById("resReasonList");
 
-        let impactHtml = "";
+        function buildExecutiveReasons(reason) {
+            const r = (reason || "").toLowerCase();
 
-        if (data.impact && data.impact.length > 0) {
-            impactHtml = `
-                <div style="margin-top:12px;">
-                    <strong>This would have:</strong>
-                    <ul style="margin:8px 0 0 16px; padding:0;">
-                        ${data.impact.map(i => `<li>${escapeHtml(i)}</li>`).join("")}
-                    </ul>
-                </div>
-        `;
+            if (r.includes("separation")) {
+                return {
+                    title: "Role separation violation",
+                    bullets: [
+                        "Same individual assigned to multiple required roles",
+                        "Breaks separation of duties constraint",
+                        "Introduces fraud and audit risk"
+                    ]
+                };
+            }
+
+            if (r.includes("approval")) {
+                return {
+                    title: "Missing required approval",
+                    bullets: [
+                        "Approval threshold exceeded",
+                        "No valid approver assigned",
+                        "Action lacks authorization"
+                    ]
+                };
+            }
+
+            return {
+                title: "Policy validation failed",
+                bullets: [
+                    "Action did not meet execution requirements",
+                    "Blocked at enforcement boundary"
+                ]
+            };
         }
 
-        reasonBox.innerHTML = `
-            <div>${escapeHtml(data.reason || "No reason provided")}</div>
-            ${impactHtml}
-        `;
+        const execReason = buildExecutiveReasons(data.reason);
 
-        document.getElementById("withoutGuardText").textContent =
-            `This $${Number(amountElement).toLocaleString()} transfer would have continued toward execution.`;
+        reasonTitle.textContent = execReason.title;
 
-        document.getElementById("withGuardText").textContent =
-            allowed
-                ? "The action satisfied the active policy and was permitted to proceed."
-                : "The action was stopped at the execution boundary before state could change.";
+        reasonList.innerHTML = execReason.bullets
+            .map(b => `<li>${escapeHtml(b)}</li>`)
+            .join("");
 
         renderTrace(data.decision_trace || []);
         renderResolvedIdentities(data.resolved_identities || {});
