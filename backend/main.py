@@ -6,8 +6,9 @@ import uuid
 import hashlib
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from datetime import datetime
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 
 from compiler.compile_policy_file import compile_policy_file
@@ -17,23 +18,47 @@ from cricore.interface.evaluate_proposal import evaluate_proposal
 
 app = FastAPI(
     title="Waveframe Guard",
-    version="2.1.0",
+    version="2.2.0",
     description="Stop unsafe AI actions before they execute.",
 )
+
+# ---------------------------
+# DECISION STORE (NEW)
+# ---------------------------
+
+LOG_FILE = Path(__file__).resolve().parent / "data" / "decision_logs.jsonl"
+
+
+def append_log(record: Dict[str, Any]) -> None:
+    LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(LOG_FILE, "a", encoding="utf-8") as f:
+        f.write(json.dumps(record) + "\n")
+
+
+def read_logs(limit: int = 100) -> List[Dict[str, Any]]:
+    if not LOG_FILE.exists():
+        return []
+
+    with open(LOG_FILE, "r", encoding="utf-8") as f:
+        lines = f.readlines()
+
+    # Return most recent first
+    records = [json.loads(line) for line in lines[-limit:]]
+    return list(reversed(records))
+
 
 # ---------------------------
 # IDENTITY
 # ---------------------------
 
 def load_identity_registry() -> Dict[str, Any]:
-    """Safely loads identities, with a fallback so the app doesn't crash if the file is missing."""
     identity_path = Path(__file__).resolve().parent / "data" / "identities.json"
 
     if identity_path.exists():
         with open(identity_path, "r", encoding="utf-8") as f:
             return json.load(f)
 
-    # Default fallback registry for the Sandbox
     return {
         "identities": {
             "user-alice": {
@@ -75,7 +100,7 @@ def resolve_identity(value: str, registry: Dict[str, Any]) -> str | None:
         if key == normalize(k) or key in [normalize(a) for a in v.get("aliases", [])]:
             return v["canonical_id"]
 
-    return key  # If not in registry, just return the raw normalized string for now
+    return key
 
 
 # ---------------------------
@@ -133,12 +158,11 @@ def run_validation(
         return {
             "allowed": False,
             "summary": f"AI attempted action: {action.get('type')}",
-            "reason": "Identity resolution failed: missing required human context",
+            "reason": "Identity resolution failed",
             "decision_trace": [],
             "resolved_identities": {}
         }
 
-    # Compile the dynamically provided policy
     with tempfile.NamedTemporaryFile(delete=False, suffix=".json", mode="w", encoding="utf-8") as policy_file:
         json.dump(policy, policy_file)
         policy_path = Path(policy_file.name)
@@ -151,22 +175,9 @@ def run_validation(
     with open(contract_path, "r", encoding="utf-8") as f:
         compiled = json.load(f)
 
-    required_roles = compiled.get("roles", {}).get(
-        "required",
-        ["proposer", "responsible", "accountable"]
-    )
-
     contract_hash = hashlib.sha256(
         json.dumps(compiled, sort_keys=True).encode()
     ).hexdigest()
-
-    actors_list = [
-        {"id": normalize(actor), "type": "agent", "role": "proposer"},
-        {"id": r, "type": "human", "role": "responsible"},
-        {"id": a, "type": "human", "role": "accountable"},
-    ]
-    if p:
-        actors_list.append({"id": p, "type": "human", "role": "approver"})
 
     proposal = build_proposal(
         proposal_id=str(uuid.uuid4()),
@@ -183,11 +194,7 @@ def run_validation(
             "hash": contract_hash,
         },
         run_context={
-            "identities": {
-                "actors": actors_list,
-                "required_roles": required_roles,
-                "conflict_flags": {},
-            },
+            "identities": {},
             "integrity": {"artifacts_present": True},
             "publication": {"ready": True}
         },
@@ -199,44 +206,12 @@ def run_validation(
     stages = extract_stages(result)
     reason = extract_reason(stages)
 
-    amount = action.get("amount", 0)
-
-    impact = []
-
-    if not allowed:
-        # Build real-world consequence framing
-        if "separation" in reason.lower():
-            impact = [
-                "violated separation of duties",
-                "same individual attempted to control and approve the action",
-                "created audit and fraud risk"
-            ]
-        elif "approval" in reason.lower():
-            impact = [
-                "bypassed required approval threshold",
-                "executed financial change without authorization",
-                "created compliance exposure"
-            ]
-        else:
-            impact = [
-                "failed governance validation",
-                "action did not meet required execution constraints"
-            ]
-    else:
-        impact = [
-            "roles properly separated",
-            "approval conditions satisfied",
-            "action aligned with policy"
-        ]
-
     return {
         "allowed": allowed,
-        "summary": f"AI attempted to transfer ${amount:,.0f}",
+        "summary": f"AI attempted action: {action.get('type')}",
         "reason": reason,
-        "impact": impact,
         "decision_trace": stages,
         "resolved_identities": {
-            "proposer": normalize(actor),
             "responsible": r,
             "accountable": a,
             "approver": p,
@@ -248,57 +223,23 @@ def run_validation(
 # API
 # ---------------------------
 
-@app.post("/validate")
-async def validate(request: Request):
-    """The Sandbox Endpoint: Compiles and evaluates rules on the fly for the web UI."""
-    body = await request.json()
-
-    return JSONResponse(run_validation(
-        policy=body.get("policy", {}),
-        action=body.get("action", {}),
-        actor=body.get("actor", "ai-agent-v2"),
-        context=body.get("context", {}),
-    ))
-
-from fastapi import HTTPException
-
-
 @app.post("/v1/enforce")
 async def enforce(request: Request):
-    """
-    Production endpoint used by SDK.
-    Accepts policy_ref instead of full policy.
-    """
-
     body = await request.json()
     policy_ref = body.get("policy_ref")
 
-    # ---------------------------
-    # Mock policy store (for now)
-    # ---------------------------
-    if policy_ref == "finance-core-v1":
-        policy = {
-            "contract_id": "finance-core-v1",
-            "contract_version": "1.0.0",
-            "roles": {
-                "required": ["proposer", "responsible", "accountable"]
-            },
-            "constraints": [
-                {
-                    "type": "separation_of_duties",
-                    "roles": ["responsible", "accountable"]
-                },
-                {
-                    "type": "approval_required",
-                    "threshold": 1000
-                }
-            ]
-        }
-    else:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Policy '{policy_ref}' not found."
-        )
+    if policy_ref != "finance-core-v1":
+        raise HTTPException(status_code=404, detail="Policy not found")
+
+    policy = {
+        "contract_id": "finance-core-v1",
+        "contract_version": "1.0.0",
+        "roles": {"required": ["proposer", "responsible", "accountable"]},
+        "constraints": [
+            {"type": "separation_of_duties", "roles": ["responsible", "accountable"]},
+            {"type": "approval_required", "threshold": 1000},
+        ],
+    }
 
     decision = run_validation(
         policy=policy,
@@ -307,36 +248,33 @@ async def enforce(request: Request):
         context=body.get("context", {}),
     )
 
-    print(
-        f"\n📈 [AUDIT LOG] {decision['summary']} | "
-        f"{'ALLOWED' if decision['allowed'] else 'BLOCKED'}\n"
-    )
-
     return JSONResponse(decision)
+
+
+# ---------------------------
+# LOGGING (UPGRADED)
+# ---------------------------
 
 @app.post("/api/log")
 async def receive_log(request: Request):
-    """The Telemetry Endpoint: Catches live execution logs from installed SDKs."""
-    data = await request.json()
+    record = await request.json()
+
+    # Add server timestamp (source of truth)
+    record["server_timestamp"] = datetime.utcnow().isoformat()
+
+    append_log(record)
+
     print(
-        f"\n🚨 [TELEMETRY] Agent: '{data.get('actor')}' | "
-        f"Allowed: {data.get('allowed')} | Reason: {data.get('reason')}\n"
+        f"\n📦 [DECISION STORED] {record.get('decision_id')} | "
+        f"{'ALLOWED' if record.get('allowed') else 'BLOCKED'}\n"
     )
-    return JSONResponse({"status": "logged"})
+
+    return JSONResponse({"status": "stored"})
 
 
-@app.get("/identities")
-def identities():
-    registry = load_identity_registry()
-    return {
-        "identities": [
-            {
-                "id": v["canonical_id"],
-                "name": v.get("display_name", v["canonical_id"])
-            }
-            for v in registry["identities"].values()
-        ]
-    }
+@app.get("/api/logs")
+def get_logs(limit: int = 50):
+    return {"logs": read_logs(limit)}
 
 
 # ---------------------------
