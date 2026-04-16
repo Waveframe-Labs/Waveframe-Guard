@@ -930,7 +930,6 @@ def ui():
 </div>
 
 <script>
-// --- FIX 1: The Human Mapping Dictionary ---
 const STAGE_EXPLANATIONS = {
     "run-structure": {
         title: "Execution context verified",
@@ -993,13 +992,11 @@ function renderTrace(trace) {
         const icon = passed ? "✅" : "❌";
         const badge = passed ? "PASS" : "FAIL";
         
-        // Match the raw stage string to our human dictionary (fallback to raw if missing)
         const mappedData = STAGE_EXPLANATIONS[stage.stage] || { 
             title: stage.stage, 
             detail: "System evaluation completed." 
         };
 
-        // Smart logic: If it failed, show the actual error message. If it passed, show the nice detail text.
         const message = !passed && (stage.messages && stage.messages.length > 0)
             ? stage.messages.join(" | ")
             : mappedData.detail;
@@ -1048,6 +1045,38 @@ function updateThresholdPreview() {
     const threshold = parseFloat(document.getElementById("approvalThreshold").value || 0);
     document.getElementById("thresholdPreview").textContent =
         `$${threshold.toLocaleString()}`;
+}
+
+function buildExecutiveReasons(allowed, reason, impact) {
+    // 🚨 Deterministic Fix: Branch completely on allowed boolean first
+    if (allowed) {
+        return {
+            title: "Action structurally aligned",
+            bullets: impact && impact.length > 0 ? impact : [
+                "Roles properly separated",
+                "Approval conditions satisfied",
+                "Action aligned with policy"
+            ]
+        };
+    }
+
+    // If blocked, we can inspect the reason string to give a better title
+    const r = (reason || "").toLowerCase();
+    let title = "Policy validation failed";
+    
+    if (r.includes("separation")) {
+        title = "Role separation violation";
+    } else if (r.includes("approval")) {
+        title = "Missing required approval";
+    }
+
+    return {
+        title: title,
+        bullets: impact && impact.length > 0 ? impact : [
+            "Action did not meet execution requirements",
+            "Blocked at enforcement boundary"
+        ]
+    };
 }
 
 async function runValidation() {
@@ -1122,41 +1151,8 @@ async function runValidation() {
         const reasonTitle = document.getElementById("resReasonTitle");
         const reasonList = document.getElementById("resReasonList");
 
-        function buildExecutiveReasons(reason) {
-            const r = (reason || "").toLowerCase();
-
-            if (r.includes("separation")) {
-                return {
-                    title: "Role separation violation",
-                    bullets: [
-                        "Same individual assigned to multiple required roles",
-                        "Breaks separation of duties constraint",
-                        "Introduces fraud and audit risk"
-                    ]
-                };
-            }
-
-            if (r.includes("approval")) {
-                return {
-                    title: "Missing required approval",
-                    bullets: [
-                        "Approval threshold exceeded",
-                        "No valid approver assigned",
-                        "Action lacks authorization"
-                    ]
-                };
-            }
-
-            return {
-                title: "Policy validation failed",
-                bullets: [
-                    "Action did not meet execution requirements",
-                    "Blocked at enforcement boundary"
-                ]
-            };
-        }
-
-        const execReason = buildExecutiveReasons(data.reason);
+        // Use the new deterministic logic, utilizing the backend's 'impact' array!
+        const execReason = buildExecutiveReasons(allowed, data.reason, data.impact);
 
         reasonTitle.textContent = execReason.title;
 
