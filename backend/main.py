@@ -716,17 +716,9 @@ def ui():
         }
 
         @media (max-width: 980px) {
-            .layout {
-                grid-template-columns: 1fr;
-            }
-
-            .top-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .impact-grid {
-                grid-template-columns: 1fr;
-            }
+            .layout { grid-template-columns: 1fr; }
+            .top-grid { grid-template-columns: 1fr; }
+            .impact-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -895,6 +887,42 @@ def ui():
 </div>
 
 <script>
+// --- FIX 1: The Human Mapping Dictionary ---
+const STAGE_EXPLANATIONS = {
+    "run-structure": {
+        title: "Execution context verified",
+        detail: "Ensures this action is evaluated inside a controlled execution boundary."
+    },
+    "structure-contract-version-gate": {
+        title: "Policy version check",
+        detail: "Ensures the correct governance policy version is being applied."
+    },
+    "structure-contract-hash-gate": {
+        title: "Policy integrity verified",
+        detail: "Confirms the policy has not been altered or tampered with."
+    },
+    "independence": {
+        title: "Role separation enforced",
+        detail: "Prevents the same person from controlling and approving an action."
+    },
+    "integrity": {
+        title: "Input integrity verified",
+        detail: "Confirms required data and artifacts are present and valid."
+    },
+    "integrity-finalization": {
+        title: "Execution readiness confirmed",
+        detail: "Final validation before allowing execution."
+    },
+    "publication": {
+        title: "Audit trace prepared",
+        detail: "Ensures the action can be recorded and audited."
+    },
+    "publication-commit": {
+        title: "Decision finalized",
+        detail: "The final execution decision has been cryptographically sealed."
+    }
+};
+
 function escapeHtml(value) {
     return String(value ?? "")
         .replaceAll("&", "&amp;")
@@ -921,9 +949,17 @@ function renderTrace(trace) {
         const passed = !!stage.passed;
         const icon = passed ? "✅" : "❌";
         const badge = passed ? "PASS" : "FAIL";
-        const message = (stage.messages && stage.messages.length > 0)
+        
+        // Match the raw stage string to our human dictionary (fallback to raw if missing)
+        const mappedData = STAGE_EXPLANATIONS[stage.stage] || { 
+            title: stage.stage, 
+            detail: "System evaluation completed." 
+        };
+
+        // Smart logic: If it failed, show the actual error message. If it passed, show the nice detail text.
+        const message = !passed && (stage.messages && stage.messages.length > 0)
             ? stage.messages.join(" | ")
-            : "No additional details";
+            : mappedData.detail;
 
         const li = document.createElement("li");
         li.className = "trace-item";
@@ -931,7 +967,7 @@ function renderTrace(trace) {
             <div class="trace-main">
                 <div class="trace-icon">${icon}</div>
                 <div>
-                    <div class="trace-stage">${escapeHtml(stage.stage)}</div>
+                    <div class="trace-stage">${escapeHtml(mappedData.title)}</div>
                     <div class="trace-message">${escapeHtml(message)}</div>
                 </div>
             </div>
@@ -1035,33 +1071,33 @@ async function runValidation() {
                 ? `✅ ALLOWED <small>action executed safely</small>`
                 : `🚫 BLOCKED <small>execution prevented</small>`;
 
-        const amount = document.getElementById("amount").value;
+        const amountElement = document.getElementById("amount").value;
 
         document.getElementById("resSummary").innerHTML =
-            `<strong>AI attempted to transfer $${Number(amount).toLocaleString()}</strong>`;
+            `<strong>AI attempted to transfer $${Number(amountElement).toLocaleString()}</strong>`;
 
         const reasonBox = document.getElementById("resReason");
 
-    let impactHtml = "";
+        let impactHtml = "";
 
-    if (data.impact && data.impact.length > 0) {
-        impactHtml = `
-            <div style="margin-top:12px;">
-                <strong>This would have:</strong>
-                <ul style="margin:8px 0 0 16px; padding:0;">
-                    ${data.impact.map(i => `<li>${escapeHtml(i)}</li>`).join("")}
-                </ul>
-            </div>
-    `;
-}
+        if (data.impact && data.impact.length > 0) {
+            impactHtml = `
+                <div style="margin-top:12px;">
+                    <strong>This would have:</strong>
+                    <ul style="margin:8px 0 0 16px; padding:0;">
+                        ${data.impact.map(i => `<li>${escapeHtml(i)}</li>`).join("")}
+                    </ul>
+                </div>
+        `;
+        }
 
-reasonBox.innerHTML = `
-    <div>${escapeHtml(data.reason || "No reason provided")}</div>
-    ${impactHtml}
-`;
+        reasonBox.innerHTML = `
+            <div>${escapeHtml(data.reason || "No reason provided")}</div>
+            ${impactHtml}
+        `;
 
         document.getElementById("withoutGuardText").textContent =
-            `This $${amount.toLocaleString()} transfer would have continued toward execution.`;
+            `This $${Number(amountElement).toLocaleString()} transfer would have continued toward execution.`;
 
         document.getElementById("withGuardText").textContent =
             allowed
