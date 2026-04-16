@@ -1,18 +1,10 @@
 from waveframe_guard import Guard
 
 
-# ---------------------------
-# Example execution function
-# ---------------------------
-
 def transfer_funds():
     print("💸 Transfer executed")
     return {"status": "success", "amount": 5000}
 
-
-# ---------------------------
-# Setup Guard
-# ---------------------------
 
 guard = Guard(
     base_url="http://localhost:8000",
@@ -31,12 +23,17 @@ result = guard.execute(
     context={
         "responsible": "user-alice",
         "accountable": "user-bob",
-        "approved_by": "user-charlie",  # ✅ FIXED (independent approver)
+        "approved_by": "user-charlie",
     },
     execute_fn=transfer_funds,
 )
 
-print(result)
+print("RESULT:")
+if isinstance(result, dict) and result.get("blocked"):
+    print("❌ BLOCKED — action did NOT execute")
+    print(f"Reason: {result['reason']}")
+else:
+    print("✅ EXECUTED — funds moved successfully")
 
 
 # ---------------------------
@@ -51,9 +48,14 @@ result = guard.execute(
     context={
         "responsible": "user-bob",
         "accountable": "user-alice",
-        "approved_by": "user-bob",  # ❌ same as responsible
+        "approved_by": "user-bob",
     },
     execute_fn=transfer_funds,
 )
 
-print(result)
+print("RESULT:")
+if isinstance(result, dict) and result.get("blocked"):
+    print("❌ BLOCKED — action did NOT execute")
+    print(f"Reason: {result['reason']}")
+else:
+    print("✅ EXECUTED — funds moved successfully")
