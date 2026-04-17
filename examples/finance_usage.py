@@ -33,6 +33,7 @@ def print_decision(record: dict):
 guard = Guard(
     base_url="http://localhost:8000",
     policy_ref="finance-core-v1",
+    api_key="wf_live_acme123"  # <-- The new API Key that links to "Acme Corp"
 )
 
 # ---------------------------
