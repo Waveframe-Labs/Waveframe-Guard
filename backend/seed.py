@@ -1,48 +1,35 @@
 # ---------------------------
-# SEED SCRIPT — WAVEFRAME GUARD
+# SEED SCRIPT — WAVEFRAME GUARD (FIXED)
 # ---------------------------
 
 import secrets
-import hashlib
-from datetime import datetime
+import json
 
 from db import (
     SessionLocal,
     init_db,
-    hash_api_key,
     Organization,
     APIKey,
     Policy,
     PolicyVersion,
 )
 
-
-# ---------------------------
-# CONFIG (EDIT THIS LATER)
-# ---------------------------
-
 ORG_NAME = "Acme Corp"
 POLICY_NAME = "finance-core"
 
-
-# ---------------------------
-# SAMPLE POLICY (START SIMPLE)
-# ---------------------------
-
 SAMPLE_POLICY = {
-    "required_roles": ["proposer", "accountable"],
-    "rules": [
+    "contract_id": "finance-core",
+    "contract_version": "1.0.0",
+    "roles": {
+        "required": ["proposer", "accountable"]
+    },
+    "constraints": [
         {
             "type": "separation_of_duties",
-            "description": "Proposer and accountable must be different"
+            "roles": ["proposer", "accountable"]
         }
     ]
 }
-
-
-# ---------------------------
-# MAIN
-# ---------------------------
 
 def run():
     print("\n🚀 Initializing database...")
@@ -51,92 +38,63 @@ def run():
     db = SessionLocal()
 
     try:
-        # ---------------------------
-        # CREATE ORGANIZATION
-        # ---------------------------
+        # ORG
         org = db.query(Organization).filter_by(name=ORG_NAME).first()
 
         if not org:
-            org = Organization(name=ORG_NAME, billing_tier="enterprise")
+            org = Organization(name=ORG_NAME)
             db.add(org)
             db.commit()
             db.refresh(org)
-            print(f"✅ Created organization: {ORG_NAME}")
+            print(f"✅ Created org: {ORG_NAME}")
         else:
-            print(f"ℹ️ Organization already exists: {ORG_NAME}")
+            print(f"ℹ️ Org exists: {ORG_NAME}")
 
-        # ---------------------------
-        # CREATE API KEY
-        # ---------------------------
+        # API KEY
         raw_key = f"wf_live_{secrets.token_hex(16)}"
-        key_hash = hash_api_key(raw_key)
 
         api_key = APIKey(
-            key_hash=key_hash,
+            key_value=raw_key,
             organization_id=org.id
         )
 
         db.add(api_key)
         db.commit()
 
-        print("\n🔑 API KEY (SAVE THIS):")
+        print("\n🔑 API KEY:")
         print(raw_key)
 
-        # ---------------------------
-        # CREATE POLICY
-        # ---------------------------
-        policy = (
-            db.query(Policy)
-            .filter_by(
-                organization_id=org.id,
-                name=POLICY_NAME
-            )
-            .first()
-        )
+        # POLICY
+        policy = db.query(Policy).filter_by(
+            organization_id=org.id,
+            name=POLICY_NAME
+        ).first()
 
         if not policy:
             policy = Policy(
-                organization_id=org.id,
-                name=POLICY_NAME
+                name=POLICY_NAME,
+                organization_id=org.id
             )
             db.add(policy)
             db.commit()
             db.refresh(policy)
-            print(f"\n✅ Created policy: {POLICY_NAME}")
-        else:
-            print(f"\nℹ️ Policy already exists: {POLICY_NAME}")
 
-        # ---------------------------
-        # CREATE POLICY VERSION (IMMUTABLE)
-        # ---------------------------
-        compiled_hash = hashlib.sha256(
-            str(SAMPLE_POLICY).encode()
-        ).hexdigest()
-
+        # POLICY VERSION
         version = PolicyVersion(
             policy_id=policy.id,
-            version_number="1.0",
-            raw_rules_json=SAMPLE_POLICY,
-            compiled_hash=compiled_hash,
-            created_at=datetime.utcnow()
+            version="1.0.0",
+            rules_json=json.dumps(SAMPLE_POLICY)
         )
 
         db.add(version)
         db.commit()
 
-        print("\n📜 Created Policy Version: v1.0")
-        print(f"Hash: {compiled_hash[:12]}...")
-
+        print("\n📜 Policy v1 created")
         print("\n✅ SEED COMPLETE")
-        print("You can now call /validate with this API key.")
 
     finally:
         db.close()
 
-
-# ---------------------------
-# ENTRY
-# ---------------------------
 
 if __name__ == "__main__":
     run()

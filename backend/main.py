@@ -12,7 +12,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy.orm import Session
 
-from db import init_db, get_db, Organization, APIKey, Policy, AuditLog
+from backend.db import init_db, get_db, Organization, APIKey, Policy, AuditLog
 
 from compiler.compile_policy_file import compile_policy_file
 from proposal_normalizer.build_proposal import build_proposal
@@ -232,7 +232,7 @@ def dashboard(db: Session = Depends(get_db)):
             <td><span class="badge" style="color: {status_color}; background: {status_color}20; border-color: {status_color}40;">{status_text}</span></td>
             <td class="td-mono">{log.actor}</td>
             <td class="td-mono">{action_type}</td>
-            <td class="td-mono">${log.amount:,.0f} if log.amount else '—'}</td>
+            <td class="td-mono">{f"${log.amount:,.0f}" if log.amount else "—"}</td>
             <td class="td-reason">{log.reason}</td>
             <td class="td-hash" title="{log.trace_hash}">{str(log.trace_hash)[:8]}...</td>
         </tr>
