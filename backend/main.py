@@ -12,7 +12,8 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy.orm import Session
 
-from backend.db import init_db, get_db, Organization, APIKey, Policy, AuditLog
+# Import your new database logic!
+from db import init_db, get_db, Organization, APIKey, Policy, AuditLog
 
 from compiler.compile_policy_file import compile_policy_file
 from proposal_normalizer.build_proposal import build_proposal
@@ -21,6 +22,7 @@ from cricore.interface.evaluate_proposal import evaluate_proposal
 app = FastAPI(
     title="Waveframe Guard",
     version="3.0.1",
+    description="Enterprise Multi-Tenant AI Governance Platform"
 )
 
 # ---------------------------
@@ -31,13 +33,11 @@ app = FastAPI(
 def startup():
     init_db()
 
-
 # ---------------------------
 # AUTH
 # ---------------------------
 
 security = HTTPBearer()
-
 
 def get_current_org(
     credentials: HTTPAuthorizationCredentials = Security(security),
@@ -47,7 +47,6 @@ def get_current_org(
     if not api_key:
         raise HTTPException(status_code=401, detail="Invalid API Key")
     return api_key.organization
-
 
 # ---------------------------
 # IDENTITY HELPERS
@@ -85,12 +84,10 @@ def load_identity_registry() -> Dict[str, Any]:
         }
     }
 
-
 def normalize(v: Optional[str]) -> str:
     if not v:
         return ""
     return v.strip().lower().replace("_", "-")
-
 
 def resolve_identity(value: Optional[str], registry: Dict[str, Any]) -> Optional[str]:
     if not value:
@@ -104,7 +101,6 @@ def resolve_identity(value: Optional[str], registry: Dict[str, Any]) -> Optional
 
     return key
 
-
 def extract_stages(result: Any) -> List[Dict[str, Any]]:
     stages = getattr(result, "stage_results", [])
     out: List[Dict[str, Any]] = []
@@ -117,7 +113,6 @@ def extract_stages(result: Any) -> List[Dict[str, Any]]:
             }
         )
     return out
-
 
 def extract_reason(stages: List[Dict[str, Any]]) -> str:
     for s in stages:
@@ -136,7 +131,6 @@ def extract_reason(stages: List[Dict[str, Any]]) -> str:
             return f"{s['stage']} failed"
 
     return "Action structurally aligned with governance policy"
-
 
 # ---------------------------
 # CORE VALIDATION
@@ -192,6 +186,19 @@ def run_validation(
         ["proposer", "responsible", "accountable"],
     )
 
+    amount = action.get("amount", 0)
+
+    # 🔥 ENFORCE APPROVAL RULE
+    approval_required = False
+    for rule in compiled.get("constraints", []):
+        if rule.get("type") == "approval_required":
+            threshold = rule.get("threshold", 0)
+            if amount > threshold:
+                approval_required = True
+
+    if approval_required:
+        required_roles = list(set(required_roles + ["approver"]))
+
     actors_list = [
         {"id": proposer, "type": "agent", "role": "proposer"},
         {"id": responsible, "type": "human", "role": "responsible"},
@@ -200,6 +207,21 @@ def run_validation(
 
     if approver:
         actors_list.append({"id": approver, "type": "human", "role": "approver"})
+
+    if approval_required and not approver:
+        return {
+            "allowed": False,
+            "summary": f"AI attempted to transfer ${amount:,.0f}",
+            "reason": "Approval required but no approver provided",
+            "impact": [
+                "exceeded approval threshold",
+                "no authorized approver assigned",
+                "execution blocked at boundary",
+            ],
+            "decision_trace": [],
+            "resolved_identities": {},
+            "trace_hash": "missing_approver",
+        }
 
     proposal = build_proposal(
         proposal_id=str(uuid.uuid4()),
@@ -230,8 +252,6 @@ def run_validation(
     stages = extract_stages(result)
     allowed = getattr(result, "commit_allowed", False)
     reason = extract_reason(stages)
-
-    amount = action.get("amount", 0)
 
     if not allowed:
         if "separation" in reason.lower() or "multiple required roles" in reason.lower():
@@ -273,13 +293,13 @@ def run_validation(
         },
     }
 
-
 # ---------------------------
 # SANDBOX ENDPOINT
 # ---------------------------
 
 @app.post("/validate")
 async def validate(request: Request, db: Session = Depends(get_db)):
+    """Public Sandbox. No API Key required. Logs to 'org_sandbox_000'."""
     body = await request.json()
 
     action = body.get("action", {})
@@ -295,7 +315,7 @@ async def validate(request: Request, db: Session = Depends(get_db)):
 
     log = AuditLog(
         id=f"dec_{uuid.uuid4().hex[:10]}",
-        organization_id=None,
+        organization_id="org_sandbox_000",
         policy_version_id=None,
         actor=actor,
         action_type=action.get("type", "unknown"),
@@ -310,9 +330,8 @@ async def validate(request: Request, db: Session = Depends(get_db)):
 
     return JSONResponse(decision)
 
-
 # ---------------------------
-# PROD ENDPOINT
+# PROD ENDPOINT (MULTI-TENANT)
 # ---------------------------
 
 @app.post("/v1/enforce")
@@ -321,20 +340,22 @@ async def enforce(
     current_org: Organization = Depends(get_current_org),
     db: Session = Depends(get_db),
 ):
+    """Production Endpoint. Requires API Key. Enforces Org Isolation."""
     body = await request.json()
 
+    # Org Isolation: Only fetch policies owned by the current organization
     policy = db.query(Policy).filter(
         Policy.id == body.get("policy_ref"),
         Policy.organization_id == current_org.id,
     ).first()
 
     if not policy:
-        raise HTTPException(status_code=404, detail="Policy not found")
+        raise HTTPException(status_code=404, detail="Policy not found or you lack permission.")
 
     if not policy.versions:
-        raise HTTPException(status_code=404, detail="Policy has no versions")
+        raise HTTPException(status_code=404, detail="Policy has no active versions")
 
-    version = policy.versions[0]
+    version = policy.versions[0] # Gets the most recent version
     policy_dict = json.loads(version.rules_json)
 
     action = body.get("action", {})
@@ -343,6 +364,7 @@ async def enforce(
 
     decision = run_validation(policy_dict, action, actor, context)
 
+    # Immutable Audit Logging tied to the specific policy version
     log = AuditLog(
         id=f"dec_{uuid.uuid4().hex[:10]}",
         organization_id=current_org.id,
@@ -360,9 +382,8 @@ async def enforce(
 
     return JSONResponse(decision)
 
-
 # ---------------------------
-# LOGS API
+# LOGS & IDENTITIES API
 # ---------------------------
 
 @app.get("/api/logs")
@@ -388,7 +409,6 @@ def logs(limit: int = 50, db: Session = Depends(get_db)):
         ]
     }
 
-
 @app.get("/identities")
 def identities():
     registry = load_identity_registry()
@@ -401,7 +421,6 @@ def identities():
             for v in registry["identities"].values()
         ]
     }
-
 
 # ---------------------------
 # UI - COMPLIANCE DASHBOARD
@@ -498,9 +517,8 @@ def dashboard(db: Session = Depends(get_db)):
     </html>
     """
 
-
 # ---------------------------
-# UI SANDBOX
+# UI - PUBLIC SANDBOX
 # ---------------------------
 
 @app.get("/", response_class=HTMLResponse)
