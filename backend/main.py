@@ -397,78 +397,762 @@ def identities():
     }
 
 
-# ---------------------------
-# NEW: COMPLIANCE DASHBOARD
-# ---------------------------
+"""
+Waveframe Guard — Upgraded Compliance Dashboard
+================================================
+DROP-IN REPLACEMENT for the /dashboard route in backend/main.py
+
+Replace your existing dashboard() function with this one.
+Everything else in main.py stays identical.
+
+The dashboard polls /api/logs and /identities (already in your FastAPI app)
+so no new backend changes are needed.
+"""
+
+from fastapi.responses import HTMLResponse
+
 
 @app.get("/dashboard", response_class=HTMLResponse)
 def dashboard():
-    """The Compliance Dashboard: Reads the local log file and displays the audit trail."""
-    logs = read_logs(limit=100)
-    
-    rows_html = ""
-    for log in logs:
-        status_color = "#2ea043" if log.get("allowed") else "#da3633"
-        status_text = "ALLOWED" if log.get("allowed") else "BLOCKED"
-        amount = log.get("action", {}).get("amount", 0)
-        action_type = log.get("action", {}).get("type", "unknown").upper()
-        ts = log.get("server_timestamp", "Recent")
-
-        rows_html += f"""
-        <tr style="border-bottom: 1px solid #333;">
-            <td style="padding: 16px; font-family: monospace; font-size: 12px; color: #8b949e;">{ts}</td>
-            <td style="padding: 16px;">
-                <span style="background: {status_color}20; color: {status_color}; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; border: 1px solid {status_color}40;">
-                    {status_text}
-                </span>
-            </td>
-            <td style="padding: 16px; font-weight: bold;">{action_type} - ${amount:,.0f}</td>
-            <td style="padding: 16px; color: #8b949e; font-size: 14px;">{log.get("actor")}</td>
-            <td style="padding: 16px; font-size: 14px;">{log.get("reason")}</td>
-            <td style="padding: 16px; font-family: monospace; font-size: 11px; color: #8b949e;" title="{log.get('trace_hash')}">
-                {str(log.get('trace_hash', ''))[:8]}...
-            </td>
-        </tr>
-        """
-
-    return f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Waveframe | Audit Dashboard</title>
-        <style>
-            body {{ font-family: -apple-system, system-ui, sans-serif; background: #0f1115; color: #fff; padding: 40px; margin: 0; }}
-            .container {{ max-width: 1200px; margin: 0 auto; }}
-            h1 {{ margin-top: 0; font-size: 24px; }}
-            p {{ color: #8b949e; margin-bottom: 30px; }}
-            table {{ width: 100%; border-collapse: collapse; background: #1a1d24; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }}
-            th {{ text-align: left; padding: 16px; border-bottom: 1px solid #333; color: #8b949e; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; background: #13161b; }}
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <h1>Waveframe Compliance Dashboard</h1>
-            <p>Immutable audit ledger of all AI execution boundaries.</p>
-            
-            <table>
-                <thead>
-                    <tr>
-                        <th>Timestamp</th>
-                        <th>Decision</th>
-                        <th>Action</th>
-                        <th>Actor</th>
-                        <th>Reason</th>
-                        <th>Trace Hash</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {rows_html if rows_html else '<tr><td colspan="6" style="padding: 24px; text-align: center; color: #8b949e;">No audit logs found. Run the SDK or Sandbox to generate data.</td></tr>'}
-                </tbody>
-            </table>
-        </div>
-    </body>
-    </html>
     """
+    Compliance Dashboard: Live audit ledger with stats, filtering, and real-time polling.
+    Reads from /api/logs and /identities — no new endpoints required.
+    """
+    return """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Waveframe Guard — Compliance Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:        #07090d;
+    --surface:   #0d1018;
+    --surface2:  #111520;
+    --border:    #1c2030;
+    --border2:   #242840;
+    --text:      #dce3f0;
+    --muted:     #4a5270;
+    --muted2:    #6b7494;
+    --green:     #00d97e;
+    --green-dim: rgba(0,217,126,0.10);
+    --red:       #ff3d5a;
+    --red-dim:   rgba(255,61,90,0.10);
+    --amber:     #ffaa00;
+    --amber-dim: rgba(255,170,0,0.10);
+    --blue:      #4d7cfe;
+    --blue-dim:  rgba(77,124,254,0.10);
+    --mono:      'IBM Plex Mono', monospace;
+    --sans:      'IBM Plex Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    padding: 0 0 60px;
+  }
+
+  /* ── Header ── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    height: 52px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-left { display: flex; align-items: center; gap: 14px; }
+  .logo {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--text);
+  }
+  .logo span { color: var(--green); }
+  .sep { width: 1px; height: 18px; background: var(--border2); }
+  .header-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted2);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .live-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    background: var(--green-dim);
+    border: 1px solid rgba(0,217,126,0.2);
+    border-radius: 99px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--green);
+    letter-spacing: 0.08em;
+  }
+  .live-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: blink 2s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .nav-link {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted2);
+    text-decoration: none;
+    letter-spacing: 0.06em;
+    padding: 5px 10px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .nav-link:hover { color: var(--text); border-color: var(--border2); }
+
+  /* ── Page body ── */
+  .page { padding: 28px 32px 0; max-width: 1440px; margin: 0 auto; }
+
+  /* ── Stat cards ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+    position: relative;
+    overflow: hidden;
+    animation: fadeUp 0.4s ease both;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    border-radius: 8px 0 0 8px;
+  }
+  .stat-card.green::before  { background: var(--green); }
+  .stat-card.red::before    { background: var(--red); }
+  .stat-card.amber::before  { background: var(--amber); }
+  .stat-card.blue::before   { background: var(--blue); }
+
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted2);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .stat-value {
+    font-family: var(--mono);
+    font-size: 30px;
+    font-weight: 600;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .stat-card.green .stat-value { color: var(--green); }
+  .stat-card.red .stat-value   { color: var(--red); }
+  .stat-card.amber .stat-value { color: var(--amber); }
+  .stat-card.blue .stat-value  { color: var(--blue); }
+  .stat-sub {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--mono);
+  }
+
+  /* ── Main panel ── */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    animation: fadeUp 0.5s ease both;
+  }
+  .panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .panel-title-row { display: flex; align-items: center; gap: 10px; }
+  .panel-title {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .count-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted2);
+    background: var(--border);
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+  .pulse-ring {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    transition: box-shadow 0.3s;
+  }
+  .pulse-ring.active { box-shadow: 0 0 0 3px rgba(0,217,126,0.25); }
+
+  /* ── Filter bar ── */
+  .filter-bar { display: flex; gap: 6px; align-items: center; }
+  .filter-btn {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.07em;
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted2);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .filter-btn:hover { color: var(--text); border-color: var(--border2); }
+  .filter-btn.active-all    { background: rgba(220,227,240,0.08); color: var(--text); border-color: var(--border2); }
+  .filter-btn.active-allow  { background: var(--green-dim); color: var(--green); border-color: rgba(0,217,126,0.3); }
+  .filter-btn.active-block  { background: var(--red-dim);   color: var(--red);   border-color: rgba(255,61,90,0.3); }
+
+  /* ── Table ── */
+  .tbl-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  thead tr { background: var(--surface2); border-bottom: 1px solid var(--border); }
+  th {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 9px 14px;
+    text-align: left;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,0.025); }
+  tbody tr.selected { background: rgba(77,124,254,0.06); }
+  tbody tr.new-row { animation: slideIn 0.35s ease both; }
+  td {
+    padding: 11px 14px;
+    font-size: 12px;
+    vertical-align: middle;
+  }
+  .td-mono { font-family: var(--mono); }
+  .td-time { color: var(--muted2); font-size: 11px; font-family: var(--mono); white-space: nowrap; }
+  .td-id   { color: var(--muted); font-size: 10px; font-family: var(--mono); }
+  .td-hash { color: var(--muted); font-size: 10px; font-family: var(--mono); }
+
+  .badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    padding: 3px 8px;
+    border-radius: 3px;
+    border: 1px solid;
+    white-space: nowrap;
+  }
+  .badge-allow { color: var(--green); background: var(--green-dim); border-color: rgba(0,217,126,0.25); }
+  .badge-block { color: var(--red);   background: var(--red-dim);   border-color: rgba(255,61,90,0.25); }
+
+  .td-reason { color: var(--muted2); font-size: 12px; max-width: 320px; }
+
+  /* ── Detail drawer ── */
+  .drawer-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(7,9,13,0.7);
+    z-index: 200;
+    backdrop-filter: blur(2px);
+  }
+  .drawer-overlay.open { display: block; }
+  .drawer {
+    position: fixed;
+    right: 0; top: 0; bottom: 0;
+    width: 380px;
+    background: var(--surface);
+    border-left: 1px solid var(--border2);
+    z-index: 201;
+    transform: translateX(100%);
+    transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .drawer.open { transform: translateX(0); }
+  .drawer-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0;
+    background: var(--surface2);
+    z-index: 1;
+  }
+  .drawer-title { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--text); }
+  .drawer-close {
+    background: none; border: none; color: var(--muted2);
+    font-size: 18px; cursor: pointer; padding: 0; line-height: 1;
+    transition: color 0.15s;
+  }
+  .drawer-close:hover { color: var(--text); }
+  .drawer-body { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 18px; }
+  .drawer-decision {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    border-radius: 7px;
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .drawer-decision.allow { background: var(--green-dim); color: var(--green); border: 1px solid rgba(0,217,126,0.2); }
+  .drawer-decision.block { background: var(--red-dim);   color: var(--red);   border: 1px solid rgba(255,61,90,0.2); }
+  .field-group { display: flex; flex-direction: column; gap: 10px; }
+  .field-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .field-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .field-key {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+    padding-top: 1px;
+  }
+  .field-val {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text);
+    text-align: right;
+    word-break: break-all;
+  }
+  .reason-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.55;
+  }
+  .reason-block .reason-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  /* ── Empty / error states ── */
+  .empty-state {
+    padding: 52px 24px;
+    text-align: center;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 13px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .empty-icon { font-size: 28px; opacity: 0.4; }
+  .error-banner {
+    display: none;
+    padding: 10px 18px;
+    background: var(--red-dim);
+    border-bottom: 1px solid rgba(255,61,90,0.2);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--red);
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Animations ── */
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(8px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  @keyframes slideIn {
+    from { opacity:0; transform:translateY(-6px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .page { padding: 20px 16px 0; }
+    .header { padding: 0 16px; }
+    .drawer { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <div class="header-left">
+    <div class="logo">WAVEFRAME <span>GUARD</span></div>
+    <div class="sep"></div>
+    <div class="header-label">Compliance Ledger</div>
+    <div class="live-pill">
+      <div class="live-dot"></div>
+      LIVE
+    </div>
+  </div>
+  <div class="header-right">
+    <div id="lastUpdated" style="font-family:var(--mono);font-size:10px;color:var(--muted);">--</div>
+    <a href="/" class="nav-link">← Sandbox</a>
+  </div>
+</header>
+
+<div class="page">
+
+  <!-- Error banner -->
+  <div id="errorBanner" class="error-banner">
+    ⚠ Could not reach /api/logs — check that the backend is running.
+  </div>
+
+  <!-- Stat cards -->
+  <div class="stats-row">
+    <div class="stat-card green">
+      <div class="stat-label">Allowed</div>
+      <div class="stat-value" id="statAllowed">—</div>
+      <div class="stat-sub" id="statAllowedPct">—</div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-label">Blocked</div>
+      <div class="stat-value" id="statBlocked">—</div>
+      <div class="stat-sub" id="statBlockedPct">—</div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-label">Total Decisions</div>
+      <div class="stat-value" id="statTotal">—</div>
+      <div class="stat-sub">Last 50 records</div>
+    </div>
+    <div class="stat-card amber">
+      <div class="stat-label">Volume Screened</div>
+      <div class="stat-value" id="statVolume">—</div>
+      <div class="stat-sub">Across all actions</div>
+    </div>
+  </div>
+
+  <!-- Log table -->
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-title-row">
+        <div class="pulse-ring" id="pulseRing"></div>
+        <div class="panel-title">Audit Feed</div>
+        <div class="count-badge" id="countBadge">0</div>
+      </div>
+      <div class="filter-bar">
+        <button class="filter-btn active-all" data-filter="all"   onclick="setFilter('all')">ALL</button>
+        <button class="filter-btn"            data-filter="allow" onclick="setFilter('allow')">ALLOWED</button>
+        <button class="filter-btn"            data-filter="block" onclick="setFilter('block')">BLOCKED</button>
+      </div>
+    </div>
+
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Decision ID</th>
+            <th>Status</th>
+            <th>Actor</th>
+            <th>Action</th>
+            <th>Amount</th>
+            <th>Reason</th>
+            <th>Trace Hash</th>
+          </tr>
+        </thead>
+        <tbody id="logBody">
+          <tr>
+            <td colspan="8">
+              <div class="empty-state">
+                <div class="empty-icon">⏳</div>
+                Loading audit records…
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Detail drawer -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <div class="drawer-title" id="drawerTitle">Decision Detail</div>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-body" id="drawerBody"></div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let allLogs    = [];
+let activeFilter = 'all';
+let selectedId   = null;
+let prevTopId    = null;
+let pollInterval = null;
+
+// ── Utilities ──────────────────────────────────────────────────────────────
+function esc(v) {
+  return String(v ?? '—')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function fmtTime(iso) {
+  if (!iso) return '—';
+  try {
+    const d = new Date(iso);
+    return d.toLocaleTimeString('en-US', { hour12: false, hour:'2-digit', minute:'2-digit', second:'2-digit' })
+      + '<br><span style="font-size:10px;color:var(--muted)">'
+      + d.toLocaleDateString('en-US', { month:'short', day:'numeric' }) + '</span>';
+  } catch { return esc(iso); }
+}
+
+function fmtMoney(n) {
+  if (n == null || isNaN(n)) return '—';
+  return new Intl.NumberFormat('en-US', { style:'currency', currency:'USD', maximumFractionDigits:0 }).format(n);
+}
+
+function shortHash(h) {
+  if (!h) return '—';
+  return String(h).slice(0,8) + '…';
+}
+
+// ── Fetch & render ─────────────────────────────────────────────────────────
+async function fetchLogs() {
+  try {
+    const res = await fetch('/api/logs?limit=50');
+    if (!res.ok) throw new Error(res.status);
+    const data = await res.json();
+    document.getElementById('errorBanner').style.display = 'none';
+    return data.logs || [];
+  } catch (e) {
+    document.getElementById('errorBanner').style.display = 'block';
+    return null;
+  }
+}
+
+function updateStats(logs) {
+  const allowed  = logs.filter(l => l.allowed).length;
+  const blocked  = logs.length - allowed;
+  const total    = logs.length;
+  const volume   = logs.reduce((s, l) => s + (l.action?.amount || 0), 0);
+  const allowPct = total ? ((allowed / total) * 100).toFixed(0) : 0;
+  const blockPct = total ? ((blocked / total) * 100).toFixed(0) : 0;
+
+  document.getElementById('statAllowed').textContent    = allowed;
+  document.getElementById('statBlocked').textContent    = blocked;
+  document.getElementById('statTotal').textContent      = total;
+  document.getElementById('statVolume').textContent     = fmtMoney(volume);
+  document.getElementById('statAllowedPct').textContent = allowPct + '% allow rate';
+  document.getElementById('statBlockedPct').textContent = blockPct + '% block rate';
+  document.getElementById('countBadge').textContent     = total;
+}
+
+function filteredLogs() {
+  if (activeFilter === 'allow') return allLogs.filter(l => l.allowed);
+  if (activeFilter === 'block') return allLogs.filter(l => !l.allowed);
+  return allLogs;
+}
+
+function renderTable(isRefresh) {
+  const logs   = filteredLogs();
+  const tbody  = document.getElementById('logBody');
+  const newTop = allLogs[0]?.decision_id;
+  const hasNew = isRefresh && newTop && newTop !== prevTopId;
+  prevTopId    = allLogs[0]?.decision_id;
+
+  if (!logs.length) {
+    tbody.innerHTML = `<tr><td colspan="8">
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        No audit records yet. Run the Sandbox or SDK to generate data.
+      </div>
+    </td></tr>`;
+    return;
+  }
+
+  // Pulse indicator on new data
+  if (hasNew) {
+    const ring = document.getElementById('pulseRing');
+    ring.classList.add('active');
+    setTimeout(() => ring.classList.remove('active'), 800);
+  }
+
+  tbody.innerHTML = logs.map((log, i) => {
+    const allowed    = !!log.allowed;
+    const badgeCls   = allowed ? 'badge-allow' : 'badge-block';
+    const badgeTxt   = allowed ? 'ALLOWED' : 'BLOCKED';
+    const isNew      = hasNew && i === 0;
+    const isSelected = log.decision_id === selectedId;
+    const actionType = (log.action?.type || 'unknown').toUpperCase();
+    const amount     = log.action?.amount;
+
+    return `<tr class="${isNew ? 'new-row' : ''} ${isSelected ? 'selected' : ''}"
+               onclick="openDrawer(${esc(JSON.stringify(log))})">
+      <td class="td-time">${fmtTime(log.server_timestamp)}</td>
+      <td class="td-id">${esc(log.decision_id)}</td>
+      <td><span class="badge ${badgeCls}">${badgeTxt}</span></td>
+      <td class="td-mono" style="font-size:12px">${esc(log.actor)}</td>
+      <td class="td-mono" style="font-size:12px">${esc(actionType)}</td>
+      <td class="td-mono" style="font-size:13px">${amount != null ? fmtMoney(amount) : '—'}</td>
+      <td class="td-reason">${esc(log.reason)}</td>
+      <td class="td-hash" title="${esc(log.trace_hash)}">${shortHash(log.trace_hash)}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function poll(isRefresh) {
+  const logs = await fetchLogs();
+  if (logs === null) return;
+  allLogs = logs;
+  updateStats(logs);
+  renderTable(isRefresh);
+
+  const now = new Date().toLocaleTimeString('en-US', { hour12: false });
+  document.getElementById('lastUpdated').textContent = 'Updated ' + now;
+}
+
+// ── Filter ──────────────────────────────────────────────────────────────────
+function setFilter(f) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.className = 'filter-btn';
+    if (btn.dataset.filter === f) {
+      if (f === 'all')   btn.classList.add('active-all');
+      if (f === 'allow') btn.classList.add('active-allow');
+      if (f === 'block') btn.classList.add('active-block');
+    }
+  });
+  renderTable(false);
+}
+
+// ── Drawer ──────────────────────────────────────────────────────────────────
+function openDrawer(logRaw) {
+  const log = typeof logRaw === 'string' ? JSON.parse(logRaw) : logRaw;
+  selectedId = log.decision_id;
+  renderTable(false);
+
+  const allowed    = !!log.allowed;
+  const actionType = (log.action?.type || 'unknown').toUpperCase();
+  const amount     = log.action?.amount;
+
+  document.getElementById('drawerTitle').textContent = log.decision_id || 'Decision Detail';
+  document.getElementById('drawerBody').innerHTML = `
+    <div class="drawer-decision ${allowed ? 'allow' : 'block'}">
+      ${allowed ? '✅ ALLOWED' : '🚫 BLOCKED'}
+    </div>
+
+    <div class="field-group">
+      <div class="field-row">
+        <div class="field-key">Decision ID</div>
+        <div class="field-val">${esc(log.decision_id)}</div>
+      </div>
+      <div class="field-row">
+        <div class="field-key">Timestamp</div>
+        <div class="field-val">${esc(log.server_timestamp)}</div>
+      </div>
+      <div class="field-row">
+        <div class="field-key">Actor</div>
+        <div class="field-val">${esc(log.actor)}</div>
+      </div>
+      <div class="field-row">
+        <div class="field-key">Action</div>
+        <div class="field-val">${esc(actionType)}</div>
+      </div>
+      <div class="field-row">
+        <div class="field-key">Amount</div>
+        <div class="field-val">${amount != null ? fmtMoney(amount) : '—'}</div>
+      </div>
+    </div>
+
+    <div class="reason-block">
+      <div class="reason-label">Enforcement Reason</div>
+      ${esc(log.reason)}
+    </div>
+
+    <div class="field-group">
+      <div class="field-row">
+        <div class="field-key">Trace Hash</div>
+        <div class="field-val" style="font-size:10px;word-break:break-all">${esc(log.trace_hash)}</div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('drawerOverlay').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+}
+
+function closeDrawer() {
+  selectedId = null;
+  document.getElementById('drawerOverlay').classList.remove('open');
+  document.getElementById('drawer').classList.remove('open');
+  renderTable(false);
+}
+
+// ── Keyboard shortcut ──────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeDrawer();
+});
+
+// ── Boot ──────────────────────────────────────────────────────────────────
+poll(false);
+pollInterval = setInterval(() => poll(true), 5000);
+</script>
+</body>
+</html>""";
+
 
 # ---------------------------
 # UI SANDBOX
