@@ -6,14 +6,14 @@ import uuid
 import hashlib
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from datetime import datetime
 
 from fastapi import FastAPI, Request, HTTPException, Depends, Security
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy.orm import Session
 
-# Import your new database logic!
-from db import init_db, get_db, Organization, APIKey, Policy, AuditLog
+from backend.db import init_db, get_db, Organization, APIKey, Policy, AuditLog
 
 from compiler.compile_policy_file import compile_policy_file
 from proposal_normalizer.build_proposal import build_proposal
@@ -21,7 +21,7 @@ from cricore.interface.evaluate_proposal import evaluate_proposal
 
 app = FastAPI(
     title="Waveframe Guard",
-    version="3.0.1",
+    version="3.0.2",
     description="Enterprise Multi-Tenant AI Governance Platform"
 )
 
@@ -188,8 +188,9 @@ def run_validation(
 
     amount = action.get("amount", 0)
 
-    # 🔥 ENFORCE APPROVAL RULE
+    # 🔥 RESTORED: ENFORCE APPROVAL RULE
     approval_required = False
+    threshold = 0
     for rule in compiled.get("constraints", []):
         if rule.get("type") == "approval_required":
             threshold = rule.get("threshold", 0)
@@ -199,6 +200,29 @@ def run_validation(
     if approval_required:
         required_roles = list(set(required_roles + ["approver"]))
 
+    # Short-circuit if threshold is exceeded but no approver is selected
+    if approval_required and not approver:
+        return {
+            "allowed": False,
+            "summary": f"AI attempted to transfer ${amount:,.0f}",
+            "reason": f"Approval required for amounts over ${threshold:,.0f}, but no approver was provided.",
+            "impact": [
+                "exceeded approval threshold",
+                "no authorized approver assigned",
+                "execution blocked at boundary",
+            ],
+            "decision_trace": [
+                {"stage": "approval-gate", "passed": False, "messages": ["Missing required human approver for threshold limit."]}
+            ],
+            "trace_hash": contract_hash,
+            "resolved_identities": {
+                "proposer": proposer,
+                "responsible": responsible,
+                "accountable": accountable,
+                "approver": approver,
+            },
+        }
+
     actors_list = [
         {"id": proposer, "type": "agent", "role": "proposer"},
         {"id": responsible, "type": "human", "role": "responsible"},
@@ -207,21 +231,6 @@ def run_validation(
 
     if approver:
         actors_list.append({"id": approver, "type": "human", "role": "approver"})
-
-    if approval_required and not approver:
-        return {
-            "allowed": False,
-            "summary": f"AI attempted to transfer ${amount:,.0f}",
-            "reason": "Approval required but no approver provided",
-            "impact": [
-                "exceeded approval threshold",
-                "no authorized approver assigned",
-                "execution blocked at boundary",
-            ],
-            "decision_trace": [],
-            "resolved_identities": {},
-            "trace_hash": "missing_approver",
-        }
 
     proposal = build_proposal(
         proposal_id=str(uuid.uuid4()),
@@ -343,7 +352,6 @@ async def enforce(
     """Production Endpoint. Requires API Key. Enforces Org Isolation."""
     body = await request.json()
 
-    # Org Isolation: Only fetch policies owned by the current organization
     policy = db.query(Policy).filter(
         Policy.id == body.get("policy_ref"),
         Policy.organization_id == current_org.id,
@@ -355,7 +363,7 @@ async def enforce(
     if not policy.versions:
         raise HTTPException(status_code=404, detail="Policy has no active versions")
 
-    version = policy.versions[0] # Gets the most recent version
+    version = policy.versions[0] 
     policy_dict = json.loads(version.rules_json)
 
     action = body.get("action", {})
@@ -364,7 +372,6 @@ async def enforce(
 
     decision = run_validation(policy_dict, action, actor, context)
 
-    # Immutable Audit Logging tied to the specific policy version
     log = AuditLog(
         id=f"dec_{uuid.uuid4().hex[:10]}",
         organization_id=current_org.id,
@@ -792,7 +799,8 @@ const STAGE_EXPLANATIONS = {
     "integrity": { title: "Input integrity verified", detail: "Confirms required data and artifacts are present and valid." },
     "integrity-finalization": { title: "Execution readiness confirmed", detail: "Final validation before allowing execution." },
     "publication": { title: "Audit trace prepared", detail: "Ensures the action can be recorded and audited." },
-    "publication-commit": { title: "Decision finalized", detail: "The final execution decision has been cryptographically sealed." }
+    "publication-commit": { title: "Decision finalized", detail: "The final execution decision has been cryptographically sealed." },
+    "approval-gate": { title: "Approval threshold enforced", detail: "Ensures transactions exceeding threshold have authorized approval." }
 };
 
 function escapeHtml(value) {
