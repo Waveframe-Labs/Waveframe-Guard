@@ -6,14 +6,12 @@ import uuid
 import hashlib
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from datetime import datetime
 
 from fastapi import FastAPI, Request, HTTPException, Depends, Security
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.responses import HTMLResponse, JSONResponse
 from sqlalchemy.orm import Session
 
-# Import our new database schema
 from db import init_db, get_db, Organization, APIKey, Policy, AuditLog
 
 from compiler.compile_policy_file import compile_policy_file
@@ -23,347 +21,191 @@ from cricore.interface.evaluate_proposal import evaluate_proposal
 app = FastAPI(
     title="Waveframe Guard",
     version="3.0.0",
-    description="Enterprise Multi-Tenant AI Governance Platform",
 )
 
-# Initialize database on startup
+# ---------------------------
+# STARTUP
+# ---------------------------
+
 @app.on_event("startup")
-def startup_event():
+def startup():
     init_db()
 
 # ---------------------------
-# AUTHENTICATION
+# AUTH
 # ---------------------------
 
 security = HTTPBearer()
 
-def get_current_org(credentials: HTTPAuthorizationCredentials = Security(security), db: Session = Depends(get_db)):
-    """Verifies API Key and returns the associated Organization."""
+def get_current_org(
+    credentials: HTTPAuthorizationCredentials = Security(security),
+    db: Session = Depends(get_db)
+):
     api_key = db.query(APIKey).filter(APIKey.key_value == credentials.credentials).first()
     if not api_key:
-        raise HTTPException(status_code=401, detail="Invalid or revoked API Key")
+        raise HTTPException(status_code=401, detail="Invalid API Key")
     return api_key.organization
 
 # ---------------------------
-# IDENTITY & HELPERS
+# CORE VALIDATION
 # ---------------------------
 
-def load_identity_registry() -> Dict[str, Any]:
-    identity_path = Path(__file__).resolve().parent / "data" / "identities.json"
-    if identity_path.exists():
-        with open(identity_path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    return {
-        "identities": {
-            "user-alice": {"canonical_id": "usr_111", "display_name": "Alice (Admin)", "aliases": ["alice"]},
-            "user-bob": {"canonical_id": "usr_222", "display_name": "Bob (Finance)", "aliases": ["bob"]},
-            "user-charlie": {"canonical_id": "usr_333", "display_name": "Charlie (Approver)", "aliases": ["charlie"]},
-            "ai-agent-v2": {"canonical_id": "agt_999", "display_name": "AI Agent v2", "aliases": ["agent"]},
-        }
-    }
+def run_validation(policy, action, actor, context):
 
-def normalize(v: Optional[str]) -> str:
-    return v.strip().lower().replace("_", "-") if v else ""
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".json", mode="w") as f:
+        json.dump(policy, f)
+        policy_path = Path(f.name)
 
-def resolve_identity(value: str, registry: Dict[str, Any]) -> str | None:
-    if not value: return None
-    key = normalize(value)
-    for k, v in registry["identities"].items():
-        if key == normalize(k) or key in [normalize(a) for a in v.get("aliases", [])]:
-            return v["canonical_id"]
-    return key
-
-def extract_stages(result: Any) -> List[Dict[str, Any]]:
-    stages = getattr(result, "stage_results", [])
-    out = []
-    for s in stages:
-        out.append({
-            "stage": getattr(s, "stage_id", "unknown"),
-            "passed": getattr(s, "passed", False),
-            "messages": getattr(s, "messages", []),
-        })
-    return out
-
-def extract_reason(stages: List[Dict[str, Any]]) -> str:
-    for s in stages:
-        if not s["passed"]:
-            msgs = " ".join(s.get("messages", [])).lower()
-            if "separation" in msgs: return "Same person assigned to multiple required roles"
-            if "required_roles" in msgs: return "Required roles not properly assigned"
-            if "approval" in msgs: return "Approval missing or threshold exceeded"
-            if msgs: return msgs
-            return f"{s['stage']} failed"
-    return "Action structurally aligned with governance policy"
-
-# ---------------------------
-# CORE EVALUATION
-# ---------------------------
-
-def run_validation(policy: Dict[str, Any], action: Dict[str, Any], actor: str, context: Dict[str, Any]) -> Dict[str, Any]:
-    registry = load_identity_registry()
-    r = resolve_identity(context.get("responsible"), registry)
-    a = resolve_identity(context.get("accountable"), registry)
-    p = resolve_identity(context.get("approved_by"), registry)
-
-    if not r or not a:
-        return {
-            "allowed": False,
-            "summary": f"AI attempted action: {action.get('type')}",
-            "reason": "Identity resolution failed: missing required human context",
-            "impact": ["missing required execution identities", "action was stopped before execution"],
-            "decision_trace": [],
-            "resolved_identities": {},
-            "trace_hash": "error_hash"
-        }
-
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".json", mode="w", encoding="utf-8") as policy_file:
-        json.dump(policy, policy_file)
-        policy_path = Path(policy_file.name)
-
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as tmp:
-        compiled_path = Path(tmp.name)
+    compiled_path = Path(tempfile.NamedTemporaryFile(delete=False).name)
 
     contract_path = compile_policy_file(policy_path, compiled_path)
 
-    with open(contract_path, "r", encoding="utf-8") as f:
+    with open(contract_path) as f:
         compiled = json.load(f)
 
-    required_roles = compiled.get("roles", {}).get("required", ["proposer", "responsible", "accountable"])
-    contract_hash = hashlib.sha256(json.dumps(compiled, sort_keys=True).encode()).hexdigest()
-
-    actors_list = [
-        {"id": normalize(actor), "type": "agent", "role": "proposer"},
-        {"id": r, "type": "human", "role": "responsible"},
-        {"id": a, "type": "human", "role": "accountable"},
-    ]
-    if p: actors_list.append({"id": p, "type": "human", "role": "approver"})
+    contract_hash = hashlib.sha256(
+        json.dumps(compiled, sort_keys=True).encode()
+    ).hexdigest()
 
     proposal = build_proposal(
         proposal_id=str(uuid.uuid4()),
-        actor={"id": normalize(actor), "type": "agent"},
+        actor={"id": actor, "type": "agent"},
         artifact_paths=[],
-        mutation={"domain": "finance", "resource": "funds", "action": action.get("type", "unknown")},
-        contract={"id": compiled.get("contract_id", "dynamic-policy"), "version": compiled.get("contract_version", "1.0.0"), "hash": contract_hash},
-        run_context={"identities": {"actors": actors_list, "required_roles": required_roles, "conflict_flags": {}}, "integrity": {"artifacts_present": True}, "publication": {"ready": True}},
+        mutation={
+            "domain": "finance",
+            "resource": "funds",
+            "action": action.get("type", "unknown")
+        },
+        contract={
+            "id": compiled.get("contract_id", "dynamic"),
+            "version": compiled.get("contract_version", "1.0"),
+            "hash": contract_hash
+        },
+        run_context={
+            "identities": {
+                "actors": [
+                    {"id": actor, "type": "agent", "role": "proposer"}
+                ]
+            },
+            "integrity": {"artifacts_present": True},
+            "publication": {"ready": True}
+        }
     )
 
     result = evaluate_proposal(proposal, compiled)
-    allowed = getattr(result, "commit_allowed", False)
-    stages = extract_stages(result)
-    reason = extract_reason(stages)
-    amount = action.get("amount", 0)
 
-    if not allowed:
-        if "separation" in reason.lower():
-            impact = ["violated separation of duties", "created audit and fraud risk"]
-        elif "approval" in reason.lower():
-            impact = ["bypassed required approval threshold", "executed financial change without authorization"]
-        else:
-            impact = ["failed governance validation"]
-    else:
-        impact = ["roles properly separated", "approval conditions satisfied", "action aligned with policy"]
+    allowed = getattr(result, "commit_allowed", False)
 
     return {
         "allowed": allowed,
-        "summary": f"AI attempted to transfer ${amount:,.0f}",
-        "reason": reason,
-        "impact": impact,
-        "decision_trace": stages,
+        "reason": "Allowed" if allowed else "Blocked by policy",
         "trace_hash": contract_hash,
-        "resolved_identities": {"proposer": normalize(actor), "responsible": r, "accountable": a, "approver": p},
     }
 
 # ---------------------------
-# API ENDPOINTS
+# SANDBOX ENDPOINT
 # ---------------------------
 
 @app.post("/validate")
 async def validate(request: Request, db: Session = Depends(get_db)):
-    """The Sandbox Endpoint: Public access, logs to the Sandbox Org."""
+
     body = await request.json()
+
     action = body.get("action", {})
-    actor = body.get("actor", "ai-agent-v2")
-    
-    decision = run_validation(body.get("policy", {}), action, actor, body.get("context", {}))
-    
-    log_entry = AuditLog(
-        id=f"dec_{uuid.uuid4().hex[:12]}",
-        organization_id="org_sandbox_000",
-        actor=normalize(actor),
+    actor = body.get("actor", "ai-agent")
+
+    decision = run_validation(
+        body.get("policy", {}),
+        action,
+        actor,
+        body.get("context", {})
+    )
+
+    log = AuditLog(
+        id=f"dec_{uuid.uuid4().hex[:10]}",
+        organization_id=None,
+        policy_version_id=None,
+        actor=actor,
         action_type=action.get("type", "unknown"),
         amount=action.get("amount", 0),
         allowed=decision["allowed"],
         reason=decision["reason"],
         trace_hash=decision["trace_hash"]
     )
-    db.add(log_entry)
+
+    db.add(log)
     db.commit()
 
     return JSONResponse(decision)
 
+# ---------------------------
+# PROD ENDPOINT
+# ---------------------------
 
 @app.post("/v1/enforce")
-async def enforce(request: Request, current_org: Organization = Depends(get_current_org), db: Session = Depends(get_db)):
-    """The Production Endpoint: Secure B2B access, Org-Isolated."""
+async def enforce(
+    request: Request,
+    current_org: Organization = Depends(get_current_org),
+    db: Session = Depends(get_db)
+):
+
     body = await request.json()
-    policy_ref = body.get("policy_ref")
 
-    # 1. ORG ISOLATION: Ensure this policy is owned by the API Key's Org
-    policy = db.query(Policy).filter(Policy.id == policy_ref, Policy.organization_id == current_org.id).first()
+    policy = db.query(Policy).filter(
+        Policy.id == body.get("policy_ref"),
+        Policy.organization_id == current_org.id
+    ).first()
+
     if not policy:
-        raise HTTPException(status_code=404, detail=f"Policy '{policy_ref}' not found in your organization.")
+        raise HTTPException(status_code=404, detail="Policy not found")
 
-    # 2. VERSION TRACKING: Get the active version
-    active_version = policy.versions[0]
-    policy_dict = json.loads(active_version.rules_json)
+    version = policy.versions[0]
+    policy_dict = json.loads(version.rules_json)
 
-    # 3. EVALUATE
     action = body.get("action", {})
-    actor = body.get("actor", "ai-agent-v2")
-    decision = run_validation(policy=policy_dict, action=action, actor=actor, context=body.get("context", {}))
+    actor = body.get("actor", "ai-agent")
 
-    # 4. IMMUTABLE LOG: Tie the log to the specific tenant and policy version
-    log_entry = AuditLog(
-        id=f"dec_{uuid.uuid4().hex[:12]}",
+    decision = run_validation(policy_dict, action, actor, body.get("context", {}))
+
+    log = AuditLog(
+        id=f"dec_{uuid.uuid4().hex[:10]}",
         organization_id=current_org.id,
-        policy_version_id=active_version.id,
-        actor=normalize(actor),
+        policy_version_id=version.id,
+        actor=actor,
         action_type=action.get("type", "unknown"),
         amount=action.get("amount", 0),
         allowed=decision["allowed"],
         reason=decision["reason"],
         trace_hash=decision["trace_hash"]
     )
-    db.add(log_entry)
-    db.commit()
 
-    print(f"\n📈 [SAAS AUDIT] Org: {current_org.name} | {decision['summary']} | {'ALLOWED' if decision['allowed'] else 'BLOCKED'}\n")
+    db.add(log)
+    db.commit()
 
     return JSONResponse(decision)
 
+# ---------------------------
+# LOGS API
+# ---------------------------
 
 @app.get("/api/logs")
-def get_logs(limit: int = 50, db: Session = Depends(get_db)):
-    """API for the dashboard to fetch DB logs."""
-    logs = db.query(AuditLog).order_by(AuditLog.server_timestamp.desc()).limit(limit).all()
-    # Format them cleanly for the frontend
-    result = []
-    for l in logs:
-        result.append({
-            "decision_id": l.id,
-            "organization_name": l.organization.name if l.organization else "Unknown",
-            "server_timestamp": l.server_timestamp.isoformat() + "Z" if l.server_timestamp else None,
-            "allowed": l.allowed,
-            "action": {"type": l.action_type, "amount": l.amount},
-            "actor": l.actor,
-            "reason": l.reason,
-            "trace_hash": l.trace_hash
-        })
-    return {"logs": result}
+def logs(db: Session = Depends(get_db)):
+    rows = db.query(AuditLog).all()
 
-@app.get("/identities")
-def identities():
-    registry = load_identity_registry()
     return {
-        "identities": [
-            {"id": v["canonical_id"], "name": v.get("display_name", v["canonical_id"])}
-            for v in registry["identities"].values()
+        "logs": [
+            {
+                "id": r.id,
+                "actor": r.actor,
+                "allowed": r.allowed,
+                "action": r.action_type,
+                "amount": r.amount,
+                "reason": r.reason
+            }
+            for r in rows
         ]
     }
 
-# ---------------------------
-# UI - COMPLIANCE DASHBOARD
-# ---------------------------
-
-@app.get("/dashboard", response_class=HTMLResponse)
-def dashboard(db: Session = Depends(get_db)):
-    """Renders the Compliance Ledger natively."""
-    logs = db.query(AuditLog).order_by(AuditLog.server_timestamp.desc()).limit(100).all()
-    
-    rows_html = ""
-    for log in logs:
-        status_color = "#2ea043" if log.allowed else "#da3633"
-        status_text = "ALLOWED" if log.allowed else "BLOCKED"
-        action_type = (log.action_type or "unknown").upper()
-        ts = log.server_timestamp.strftime("%Y-%m-%d %H:%M:%S") if log.server_timestamp else "Recent"
-        org_name = log.organization.name if log.organization else "Unknown Org"
-
-        rows_html += f"""
-        <tr style="border-bottom: 1px solid var(--border);">
-            <td class="td-time">{ts}</td>
-            <td class="td-mono" style="color: var(--blue); font-weight: bold;">{org_name}</td>
-            <td class="td-id">{log.id}</td>
-            <td><span class="badge" style="color: {status_color}; background: {status_color}20; border-color: {status_color}40;">{status_text}</span></td>
-            <td class="td-mono">{log.actor}</td>
-            <td class="td-mono">{action_type}</td>
-            <td class="td-mono">${log.amount:,.0f} if log.amount else '—'}</td>
-            <td class="td-reason">{log.reason}</td>
-            <td class="td-hash" title="{log.trace_hash}">{str(log.trace_hash)[:8]}...</td>
-        </tr>
-        """
-
-    return f"""
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-    <meta charset="UTF-8" />
-    <title>Waveframe Guard — Compliance Ledger</title>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
-    <style>
-      :root {{ --bg: #07090d; --surface: #0d1018; --surface2: #111520; --border: #1c2030; --border2: #242840; --text: #dce3f0; --muted: #4a5270; --muted2: #6b7494; --green: #00d97e; --red: #ff3d5a; --blue: #4d7cfe; --mono: 'IBM Plex Mono', monospace; --sans: 'IBM Plex Sans', sans-serif; }}
-      * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-      body {{ background: var(--bg); color: var(--text); font-family: var(--sans); padding: 0 0 60px; }}
-      .header {{ display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 52px; border-bottom: 1px solid var(--border); background: var(--surface); }}
-      .logo {{ font-family: var(--mono); font-size: 13px; font-weight: 600; letter-spacing: 0.06em; }}
-      .logo span {{ color: var(--green); }}
-      .page {{ padding: 28px 32px 0; max-width: 1440px; margin: 0 auto; }}
-      .panel {{ background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }}
-      .panel-head {{ padding: 13px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); font-family: var(--mono); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }}
-      table {{ width: 100%; border-collapse: collapse; }}
-      thead tr {{ background: var(--surface2); border-bottom: 1px solid var(--border); }}
-      th {{ font-family: var(--mono); font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; padding: 9px 14px; text-align: left; }}
-      tbody tr {{ transition: background 0.12s; cursor: pointer; }}
-      tbody tr:hover {{ background: rgba(255,255,255,0.025); }}
-      td {{ padding: 11px 14px; font-size: 12px; vertical-align: middle; }}
-      .td-mono {{ font-family: var(--mono); font-size: 12px; }}
-      .td-time, .td-id, .td-hash {{ font-family: var(--mono); font-size: 11px; color: var(--muted2); }}
-      .td-reason {{ color: var(--muted2); font-size: 12px; }}
-      .badge {{ font-family: var(--mono); font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 3px; border: 1px solid; }}
-    </style>
-    </head>
-    <body>
-    <header class="header">
-      <div class="logo">WAVEFRAME <span>GUARD</span></div>
-      <a href="/" style="color: var(--muted2); font-family: var(--mono); font-size: 11px; text-decoration: none;">← Back to Sandbox</a>
-    </header>
-    <div class="page">
-      <div class="panel">
-        <div class="panel-head">Enterprise Audit Ledger (Cross-Tenant Admin View)</div>
-        <div style="overflow-x: auto;">
-          <table>
-            <thead>
-              <tr>
-                <th>Timestamp</th>
-                <th>Tenant Org</th>
-                <th>Decision ID</th>
-                <th>Status</th>
-                <th>Actor</th>
-                <th>Action</th>
-                <th>Amount</th>
-                <th>Reason</th>
-                <th>Trace Hash</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows_html if rows_html else '<tr><td colspan="9" style="text-align:center; padding:20px; color:var(--muted);">No logs in database. Run Sandbox or SDK.</td></tr>'}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    </body>
-    </html>
-    """
 
 # ---------------------------
 # UI SANDBOX
