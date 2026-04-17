@@ -20,7 +20,7 @@ from cricore.interface.evaluate_proposal import evaluate_proposal
 
 app = FastAPI(
     title="Waveframe Guard",
-    version="3.0.0",
+    version="3.0.1",
 )
 
 # ---------------------------
@@ -31,76 +31,248 @@ app = FastAPI(
 def startup():
     init_db()
 
+
 # ---------------------------
 # AUTH
 # ---------------------------
 
 security = HTTPBearer()
 
+
 def get_current_org(
     credentials: HTTPAuthorizationCredentials = Security(security),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     api_key = db.query(APIKey).filter(APIKey.key_value == credentials.credentials).first()
     if not api_key:
         raise HTTPException(status_code=401, detail="Invalid API Key")
     return api_key.organization
 
+
+# ---------------------------
+# IDENTITY HELPERS
+# ---------------------------
+
+def load_identity_registry() -> Dict[str, Any]:
+    identity_path = Path(__file__).resolve().parent / "data" / "identities.json"
+
+    if identity_path.exists():
+        with open(identity_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+
+    return {
+        "identities": {
+            "user-alice": {
+                "canonical_id": "usr_111",
+                "display_name": "Alice (Admin)",
+                "aliases": ["alice"],
+            },
+            "user-bob": {
+                "canonical_id": "usr_222",
+                "display_name": "Bob (Finance)",
+                "aliases": ["bob"],
+            },
+            "user-charlie": {
+                "canonical_id": "usr_333",
+                "display_name": "Charlie (Approver)",
+                "aliases": ["charlie"],
+            },
+            "ai-agent-v2": {
+                "canonical_id": "agt_999",
+                "display_name": "AI Agent v2",
+                "aliases": ["agent"],
+            },
+        }
+    }
+
+
+def normalize(v: Optional[str]) -> str:
+    if not v:
+        return ""
+    return v.strip().lower().replace("_", "-")
+
+
+def resolve_identity(value: Optional[str], registry: Dict[str, Any]) -> Optional[str]:
+    if not value:
+        return None
+
+    key = normalize(value)
+    for k, v in registry["identities"].items():
+        aliases = [normalize(a) for a in v.get("aliases", [])]
+        if key == normalize(k) or key in aliases:
+            return v["canonical_id"]
+
+    return key
+
+
+def extract_stages(result: Any) -> List[Dict[str, Any]]:
+    stages = getattr(result, "stage_results", [])
+    out: List[Dict[str, Any]] = []
+    for s in stages:
+        out.append(
+            {
+                "stage": getattr(s, "stage_id", "unknown"),
+                "passed": getattr(s, "passed", False),
+                "messages": getattr(s, "messages", []),
+            }
+        )
+    return out
+
+
+def extract_reason(stages: List[Dict[str, Any]]) -> str:
+    for s in stages:
+        if not s["passed"]:
+            msgs = " ".join(s.get("messages", [])).lower()
+
+            if "separation" in msgs or "independence" in msgs:
+                return "Same person assigned to multiple required roles"
+            if "required_roles" in msgs:
+                return "Required roles not properly assigned"
+            if "approval" in msgs:
+                return "Approval missing or threshold exceeded"
+            if msgs:
+                return msgs
+
+            return f"{s['stage']} failed"
+
+    return "Action structurally aligned with governance policy"
+
+
 # ---------------------------
 # CORE VALIDATION
 # ---------------------------
 
-def run_validation(policy, action, actor, context):
+def run_validation(
+    policy: Dict[str, Any],
+    action: Dict[str, Any],
+    actor: str,
+    context: Dict[str, Any],
+) -> Dict[str, Any]:
+    registry = load_identity_registry()
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".json", mode="w") as f:
+    proposer = normalize(actor)
+    responsible = resolve_identity(context.get("responsible"), registry)
+    accountable = resolve_identity(context.get("accountable"), registry)
+    approver = resolve_identity(context.get("approved_by"), registry)
+
+    if not responsible or not accountable:
+        return {
+            "allowed": False,
+            "summary": f"AI attempted action: {action.get('type')}",
+            "reason": "Identity resolution failed: missing required human context",
+            "impact": [
+                "missing required execution identities",
+                "could not verify governance role assignments",
+                "action was stopped before execution",
+            ],
+            "decision_trace": [],
+            "resolved_identities": {},
+            "trace_hash": "identity_resolution_failed",
+        }
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".json", mode="w", encoding="utf-8") as f:
         json.dump(policy, f)
         policy_path = Path(f.name)
 
-    compiled_path = Path(tempfile.NamedTemporaryFile(delete=False).name)
+    tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".json")
+    compiled_path = Path(tmp_file.name)
+    tmp_file.close()
 
     contract_path = compile_policy_file(policy_path, compiled_path)
 
-    with open(contract_path) as f:
+    with open(contract_path, "r", encoding="utf-8") as f:
         compiled = json.load(f)
 
     contract_hash = hashlib.sha256(
         json.dumps(compiled, sort_keys=True).encode()
     ).hexdigest()
 
+    required_roles = compiled.get("roles", {}).get(
+        "required",
+        ["proposer", "responsible", "accountable"],
+    )
+
+    actors_list = [
+        {"id": proposer, "type": "agent", "role": "proposer"},
+        {"id": responsible, "type": "human", "role": "responsible"},
+        {"id": accountable, "type": "human", "role": "accountable"},
+    ]
+
+    if approver:
+        actors_list.append({"id": approver, "type": "human", "role": "approver"})
+
     proposal = build_proposal(
         proposal_id=str(uuid.uuid4()),
-        actor={"id": actor, "type": "agent"},
+        actor={"id": proposer, "type": "agent"},
         artifact_paths=[],
         mutation={
             "domain": "finance",
             "resource": "funds",
-            "action": action.get("type", "unknown")
+            "action": action.get("type", "unknown"),
         },
         contract={
             "id": compiled.get("contract_id", "dynamic"),
             "version": compiled.get("contract_version", "1.0"),
-            "hash": contract_hash
+            "hash": contract_hash,
         },
         run_context={
             "identities": {
-                "actors": [
-                    {"id": actor, "type": "agent", "role": "proposer"}
-                ]
+                "actors": actors_list,
+                "required_roles": required_roles,
+                "conflict_flags": {},
             },
             "integrity": {"artifacts_present": True},
-            "publication": {"ready": True}
-        }
+            "publication": {"ready": True},
+        },
     )
 
     result = evaluate_proposal(proposal, compiled)
-
+    stages = extract_stages(result)
     allowed = getattr(result, "commit_allowed", False)
+    reason = extract_reason(stages)
+
+    amount = action.get("amount", 0)
+
+    if not allowed:
+        if "separation" in reason.lower() or "multiple required roles" in reason.lower():
+            impact = [
+                "violated separation of duties",
+                "same individual attempted to control multiple required roles",
+                "created audit and fraud risk",
+            ]
+        elif "approval" in reason.lower():
+            impact = [
+                "bypassed required approval threshold",
+                "executed financial change without authorization",
+                "created compliance exposure",
+            ]
+        else:
+            impact = [
+                "failed governance validation",
+                "action did not meet required execution constraints",
+            ]
+    else:
+        impact = [
+            "roles properly separated",
+            "approval conditions satisfied",
+            "action aligned with policy",
+        ]
 
     return {
         "allowed": allowed,
-        "reason": "Allowed" if allowed else "Blocked by policy",
+        "summary": f"AI attempted to transfer ${amount:,.0f}",
+        "reason": reason,
+        "impact": impact,
+        "decision_trace": stages,
         "trace_hash": contract_hash,
+        "resolved_identities": {
+            "proposer": proposer,
+            "responsible": responsible,
+            "accountable": accountable,
+            "approver": approver,
+        },
     }
+
 
 # ---------------------------
 # SANDBOX ENDPOINT
@@ -108,17 +280,17 @@ def run_validation(policy, action, actor, context):
 
 @app.post("/validate")
 async def validate(request: Request, db: Session = Depends(get_db)):
-
     body = await request.json()
 
     action = body.get("action", {})
-    actor = body.get("actor", "ai-agent")
+    actor = body.get("actor", "ai-agent-v2")
+    context = body.get("context", {})
 
     decision = run_validation(
         body.get("policy", {}),
         action,
         actor,
-        body.get("context", {})
+        context,
     )
 
     log = AuditLog(
@@ -130,13 +302,14 @@ async def validate(request: Request, db: Session = Depends(get_db)):
         amount=action.get("amount", 0),
         allowed=decision["allowed"],
         reason=decision["reason"],
-        trace_hash=decision["trace_hash"]
+        trace_hash=decision["trace_hash"],
     )
 
     db.add(log)
     db.commit()
 
     return JSONResponse(decision)
+
 
 # ---------------------------
 # PROD ENDPOINT
@@ -146,26 +319,29 @@ async def validate(request: Request, db: Session = Depends(get_db)):
 async def enforce(
     request: Request,
     current_org: Organization = Depends(get_current_org),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
-
     body = await request.json()
 
     policy = db.query(Policy).filter(
         Policy.id == body.get("policy_ref"),
-        Policy.organization_id == current_org.id
+        Policy.organization_id == current_org.id,
     ).first()
 
     if not policy:
         raise HTTPException(status_code=404, detail="Policy not found")
 
+    if not policy.versions:
+        raise HTTPException(status_code=404, detail="Policy has no versions")
+
     version = policy.versions[0]
     policy_dict = json.loads(version.rules_json)
 
     action = body.get("action", {})
-    actor = body.get("actor", "ai-agent")
+    actor = body.get("actor", "ai-agent-v2")
+    context = body.get("context", {})
 
-    decision = run_validation(policy_dict, action, actor, body.get("context", {}))
+    decision = run_validation(policy_dict, action, actor, context)
 
     log = AuditLog(
         id=f"dec_{uuid.uuid4().hex[:10]}",
@@ -176,7 +352,7 @@ async def enforce(
         amount=action.get("amount", 0),
         allowed=decision["allowed"],
         reason=decision["reason"],
-        trace_hash=decision["trace_hash"]
+        trace_hash=decision["trace_hash"],
     )
 
     db.add(log)
@@ -184,25 +360,45 @@ async def enforce(
 
     return JSONResponse(decision)
 
+
 # ---------------------------
 # LOGS API
 # ---------------------------
 
 @app.get("/api/logs")
-def logs(db: Session = Depends(get_db)):
-    rows = db.query(AuditLog).all()
+def logs(limit: int = 50, db: Session = Depends(get_db)):
+    rows = db.query(AuditLog).order_by(AuditLog.server_timestamp.desc()).limit(limit).all()
 
     return {
         "logs": [
             {
-                "id": r.id,
+                "decision_id": r.id,
                 "actor": r.actor,
                 "allowed": r.allowed,
-                "action": r.action_type,
+                "action": {
+                    "type": r.action_type,
+                    "amount": r.amount,
+                },
                 "amount": r.amount,
-                "reason": r.reason
+                "reason": r.reason,
+                "trace_hash": r.trace_hash,
+                "server_timestamp": r.server_timestamp.isoformat() + "Z" if r.server_timestamp else None,
             }
             for r in rows
+        ]
+    }
+
+
+@app.get("/identities")
+def identities():
+    registry = load_identity_registry()
+    return {
+        "identities": [
+            {
+                "id": v["canonical_id"],
+                "name": v.get("display_name", v["canonical_id"]),
+            }
+            for v in registry["identities"].values()
         ]
     }
 
@@ -215,7 +411,7 @@ def logs(db: Session = Depends(get_db)):
 def dashboard(db: Session = Depends(get_db)):
     """Renders the Compliance Ledger natively."""
     logs = db.query(AuditLog).order_by(AuditLog.server_timestamp.desc()).limit(100).all()
-    
+
     rows_html = ""
     for log in logs:
         status_color = "#2ea043" if log.allowed else "#da3633"
@@ -223,6 +419,7 @@ def dashboard(db: Session = Depends(get_db)):
         action_type = (log.action_type or "unknown").upper()
         ts = log.server_timestamp.strftime("%Y-%m-%d %H:%M:%S") if log.server_timestamp else "Recent"
         org_name = log.organization.name if log.organization else "Unknown Org"
+        amount_display = f"${log.amount:,.0f}" if log.amount else "—"
 
         rows_html += f"""
         <tr style="border-bottom: 1px solid var(--border);">
@@ -232,7 +429,7 @@ def dashboard(db: Session = Depends(get_db)):
             <td><span class="badge" style="color: {status_color}; background: {status_color}20; border-color: {status_color}40;">{status_text}</span></td>
             <td class="td-mono">{log.actor}</td>
             <td class="td-mono">{action_type}</td>
-            <td class="td-mono">{f"${log.amount:,.0f}" if log.amount else "—"}</td>
+            <td class="td-mono">{amount_display}</td>
             <td class="td-reason">{log.reason}</td>
             <td class="td-hash" title="{log.trace_hash}">{str(log.trace_hash)[:8]}...</td>
         </tr>
@@ -301,10 +498,11 @@ def dashboard(db: Session = Depends(get_db)):
     </html>
     """
 
+
 # ---------------------------
 # UI SANDBOX
 # ---------------------------
-# Your exact Sandbox UI code remains here! 
+
 @app.get("/", response_class=HTMLResponse)
 def ui():
     return """
@@ -341,13 +539,13 @@ def ui():
         }
 
         .app { width: 100%; max-width: 1180px; }
-        
+
         .header-container { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
         .hero { margin-bottom: 0; }
         .eyebrow { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
         .hero h1 { margin: 0 0 8px 0; font-size: 34px; line-height: 1.1; font-weight: 700; }
         .hero p { margin: 0; color: var(--muted); font-size: 16px; max-width: 760px; line-height: 1.5; }
-        
+
         .dashboard-btn {
             display: inline-flex; align-items: center; padding: 10px 16px;
             background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border);
@@ -367,14 +565,14 @@ def ui():
         .form-group { margin-bottom: 16px; }
         .form-group:last-child { margin-bottom: 0; }
         label { display: block; margin-bottom: 8px; color: var(--muted); font-size: 13px; font-weight: 600; }
-        
+
         input, select {
             width: 100%; padding: 11px 12px; background: #0f141b; color: var(--text);
             border: 1px solid var(--border); border-radius: 10px; font-size: 14px; transition: border-color 0.15s ease, box-shadow 0.15s ease;
         }
         input:focus, select:focus { outline: none; border-color: #5b6573; box-shadow: 0 0 0 3px rgba(255,255,255,0.04); }
         input[disabled], select[disabled] { opacity: 0.72; cursor: not-allowed; }
-        
+
         .input-note { margin-top: 8px; font-size: 12px; color: var(--muted); }
         .cta { margin-top: 24px; }
         button { width: 100%; padding: 14px 16px; background: var(--text); color: #0c1117; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; transition: transform 0.08s ease, opacity 0.15s ease; }
@@ -386,15 +584,15 @@ def ui():
         .decision-card.show { display: block; }
         .decision-status { display: inline-flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 800; margin-bottom: 12px; }
         .decision-status small { font-size: 14px; font-weight: 600; color: var(--muted); }
-        
+
         .decision-card.allowed { background: var(--green-bg); border-color: rgba(34, 197, 94, 0.35); }
         .decision-card.allowed .decision-status { color: #7ee787; }
-        
+
         .decision-card.blocked { background: var(--red-bg); border-color: rgba(239, 68, 68, 0.35); }
         .decision-card.blocked .decision-status { color: #ff8e8e; }
 
         .reason-box { background: rgba(0,0,0,0.25); border: 1px solid var(--border); border-radius: 10px; padding: 14px; font-size: 14px; line-height: 1.5; color: var(--text); }
-        
+
         .trace-list, .identity-list { list-style: none; margin: 0; padding: 0; }
         .trace-item, .identity-item { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
         .trace-item:last-child, .identity-item:last-child { border-bottom: none; padding-bottom: 0; }
@@ -406,7 +604,7 @@ def ui():
         .trace-badge { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 4px 8px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); white-space: nowrap; }
         .trace-badge.pass { color: #7ee787; border-color: rgba(34, 197, 94, 0.35); background: rgba(34, 197, 94, 0.08); }
         .trace-badge.fail { color: #ff8e8e; border-color: rgba(239, 68, 68, 0.35); background: rgba(239, 68, 68, 0.08); }
-        
+
         .identity-key { color: var(--muted); font-size: 13px; font-weight: 600; }
         .identity-value { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; color: var(--text); text-align: right; word-break: break-word; max-width: 55%; }
         .empty-state { color: var(--muted); font-size: 14px; line-height: 1.5; }
@@ -706,7 +904,7 @@ async function runValidation() {
 
         const data = await res.json();
         const card = document.getElementById("outputCard");
-        const allowed = !!data.allowed; 
+        const allowed = !!data.allowed;
 
         card.classList.add("show");
         card.classList.remove("allowed", "blocked");
@@ -731,7 +929,7 @@ async function runValidation() {
 
         renderTrace(data.decision_trace || []);
         renderResolvedIdentities(data.resolved_identities || {});
-        
+
         auditLogNotice.style.display = "flex";
 
     } catch (err) {
