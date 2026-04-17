@@ -208,6 +208,100 @@ def logs(db: Session = Depends(get_db)):
 
 
 # ---------------------------
+# UI - COMPLIANCE DASHBOARD
+# ---------------------------
+
+@app.get("/dashboard", response_class=HTMLResponse)
+def dashboard(db: Session = Depends(get_db)):
+    """Renders the Compliance Ledger natively."""
+    logs = db.query(AuditLog).order_by(AuditLog.server_timestamp.desc()).limit(100).all()
+    
+    rows_html = ""
+    for log in logs:
+        status_color = "#2ea043" if log.allowed else "#da3633"
+        status_text = "ALLOWED" if log.allowed else "BLOCKED"
+        action_type = (log.action_type or "unknown").upper()
+        ts = log.server_timestamp.strftime("%Y-%m-%d %H:%M:%S") if log.server_timestamp else "Recent"
+        org_name = log.organization.name if log.organization else "Unknown Org"
+
+        rows_html += f"""
+        <tr style="border-bottom: 1px solid var(--border);">
+            <td class="td-time">{ts}</td>
+            <td class="td-mono" style="color: var(--blue); font-weight: bold;">{org_name}</td>
+            <td class="td-id">{log.id}</td>
+            <td><span class="badge" style="color: {status_color}; background: {status_color}20; border-color: {status_color}40;">{status_text}</span></td>
+            <td class="td-mono">{log.actor}</td>
+            <td class="td-mono">{action_type}</td>
+            <td class="td-mono">${log.amount:,.0f} if log.amount else '—'}</td>
+            <td class="td-reason">{log.reason}</td>
+            <td class="td-hash" title="{log.trace_hash}">{str(log.trace_hash)[:8]}...</td>
+        </tr>
+        """
+
+    return f"""
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+    <meta charset="UTF-8" />
+    <title>Waveframe Guard — Compliance Ledger</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+    <style>
+      :root {{ --bg: #07090d; --surface: #0d1018; --surface2: #111520; --border: #1c2030; --border2: #242840; --text: #dce3f0; --muted: #4a5270; --muted2: #6b7494; --green: #00d97e; --red: #ff3d5a; --blue: #4d7cfe; --mono: 'IBM Plex Mono', monospace; --sans: 'IBM Plex Sans', sans-serif; }}
+      * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+      body {{ background: var(--bg); color: var(--text); font-family: var(--sans); padding: 0 0 60px; }}
+      .header {{ display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 52px; border-bottom: 1px solid var(--border); background: var(--surface); }}
+      .logo {{ font-family: var(--mono); font-size: 13px; font-weight: 600; letter-spacing: 0.06em; }}
+      .logo span {{ color: var(--green); }}
+      .page {{ padding: 28px 32px 0; max-width: 1440px; margin: 0 auto; }}
+      .panel {{ background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }}
+      .panel-head {{ padding: 13px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); font-family: var(--mono); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }}
+      table {{ width: 100%; border-collapse: collapse; }}
+      thead tr {{ background: var(--surface2); border-bottom: 1px solid var(--border); }}
+      th {{ font-family: var(--mono); font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; padding: 9px 14px; text-align: left; }}
+      tbody tr {{ transition: background 0.12s; cursor: pointer; }}
+      tbody tr:hover {{ background: rgba(255,255,255,0.025); }}
+      td {{ padding: 11px 14px; font-size: 12px; vertical-align: middle; }}
+      .td-mono {{ font-family: var(--mono); font-size: 12px; }}
+      .td-time, .td-id, .td-hash {{ font-family: var(--mono); font-size: 11px; color: var(--muted2); }}
+      .td-reason {{ color: var(--muted2); font-size: 12px; }}
+      .badge {{ font-family: var(--mono); font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 3px; border: 1px solid; }}
+    </style>
+    </head>
+    <body>
+    <header class="header">
+      <div class="logo">WAVEFRAME <span>GUARD</span></div>
+      <a href="/" style="color: var(--muted2); font-family: var(--mono); font-size: 11px; text-decoration: none;">← Back to Sandbox</a>
+    </header>
+    <div class="page">
+      <div class="panel">
+        <div class="panel-head">Enterprise Audit Ledger (Cross-Tenant Admin View)</div>
+        <div style="overflow-x: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Tenant Org</th>
+                <th>Decision ID</th>
+                <th>Status</th>
+                <th>Actor</th>
+                <th>Action</th>
+                <th>Amount</th>
+                <th>Reason</th>
+                <th>Trace Hash</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows_html if rows_html else '<tr><td colspan="9" style="text-align:center; padding:20px; color:var(--muted);">No logs in database. Run Sandbox or SDK.</td></tr>'}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    </body>
+    </html>
+    """
+
+# ---------------------------
 # UI SANDBOX
 # ---------------------------
 # Your exact Sandbox UI code remains here! 
