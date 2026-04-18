@@ -560,8 +560,10 @@ def identities():
 
 @app.get("/dashboard", response_class=HTMLResponse)
 def dashboard(db: Session = Depends(get_db)):
-    """Renders the Compliance Ledger natively."""
+    """Renders the Live Enforcement Console."""
     logs = db.query(AuditLog).order_by(AuditLog.server_timestamp.desc()).limit(100).all()
+    allowed_count = sum(1 for log in logs if log.allowed)
+    blocked_count = len(logs) - allowed_count
 
     rows_html = ""
     for log in logs:
@@ -591,18 +593,40 @@ def dashboard(db: Session = Depends(get_db)):
     <html lang="en">
     <head>
     <meta charset="UTF-8" />
-    <title>Waveframe Guard — Compliance Ledger</title>
+    <title>Waveframe Guard - Live Enforcement Console</title>
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
     <style>
-      :root {{ --bg: #07090d; --surface: #0d1018; --surface2: #111520; --border: #1c2030; --border2: #242840; --text: #dce3f0; --muted: #4a5270; --muted2: #6b7494; --green: #00d97e; --red: #ff3d5a; --blue: #4d7cfe; --mono: 'IBM Plex Mono', monospace; --sans: 'IBM Plex Sans', sans-serif; }}
+      :root {{ --bg: #07090d; --surface: #0d1018; --surface2: #111520; --surface3: #161b27; --border: #1c2030; --border2: #242840; --text: #dce3f0; --muted: #4a5270; --muted2: #6b7494; --green: #00d97e; --red: #ff3d5a; --blue: #4d7cfe; --mono: 'IBM Plex Mono', monospace; --sans: 'IBM Plex Sans', sans-serif; }}
       * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-      body {{ background: var(--bg); color: var(--text); font-family: var(--sans); padding: 0 0 60px; }}
-      .header {{ display: flex; align-items: center; justify-content: space-between; padding: 0 32px; height: 52px; border-bottom: 1px solid var(--border); background: var(--surface); }}
+      body {{ background: radial-gradient(circle at top, #111726 0%, var(--bg) 42%); color: var(--text); font-family: var(--sans); padding: 0 0 60px; }}
+      .header {{ display: flex; align-items: center; justify-content: space-between; padding: 0 32px; min-height: 72px; border-bottom: 1px solid var(--border); background: rgba(13, 16, 24, 0.92); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 5; }}
       .logo {{ font-family: var(--mono); font-size: 13px; font-weight: 600; letter-spacing: 0.06em; }}
       .logo span {{ color: var(--green); }}
+      .header-actions {{ display: flex; align-items: center; gap: 12px; }}
+      .console-nav {{ display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 999px; border: 1px solid var(--border2); background: rgba(255,255,255,0.03); color: var(--text); text-decoration: none; font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; }}
+      .console-nav.primary {{ background: rgba(77, 124, 254, 0.12); border-color: rgba(77, 124, 254, 0.35); }}
+      .console-nav:hover {{ background: rgba(255,255,255,0.08); }}
       .page {{ padding: 28px 32px 0; max-width: 1440px; margin: 0 auto; }}
-      .panel {{ background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }}
-      .panel-head {{ padding: 13px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); font-family: var(--mono); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }}
+      .hero {{ display: grid; grid-template-columns: 1.6fr 1fr; gap: 20px; margin-bottom: 22px; }}
+      .hero-card {{ background: linear-gradient(180deg, rgba(22,27,39,0.95) 0%, rgba(13,16,24,0.98) 100%); border: 1px solid var(--border2); border-radius: 16px; padding: 22px 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.28); }}
+      .eyebrow {{ font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--blue); margin-bottom: 10px; }}
+      .hero-title {{ font-size: 34px; line-height: 1.05; font-weight: 600; margin-bottom: 10px; }}
+      .hero-copy {{ color: var(--muted2); max-width: 760px; line-height: 1.6; }}
+      .hero-meta {{ display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }}
+      .pill {{ display: inline-flex; align-items: center; gap: 8px; padding: 9px 12px; border-radius: 999px; border: 1px solid var(--border2); background: rgba(255,255,255,0.03); font-family: var(--mono); font-size: 11px; color: var(--muted2); text-transform: uppercase; letter-spacing: 0.05em; }}
+      .live-dot {{ width: 8px; height: 8px; border-radius: 999px; background: var(--green); box-shadow: 0 0 0 6px rgba(0,217,126,0.12); }}
+      .hero-stats {{ display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }}
+      .stat-card {{ background: var(--surface3); border: 1px solid var(--border2); border-radius: 14px; padding: 18px; }}
+      .stat-label {{ font-family: var(--mono); font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 10px; }}
+      .stat-value {{ font-size: 28px; font-weight: 600; margin-bottom: 6px; }}
+      .stat-note {{ font-size: 12px; color: var(--muted2); }}
+      .panel {{ background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.22); }}
+      .panel-head {{ display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 18px; border-bottom: 1px solid var(--border); background: var(--surface2); }}
+      .panel-title-wrap {{ display: flex; flex-direction: column; gap: 4px; }}
+      .panel-kicker {{ font-family: var(--mono); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--blue); }}
+      .panel-title {{ font-size: 18px; font-weight: 600; }}
+      .panel-subtitle {{ color: var(--muted2); font-size: 13px; }}
+      .panel-status {{ display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px; border: 1px solid rgba(0,217,126,0.18); background: rgba(0,217,126,0.08); color: #9ff5c9; font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }}
       table {{ width: 100%; border-collapse: collapse; }}
       thead tr {{ background: var(--surface2); border-bottom: 1px solid var(--border); }}
       th {{ font-family: var(--mono); font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.12em; padding: 9px 14px; text-align: left; }}
@@ -613,17 +637,60 @@ def dashboard(db: Session = Depends(get_db)):
       .td-time, .td-id, .td-hash {{ font-family: var(--mono); font-size: 11px; color: var(--muted2); }}
       .td-reason {{ color: var(--muted2); font-size: 12px; }}
       .badge {{ font-family: var(--mono); font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 3px; border: 1px solid; }}
+      .feed-shell {{ overflow-x: auto; }}
+      .feed-empty {{ text-align: center; padding: 20px; color: var(--muted); }}
+      .feed-footer {{ display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 12px 18px; border-top: 1px solid var(--border); background: rgba(255,255,255,0.02); color: var(--muted2); font-family: var(--mono); font-size: 11px; }}
+      .feed-meta {{ display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }}
+      .feed-tag {{ padding: 6px 9px; border-radius: 999px; border: 1px solid var(--border2); background: rgba(255,255,255,0.03); }}
+      @media (max-width: 1040px) {{ .hero {{ grid-template-columns: 1fr; }} }}
+      @media (max-width: 760px) {{ .header {{ padding: 14px 18px; flex-direction: column; align-items: flex-start; gap: 12px; }} .page {{ padding: 20px 18px 0; }} .hero-stats {{ grid-template-columns: 1fr; }} .panel-head, .feed-footer {{ align-items: flex-start; flex-direction: column; }} }}
     </style>
     </head>
     <body>
     <header class="header">
       <div class="logo">WAVEFRAME <span>GUARD</span></div>
-      <a href="/" style="color: var(--muted2); font-family: var(--mono); font-size: 11px; text-decoration: none;">← Back to Sandbox</a>
+      <div class="header-actions">
+        <a href="/" class="console-nav">Back to Sandbox</a>
+        <a href="/dashboard" class="console-nav primary">Live Console</a>
+      </div>
     </header>
     <div class="page">
+      <section class="hero">
+        <div class="hero-card">
+          <div class="eyebrow">Live Enforcement Console</div>
+          <div class="hero-title">Real-time governance decisions, streamed inside the control plane.</div>
+          <div class="hero-copy">
+            Monitor every allow and block event as it lands, keep navigation inside the console, and use this as an active operations surface instead of a static simulator page.
+          </div>
+          <div class="hero-meta">
+            <div class="pill"><span class="live-dot"></span> Live feed active</div>
+            <div class="pill">Mode: Global admin view</div>
+            <div class="pill">Refresh: 2 seconds</div>
+          </div>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-card">
+            <div class="stat-label">Allowed Decisions</div>
+            <div class="stat-value" id="allowedCount">{allowed_count}</div>
+            <div class="stat-note">Successful actions cleared by policy enforcement.</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Blocked Decisions</div>
+            <div class="stat-value" id="blockedCount">{blocked_count}</div>
+            <div class="stat-note">Requests stopped before execution at the boundary.</div>
+          </div>
+        </div>
+      </section>
       <div class="panel">
-        <div class="panel-head">Enterprise Audit Ledger (Cross-Tenant Admin View)</div>
-        <div style="overflow-x: auto;">
+        <div class="panel-head">
+          <div class="panel-title-wrap">
+            <div class="panel-kicker">Streaming Feed</div>
+            <div class="panel-title">Live Enforcement Console</div>
+            <div class="panel-subtitle">Cross-tenant admin feed of the most recent enforcement decisions.</div>
+          </div>
+          <div class="panel-status"><span class="live-dot"></span> <span id="liveStatus">Connected</span></div>
+        </div>
+        <div class="feed-shell">
           <table>
             <thead>
               <tr>
@@ -638,21 +705,52 @@ def dashboard(db: Session = Depends(get_db)):
                 <th>Trace Hash</th>
               </tr>
             </thead>
-            <tbody>
-              {rows_html if rows_html else '<tr><td colspan="9" style="text-align:center; padding:20px; color:var(--muted);">No logs in database. Run Sandbox or SDK.</td></tr>'}
+            <tbody id="logRows">
+              {rows_html if rows_html else '<tr><td colspan="9" class="feed-empty">No events yet. Trigger the sandbox or SDK to start the live feed.</td></tr>'}
             </tbody>
           </table>
+        </div>
+        <div class="feed-footer">
+          <div class="feed-meta">
+            <span class="feed-tag">Source: /api/logs</span>
+            <span class="feed-tag">Window: 100 decisions</span>
+          </div>
+          <div id="lastUpdated">Last refresh: waiting for feed...</div>
         </div>
       </div>
     </div>
     <script>
+    function formatAmount(amount) {{
+        return amount ? `$${{Number(amount).toLocaleString()}}` : "—";
+    }}
+
+    function updateSummary(logs) {{
+        const allowed = logs.filter(log => !!log.allowed).length;
+        const blocked = logs.length - allowed;
+        const allowedNode = document.getElementById("allowedCount");
+        const blockedNode = document.getElementById("blockedCount");
+        if (allowedNode) allowedNode.textContent = String(allowed);
+        if (blockedNode) blockedNode.textContent = String(blocked);
+    }}
+
     async function refreshLogs() {{
         try {{
             const res = await fetch("/api/logs?limit=100");
             const data = await res.json();
 
-            const tbody = document.querySelector("tbody");
+            const tbody = document.getElementById("logRows");
+            const liveStatus = document.getElementById("liveStatus");
+            const lastUpdated = document.getElementById("lastUpdated");
             if (!tbody) return;
+
+            if (liveStatus) liveStatus.textContent = "Connected";
+            updateSummary(data.logs || []);
+
+            if (!data.logs || data.logs.length === 0) {{
+                tbody.innerHTML = '<tr><td colspan="9" class="feed-empty">No events yet. Trigger the sandbox or SDK to start the live feed.</td></tr>';
+                if (lastUpdated) lastUpdated.textContent = "Last refresh: live feed online, waiting for first decision";
+                return;
+            }}
 
             tbody.innerHTML = data.logs.map(log => {{
                 const statusColor = log.allowed ? "#2ea043" : "#da3633";
@@ -662,7 +760,7 @@ def dashboard(db: Session = Depends(get_db)):
                     ? new Date(log.server_timestamp).toLocaleString()
                     : "Recent";
 
-                const amount = log.amount ? `$${{Number(log.amount).toLocaleString()}}` : "—";
+                const amount = formatAmount(log.amount);
 
                 return `
                 <tr style="border-bottom: 1px solid var(--border);">
@@ -686,15 +784,20 @@ def dashboard(db: Session = Depends(get_db)):
                 `;
             }}).join("");
 
+            if (lastUpdated) {{
+                lastUpdated.textContent = `Last refresh: ${{new Date().toLocaleTimeString()}}`;
+            }}
+
         }} catch (err) {{
+            const liveStatus = document.getElementById("liveStatus");
+            const lastUpdated = document.getElementById("lastUpdated");
+            if (liveStatus) liveStatus.textContent = "Reconnect";
+            if (lastUpdated) lastUpdated.textContent = "Last refresh: feed error";
             console.error("Live refresh failed", err);
         }}
     }}
 
-    // refresh every 2 seconds
     setInterval(refreshLogs, 2000);
-
-    // initial load
     refreshLogs();
     </script>
     </body>
