@@ -856,15 +856,8 @@ def dashboard(db: Session = Depends(get_db)):
         content.innerHTML = "Loading...";
 
         try {{
-            const res = await fetch(`/api/logs?limit=100`);
-            const data = await res.json();
-
-            const log = data.logs.find(l => l.decision_id === id);
-
-            if (!log) {{
-                content.innerHTML = "Log not found";
-                return;
-            }}
+            const res = await fetch(`/api/log/${{id}}`);
+            const log = await res.json();
 
             content.innerHTML = `
                 <div><strong>ID:</strong> ${{log.decision_id}}</div>
@@ -874,6 +867,29 @@ def dashboard(db: Session = Depends(get_db)):
                 <div><strong>Amount:</strong> ${{log.amount || "—"}}</div>
                 <div><strong>Status:</strong> ${{log.allowed ? "ALLOWED" : "BLOCKED"}}</div>
                 <div><strong>Reason:</strong> ${{log.reason}}</div>
+
+                <hr style="margin:12px 0; border-color: #222;">
+
+                <div><strong>Impact:</strong></div>
+                <ul>
+                    ${{(log.impact || []).map(i => `<li>${{i}}</li>`).join("")}}
+                </ul>
+
+                <div><strong>Decision Trace:</strong></div>
+                ${{(log.decision_trace || []).map(step => `
+                    <div style="margin-bottom:8px;">
+                        <strong>${{step.stage}}</strong> — ${{step.passed ? "PASS" : "FAIL"}}<br/>
+                        <small>${{step.messages.join(", ")}}</small>
+                    </div>
+                `).join("")}}
+
+                <div><strong>Resolved Identities:</strong></div>
+                ${{Object.entries(log.resolved_identities || {{}}).map(([k,v]) => `
+                    <div>${{k}}: ${{v || "—"}}</div>
+                `).join("")}}
+
+                <hr style="margin:12px 0; border-color: #222;">
+
                 <div><strong>Trace Hash:</strong> ${{log.trace_hash}}</div>
             `;
         }} catch (err) {{
