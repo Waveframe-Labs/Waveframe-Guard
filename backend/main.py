@@ -448,10 +448,7 @@ async def enforce(
 # LOGS & IDENTITIES API
 # ---------------------------
 
-@app.get("/api/logs")
-def logs(limit: int = 50, db: Session = Depends(get_db)):
-    rows = db.query(AuditLog).order_by(AuditLog.server_timestamp.desc()).limit(limit).all()
-
+def serialize_audit_logs(rows: List[AuditLog]) -> Dict[str, List[Dict[str, Any]]]:
     return {
         "logs": [
             {
@@ -470,6 +467,23 @@ def logs(limit: int = 50, db: Session = Depends(get_db)):
             for r in rows
         ]
     }
+
+@app.get("/api/logs")
+def logs(limit: int = 50, db: Session = Depends(get_db)):
+    rows = db.query(AuditLog).order_by(AuditLog.server_timestamp.desc()).limit(limit).all()
+    return serialize_audit_logs(rows)
+
+@app.get("/v1/logs")
+def tenant_logs(
+    limit: int = 50,
+    current_org: Organization = Depends(get_current_org),
+    db: Session = Depends(get_db),
+):
+    rows = db.query(AuditLog).filter(
+        AuditLog.organization_id == current_org.id
+    ).order_by(AuditLog.server_timestamp.desc()).limit(limit).all()
+
+    return serialize_audit_logs(rows)
 
 @app.get("/identities")
 def identities():
