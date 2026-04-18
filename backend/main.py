@@ -140,19 +140,21 @@ def extract_reason(stages: List[Dict[str, Any]]) -> str:
     return "Action structurally aligned with governance policy"
 
 def evaluate_approval_requirement(
+    policy: Dict[str, Any],
     compiled: Dict[str, Any],
     amount: float,
 ) -> tuple[bool, float]:
-    threshold = 0.0
-    for rule in compiled.get("constraints", []):
-        if rule.get("type") != "approval_required":
-            continue
+    for source in (policy, compiled):
+        threshold = 0.0
+        for rule in source.get("constraints", []):
+            if rule.get("type") != "approval_required":
+                continue
 
-        threshold = float(rule.get("threshold", 0) or 0)
-        if amount > threshold:
-            return True, threshold
+            threshold = float(rule.get("threshold", 0) or 0)
+            if amount > threshold:
+                return True, threshold
 
-    return False, threshold
+    return False, 0.0
 
 def append_required_role(required_roles: List[str], role: str) -> List[str]:
     if role in required_roles:
@@ -252,7 +254,7 @@ def run_validation(
     amount = action.get("amount", 0)
 
     # 🔥 PRE-FLIGHT BUSINESS LOGIC: ENFORCE APPROVAL RULE
-    approval_required, threshold = evaluate_approval_requirement(compiled, amount)
+    approval_required, threshold = evaluate_approval_requirement(policy, compiled, amount)
     if approval_required:
         approver = resolve_identity(
             requested_approver,
@@ -1025,3 +1027,4 @@ updateThresholdPreview();
 
 </body>
 </html>
+"""
