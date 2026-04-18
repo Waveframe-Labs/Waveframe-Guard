@@ -718,6 +718,22 @@ def dashboard(db: Session = Depends(get_db)):
           <div id="lastUpdated">Last refresh: waiting for feed...</div>
         </div>
       </div>
+      <div id="inspectorPanel" style="
+          position: fixed;
+          top: 0;
+          right: -500px;
+          width: 500px;
+          height: 100%;
+          background: #0d1018;
+          border-left: 1px solid var(--border);
+          padding: 20px;
+          overflow-y: auto;
+          transition: right 0.3s ease;
+          z-index: 100;
+      ">
+          <h3>Decision Details</h3>
+          <div id="inspectorContent">Click a log entry</div>
+      </div>
     </div>
     <script>
     function formatAmount(amount) {{
@@ -763,7 +779,9 @@ def dashboard(db: Session = Depends(get_db)):
                 const amount = formatAmount(log.amount);
 
                 return `
-                <tr style="border-bottom: 1px solid var(--border);">
+                <tr
+                    onclick="openInspector('${{log.decision_id}}')"
+                    style="cursor:pointer; border-bottom: 1px solid var(--border);">
                     <td class="td-time">${{ts}}</td>
                     <td class="td-mono">—</td>
                     <td class="td-id">${{log.decision_id}}</td>
@@ -796,6 +814,47 @@ def dashboard(db: Session = Depends(get_db)):
             console.error("Live refresh failed", err);
         }}
     }}
+
+    async function openInspector(id) {{
+        const panel = document.getElementById("inspectorPanel");
+        const content = document.getElementById("inspectorContent");
+
+        panel.style.right = "0px";
+        content.innerHTML = "Loading...";
+
+        try {{
+            const res = await fetch(`/api/logs?limit=100`);
+            const data = await res.json();
+
+            const log = data.logs.find(l => l.decision_id === id);
+
+            if (!log) {{
+                content.innerHTML = "Log not found";
+                return;
+            }}
+
+            content.innerHTML = `
+                <div><strong>ID:</strong> ${{log.decision_id}}</div>
+                <div><strong>Timestamp:</strong> ${{log.server_timestamp}}</div>
+                <div><strong>Actor:</strong> ${{log.actor}}</div>
+                <div><strong>Action:</strong> ${{log.action.type}}</div>
+                <div><strong>Amount:</strong> ${{log.amount || "—"}}</div>
+                <div><strong>Status:</strong> ${{log.allowed ? "ALLOWED" : "BLOCKED"}}</div>
+                <div><strong>Reason:</strong> ${{log.reason}}</div>
+                <div><strong>Trace Hash:</strong> ${{log.trace_hash}}</div>
+            `;
+        }} catch (err) {{
+            content.innerHTML = "Failed to load details";
+        }}
+    }}
+
+    document.addEventListener("click", (e) => {{
+        const panel = document.getElementById("inspectorPanel");
+        if (e.target.closest("tr")) return;
+        if (!e.target.closest("#inspectorPanel")) {{
+            panel.style.right = "-500px";
+        }}
+    }});
 
     setInterval(refreshLogs, 2000);
     refreshLogs();
