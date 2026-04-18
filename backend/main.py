@@ -575,6 +575,54 @@ def dashboard(db: Session = Depends(get_db)):
         </div>
       </div>
     </div>
+    <script>
+    async function refreshLogs() {{
+        try {{
+            const res = await fetch("/api/logs?limit=100");
+            const data = await res.json();
+
+            const tbody = document.querySelector("tbody");
+
+            tbody.innerHTML = data.logs.map(log => {{
+                const statusColor = log.allowed ? "#2ea043" : "#da3633";
+                const statusText = log.allowed ? "ALLOWED" : "BLOCKED";
+
+                const ts = log.server_timestamp
+                    ? new Date(log.server_timestamp).toLocaleString()
+                    : "Recent";
+
+                const amount = log.amount ? `$${{Number(log.amount).toLocaleString()}}` : "—";
+
+                return `
+                <tr style="border-bottom: 1px solid var(--border);">
+                    <td class="td-time">${{ts}}</td>
+                    <td class="td-mono">—</td>
+                    <td class="td-id">${{log.decision_id}}</td>
+                    <td>
+                        <span class="badge"
+                            style="color:${{statusColor}};
+                                   background:${{statusColor}}20;
+                                   border-color:${{statusColor}}40;">
+                            ${{statusText}}
+                        </span>
+                    </td>
+                    <td class="td-mono">${{log.actor}}</td>
+                    <td class="td-mono">${{log.action.type}}</td>
+                    <td class="td-mono">${{amount}}</td>
+                    <td class="td-reason">${{log.reason}}</td>
+                    <td class="td-hash">${{log.trace_hash.slice(0,8)}}...</td>
+                </tr>
+                `;
+            }}).join("");
+
+        }} catch (err) {{
+            console.error("Failed to refresh logs", err);
+        }}
+    }}
+
+    setInterval(refreshLogs, 2000);
+    refreshLogs();
+    </script>
     </body>
     </html>
     """
@@ -707,7 +755,7 @@ def ui():
                 This sandbox compiles the proposed policy, resolves identities, runs CRI-CORE, and returns a binary decision with trace visibility.
             </p>
         </div>
-        <a href="/dashboard" target="_blank" class="dashboard-btn">View Compliance Ledger &rarr;</a>
+        <a href="/dashboard" class="dashboard-btn">View Compliance Ledger &rarr;</a>
     </div>
 
     <div class="layout">
@@ -794,7 +842,7 @@ def ui():
                             <strong style="color: var(--text);">Immutable Audit Record Created</strong><br>
                             <span>A cryptographic trace of this execution boundary has been logged.</span>
                         </div>
-                        <a href="/dashboard" target="_blank" style="color: var(--accent); text-decoration: none; font-weight: 600;">View Ledger</a>
+                        <a href="/dashboard" style="color: var(--accent); text-decoration: none; font-weight: 600;">View Ledger</a>
                     </div>
                 </div>
             </div>
