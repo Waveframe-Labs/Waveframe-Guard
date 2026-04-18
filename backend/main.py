@@ -582,6 +582,7 @@ def dashboard(db: Session = Depends(get_db)):
             const data = await res.json();
 
             const tbody = document.querySelector("tbody");
+            if (!tbody) return;
 
             tbody.innerHTML = data.logs.map(log => {{
                 const statusColor = log.allowed ? "#2ea043" : "#da3633";
@@ -616,11 +617,14 @@ def dashboard(db: Session = Depends(get_db)):
             }}).join("");
 
         }} catch (err) {{
-            console.error("Failed to refresh logs", err);
+            console.error("Live refresh failed", err);
         }}
     }}
 
+    // refresh every 2 seconds
     setInterval(refreshLogs, 2000);
+
+    // initial load
     refreshLogs();
     </script>
     </body>
