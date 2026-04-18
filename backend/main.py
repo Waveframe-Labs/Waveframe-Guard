@@ -244,7 +244,7 @@ def run_validation(
     if not responsible or not accountable:
         return {
             "allowed": False,
-            "summary": f"AI attempted action: {action.get('type')}",
+            "summary": f"AI proposed action: {action.get('type')}",
             "reason": "Identity resolution failed: missing required human context",
             "impact": [
                 "missing required execution identities",
@@ -371,7 +371,7 @@ def run_validation(
 
     return {
         "allowed": allowed,
-        "summary": f"AI attempted to transfer ${amount:,.0f}",
+        "summary": f"AI proposed transfer of ${amount:,.0f}",
         "reason": reason,
         "impact": impact,
         "decision_trace": stages,
