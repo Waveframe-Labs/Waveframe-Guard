@@ -21,7 +21,7 @@ from cricore.interface.evaluate_proposal import evaluate_proposal
 
 app = FastAPI(
     title="Waveframe Guard",
-    version="3.0.2",
+    version="3.0.3",
     description="Enterprise Multi-Tenant AI Governance Platform"
 )
 
@@ -89,7 +89,11 @@ def normalize(v: Optional[str]) -> str:
         return ""
     return v.strip().lower().replace("_", "-")
 
-def resolve_identity(value: Optional[str], registry: Dict[str, Any]) -> Optional[str]:
+def resolve_identity(
+    value: Optional[str],
+    registry: Dict[str, Any],
+    require_registered: bool = False,
+) -> Optional[str]:
     if not value:
         return None
 
@@ -98,6 +102,9 @@ def resolve_identity(value: Optional[str], registry: Dict[str, Any]) -> Optional
         aliases = [normalize(a) for a in v.get("aliases", [])]
         if key == normalize(k) or key in aliases:
             return v["canonical_id"]
+
+    if require_registered:
+        return None
 
     return key
 
@@ -132,6 +139,61 @@ def extract_reason(stages: List[Dict[str, Any]]) -> str:
 
     return "Action structurally aligned with governance policy"
 
+def evaluate_approval_requirement(
+    compiled: Dict[str, Any],
+    amount: float,
+) -> tuple[bool, float]:
+    threshold = 0.0
+    for rule in compiled.get("constraints", []):
+        if rule.get("type") != "approval_required":
+            continue
+
+        threshold = float(rule.get("threshold", 0) or 0)
+        if amount > threshold:
+            return True, threshold
+
+    return False, threshold
+
+def append_required_role(required_roles: List[str], role: str) -> List[str]:
+    if role in required_roles:
+        return required_roles
+    return [*required_roles, role]
+
+def build_missing_approver_decision(
+    amount: float,
+    threshold: float,
+    proposer: str,
+    responsible: str,
+    accountable: str,
+    approver: Optional[str],
+) -> Dict[str, Any]:
+    return {
+        "allowed": False,
+        "summary": f"AI attempted to transfer ${amount:,.0f}",
+        "reason": "Approval required but no listed approver provided",
+        "impact": [
+            "transaction exceeded approval threshold",
+            "required approver role was not assigned to a listed identity",
+            "execution blocked at boundary",
+        ],
+        "decision_trace": [
+            {
+                "stage": "approval-check",
+                "passed": False,
+                "messages": [
+                    f"Amount ${amount:,.0f} exceeds threshold (${threshold:,.0f}) but no listed approver was resolved"
+                ],
+            }
+        ],
+        "trace_hash": "approval_missing",
+        "resolved_identities": {
+            "proposer": proposer,
+            "responsible": responsible,
+            "accountable": accountable,
+            "approver": approver,
+        },
+    }
+
 # ---------------------------
 # CORE VALIDATION
 # ---------------------------
@@ -143,11 +205,12 @@ def run_validation(
     context: Dict[str, Any],
 ) -> Dict[str, Any]:
     registry = load_identity_registry()
+    requested_approver = context.get("approved_by")
 
     proposer = normalize(actor)
     responsible = resolve_identity(context.get("responsible"), registry)
     accountable = resolve_identity(context.get("accountable"), registry)
-    approver = resolve_identity(context.get("approved_by"), registry)
+    approver = resolve_identity(requested_approver, registry)
 
     if not responsible or not accountable:
         return {
@@ -188,40 +251,29 @@ def run_validation(
 
     amount = action.get("amount", 0)
 
-    # 🔥 RESTORED: ENFORCE APPROVAL RULE
-    approval_required = False
-    threshold = 0
-    for rule in compiled.get("constraints", []):
-        if rule.get("type") == "approval_required":
-            threshold = rule.get("threshold", 0)
-            if amount > threshold:
-                approval_required = True
-
+    # 🔥 PRE-FLIGHT BUSINESS LOGIC: ENFORCE APPROVAL RULE
+    approval_required, threshold = evaluate_approval_requirement(compiled, amount)
     if approval_required:
-        required_roles = list(set(required_roles + ["approver"]))
+        approver = resolve_identity(
+            requested_approver,
+            registry,
+            require_registered=True,
+        )
 
-    # Short-circuit if threshold is exceeded but no approver is selected
+    # 🚨 HARD STOP (WAVEFRAME GUARD LAYER)
     if approval_required and not approver:
-        return {
-            "allowed": False,
-            "summary": f"AI attempted to transfer ${amount:,.0f}",
-            "reason": f"Approval required for amounts over ${threshold:,.0f}, but no approver was provided.",
-            "impact": [
-                "exceeded approval threshold",
-                "no authorized approver assigned",
-                "execution blocked at boundary",
-            ],
-            "decision_trace": [
-                {"stage": "approval-gate", "passed": False, "messages": ["Missing required human approver for threshold limit."]}
-            ],
-            "trace_hash": contract_hash,
-            "resolved_identities": {
-                "proposer": proposer,
-                "responsible": responsible,
-                "accountable": accountable,
-                "approver": approver,
-            },
-        }
+        return build_missing_approver_decision(
+            amount=amount,
+            threshold=threshold,
+            proposer=proposer,
+            responsible=responsible,
+            accountable=accountable,
+            approver=approver,
+        )
+
+    # If it passes business logic, update roles for CRI-CORE structural logic
+    if approval_required:
+        required_roles = append_required_role(required_roles, "approver")
 
     actors_list = [
         {"id": proposer, "type": "agent", "role": "proposer"},
@@ -257,6 +309,7 @@ def run_validation(
         },
     )
 
+    # 🛡️ CRYPTOGRAPHIC STRUCTURAL LOGIC (CRI-CORE LAYER)
     result = evaluate_proposal(proposal, compiled)
     stages = extract_stages(result)
     allowed = getattr(result, "commit_allowed", False)
@@ -800,7 +853,7 @@ const STAGE_EXPLANATIONS = {
     "integrity-finalization": { title: "Execution readiness confirmed", detail: "Final validation before allowing execution." },
     "publication": { title: "Audit trace prepared", detail: "Ensures the action can be recorded and audited." },
     "publication-commit": { title: "Decision finalized", detail: "The final execution decision has been cryptographically sealed." },
-    "approval-gate": { title: "Approval threshold enforced", detail: "Ensures transactions exceeding threshold have authorized approval." }
+    "approval-check": { title: "Approval threshold enforced", detail: "Ensures transactions exceeding threshold have authorized approval." }
 };
 
 function escapeHtml(value) {
@@ -882,7 +935,7 @@ function buildExecutiveReasons(allowed, reason, impact) {
     }
     const r = (reason || "").toLowerCase();
     let title = "Policy validation failed";
-    if (r.includes("separation")) {
+    if (r.includes("separation") || r.includes("multiple required roles")) {
         title = "Role separation violation";
     } else if (r.includes("approval")) {
         title = "Missing required approval";
@@ -972,4 +1025,3 @@ updateThresholdPreview();
 
 </body>
 </html>
-"""
