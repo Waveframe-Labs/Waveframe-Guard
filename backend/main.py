@@ -413,6 +413,9 @@ async def validate(request: Request, db: Session = Depends(get_db)):
         amount=action.get("amount", 0),
         allowed=decision["allowed"],
         reason=decision["reason"],
+        decision_trace=json.dumps(decision.get("decision_trace", [])),
+        resolved_identities=json.dumps(decision.get("resolved_identities", {})),
+        impact=json.dumps(decision.get("impact", [])),
         trace_hash=decision["trace_hash"],
     )
 
@@ -492,6 +495,9 @@ async def enforce(
         amount=action_amount,
         allowed=decision["allowed"],
         reason=decision["reason"],
+        decision_trace=json.dumps(decision.get("decision_trace", [])),
+        resolved_identities=json.dumps(decision.get("resolved_identities", {})),
+        impact=json.dumps(decision.get("impact", [])),
         trace_hash=decision["trace_hash"],
     )
 
@@ -519,6 +525,9 @@ def serialize_audit_logs(rows: List[AuditLog]) -> Dict[str, List[Dict[str, Any]]
                 "reason": r.reason,
                 "trace_hash": r.trace_hash,
                 "server_timestamp": r.server_timestamp.isoformat() + "Z" if r.server_timestamp else None,
+                "decision_trace": json.loads(r.decision_trace or "[]"),
+                "resolved_identities": json.loads(r.resolved_identities or "{}"),
+                "impact": json.loads(r.impact or "[]"),
             }
             for r in rows
         ]
@@ -528,6 +537,30 @@ def serialize_audit_logs(rows: List[AuditLog]) -> Dict[str, List[Dict[str, Any]]
 def logs(limit: int = 50, db: Session = Depends(get_db)):
     rows = db.query(AuditLog).order_by(AuditLog.server_timestamp.desc()).limit(limit).all()
     return serialize_audit_logs(rows)
+
+@app.get("/api/log/{id}")
+def log_detail(id: str, db: Session = Depends(get_db)):
+    log = db.query(AuditLog).filter(AuditLog.id == id).first()
+
+    if not log:
+        raise HTTPException(status_code=404, detail="Log not found")
+
+    return {
+        "decision_id": log.id,
+        "actor": log.actor,
+        "allowed": log.allowed,
+        "action": {
+            "type": log.action_type,
+            "amount": log.amount,
+        },
+        "amount": log.amount,
+        "reason": log.reason,
+        "trace_hash": log.trace_hash,
+        "server_timestamp": log.server_timestamp.isoformat() + "Z" if log.server_timestamp else None,
+        "decision_trace": json.loads(log.decision_trace or "[]"),
+        "resolved_identities": json.loads(log.resolved_identities or "{}"),
+        "impact": json.loads(log.impact or "[]"),
+    }
 
 @app.get("/v1/logs")
 def tenant_logs(

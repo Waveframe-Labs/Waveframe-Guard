@@ -99,6 +99,9 @@ class AuditLog(Base):
     # Decision
     allowed = Column(Boolean, nullable=False)
     reason = Column(Text, nullable=False)
+    decision_trace = Column(Text, nullable=True)
+    resolved_identities = Column(Text, nullable=True)
+    impact = Column(Text, nullable=True)
 
     # Integrity
     trace_hash = Column(String, nullable=False)
