@@ -108,6 +108,33 @@ def resolve_identity(
 
     return key
 
+def validate_action(action: dict):
+    """
+    Stage 0 - Action Validation Gate
+
+    Ensures the action itself is structurally valid
+    before governance enforcement.
+    """
+
+    if not isinstance(action, dict):
+        return False, "Action must be a dictionary", "invalid_action_type"
+
+    if "type" not in action:
+        return False, "Missing required field: type", "missing_action_type"
+
+    action_type = action.get("type")
+
+    if action_type == "transfer":
+        if "amount" not in action:
+            return False, "Missing required field: amount for transfer", "missing_amount"
+
+        try:
+            float(action.get("amount", 0))
+        except Exception:
+            return False, "Invalid amount value", "invalid_amount"
+
+    return True, None, None
+
 def extract_stages(result: Any) -> List[Dict[str, Any]]:
     stages = getattr(result, "stage_results", [])
     out: List[Dict[str, Any]] = []
@@ -424,16 +451,45 @@ async def enforce(
     action = body.get("action", {})
     actor = body.get("actor", "ai-agent-v2")
     context = body.get("context", {})
+    action_type = action.get("type", "unknown") if isinstance(action, dict) else "unknown"
+    action_amount = action.get("amount", 0) if isinstance(action, dict) else 0
 
-    decision = run_validation(policy_dict, action, actor, context)
+    # ---------------------------
+    # STAGE 0 - ACTION VALIDATION
+    # ---------------------------
+
+    is_valid, error_reason, error_code = validate_action(action)
+
+    if not is_valid:
+        decision = {
+            "allowed": False,
+            "summary": f"AI attempted action: {action_type}",
+            "reason": error_reason,
+            "impact": [
+                "invalid action structure",
+                "failed pre-execution validation",
+                "execution blocked before governance evaluation"
+            ],
+            "decision_trace": [
+                {
+                    "stage": "action-validation",
+                    "passed": False,
+                    "messages": [error_reason],
+                }
+            ],
+            "trace_hash": error_code,
+            "resolved_identities": {},
+        }
+    else:
+        decision = run_validation(policy_dict, action, actor, context)
 
     log = AuditLog(
         id=f"dec_{uuid.uuid4().hex[:10]}",
         organization_id=current_org.id,
         policy_version_id=version.id,
         actor=actor,
-        action_type=action.get("type", "unknown"),
-        amount=action.get("amount", 0),
+        action_type=action_type,
+        amount=action_amount,
         allowed=decision["allowed"],
         reason=decision["reason"],
         trace_hash=decision["trace_hash"],
