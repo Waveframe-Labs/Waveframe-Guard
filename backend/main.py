@@ -198,7 +198,7 @@ def build_missing_approver_decision(
 ) -> Dict[str, Any]:
     return {
         "allowed": False,
-        "summary": f"AI attempted to transfer ${amount:,.0f}",
+        "summary": f"AI proposed transfer of ${amount:,.0f} for approval",
         "reason": "Approval required but no listed approver provided",
         "impact": [
             "transaction exceeded approval threshold",
@@ -371,7 +371,7 @@ def run_validation(
 
     return {
         "allowed": allowed,
-        "summary": f"AI proposed transfer of ${amount:,.0f}",
+        "summary": f"AI proposed transfer of ${amount:,.0f} for approval",
         "reason": reason,
         "impact": impact,
         "decision_trace": stages,
@@ -545,9 +545,15 @@ def log_detail(id: str, db: Session = Depends(get_db)):
     if not log:
         raise HTTPException(status_code=404, detail="Log not found")
 
+    resolved_identities = json.loads(log.resolved_identities or "{}")
+
     return {
         "decision_id": log.id,
         "actor": log.actor,
+        "proposer": resolved_identities.get("proposer"),
+        "responsible": resolved_identities.get("responsible"),
+        "accountable": resolved_identities.get("accountable"),
+        "approver": resolved_identities.get("approver"),
         "allowed": log.allowed,
         "action": {
             "type": log.action_type,
@@ -558,7 +564,7 @@ def log_detail(id: str, db: Session = Depends(get_db)):
         "trace_hash": log.trace_hash,
         "server_timestamp": log.server_timestamp.isoformat() + "Z" if log.server_timestamp else None,
         "decision_trace": json.loads(log.decision_trace or "[]"),
-        "resolved_identities": json.loads(log.resolved_identities or "{}"),
+        "resolved_identities": resolved_identities,
         "impact": json.loads(log.impact or "[]"),
     }
 
@@ -860,37 +866,35 @@ def dashboard(db: Session = Depends(get_db)):
             const log = await res.json();
 
             content.innerHTML = `
-                <div><strong>ID:</strong> ${{log.decision_id}}</div>
-                <div><strong>Timestamp:</strong> ${{log.server_timestamp}}</div>
-                <div><strong>Actor:</strong> ${{log.actor}}</div>
-                <div><strong>Action:</strong> ${{log.action.type}}</div>
-                <div><strong>Amount:</strong> ${{log.amount || "—"}}</div>
-                <div><strong>Status:</strong> ${{log.allowed ? "ALLOWED" : "BLOCKED"}}</div>
-                <div><strong>Reason:</strong> ${{log.reason}}</div>
+                <div style="margin-bottom:16px;">
+                    <strong>${{log.allowed ? "ALLOWED" : "BLOCKED"}}</strong>
+                </div>
 
-                <hr style="margin:12px 0; border-color: #222;">
+                <div style="margin-bottom:16px;">
+                    <div style="font-size:12px; color:gray;">Summary</div>
+                    <div>${{log.reason}}</div>
+                </div>
 
-                <div><strong>Impact:</strong></div>
-                <ul>
-                    ${{(log.impact || []).map(i => `<li>${{i}}</li>`).join("")}}
-                </ul>
+                <div style="margin-bottom:16px;">
+                    <div style="font-size:12px; color:gray;">Execution Roles</div>
+                    <div>Proposer: ${{log.resolved_identities?.proposer || "—"}}</div>
+                    <div>Responsible: ${{log.resolved_identities?.responsible || "—"}}</div>
+                    <div>Accountable: ${{log.resolved_identities?.accountable || "—"}}</div>
+                    <div>Approver: ${{log.resolved_identities?.approver || "—"}}</div>
+                </div>
 
-                <div><strong>Decision Trace:</strong></div>
-                ${{(log.decision_trace || []).map(step => `
-                    <div style="margin-bottom:8px;">
-                        <strong>${{step.stage}}</strong> — ${{step.passed ? "PASS" : "FAIL"}}<br/>
-                        <small>${{step.messages.join(", ")}}</small>
-                    </div>
-                `).join("")}}
+                <div style="margin-bottom:16px;">
+                    <div style="font-size:12px; color:gray;">Decision Trace</div>
+                    ${{(log.decision_trace || []).map(step => `
+                        <div>
+                            ${{step.stage}}: ${{step.passed ? "PASS" : "FAIL"}}
+                        </div>
+                    `).join("")}}
+                </div>
 
-                <div><strong>Resolved Identities:</strong></div>
-                ${{Object.entries(log.resolved_identities || {{}}).map(([k,v]) => `
-                    <div>${{k}}: ${{v || "—"}}</div>
-                `).join("")}}
-
-                <hr style="margin:12px 0; border-color: #222;">
-
-                <div><strong>Trace Hash:</strong> ${{log.trace_hash}}</div>
+                <div style="margin-top:16px;">
+                    <small>${{log.server_timestamp}}</small>
+                </div>
             `;
         }} catch (err) {{
             content.innerHTML = "Failed to load details";
