@@ -853,10 +853,23 @@ def dashboard(db: Session = Depends(get_db)):
         }}
     }}
 
+    function closeInspector() {{
+        const panel = document.getElementById("inspectorPanel");
+        if (!panel) return;
+        panel.style.right = "-500px";
+        panel.dataset.activeId = "";
+    }}
+
     async function openInspector(id) {{
         const panel = document.getElementById("inspectorPanel");
         const content = document.getElementById("inspectorContent");
 
+        if (panel.dataset.activeId === id && panel.style.right === "0px") {{
+            closeInspector();
+            return;
+        }}
+
+        panel.dataset.activeId = id;
         panel.style.right = "0px";
         content.innerHTML = "Loading...";
 
@@ -901,10 +914,9 @@ def dashboard(db: Session = Depends(get_db)):
     }}
 
     document.addEventListener("click", (e) => {{
-        const panel = document.getElementById("inspectorPanel");
         if (e.target.closest("tr")) return;
         if (!e.target.closest("#inspectorPanel")) {{
-            panel.style.right = "-500px";
+            closeInspector();
         }}
     }});
 
