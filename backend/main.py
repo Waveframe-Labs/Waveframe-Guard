@@ -515,6 +515,7 @@ def serialize_audit_logs(rows: List[AuditLog]) -> Dict[str, List[Dict[str, Any]]
         "logs": [
             {
                 "decision_id": r.id,
+                "organization": r.organization.name if r.organization else "Sandbox",
                 "actor": r.actor,
                 "allowed": r.allowed,
                 "action": {
@@ -534,8 +535,13 @@ def serialize_audit_logs(rows: List[AuditLog]) -> Dict[str, List[Dict[str, Any]]
     }
 
 @app.get("/api/logs")
-def logs(limit: int = 50, db: Session = Depends(get_db)):
-    rows = db.query(AuditLog).order_by(AuditLog.server_timestamp.desc()).limit(limit).all()
+def logs(limit: int = 50, org: Optional[str] = None, db: Session = Depends(get_db)):
+    query = db.query(AuditLog)
+
+    if org:
+        query = query.join(Organization).filter(Organization.name == org)
+
+    rows = query.order_by(AuditLog.server_timestamp.desc()).limit(limit).all()
     return serialize_audit_logs(rows)
 
 @app.get("/api/log/{id}")
@@ -600,6 +606,9 @@ def identities():
 def dashboard(db: Session = Depends(get_db)):
     """Renders the Live Enforcement Console."""
     logs = db.query(AuditLog).order_by(AuditLog.server_timestamp.desc()).limit(100).all()
+    latest_org = None
+    if logs:
+        latest_org = logs[0].organization.name if logs[0].organization else "Sandbox"
     allowed_count = sum(1 for log in logs if log.allowed)
     blocked_count = len(logs) - allowed_count
 
@@ -686,8 +695,17 @@ def dashboard(db: Session = Depends(get_db)):
     </head>
     <body>
     <header class="header">
-      <div class="logo">WAVEFRAME <span>GUARD</span></div>
+      <div class="logo">
+          WAVEFRAME <span>GUARD</span><br/>
+          <span style="font-size:10px; color: var(--muted);">
+              Org: {latest_org}
+          </span>
+      </div>
       <div class="header-actions">
+        <select id="orgFilter" onchange="refreshLogs()">
+          <option value="">All Orgs</option>
+          <option value="Acme Corp">Acme Corp</option>
+        </select>
         <a href="/" class="console-nav">Back to Sandbox</a>
         <a href="/dashboard" class="console-nav primary">Live Console</a>
       </div>
@@ -789,7 +807,8 @@ def dashboard(db: Session = Depends(get_db)):
 
     async function refreshLogs() {{
         try {{
-            const res = await fetch("/api/logs?limit=100");
+            const org = document.getElementById("orgFilter")?.value || "";
+            const res = await fetch(`/api/logs?limit=100&org=${{org}}`);
             const data = await res.json();
 
             const tbody = document.getElementById("logRows");
@@ -821,7 +840,7 @@ def dashboard(db: Session = Depends(get_db)):
                     onclick="openInspector('${{log.decision_id}}')"
                     style="cursor:pointer; border-bottom: 1px solid var(--border);">
                     <td class="td-time">${{ts}}</td>
-                    <td class="td-mono">—</td>
+                    <td class="td-mono">${{log.organization || "Sandbox"}}</td>
                     <td class="td-id">${{log.decision_id}}</td>
                     <td>
                         <span class="badge"
