@@ -549,7 +549,6 @@ def log_detail(id: str, db: Session = Depends(get_db)):
 
     return {
         "decision_id": log.id,
-        "actor": log.actor,
         "proposer": resolved_identities.get("proposer"),
         "responsible": resolved_identities.get("responsible"),
         "accountable": resolved_identities.get("accountable"),
