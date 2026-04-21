@@ -10,7 +10,7 @@ from datetime import datetime
 
 from fastapi import FastAPI, Request, HTTPException, Depends, Security
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
 
 from backend.db import init_db, get_db, Organization, APIKey, Policy, AuditLog
@@ -617,6 +617,10 @@ def identities():
 
 @app.get("/dashboard", response_class=HTMLResponse)
 def dashboard(db: Session = Depends(get_db)):
+    return RedirectResponse(url="/#live-console", status_code=307)
+
+@app.get("/dashboard/embed", response_class=HTMLResponse)
+def dashboard_embed(db: Session = Depends(get_db)):
     """Renders the Live Enforcement Console."""
     logs = db.query(AuditLog).order_by(AuditLog.server_timestamp.desc()).limit(100).all()
     latest_org = "Global View"
@@ -1062,6 +1066,8 @@ def ui():
         button:hover { opacity: 0.95; }
         button:active { transform: translateY(1px); }
         button:disabled { opacity: 0.6; cursor: wait; }
+        .console-section { margin-top: 28px; }
+        .console-frame { width: 100%; min-height: 1180px; border: 1px solid var(--border); border-radius: 14px; background: #0d1018; box-shadow: var(--shadow); }
 
         .decision-card { display: none; margin-top: 0; }
         .decision-card.show { display: block; }
@@ -1113,7 +1119,7 @@ def ui():
                 This sandbox compiles the proposed policy, resolves identities, runs CRI-CORE, and returns a binary decision with trace visibility.
             </p>
         </div>
-        <a href="/dashboard" class="dashboard-btn">View Compliance Ledger &rarr;</a>
+        <a href="#live-console" class="dashboard-btn">View Compliance Ledger &rarr;</a>
     </div>
 
     <div class="layout">
@@ -1203,7 +1209,7 @@ def ui():
                             <strong style="color: var(--text);">Immutable Audit Record Created</strong><br>
                             <span>A cryptographic trace of this execution boundary has been logged.</span>
                         </div>
-                        <a href="/dashboard" style="color: var(--accent); text-decoration: none; font-weight: 600;">View Ledger</a>
+                        <a href="#live-console" style="color: var(--accent); text-decoration: none; font-weight: 600;">View Ledger</a>
                     </div>
                 </div>
             </div>
@@ -1249,6 +1255,22 @@ def ui():
                         <div class="identity-value" id="thresholdPreview">$1,000</div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="live-console" class="console-section">
+        <div class="panel">
+            <div class="panel-header">
+                <h3 class="panel-title">Live Enforcement Console</h3>
+                <p class="panel-subtitle">Sandbox decisions and ledger monitoring now live in one place.</p>
+            </div>
+            <div class="panel-body" style="padding: 0;">
+                <iframe
+                    title="Live Enforcement Console"
+                    src="/dashboard/embed"
+                    class="console-frame"
+                ></iframe>
             </div>
         </div>
     </div>
