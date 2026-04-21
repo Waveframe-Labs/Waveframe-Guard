@@ -962,6 +962,11 @@ def dashboard_embed(db: Session = Depends(get_db)):
                     `).join("")}}
                 </div>
 
+                <div style="margin-bottom:16px;">
+                    <div style="font-size:12px; color:gray;">Trace Hash</div>
+                    <div style="word-break:break-all;">${{log.trace_hash}}</div>
+                </div>
+
                 <div style="margin-top:16px;">
                     <small>${{log.server_timestamp}}</small>
                 </div>
