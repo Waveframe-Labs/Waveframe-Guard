@@ -393,6 +393,13 @@ async def validate(request: Request, db: Session = Depends(get_db)):
     """Public Sandbox. No API Key required. Logs to 'org_sandbox_000'."""
     body = await request.json()
 
+    sandbox = db.query(Organization).filter_by(name="Sandbox").first()
+    if not sandbox:
+        sandbox = Organization(name="Sandbox")
+        db.add(sandbox)
+        db.commit()
+        db.refresh(sandbox)
+
     action = body.get("action", {})
     actor = body.get("actor", "ai-agent-v2")
     context = body.get("context", {})
@@ -406,7 +413,7 @@ async def validate(request: Request, db: Session = Depends(get_db)):
 
     log = AuditLog(
         id=f"dec_{uuid.uuid4().hex[:10]}",
-        organization_id="org_sandbox_000",
+        organization_id=sandbox.id,
         policy_version_id=None,
         actor=actor,
         action_type=action.get("type", "unknown"),
