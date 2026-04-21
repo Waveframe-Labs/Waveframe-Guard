@@ -1162,8 +1162,11 @@ def ui():
                             </div>
                             <div class="form-group">
                                 <label>Action Type</label>
-                                <select id="actionType" disabled>
+                                <select id="actionType">
                                     <option value="transfer">Transfer Funds</option>
+                                    <option value="write">Write Data</option>
+                                    <option value="delete">Delete Resource</option>
+                                    <option value="deploy">Deploy Service</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -1445,7 +1448,7 @@ async function runValidation() {
             body: JSON.stringify({
                 policy,
                 action: {
-                    type: "transfer",
+                    type: document.getElementById("actionType").value,
                     amount,
                     system: document.getElementById("system").value,
                     resource: document.getElementById("resource").value
@@ -1514,7 +1517,7 @@ async function sendToProduction() {
         body: JSON.stringify({
             policy_ref: "demo_policy_1",
             action: {
-                type: "transfer",
+                type: document.getElementById("actionType").value,
                 amount,
                 system: document.getElementById("system").value,
                 resource: document.getElementById("resource").value
