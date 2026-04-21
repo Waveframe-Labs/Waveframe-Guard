@@ -907,6 +907,12 @@ def dashboard(db: Session = Depends(get_db)):
                 </div>
 
                 <div style="margin-bottom:16px;">
+                    <div style="font-size:18px; font-weight:600;">
+                        ${{log.allowed ? "✅ Execution Approved" : "🚫 Execution Blocked"}}
+                    </div>
+                </div>
+
+                <div style="margin-bottom:16px;">
                     <div style="font-size:12px; color:gray;">Summary</div>
                     <div>${{log.reason}}</div>
                 </div>
