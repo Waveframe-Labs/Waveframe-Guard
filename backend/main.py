@@ -198,8 +198,10 @@ def append_required_role(required_roles: List[str], role: str) -> List[str]:
     return [*required_roles, role]
 
 def build_missing_approver_decision(
+    action: Dict[str, Any],
     amount: float,
     threshold: float,
+    contract_hash: str,
     proposer: str,
     responsible: str,
     accountable: str,
@@ -207,7 +209,7 @@ def build_missing_approver_decision(
 ) -> Dict[str, Any]:
     return {
         "allowed": False,
-        "summary": f"AI proposed transfer of ${amount:,.0f} for approval",
+        "summary": f"AI proposed {action.get('type')} on {action.get('system')}/{action.get('resource')}",
         "reason": "Approval required but no listed approver provided",
         "impact": [
             "transaction exceeded approval threshold",
@@ -223,7 +225,8 @@ def build_missing_approver_decision(
                 ],
             }
         ],
-        "trace_hash": "approval_missing",
+        "trace_hash": contract_hash,
+        "error_code": "approval_missing",
         "resolved_identities": {
             "proposer": proposer,
             "responsible": responsible,
@@ -301,8 +304,10 @@ def run_validation(
     # 🚨 HARD STOP (WAVEFRAME GUARD LAYER)
     if approval_required and not approver:
         return build_missing_approver_decision(
+            action=action,
             amount=amount,
             threshold=threshold,
+            contract_hash=contract_hash,
             proposer=proposer,
             responsible=responsible,
             accountable=accountable,
@@ -724,22 +729,19 @@ def dashboard_embed(db: Session = Depends(get_db)):
     for log in logs:
         status_color = "#2ea043" if log.allowed else "#da3633"
         status_text = "ALLOWED" if log.allowed else "BLOCKED"
-        action_type = (log.action_type or "unknown").upper()
+        action_type = log.action_type or "unknown"
         ts = log.server_timestamp.strftime("%Y-%m-%d %H:%M:%S") if log.server_timestamp else "Recent"
-        org_name = log.organization.name if log.organization else "Unknown Org"
-        amount_display = f"${log.amount:,.0f}" if log.amount else "—"
+        system_display = f"{log.action_domain or 'unknown'}/{action_type}"
+        details_display = f"{action_type} | ${log.amount:,.0f}" if log.amount else action_type
 
         rows_html += f"""
         <tr style="border-bottom: 1px solid var(--border);">
             <td class="td-time">{ts}</td>
-            <td class="td-mono" style="color: var(--blue); font-weight: bold;">{org_name}</td>
+            <td class="td-mono">{system_display}</td>
             <td class="td-id">{log.id}</td>
             <td><span class="badge" style="color: {status_color}; background: {status_color}20; border-color: {status_color}40;">{status_text}</span></td>
             <td class="td-mono">{log.actor}</td>
-            <td class="td-mono">{action_type}</td>
-            <td class="td-mono">{amount_display}</td>
-            <td class="td-reason">{log.reason}</td>
-            <td class="td-hash" title="{log.trace_hash}">{str(log.trace_hash)[:8]}...</td>
+            <td class="td-reason">{details_display}</td>
         </tr>
         """
 
@@ -797,6 +799,17 @@ def dashboard_embed(db: Session = Depends(get_db)):
       .feed-footer {{ display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 12px 18px; border-top: 1px solid var(--border); background: rgba(255,255,255,0.02); color: var(--muted2); font-family: var(--mono); font-size: 11px; }}
       .feed-meta {{ display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }}
       .feed-tag {{ padding: 6px 9px; border-radius: 999px; border: 1px solid var(--border2); background: rgba(255,255,255,0.03); }}
+      @keyframes fadeInRow {{
+        from {{
+          opacity: 0;
+          transform: translateY(-6px);
+        }}
+        to {{
+          opacity: 1;
+          transform: translateY(0);
+        }}
+      }}
+      .new-row {{ animation: fadeInRow 0.4s ease; }}
       @media (max-width: 1040px) {{ .hero {{ grid-template-columns: 1fr; }} }}
       @media (max-width: 760px) {{ .header {{ padding: 14px 18px; flex-direction: column; align-items: flex-start; gap: 12px; }} .page {{ padding: 20px 18px 0; }} .hero-stats {{ grid-template-columns: 1fr; }} .panel-head, .feed-footer {{ align-items: flex-start; flex-direction: column; }} }}
     </style>
@@ -863,20 +876,16 @@ def dashboard_embed(db: Session = Depends(get_db)):
           <table>
             <thead>
               <tr>
-                <th>Timestamp</th>
-                <th>Tenant Org</th>
-                <th>Domain</th>
-                <th>Decision ID</th>
+                <th>Time</th>
+                <th>System</th>
+                <th>Decision</th>
                 <th>Status</th>
                 <th>Actor</th>
-                <th>Action</th>
-                <th>Amount</th>
-                <th>Reason</th>
-                <th>Trace Hash</th>
+                <th>Details</th>
               </tr>
             </thead>
             <tbody id="logRows">
-              {rows_html if rows_html else '<tr><td colspan="10" class="feed-empty">No events yet. Trigger the dev environment or SDK to start the live feed.</td></tr>'}
+              {rows_html if rows_html else '<tr><td colspan="6" class="feed-empty">No events yet. Trigger the dev environment or SDK to start the live feed.</td></tr>'}
             </tbody>
           </table>
         </div>
@@ -943,12 +952,16 @@ def dashboard_embed(db: Session = Depends(get_db)):
             updateSummary(data.logs || []);
 
             if (!data.logs || data.logs.length === 0) {{
-                tbody.innerHTML = '<tr><td colspan="10" class="feed-empty">No events yet. Trigger the dev environment or SDK to start the live feed.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="feed-empty">No events yet. Trigger the dev environment or SDK to start the live feed.</td></tr>';
+                window.previousLogIds = [];
                 if (lastUpdated) lastUpdated.textContent = "Last refresh: live feed online, waiting for first decision";
                 return;
             }}
 
+            let previousIds = window.previousLogIds || [];
+
             tbody.innerHTML = data.logs.map(log => {{
+                const isNew = !previousIds.includes(log.decision_id);
                 const statusColor = log.allowed ? "#2ea043" : "#da3633";
                 const statusText = log.allowed ? "ALLOWED" : "BLOCKED";
 
@@ -957,12 +970,11 @@ def dashboard_embed(db: Session = Depends(get_db)):
                     : "Recent";
 
                 return `
-                <tr
+                <tr class="${{isNew ? 'new-row' : ''}}"
                     onclick="openInspector('${{log.decision_id}}')"
                     style="cursor:pointer; border-bottom: 1px solid var(--border);">
                     <td class="td-time">${{ts}}</td>
-                    <td class="td-mono">${{log.organization || "Dev Environment"}}</td>
-                    <td class="td-mono">${{log.domain}}</td>
+                    <td class="td-mono">${{log.domain}}/${{log.action.type}}</td>
                     <td class="td-id">${{log.decision_id}}</td>
                     <td>
                         <span class="badge"
@@ -973,13 +985,12 @@ def dashboard_embed(db: Session = Depends(get_db)):
                         </span>
                     </td>
                     <td class="td-mono">${{log.actor}}</td>
-                    <td class="td-mono">${{log.action.type}}</td>
-                    <td class="td-mono">${{log.action.amount ? "$" + Number(log.action.amount).toLocaleString() : "—"}}</td>
-                    <td class="td-reason">${{log.reason}}</td>
-                    <td class="td-hash">${{log.trace_hash.slice(0,8)}}...</td>
+                    <td class="td-reason">${{log.action.type}} | ${{log.action.amount ? "$" + Number(log.action.amount).toLocaleString() : ""}}</td>
                 </tr>
                 `;
             }}).join("");
+
+            window.previousLogIds = data.logs.map(l => l.decision_id);
 
             if (lastUpdated) {{
                 lastUpdated.textContent = `Last refresh: ${{new Date().toLocaleTimeString()}}`;
@@ -1579,7 +1590,7 @@ async function runValidation() {
             resTitle.innerHTML = `🚫 BLOCKED <small>execution prevented</small>`;
         }
 
-        document.getElementById("resSummary").innerHTML = `<strong>AI attempted to execute: ${escapeHtml(actionType)} on ${escapeHtml(system)}/${escapeHtml(resource)}</strong>`;
+        document.getElementById("resSummary").innerHTML = `<strong>AI attempted to execute ${escapeHtml(actionType)} on ${escapeHtml(system)}/${escapeHtml(resource)}</strong>`;
 
         const execReason = buildExecutiveReasons(allowed, data.reason, data.impact);
         resReasonTitle.textContent = execReason.title;
