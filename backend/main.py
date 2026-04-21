@@ -743,7 +743,7 @@ def dashboard(db: Session = Depends(get_db)):
           <div class="panel-title-wrap">
             <div class="panel-kicker">Streaming Feed</div>
             <div class="panel-title">Live Enforcement Console</div>
-            <div class="panel-subtitle">Cross-tenant admin feed of the most recent enforcement decisions.</div>
+            <div class="panel-subtitle">Real-time execution control layer — every AI action is evaluated before it becomes real.</div>
           </div>
           <div class="panel-status"><span class="live-dot"></span> <span id="liveStatus">Connected</span></div>
         </div>
