@@ -94,6 +94,7 @@ class AuditLog(Base):
     # Actor + action
     actor = Column(String, nullable=False)
     action_type = Column(String, nullable=False)
+    action_domain = Column(String, default="unknown")
     amount = Column(Float, nullable=True)
 
     # Decision

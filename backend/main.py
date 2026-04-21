@@ -4,6 +4,9 @@ import json
 import tempfile
 import uuid
 import hashlib
+import threading
+import time
+import random
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 from datetime import datetime
@@ -25,13 +28,19 @@ app = FastAPI(
     description="Enterprise Multi-Tenant AI Governance Platform"
 )
 
+simulation_thread: Optional[threading.Thread] = None
+
 # ---------------------------
 # STARTUP
 # ---------------------------
 
 @app.on_event("startup")
 def startup():
+    global simulation_thread
     init_db()
+    if simulation_thread is None or not simulation_thread.is_alive():
+        simulation_thread = threading.Thread(target=simulate_activity, daemon=True)
+        simulation_thread.start()
 
 # ---------------------------
 # AUTH
@@ -421,6 +430,7 @@ async def validate(request: Request, db: Session = Depends(get_db)):
         policy_version_id=None,
         actor=actor,
         action_type=action.get("type", "unknown"),
+        action_domain=action.get("system", "unknown"),
         amount=action.get("amount", 0),
         allowed=decision["allowed"],
         reason=decision["reason"],
@@ -503,6 +513,7 @@ async def enforce(
         policy_version_id=version.id,
         actor=actor,
         action_type=action_type,
+        action_domain=action.get("system", "unknown"),
         amount=action_amount,
         allowed=decision["allowed"],
         reason=decision["reason"],
@@ -527,7 +538,7 @@ def serialize_audit_logs(rows: List[AuditLog]) -> Dict[str, List[Dict[str, Any]]
             {
                 "decision_id": r.id,
                 "organization": r.organization.name if r.organization else "Dev Environment",
-                "domain": "finance",
+                "domain": r.action_domain or "unknown",
                 "actor": r.actor,
                 "allowed": r.allowed,
                 "action": {
@@ -614,6 +625,84 @@ def identities():
             for v in registry["identities"].values()
         ]
     }
+
+
+def simulate_activity():
+    """Continuously generates fake AI actions for demo realism."""
+    from backend.db import SessionLocal
+
+    while True:
+        db = None
+        try:
+            db = SessionLocal()
+
+            sandbox = db.query(Organization).filter_by(name="Acme Corp").first()
+            if not sandbox:
+                sandbox = Organization(name="Acme Corp")
+                db.add(sandbox)
+                db.commit()
+                db.refresh(sandbox)
+
+            systems = ["infra", "crm", "finance", "hr"]
+            resources = ["prod-db", "user-records", "payroll", "api-cluster"]
+            actions = ["transfer", "delete", "write", "deploy"]
+
+            system = random.choice(systems)
+            resource = random.choice(resources)
+            action_type = random.choice(actions)
+
+            amount = random.randint(100, 10000)
+
+            context = {
+                "responsible": "user-alice",
+                "accountable": "user-bob",
+                "approved_by": random.choice([None, "user-charlie"]),
+            }
+
+            action = {
+                "type": action_type,
+                "amount": amount,
+                "system": system,
+                "resource": resource,
+            }
+
+            policy = {
+                "contract_id": "demo-policy",
+                "contract_version": "1.0",
+                "roles": {"required": ["proposer", "responsible", "accountable"]},
+                "constraints": [
+                    {"type": "separation_of_duties", "roles": ["responsible", "accountable"]},
+                    {"type": "approval_required", "threshold": 1000},
+                ],
+            }
+
+            decision = run_validation(policy, action, "ai-agent-v2", context)
+
+            log = AuditLog(
+                id=f"dec_{uuid.uuid4().hex[:10]}",
+                organization_id=sandbox.id,
+                actor="ai-agent-v2",
+                action_type=action_type,
+                action_domain=system,
+                amount=amount,
+                allowed=decision["allowed"],
+                reason=decision["reason"],
+                decision_trace=json.dumps(decision.get("decision_trace", [])),
+                resolved_identities=json.dumps(decision.get("resolved_identities", {})),
+                impact=json.dumps(decision.get("impact", [])),
+                trace_hash=decision["trace_hash"],
+            )
+
+            db.add(log)
+            db.commit()
+
+        except Exception as e:
+            print("Simulation error:", e)
+        finally:
+            if db is not None:
+                db.close()
+
+        time.sleep(random.randint(3, 6))
 
 # ---------------------------
 # UI - COMPLIANCE DASHBOARD
