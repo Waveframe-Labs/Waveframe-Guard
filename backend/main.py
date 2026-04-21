@@ -899,7 +899,11 @@ def dashboard(db: Session = Depends(get_db)):
 
             content.innerHTML = `
                 <div style="margin-bottom:16px;">
-                    <strong>${{log.allowed ? "ALLOWED" : "BLOCKED"}}</strong>
+                    <div style="font-size:12px; color:gray;">Proposed Action</div>
+                    <div><strong>${{log.action.type}}</strong></div>
+                    <div style="color:gray; font-size:12px;">
+                        ${{log.amount ? "$" + Number(log.amount).toLocaleString() : "No amount"}}
+                    </div>
                 </div>
 
                 <div style="margin-bottom:16px;">
