@@ -713,9 +713,14 @@ def dashboard(db: Session = Depends(get_db)):
           </span>
       </div>
       <div class="header-actions">
-        <select id="orgFilter" onchange="refreshLogs()">
-          <option value="">All Orgs</option>
-        </select>
+        <div>
+          <div style="font-size:10px; color:var(--muted); margin-bottom:4px;">
+              Viewing Organization
+          </div>
+          <select id="orgFilter" onchange="refreshLogs()">
+            <option value="">All Orgs</option>
+          </select>
+        </div>
         <a href="/" class="console-nav">Back to Sandbox</a>
         <a href="/dashboard" class="console-nav primary">Live Console</a>
       </div>
@@ -730,7 +735,8 @@ def dashboard(db: Session = Depends(get_db)):
           </div>
           <div class="hero-meta">
             <div class="pill"><span class="live-dot"></span> Live feed active</div>
-            <div class="pill">Mode: Global admin view</div>
+            <div class="pill">Scope: All Organizations</div>
+            <div class="pill">Environment: Live Enforcement</div>
             <div class="pill">Refresh: 2 seconds</div>
           </div>
         </div>
