@@ -63,17 +63,17 @@ def load_identity_registry() -> Dict[str, Any]:
         "identities": {
             "user-alice": {
                 "canonical_id": "usr_111",
-                "display_name": "Alice (Admin)",
+                "display_name": "Alice (Platform Admin)",
                 "aliases": ["alice"],
             },
             "user-bob": {
                 "canonical_id": "usr_222",
-                "display_name": "Bob (Finance)",
+                "display_name": "Bob (System Owner)",
                 "aliases": ["bob"],
             },
             "user-charlie": {
                 "canonical_id": "usr_333",
-                "display_name": "Charlie (Approver)",
+                "display_name": "Charlie (Security Lead)",
                 "aliases": ["charlie"],
             },
             "ai-agent-v2": {
@@ -369,9 +369,13 @@ def run_validation(
             "action aligned with policy",
         ]
 
+    action_type = action.get("type", "unknown")
+    action_system = action.get("system", "unknown")
+    action_resource = action.get("resource", "unknown")
+
     return {
         "allowed": allowed,
-        "summary": f"AI proposed transfer of ${amount:,.0f} for approval",
+        "summary": f"AI proposed {action_type} on {action_system}/{action_resource}",
         "reason": reason,
         "impact": impact,
         "decision_trace": stages,
@@ -1131,7 +1135,7 @@ def ui():
             <div class="panel">
                 <div class="panel-header">
                     <h3 class="panel-title">Proposed System Action</h3>
-                    <p class="panel-subtitle">Define the action an AI system is attempting to execute within your environment.</p>
+                    <p class="panel-subtitle">Submit a proposed AI system action for governance evaluation before execution.</p>
                 </div>
                 <div class="panel-body">
                     <div style="
@@ -1170,8 +1174,8 @@ def ui():
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>Amount ($)</label>
-                                <input id="amount" type="number" value="5000" />
+                                <label>Impact Value</label>
+                                <input id="amount" type="number" value="5000" placeholder="Optional — e.g. cost, risk score, data volume" />
                             </div>
                             <div class="form-group">
                                 <label>Proposing Actor</label>
@@ -1181,28 +1185,28 @@ def ui():
 
                         <div>
                             <div class="form-group">
-                                <label>Responsible</label>
+                                <label>Executor</label>
                                 <select id="responsible">
-                                    <option value="user-alice" selected>Alice (Admin)</option>
-                                    <option value="user-bob">Bob (Finance)</option>
-                                    <option value="user-charlie">Charlie (Approver)</option>
+                                    <option value="user-alice" selected>Alice (Platform Admin)</option>
+                                    <option value="user-bob">Bob (System Owner)</option>
+                                    <option value="user-charlie">Charlie (Security Lead)</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>Accountable</label>
+                                <label>System Owner</label>
                                 <select id="accountable">
-                                    <option value="user-alice">Alice (Admin)</option>
-                                    <option value="user-bob" selected>Bob (Finance)</option>
-                                    <option value="user-charlie">Charlie (Approver)</option>
+                                    <option value="user-alice">Alice (Platform Admin)</option>
+                                    <option value="user-bob" selected>Bob (System Owner)</option>
+                                    <option value="user-charlie">Charlie (Security Lead)</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>Approver</label>
+                                <label>Authorizer</label>
                                 <select id="approved_by">
                                     <option value="">None</option>
-                                    <option value="user-alice">Alice (Admin)</option>
-                                    <option value="user-bob">Bob (Finance)</option>
-                                    <option value="user-charlie">Charlie (Approver)</option>
+                                    <option value="user-alice">Alice (Platform Admin)</option>
+                                    <option value="user-bob">Bob (System Owner)</option>
+                                    <option value="user-charlie">Charlie (Security Lead)</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -1278,11 +1282,11 @@ def ui():
                 <div class="panel-body">
                     <div class="identity-item">
                         <div class="identity-key">Required roles</div>
-                        <div class="identity-value">proposer, responsible, accountable</div>
+                        <div class="identity-value">proposer, executor, system owner</div>
                     </div>
                     <div class="identity-item">
                         <div class="identity-key">Rule</div>
-                        <div class="identity-value">Responsible and approver must remain independent</div>
+                        <div class="identity-value">Executor and authorizer must remain independent</div>
                     </div>
                     <div class="identity-item">
                         <div class="identity-key">Threshold</div>
@@ -1370,6 +1374,12 @@ function renderResolvedIdentities(resolved) {
     const identityList = document.getElementById("identityList");
     const identityEmpty = document.getElementById("identityEmpty");
     identityList.innerHTML = "";
+    const roleLabels = {
+        proposer: "Proposer",
+        responsible: "Executor",
+        accountable: "System Owner",
+        approver: "Authorizer"
+    };
 
     if (!resolved || Object.keys(resolved).length === 0) {
         identityEmpty.style.display = "block";
@@ -1381,7 +1391,7 @@ function renderResolvedIdentities(resolved) {
         const li = document.createElement("li");
         li.className = "identity-item";
         li.innerHTML = `
-            <div class="identity-key">${escapeHtml(key)}</div>
+            <div class="identity-key">${escapeHtml(roleLabels[key] || key)}</div>
             <div class="identity-value">${escapeHtml(value || "None")}</div>
         `;
         identityList.appendChild(li);
@@ -1420,6 +1430,9 @@ async function runValidation() {
 
     try {
         const amount = parseFloat(document.getElementById("amount").value || 0);
+        const actionType = document.getElementById("actionType").value;
+        const system = document.getElementById("system").value;
+        const resource = document.getElementById("resource").value;
         const responsible = document.getElementById("responsible").value;
         const accountable = document.getElementById("accountable").value;
         const approved_by = document.getElementById("approved_by").value;
@@ -1448,10 +1461,10 @@ async function runValidation() {
             body: JSON.stringify({
                 policy,
                 action: {
-                    type: document.getElementById("actionType").value,
+                    type: actionType,
                     amount,
-                    system: document.getElementById("system").value,
-                    resource: document.getElementById("resource").value
+                    system,
+                    resource
                 },
                 actor: "ai-agent-v2",
                 context
@@ -1477,7 +1490,7 @@ async function runValidation() {
             resTitle.innerHTML = `🚫 BLOCKED <small>execution prevented</small>`;
         }
 
-        document.getElementById("resSummary").innerHTML = `<strong>AI attempted to transfer $${amount.toLocaleString()}</strong>`;
+        document.getElementById("resSummary").innerHTML = `<strong>AI attempted to execute: ${escapeHtml(actionType)} on ${escapeHtml(system)}/${escapeHtml(resource)}</strong>`;
 
         const execReason = buildExecutiveReasons(allowed, data.reason, data.impact);
         resReasonTitle.textContent = execReason.title;
