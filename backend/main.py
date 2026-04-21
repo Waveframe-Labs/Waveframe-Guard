@@ -318,8 +318,8 @@ def run_validation(
         actor={"id": proposer, "type": "agent"},
         artifact_paths=[],
         mutation={
-            "domain": "finance",
-            "resource": "funds",
+            "domain": action.get("system", "unknown"),
+            "resource": action.get("resource", "unknown"),
             "action": action.get("type", "unknown"),
         },
         contract={
@@ -1130,12 +1130,36 @@ def ui():
         <div class="main-column">
             <div class="panel">
                 <div class="panel-header">
-                    <h3 class="panel-title">Incoming AI Request</h3>
-                    <p class="panel-subtitle">Define the proposed action, execution context, and policy conditions.</p>
+                    <h3 class="panel-title">Proposed System Action</h3>
+                    <p class="panel-subtitle">Define the action an AI system is attempting to execute within your environment.</p>
                 </div>
                 <div class="panel-body">
+                    <div style="
+                        padding:10px 12px;
+                        background: rgba(255,255,255,0.03);
+                        border: 1px solid var(--border);
+                        border-radius: 8px;
+                        font-size:12px;
+                        color: var(--muted);
+                        margin-bottom: 16px;
+                    ">
+                        Every action submitted here is evaluated against governance policy before execution.
+                    </div>
                     <div class="top-grid">
                         <div>
+                            <div class="form-group">
+                                <label>Target System</label>
+                                <select id="system">
+                                    <option value="finance">Finance System</option>
+                                    <option value="hr">HR System</option>
+                                    <option value="infra">Infrastructure</option>
+                                    <option value="crm">Customer Data</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Target Resource</label>
+                                <input id="resource" placeholder="e.g. payroll-account, prod-db, user-records" />
+                            </div>
                             <div class="form-group">
                                 <label>Action Type</label>
                                 <select id="actionType" disabled>
@@ -1418,7 +1442,17 @@ async function runValidation() {
         const res = await fetch("/validate", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({ policy, action: { type: "transfer", amount }, actor: "ai-agent-v2", context })
+            body: JSON.stringify({
+                policy,
+                action: {
+                    type: "transfer",
+                    amount,
+                    system: document.getElementById("system").value,
+                    resource: document.getElementById("resource").value
+                },
+                actor: "ai-agent-v2",
+                context
+            })
         });
 
         const data = await res.json();
@@ -1479,7 +1513,12 @@ async function sendToProduction() {
         },
         body: JSON.stringify({
             policy_ref: "demo_policy_1",
-            action: { type: "transfer", amount },
+            action: {
+                type: "transfer",
+                amount,
+                system: document.getElementById("system").value,
+                resource: document.getElementById("resource").value
+            },
             actor: "ai-agent-v2",
             context
         })
