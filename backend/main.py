@@ -1099,6 +1099,9 @@ def ui():
         <div class="hero">
             <div class="eyebrow">Execution Boundary</div>
             <h1>Waveframe Guard Sandbox</h1>
+            <div style="margin-top:6px; color:#6b7494; font-size:13px;">
+                Running in: <strong>Sandbox Environment</strong>
+            </div>
             <p>
                 Evaluate whether an AI action is allowed to execute before it reaches your system.
                 This sandbox compiles the proposed policy, resolves identities, runs CRI-CORE, and returns a binary decision with trace visibility.
@@ -1168,6 +1171,9 @@ def ui():
 
                     <div class="cta">
                         <button onclick="runValidation()" id="submitBtn">Evaluate Action</button>
+                        <button onclick="sendToProduction()" style="margin-top:10px;">
+                            Send to Production (Acme Corp)
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1417,6 +1423,36 @@ async function runValidation() {
         btn.innerText = "Evaluate Action";
         btn.disabled = false;
     }
+}
+
+async function sendToProduction() {
+    const amount = parseFloat(document.getElementById("amount").value || 0);
+    const responsible = document.getElementById("responsible").value;
+    const accountable = document.getElementById("accountable").value;
+    const approved_by = document.getElementById("approved_by").value;
+
+    const context = {};
+    if (responsible) context.responsible = responsible;
+    if (accountable) context.accountable = accountable;
+    if (approved_by) context.approved_by = approved_by;
+
+    const res = await fetch("/v1/enforce", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer wf_test_key_123"
+        },
+        body: JSON.stringify({
+            policy_ref: "demo_policy_1",
+            action: { type: "transfer", amount },
+            actor: "ai-agent-v2",
+            context
+        })
+    });
+
+    const data = await res.json();
+    console.log("Production decision:", data);
+    alert("Sent to production org. Check dashboard.");
 }
 
 updateThresholdPreview();
