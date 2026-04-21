@@ -614,9 +614,7 @@ def identities():
 def dashboard(db: Session = Depends(get_db)):
     """Renders the Live Enforcement Console."""
     logs = db.query(AuditLog).order_by(AuditLog.server_timestamp.desc()).limit(100).all()
-    latest_org = None
-    if logs:
-        latest_org = logs[0].organization.name if logs[0].organization else "Sandbox"
+    latest_org = "Global View"
     allowed_count = sum(1 for log in logs if log.allowed)
     blocked_count = len(logs) - allowed_count
 
