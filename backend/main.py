@@ -581,6 +581,11 @@ def log_detail(id: str, db: Session = Depends(get_db)):
         "impact": json.loads(log.impact or "[]"),
     }
 
+@app.get("/api/orgs")
+def get_orgs(db: Session = Depends(get_db)):
+    orgs = db.query(Organization).all()
+    return {"orgs": [o.name for o in orgs]}
+
 @app.get("/v1/logs")
 def tenant_logs(
     limit: int = 50,
@@ -710,7 +715,6 @@ def dashboard(db: Session = Depends(get_db)):
       <div class="header-actions">
         <select id="orgFilter" onchange="refreshLogs()">
           <option value="">All Orgs</option>
-          <option value="Acme Corp">Acme Corp</option>
         </select>
         <a href="/" class="console-nav">Back to Sandbox</a>
         <a href="/dashboard" class="console-nav primary">Live Console</a>
@@ -810,6 +814,15 @@ def dashboard(db: Session = Depends(get_db)):
         const blockedNode = document.getElementById("blockedCount");
         if (allowedNode) allowedNode.textContent = String(allowed);
         if (blockedNode) blockedNode.textContent = String(blocked);
+    }}
+
+    async function loadOrgs() {{
+        const res = await fetch("/api/orgs");
+        const data = await res.json();
+
+        const select = document.getElementById("orgFilter");
+        select.innerHTML = `<option value="">All Orgs</option>` +
+            data.orgs.map(o => `<option value="${{o}}">${{o}}</option>`).join("");
     }}
 
     async function refreshLogs() {{
@@ -956,6 +969,7 @@ def dashboard(db: Session = Depends(get_db)):
     }});
 
     setInterval(refreshLogs, 2000);
+    loadOrgs();
     refreshLogs();
     </script>
     </body>
