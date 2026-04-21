@@ -516,6 +516,7 @@ def serialize_audit_logs(rows: List[AuditLog]) -> Dict[str, List[Dict[str, Any]]
             {
                 "decision_id": r.id,
                 "organization": r.organization.name if r.organization else "Sandbox",
+                "domain": "finance",
                 "actor": r.actor,
                 "allowed": r.allowed,
                 "action": {
@@ -752,6 +753,7 @@ def dashboard(db: Session = Depends(get_db)):
               <tr>
                 <th>Timestamp</th>
                 <th>Tenant Org</th>
+                <th>Domain</th>
                 <th>Decision ID</th>
                 <th>Status</th>
                 <th>Actor</th>
@@ -762,7 +764,7 @@ def dashboard(db: Session = Depends(get_db)):
               </tr>
             </thead>
             <tbody id="logRows">
-              {rows_html if rows_html else '<tr><td colspan="9" class="feed-empty">No events yet. Trigger the sandbox or SDK to start the live feed.</td></tr>'}
+              {rows_html if rows_html else '<tr><td colspan="10" class="feed-empty">No events yet. Trigger the sandbox or SDK to start the live feed.</td></tr>'}
             </tbody>
           </table>
         </div>
@@ -833,14 +835,13 @@ def dashboard(db: Session = Depends(get_db)):
                     ? new Date(log.server_timestamp).toLocaleString()
                     : "Recent";
 
-                const amount = formatAmount(log.amount);
-
                 return `
                 <tr
                     onclick="openInspector('${{log.decision_id}}')"
                     style="cursor:pointer; border-bottom: 1px solid var(--border);">
                     <td class="td-time">${{ts}}</td>
                     <td class="td-mono">${{log.organization || "Sandbox"}}</td>
+                    <td class="td-mono">${{log.domain}}</td>
                     <td class="td-id">${{log.decision_id}}</td>
                     <td>
                         <span class="badge"
@@ -852,7 +853,7 @@ def dashboard(db: Session = Depends(get_db)):
                     </td>
                     <td class="td-mono">${{log.actor}}</td>
                     <td class="td-mono">${{log.action.type}}</td>
-                    <td class="td-mono">${{amount}}</td>
+                    <td class="td-mono">${{log.action.amount ? "$" + Number(log.action.amount).toLocaleString() : "—"}}</td>
                     <td class="td-reason">${{log.reason}}</td>
                     <td class="td-hash">${{log.trace_hash.slice(0,8)}}...</td>
                 </tr>
