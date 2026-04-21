@@ -385,17 +385,17 @@ def run_validation(
     }
 
 # ---------------------------
-# SANDBOX ENDPOINT
+# DEV ENVIRONMENT ENDPOINT
 # ---------------------------
 
 @app.post("/validate")
 async def validate(request: Request, db: Session = Depends(get_db)):
-    """Public Sandbox. No API Key required. Logs to 'org_sandbox_000'."""
+    """Public Dev Environment. No API Key required."""
     body = await request.json()
 
-    sandbox = db.query(Organization).filter_by(name="Sandbox").first()
+    sandbox = db.query(Organization).filter_by(name="Dev Environment").first()
     if not sandbox:
-        sandbox = Organization(name="Sandbox")
+        sandbox = Organization(name="Dev Environment")
         db.add(sandbox)
         db.commit()
         db.refresh(sandbox)
@@ -522,7 +522,7 @@ def serialize_audit_logs(rows: List[AuditLog]) -> Dict[str, List[Dict[str, Any]]
         "logs": [
             {
                 "decision_id": r.id,
-                "organization": r.organization.name if r.organization else "Sandbox",
+                "organization": r.organization.name if r.organization else "Dev Environment",
                 "domain": "finance",
                 "actor": r.actor,
                 "allowed": r.allowed,
@@ -713,19 +713,19 @@ def dashboard_embed(db: Session = Depends(get_db)):
       <div class="logo">
           WAVEFRAME <span>GUARD</span><br/>
           <span style="font-size:10px; color: var(--muted);">
-              Org: {latest_org}
+              Scope: All Organizations
           </span>
       </div>
       <div class="header-actions">
         <div>
           <div style="font-size:10px; color:var(--muted); margin-bottom:4px;">
-              Viewing Organization
+              Organization Scope
           </div>
           <select id="orgFilter" onchange="refreshLogs()">
             <option value="">All Orgs</option>
           </select>
         </div>
-        <a href="/" class="console-nav">Back to Sandbox</a>
+        <a href="/" class="console-nav">Back to Dev Environment</a>
         <a href="/dashboard" class="console-nav primary">Live Console</a>
       </div>
     </header>
@@ -783,7 +783,7 @@ def dashboard_embed(db: Session = Depends(get_db)):
               </tr>
             </thead>
             <tbody id="logRows">
-              {rows_html if rows_html else '<tr><td colspan="10" class="feed-empty">No events yet. Trigger the sandbox or SDK to start the live feed.</td></tr>'}
+              {rows_html if rows_html else '<tr><td colspan="10" class="feed-empty">No events yet. Trigger the dev environment or SDK to start the live feed.</td></tr>'}
             </tbody>
           </table>
         </div>
@@ -850,7 +850,7 @@ def dashboard_embed(db: Session = Depends(get_db)):
             updateSummary(data.logs || []);
 
             if (!data.logs || data.logs.length === 0) {{
-                tbody.innerHTML = '<tr><td colspan="9" class="feed-empty">No events yet. Trigger the sandbox or SDK to start the live feed.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="10" class="feed-empty">No events yet. Trigger the dev environment or SDK to start the live feed.</td></tr>';
                 if (lastUpdated) lastUpdated.textContent = "Last refresh: live feed online, waiting for first decision";
                 return;
             }}
@@ -868,7 +868,7 @@ def dashboard_embed(db: Session = Depends(get_db)):
                     onclick="openInspector('${{log.decision_id}}')"
                     style="cursor:pointer; border-bottom: 1px solid var(--border);">
                     <td class="td-time">${{ts}}</td>
-                    <td class="td-mono">${{log.organization || "Sandbox"}}</td>
+                    <td class="td-mono">${{log.organization || "Dev Environment"}}</td>
                     <td class="td-mono">${{log.domain}}</td>
                     <td class="td-id">${{log.decision_id}}</td>
                     <td>
@@ -987,7 +987,7 @@ def dashboard_embed(db: Session = Depends(get_db)):
     """
 
 # ---------------------------
-# UI - PUBLIC SANDBOX
+# UI - POLICY SIMULATION
 # ---------------------------
 
 @app.get("/", response_class=HTMLResponse)
@@ -996,7 +996,7 @@ def ui():
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Waveframe Guard | Sandbox</title>
+    <title>Waveframe Guard — Policy Simulation</title>
     <style>
         :root {
             --bg: #0f1115;
@@ -1110,13 +1110,12 @@ def ui():
     <div class="header-container">
         <div class="hero">
             <div class="eyebrow">Execution Boundary</div>
-            <h1>Waveframe Guard Sandbox</h1>
+            <h1>Waveframe Guard — Policy Simulation</h1>
             <div style="margin-top:6px; color:#6b7494; font-size:13px;">
-                Running in: <strong>Sandbox Environment</strong>
+                Running in: <strong>Dev Environment</strong>
             </div>
             <p>
-                Evaluate whether an AI action is allowed to execute before it reaches your system.
-                This sandbox compiles the proposed policy, resolves identities, runs CRI-CORE, and returns a binary decision with trace visibility.
+                Simulate AI actions before submitting them to your governed environments.
             </p>
         </div>
         <a href="#live-console" class="dashboard-btn">View Compliance Ledger &rarr;</a>
@@ -1184,8 +1183,11 @@ def ui():
                     <div class="cta">
                         <button onclick="runValidation()" id="submitBtn">Evaluate Action</button>
                         <button onclick="sendToProduction()" style="margin-top:10px;">
-                            Send to Production (Acme Corp)
+                            Submit for Enforcement (Acme Corp)
                         </button>
+                        <div style="margin-top:10px; font-size:12px; color:#6b7494;">
+                            This action will be evaluated locally, then optionally submitted to a governed organization.
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1263,7 +1265,7 @@ def ui():
         <div class="panel">
             <div class="panel-header">
                 <h3 class="panel-title">Live Enforcement Console</h3>
-                <p class="panel-subtitle">Sandbox decisions and ledger monitoring now live in one place.</p>
+                <p class="panel-subtitle">Dev environment decisions and ledger monitoring now live in one place.</p>
             </div>
             <div class="panel-body" style="padding: 0;">
                 <iframe
