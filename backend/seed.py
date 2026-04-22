@@ -82,7 +82,7 @@ def run():
         if not policy:
             policy = Policy(
                 id=POLICY_ID,
-                name="Demo Finance Policy",
+                name="finance-core",
                 organization_id=ORG_ID
             )
             db.add(policy)

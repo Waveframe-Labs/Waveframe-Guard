@@ -14,7 +14,7 @@ from waveframe_guard.client import WaveframeGuard
 
 API_KEY = "wf_test_key_123"
 BASE_URL = "http://localhost:8000"
-POLICY_REF = "demo_policy_1"
+POLICY_ID = "finance-core"
 
 
 # -----------------------------
@@ -23,6 +23,7 @@ POLICY_REF = "demo_policy_1"
 
 guard = WaveframeGuard(
     api_key=API_KEY,
+    policy_id=POLICY_ID,
     base_url=BASE_URL
 )
 
@@ -56,7 +57,6 @@ BASE_CONTEXT = {
 
 run_scenario(
     "Scenario 1: No approval",
-    policy_ref=POLICY_REF,
     action={"type": "transfer", "amount": 5000},
     context=BASE_CONTEXT,
 )
@@ -68,7 +68,6 @@ run_scenario(
 
 run_scenario(
     "Scenario 2: Same actor approval",
-    policy_ref=POLICY_REF,
     action={"type": "transfer", "amount": 5000},
     context={
         **BASE_CONTEXT,
@@ -83,7 +82,6 @@ run_scenario(
 
 run_scenario(
     "Scenario 3: Valid approval",
-    policy_ref=POLICY_REF,
     action={"type": "transfer", "amount": 5000},
     context={
         **BASE_CONTEXT,
@@ -98,7 +96,6 @@ run_scenario(
 
 run_scenario(
     "Scenario 4: Read-only action",
-    policy_ref=POLICY_REF,
     action={"type": "get_balance"},
     context=BASE_CONTEXT,
 )
@@ -110,7 +107,6 @@ run_scenario(
 
 run_scenario(
     "Edge Case 1: Empty action",
-    policy_ref=POLICY_REF,
     action={},
     context=BASE_CONTEXT,
 )
@@ -122,7 +118,6 @@ run_scenario(
 
 run_scenario(
     "Edge Case 2: Missing type",
-    policy_ref=POLICY_REF,
     action={"amount": 100},
     context=BASE_CONTEXT,
 )
@@ -134,7 +129,6 @@ run_scenario(
 
 run_scenario(
     "Edge Case 3: Garbage context",
-    policy_ref=POLICY_REF,
     action={"type": "transfer"},
     context="not a dict",
 )

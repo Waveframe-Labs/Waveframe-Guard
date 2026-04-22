@@ -1,19 +1,19 @@
 import requests
 
 class WaveframeGuard:
-    def __init__(self, api_key: str, base_url: str = "http://localhost:8000"):
+    def __init__(self, api_key: str, policy_id: str, base_url: str = "http://localhost:8000"):
         self.api_key = api_key
+        self.policy_id = policy_id
         self.base_url = base_url
 
     # ---------------------------
     # PUBLIC API
     # ---------------------------
 
-    def execute(self, policy_ref: str, action: dict, context: dict, actor: str = "ai-agent-v2"):
+    def execute(self, action: dict, context: dict, actor: str = "ai-agent-v2"):
         context = self._normalize_context(context)
 
         return self._request(
-            policy_ref=policy_ref,
             action=action,
             context=context,
             actor=actor,
@@ -23,7 +23,7 @@ class WaveframeGuard:
     # INTERNAL
     # ---------------------------
 
-    def _request(self, policy_ref: str, action: dict, context: dict, actor: str):
+    def _request(self, action: dict, context: dict, actor: str):
         res = requests.post(
             f"{self.base_url}/v1/enforce",
             headers={
@@ -31,7 +31,7 @@ class WaveframeGuard:
                 "Content-Type": "application/json",
             },
             json={
-                "policy_ref": policy_ref,
+                "policy_id": self.policy_id,
                 "action": action,
                 "context": context,
                 "actor": actor,

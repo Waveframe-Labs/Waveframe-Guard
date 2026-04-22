@@ -16,7 +16,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
 
-from backend.db import init_db, get_db, Organization, APIKey, Policy, AuditLog
+from backend.db import init_db, get_db, Organization, APIKey, Policy, PolicyVersion, AuditLog
 
 from compiler.compile_policy_file import compile_policy_file
 from proposal_normalizer.build_proposal import build_proposal
@@ -197,6 +197,27 @@ def append_required_role(required_roles: List[str], role: str) -> List[str]:
         return required_roles
     return [*required_roles, role]
 
+def compute_risk_level(
+    action: Dict[str, Any],
+    allowed: bool,
+    impact: List[str],
+    reason: str,
+) -> str:
+    action_type = action.get("type", "")
+    system = action.get("system", "")
+    amount = action.get("amount", 0) or 0
+
+    if not allowed and ("approval" in reason.lower() or amount > 5000):
+        return "critical"
+
+    if system in ["infra", "production"] or action_type in ["delete", "deploy"]:
+        return "high"
+
+    if amount > 1000:
+        return "medium"
+
+    return "low"
+
 def build_missing_approver_decision(
     action: Dict[str, Any],
     amount: float,
@@ -207,15 +228,18 @@ def build_missing_approver_decision(
     accountable: str,
     approver: Optional[str],
 ) -> Dict[str, Any]:
+    impact = [
+        "transaction exceeded approval threshold",
+        "required approver role was not assigned to a listed identity",
+        "execution blocked at boundary",
+    ]
+    reason = "Approval required but no listed approver provided"
+    risk_level = compute_risk_level(action, False, impact, reason)
     return {
         "allowed": False,
         "summary": f"AI proposed {action.get('type')} on {action.get('system')}/{action.get('resource')}",
-        "reason": "Approval required but no listed approver provided",
-        "impact": [
-            "transaction exceeded approval threshold",
-            "required approver role was not assigned to a listed identity",
-            "execution blocked at boundary",
-        ],
+        "reason": reason,
+        "impact": impact,
         "decision_trace": [
             {
                 "stage": "approval-check",
@@ -227,6 +251,7 @@ def build_missing_approver_decision(
         ],
         "trace_hash": contract_hash,
         "error_code": "approval_missing",
+        "risk_level": risk_level,
         "resolved_identities": {
             "proposer": proposer,
             "responsible": responsible,
@@ -254,18 +279,21 @@ def run_validation(
     approver = resolve_identity(requested_approver, registry)
 
     if not responsible or not accountable:
+        impact = [
+            "missing required execution identities",
+            "could not verify governance role assignments",
+            "action was stopped before execution",
+        ]
+        reason = "Identity resolution failed: missing required human context"
         return {
             "allowed": False,
             "summary": f"AI proposed action: {action.get('type')}",
-            "reason": "Identity resolution failed: missing required human context",
-            "impact": [
-                "missing required execution identities",
-                "could not verify governance role assignments",
-                "action was stopped before execution",
-            ],
+            "reason": reason,
+            "impact": impact,
             "decision_trace": [],
             "resolved_identities": {},
             "trace_hash": "identity_resolution_failed",
+            "risk_level": compute_risk_level(action, False, impact, reason),
         }
 
     with tempfile.NamedTemporaryFile(delete=False, suffix=".json", mode="w", encoding="utf-8") as f:
@@ -386,12 +414,14 @@ def run_validation(
     action_type = action.get("type", "unknown")
     action_system = action.get("system", "unknown")
     action_resource = action.get("resource", "unknown")
+    risk_level = compute_risk_level(action, allowed, impact, reason)
 
     return {
         "allowed": allowed,
         "summary": f"AI proposed {action_type} on {action_system}/{action_resource}",
         "reason": reason,
         "impact": impact,
+        "risk_level": risk_level,
         "decision_trace": stages,
         "trace_hash": contract_hash,
         "resolved_identities": {
@@ -438,6 +468,7 @@ async def validate(request: Request, db: Session = Depends(get_db)):
         action_domain=action.get("system", "unknown"),
         amount=action.get("amount", 0),
         allowed=decision["allowed"],
+        risk_level=decision.get("risk_level", "low"),
         reason=decision["reason"],
         decision_trace=json.dumps(decision.get("decision_trace", [])),
         resolved_identities=json.dumps(decision.get("resolved_identities", {})),
@@ -463,19 +494,26 @@ async def enforce(
     """Production Endpoint. Requires API Key. Enforces Org Isolation."""
     body = await request.json()
 
-    policy = db.query(Policy).filter(
-        Policy.id == body.get("policy_ref"),
-        Policy.organization_id == current_org.id,
-    ).first()
+    policy_id = body.get("policy_id")
 
-    if not policy:
-        raise HTTPException(status_code=404, detail="Policy not found or you lack permission.")
+    if not policy_id:
+        raise HTTPException(status_code=400, detail="policy_id is required")
 
-    if not policy.versions:
-        raise HTTPException(status_code=404, detail="Policy has no active versions")
+    policy_version = (
+        db.query(PolicyVersion)
+        .join(Policy)
+        .filter(
+            Policy.name == policy_id,
+            Policy.organization_id == current_org.id,
+        )
+        .order_by(PolicyVersion.version.desc())
+        .first()
+    )
 
-    version = policy.versions[0] 
-    policy_dict = json.loads(version.rules_json)
+    if not policy_version:
+        raise HTTPException(status_code=404, detail="Policy not found")
+
+    policy = json.loads(policy_version.rules_json)
 
     action = body.get("action", {})
     actor = body.get("actor", "ai-agent-v2")
@@ -490,15 +528,17 @@ async def enforce(
     is_valid, error_reason, error_code = validate_action(action)
 
     if not is_valid:
+        invalid_impact = [
+            "invalid action structure",
+            "failed pre-execution validation",
+            "execution blocked before governance evaluation"
+        ]
         decision = {
             "allowed": False,
             "summary": f"AI attempted action: {action_type}",
             "reason": error_reason,
-            "impact": [
-                "invalid action structure",
-                "failed pre-execution validation",
-                "execution blocked before governance evaluation"
-            ],
+            "impact": invalid_impact,
+            "risk_level": compute_risk_level(action, False, invalid_impact, error_reason),
             "decision_trace": [
                 {
                     "stage": "action-validation",
@@ -510,17 +550,18 @@ async def enforce(
             "resolved_identities": {},
         }
     else:
-        decision = run_validation(policy_dict, action, actor, context)
+        decision = run_validation(policy, action, actor, context)
 
     log = AuditLog(
         id=f"dec_{uuid.uuid4().hex[:10]}",
         organization_id=current_org.id,
-        policy_version_id=version.id,
+        policy_version_id=policy_version.id,
         actor=actor,
         action_type=action_type,
         action_domain=action.get("system", "unknown"),
         amount=action_amount,
         allowed=decision["allowed"],
+        risk_level=decision.get("risk_level", "low"),
         reason=decision["reason"],
         decision_trace=json.dumps(decision.get("decision_trace", [])),
         resolved_identities=json.dumps(decision.get("resolved_identities", {})),
@@ -546,6 +587,7 @@ def serialize_audit_logs(rows: List[AuditLog]) -> Dict[str, List[Dict[str, Any]]
                 "domain": r.action_domain or "unknown",
                 "actor": r.actor,
                 "allowed": r.allowed,
+                "risk_level": r.risk_level or "low",
                 "action": {
                     "type": r.action_type,
                     "amount": r.amount,
@@ -580,14 +622,22 @@ def log_detail(id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Log not found")
 
     resolved_identities = json.loads(log.resolved_identities or "{}")
+    policy_version = (
+        db.query(PolicyVersion).filter(PolicyVersion.id == log.policy_version_id).first()
+        if log.policy_version_id
+        else None
+    )
+    policy_id = policy_version.policy.name if policy_version and policy_version.policy else None
 
     return {
         "decision_id": log.id,
+        "policy_id": policy_id,
         "proposer": resolved_identities.get("proposer"),
         "responsible": resolved_identities.get("responsible"),
         "accountable": resolved_identities.get("accountable"),
         "approver": resolved_identities.get("approver"),
         "allowed": log.allowed,
+        "risk_level": log.risk_level or "low",
         "action": {
             "type": log.action_type,
             "amount": log.amount,
@@ -598,6 +648,41 @@ def log_detail(id: str, db: Session = Depends(get_db)):
         "server_timestamp": log.server_timestamp.isoformat() + "Z" if log.server_timestamp else None,
         "decision_trace": json.loads(log.decision_trace or "[]"),
         "resolved_identities": resolved_identities,
+        "impact": json.loads(log.impact or "[]"),
+    }
+
+@app.get("/api/audit/{decision_id}")
+def get_audit_record(decision_id: str, db: Session = Depends(get_db)):
+    log = db.query(AuditLog).filter(AuditLog.id == decision_id).first()
+
+    if not log:
+        raise HTTPException(status_code=404, detail="Decision not found")
+
+    policy_version = None
+    if log.policy_version_id:
+        policy_version = db.query(PolicyVersion).filter(
+            PolicyVersion.id == log.policy_version_id
+        ).first()
+
+    return {
+        "decision_id": log.id,
+        "timestamp": log.server_timestamp.isoformat() + "Z" if log.server_timestamp else None,
+        "actor": log.actor,
+        "action": {
+            "type": log.action_type,
+            "domain": log.action_domain,
+            "amount": log.amount,
+        },
+        "allowed": log.allowed,
+        "reason": log.reason,
+        "trace_hash": log.trace_hash,
+        "risk_level": getattr(log, "risk_level", "unknown"),
+        "policy": {
+            "version_id": log.policy_version_id,
+            "rules": json.loads(policy_version.rules_json) if policy_version else None,
+        },
+        "decision_trace": json.loads(log.decision_trace or "[]"),
+        "resolved_identities": json.loads(log.resolved_identities or "{}"),
         "impact": json.loads(log.impact or "[]"),
     }
 
@@ -691,6 +776,7 @@ def simulate_activity():
                 action_domain=system,
                 amount=amount,
                 allowed=decision["allowed"],
+                risk_level=decision.get("risk_level", "low"),
                 reason=decision["reason"],
                 decision_trace=json.dumps(decision.get("decision_trace", [])),
                 resolved_identities=json.dumps(decision.get("resolved_identities", {})),
@@ -727,8 +813,7 @@ def dashboard_embed(db: Session = Depends(get_db)):
 
     rows_html = ""
     for log in logs:
-        status_color = "#2ea043" if log.allowed else "#da3633"
-        status_text = "ALLOWED" if log.allowed else "BLOCKED"
+        risk_level = (log.risk_level or "low").lower()
         action_type = log.action_type or "unknown"
         ts = log.server_timestamp.strftime("%Y-%m-%d %H:%M:%S") if log.server_timestamp else "Recent"
         system_display = f"{log.action_domain or 'unknown'}/{action_type}"
@@ -739,7 +824,7 @@ def dashboard_embed(db: Session = Depends(get_db)):
             <td class="td-time">{ts}</td>
             <td class="td-mono">{system_display}</td>
             <td class="td-id">{log.id}</td>
-            <td><span class="badge" style="color: {status_color}; background: {status_color}20; border-color: {status_color}40;">{status_text}</span></td>
+            <td><span class="badge risk-{risk_level}">{risk_level.upper()}</span></td>
             <td class="td-mono">{log.actor}</td>
             <td class="td-reason">{details_display}</td>
         </tr>
@@ -794,6 +879,12 @@ def dashboard_embed(db: Session = Depends(get_db)):
       .td-time, .td-id, .td-hash {{ font-family: var(--mono); font-size: 11px; color: var(--muted2); }}
       .td-reason {{ color: var(--muted2); font-size: 12px; }}
       .badge {{ font-family: var(--mono); font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 3px; border: 1px solid; }}
+      .risk-low {{ color: #2ea043; background: rgba(46,160,67,0.12); border: 1px solid rgba(46,160,67,0.35); }}
+      .risk-medium {{ color: #d29922; background: rgba(210,153,34,0.12); border: 1px solid rgba(210,153,34,0.35); }}
+      .risk-high {{ color: #f85149; background: rgba(248,81,73,0.12); border: 1px solid rgba(248,81,73,0.35); }}
+      .risk-critical {{ color: #ff3d5a; background: rgba(255,61,90,0.18); border: 1px solid rgba(255,61,90,0.5); box-shadow: 0 0 12px rgba(255,61,90,0.25); }}
+      .btn-secondary {{ background: linear-gradient(135deg, #1f2937, #111827); border: 1px solid #374151; color: #e5e7eb; padding: 8px 12px; border-radius: 8px; cursor: pointer; }}
+      .btn-secondary:hover {{ border-color: #f97316; box-shadow: 0 0 10px rgba(249,115,22,0.25); }}
       .feed-shell {{ overflow-x: auto; }}
       .feed-empty {{ text-align: center; padding: 20px; color: var(--muted); }}
       .feed-footer {{ display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 12px 18px; border-top: 1px solid var(--border); background: rgba(255,255,255,0.02); color: var(--muted2); font-family: var(--mono); font-size: 11px; }}
@@ -962,8 +1053,8 @@ def dashboard_embed(db: Session = Depends(get_db)):
 
             tbody.innerHTML = data.logs.map(log => {{
                 const isNew = !previousIds.includes(log.decision_id);
-                const statusColor = log.allowed ? "#2ea043" : "#da3633";
-                const statusText = log.allowed ? "ALLOWED" : "BLOCKED";
+                const risk = log.risk_level || "low";
+                const riskClass = `risk-${{risk}}`;
 
                 const ts = log.server_timestamp
                     ? new Date(log.server_timestamp).toLocaleString()
@@ -977,11 +1068,8 @@ def dashboard_embed(db: Session = Depends(get_db)):
                     <td class="td-mono">${{log.domain}}/${{log.action.type}}</td>
                     <td class="td-id">${{log.decision_id}}</td>
                     <td>
-                        <span class="badge"
-                            style="color:${{statusColor}};
-                                   background:${{statusColor}}20;
-                                   border-color:${{statusColor}}40;">
-                            ${{statusText}}
+                        <span class="badge ${{riskClass}}">
+                            ${{risk.toUpperCase()}}
                         </span>
                     </td>
                     <td class="td-mono">${{log.actor}}</td>
@@ -1030,6 +1118,11 @@ def dashboard_embed(db: Session = Depends(get_db)):
             const log = await res.json();
 
             content.innerHTML = `
+                <div style="margin-bottom:12px;">
+                    <span class="badge risk-${{log.risk_level || "low"}}">
+                        ${{(log.risk_level || "low").toUpperCase()}} RISK
+                    </span>
+                </div>
                 <div style="margin-bottom:16px;">
                     <div style="font-size:12px; color:gray;">Proposed Action</div>
                     <div><strong>${{log.action.type}}</strong></div>
@@ -1043,6 +1136,8 @@ def dashboard_embed(db: Session = Depends(get_db)):
                         ${{log.allowed ? "✅ Execution Approved" : "🚫 Execution Blocked"}}
                     </div>
                 </div>
+
+                <p><strong>Policy:</strong> ${{log.policy_id || "finance-core"}}</p>
 
                 <div style="margin-bottom:16px;">
                     <div style="font-size:12px; color:gray;">Summary</div>
@@ -1071,10 +1166,33 @@ def dashboard_embed(db: Session = Depends(get_db)):
                     <div style="word-break:break-all;">${{log.trace_hash}}</div>
                 </div>
 
+                <button id="downloadAuditBtn" class="btn-secondary">
+                    Download Audit Record
+                </button>
+
                 <div style="margin-top:16px;">
                     <small>${{log.server_timestamp}}</small>
                 </div>
             `;
+
+            const decisionId = log.decision_id;
+            document.getElementById("downloadAuditBtn").onclick = async () => {{
+                const res = await fetch(`/api/audit/${{decisionId}}`);
+                const data = await res.json();
+
+                const blob = new Blob([JSON.stringify(data, null, 2)], {{
+                    type: "application/json"
+                }});
+
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+
+                a.href = url;
+                a.download = `audit_${{decisionId}}.json`;
+                a.click();
+
+                window.URL.revokeObjectURL(url);
+            }};
         }} catch (err) {{
             content.innerHTML = "Failed to load details";
         }}
@@ -1307,6 +1425,12 @@ def ui():
                                     <option value="user-alice">Alice (Platform Admin)</option>
                                     <option value="user-bob">Bob (System Owner)</option>
                                     <option value="user-charlie">Charlie (Security Lead)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Policy</label>
+                                <select id="policySelect">
+                                    <option value="finance-core">finance-core</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -1628,7 +1752,7 @@ async function sendToProduction() {
             "Authorization": "Bearer wf_test_key_123"
         },
         body: JSON.stringify({
-            policy_ref: "demo_policy_1",
+            policy_id: document.getElementById("policySelect").value,
             action: {
                 type: document.getElementById("actionType").value,
                 amount,
