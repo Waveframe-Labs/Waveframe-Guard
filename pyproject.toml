@@ -4,13 +4,19 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "waveframe-guard"
-version = "0.1.0"
-description = "Stop unsafe AI actions before they execute"
+version = "0.2.0"
+description = "Enterprise AI governance layer for deterministic execution control with policy-bound enforcement and immutable audit tracing."
 authors = [
     { name = "Shawn Wright", email = "swright@waveframelabs.org" }
 ]
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.9"
+keywords = ["ai governance", "policy enforcement", "execution control", "compliance", "audit"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: Other/Proprietary License",
+    "Operating System :: OS Independent",
+]
 
 # 🔒 Proprietary license
 license = { text = "Proprietary" }

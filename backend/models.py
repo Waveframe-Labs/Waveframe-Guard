@@ -15,9 +15,9 @@ class EvaluateRequest(BaseModel):
     action: Dict[str, Any]
     actor: str
     context: Optional[Dict[str, Any]] = None
-    policy: Optional[str] = Field(
-        default="finance-policy.json",
-        description="Path or identifier for the policy file",
+    policy_id: Optional[str] = Field(
+        default="finance-core",
+        description="Stored policy identifier used to resolve the latest policy version",
     )
 
 
@@ -37,7 +37,7 @@ class EventRecord(BaseModel):
     context: Dict[str, Any]
     allowed: bool
     reason: str
-    policy: str
+    policy_id: str
 
     @classmethod
     def create(
@@ -48,7 +48,7 @@ class EventRecord(BaseModel):
         context: Optional[Dict[str, Any]],
         allowed: bool,
         reason: str,
-        policy: str,
+        policy_id: str,
     ) -> "EventRecord":
         return cls(
             event_id=f"evt_{uuid4().hex}",
@@ -59,5 +59,5 @@ class EventRecord(BaseModel):
             context=context or {},
             allowed=allowed,
             reason=reason,
-            policy=policy,
+            policy_id=policy_id,
         )

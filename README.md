@@ -1,176 +1,103 @@
 # Waveframe Guard
 
-Deterministic execution control for AI agents.
+Enterprise AI governance layer for deterministic execution control with policy-bound enforcement and immutable audit tracing.
 
-Stop unauthorized AI actions—from rogue financial transfers to unapproved budget reallocations—in a single function call.
+Waveframe Guard sits at the execution boundary for AI-initiated actions. It builds a governance proposal, routes it through deterministic policy enforcement, and returns a clear decision before your system mutates state.
 
-Prevent costly mistakes before they hit production systems.
+## What it does
 
----
+- Resolves a stored policy by `policy_id`
+- Builds a proposal from actor, action, and human execution roles
+- Enforces deterministic policy checks before execution
+- Returns structured outcomes such as `allowed`, `pending`, or `blocked`
+- Produces immutable audit records with policy-version traceability
 
-## The execution boundary
+## What it does not do
 
-Most AI governance tools act as monitors: they log, flag, and alert after a mistake has already happened.
+- Execute your business action
+- Manage approvals or identity proofing for you
+- Replace your system-of-record or workflow engine
+- Make post-hoc recommendations instead of enforcement decisions
 
-Waveframe Guard sits directly at the execution boundary. It evaluates every proposed action before it ever reaches your backend or mutates state.
-
-The evaluation is deterministic and the result is binary:
-
-- **Allowed** → execution proceeds seamlessly  
-- **Blocked** → execution is stopped before it reaches your system  
-
-No warnings. No post-hoc analysis. The action either happens, or it doesn’t.
-
----
-
-## A drop-in execution gate
-
-Integrate Waveframe Guard into your workflow in minutes.
-
-Initialize the SDK with your compiled governance policy, pass the proposed AI action, and let Guard handle the evaluation.
-
-```python
-from waveframe_guard import WaveframeGuard
-
-guard = WaveframeGuard(policy="finance-policy.json")
-
-
-def execute_transfer(action):
-    return {
-        "status": "executed",
-        "details": action
-    }
-
-
-def process_ai_action(action, actor, context=None):
-    decision = guard.execute(
-        action=action,
-        actor=actor,
-        context=context
-    )
-
-    if decision["allowed"]:
-        return execute_transfer(action)
-    else:
-        return {
-            "status": "blocked",
-            "reason": decision["reason"]
-        }
-
-
-result = process_ai_action(
-    action={"type": "transfer", "amount": 5000},
-    actor="ai-agent",
-    context={"approved_by": "human-123"}
-)
-
-print(result)
-````
-
-Waveframe Guard does not execute actions.
-
-It decides whether execution is allowed.
-
----
-
-## Predictable, standardized outputs
-
-Guard returns a strict, predictable response so your application can route logic deterministically.
-
-**Authorized attempt:**
-
-```json
-{
-  "allowed": true,
-  "reason": "Allowed: execution permitted"
-}
-```
-
----
-
-**Unauthorized attempt (missing approval):**
-
-```json
-{
-  "allowed": false,
-  "reason": "Blocked: approval required (no approver provided)"
-}
-```
-
----
-
-## Built for financial-grade governance
-
-Waveframe Guard is designed for high-stakes autonomous systems.
-
-* **Separation of duties**
-  The actor proposing an action cannot approve it.
-
-* **Approval requirements**
-  Human authorization is required for sensitive actions.
-
-* **Action-level constraints**
-  Define exactly what an agent is allowed to do.
-
-* **No state stored**
-  Your system remains in full control.
-
----
-
-## Clear boundaries
-
-Waveframe Guard focuses on one responsibility:
-
-👉 deciding whether an action can execute
-
-It does not:
-
-* run workflows
-* manage approvals
-* store policies
-* maintain system state
-
----
-
-## Getting started
-
-Waveframe Guard is in active development, focused on financial governance and autonomous agent control.
-
-### Local installation
+## Install
 
 ```bash
 pip install waveframe-guard
 ```
 
----
+## Quick start
 
-### Run the example
+```python
+from waveframe_guard import WaveframeGuard
+
+guard = WaveframeGuard(
+    api_key="wf_test_key_123",
+    policy_id="finance-core",
+    base_url="http://localhost:8000",
+)
+
+decision = guard.execute(
+    action={
+        "type": "transfer",
+        "amount": 5000,
+        "system": "finance",
+        "resource": "payroll",
+    },
+    context={
+        "responsible": "user-alice",
+        "accountable": "user-bob",
+        "approved_by": "user-charlie",
+    },
+    actor="ai-agent-v2",
+)
+
+if decision["allowed"]:
+    print("Execute downstream action")
+else:
+    print(decision["status"], decision["reason"])
+```
+
+## Decision model
+
+Guard returns deterministic, machine-friendly responses. Typical fields include:
+
+```json
+{
+  "allowed": false,
+  "status": "pending",
+  "summary": "AI proposed transfer on finance/payroll",
+  "reason": "Approval missing or threshold exceeded",
+  "risk_level": "critical"
+}
+```
+
+- `allowed`: whether the action may proceed
+- `status`: `allowed`, `pending`, or `blocked`
+- `reason`: human-readable explanation derived after enforcement
+- `risk_level`: UX-level severity classification for operators
+
+## Governance model
+
+Waveframe Guard is designed around deterministic execution control:
+
+- Policies are resolved from stored policy versions, not injected inline at execution time
+- Guard may shape proposal structure from contract conditions
+- The enforcement kernel determines outcome
+- Audit records preserve policy-version linkage and execution trace data
+
+## Local development
+
+Run the seeded backend and the example script:
 
 ```bash
+python -m backend.seed
 python examples/finance_usage.py
 ```
 
----
+## Release status
 
-## Policy
+This repository is being prepared for the `v0.2.0` release line.
 
-Policies represent compiled governance rules.
+## License
 
-```python
-guard = WaveframeGuard(policy="finance-policy.json")
-```
-
-These rules define:
-
-* who can approve actions
-* what actions require approval
-* role separation requirements
-
----
-
-<div align="center">
-  <sub><b>Proprietary / Commercial License (Pending)</b></sub>
-  <br>
-  <sub>© 2026 Waveframe Labs</sub>
-</div>
-
+Proprietary. See [LICENSE](LICENSE).

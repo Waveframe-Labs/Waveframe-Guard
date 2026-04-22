@@ -1,24 +1,18 @@
 {
-  "contract_id": "finance-policy",
-  "contract_version": "0.1.0",
-  "description": "Governance rules for AI-driven financial actions",
-
-  "rules": {
-    "transfer": {
-      "requires_approval": true,
-      "approval_role": "human",
-      "max_amount_without_additional_review": 10000
-    },
-
-    "get_balance": {
-      "requires_approval": false,
-      "read_only": true
-    }
+  "contract_id": "finance-core",
+  "contract_version": "1.2.0",
+  "description": "Deterministic execution-control policy for governed AI actions.",
+  "roles": {
+    "required": ["proposer", "responsible", "accountable"]
   },
-
-  "invariants": {
-    "separation_of_duties": [
-      ["proposer", "approver"]
-    ]
-  }
+  "constraints": [
+    {
+      "type": "separation_of_duties",
+      "roles": ["responsible", "accountable"]
+    },
+    {
+      "type": "approval_required",
+      "threshold": 1000
+    }
+  ]
 }

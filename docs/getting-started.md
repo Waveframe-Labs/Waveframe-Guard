@@ -1,154 +1,83 @@
 # Getting Started
 
-Use Waveframe Guard to stop unsafe AI actions before they execute.
-
-This guide shows how to install, run, and integrate it into a real system in minutes.
-
----
+Use Waveframe Guard when AI systems can trigger real operations and you need deterministic control before execution.
 
 ## 1. Install
 
 ```bash
 pip install waveframe-guard
-````
+```
 
----
-
-## 2. Run the example
+## 2. Seed local demo data
 
 ```bash
-python examples/finance_usage.py
+python -m backend.seed
 ```
 
-Expected output:
+This creates a demo organization, API key, and stored policy named `finance-core`.
 
-```
---- Scenario 1: Missing approval ---
-{'status': 'blocked', 'reason': 'Blocked: approval required (no approver provided)'}
-
---- Scenario 3: Valid approval ---
-{'status': 'executed', 'result': {...}}
-```
-
-This demonstrates:
-
-* actions without approval → blocked
-* valid actions → executed
-
----
-
-## 3. Add to your system
-
-Waveframe Guard runs **at the execution point**, right before an action is performed.
-
-Wrap your AI-driven actions like this:
+## 3. Create a client
 
 ```python
 from waveframe_guard import WaveframeGuard
 
-guard = WaveframeGuard(policy="finance-policy.json")
-
-
-def execute_transfer(action):
-    # Your actual system logic
-    return {
-        "status": "executed",
-        "details": action
-    }
-
-
-def process_ai_action(action, actor, context=None):
-    decision = guard.execute(
-        action=action,
-        actor=actor,
-        context=context
-    )
-
-    if not decision["allowed"]:
-        return {
-            "status": "blocked",
-            "reason": decision["reason"]
-        }
-
-    return execute_transfer(action)
-```
-
-Now every AI action must pass through an execution gate before it runs.
-
----
-
-## 4. Example usage
-
-```python
-result = process_ai_action(
-    action={"type": "transfer", "amount": 5000},
-    actor="ai-agent",
-    context={"approved_by": "human-123"}
+guard = WaveframeGuard(
+    api_key="wf_test_key_123",
+    policy_id="finance-core",
+    base_url="http://localhost:8000",
 )
-
-print(result)
 ```
 
----
-
-## 5. What just happened
-
-Waveframe Guard:
-
-1. receives the proposed action
-2. evaluates it against governance rules
-3. returns:
+## 4. Evaluate an action
 
 ```python
-{
-  "allowed": bool,
-  "reason": str
-}
+decision = guard.execute(
+    action={
+        "type": "transfer",
+        "amount": 5000,
+        "system": "finance",
+        "resource": "payroll",
+    },
+    context={
+        "responsible": "user-alice",
+        "accountable": "user-bob",
+        "approved_by": "user-charlie",
+    },
+    actor="ai-agent-v2",
+)
 ```
 
-Your system:
-
-* executes if allowed
-* blocks if not
-
----
-
-## 6. Policy
-
-Waveframe Guard uses compiled governance rules:
+## 5. Route downstream execution
 
 ```python
-guard = WaveframeGuard(policy="finance-policy.json")
+if decision["allowed"]:
+    print("Proceed with downstream execution")
+else:
+    print(decision["status"], decision["reason"])
 ```
 
-These rules define:
+## 6. Understand the result
 
-* which actions require approval
-* who can approve them
-* role separation requirements
+Typical response fields:
 
----
+- `allowed`: whether execution may proceed
+- `status`: `allowed`, `pending`, or `blocked`
+- `summary`: normalized description of the proposed action
+- `reason`: post-enforcement explanation
+- `risk_level`: operator-facing severity label
 
-## 7. When to use this
+## 7. Inspect audit records
+
+The backend exposes:
+
+- `/api/logs` for live feed summaries
+- `/api/log/{decision_id}` for inspector detail
+- `/api/audit/{decision_id}` for full downloadable audit records
+
+## When to use Guard
 
 Use Waveframe Guard when:
 
-* AI systems can trigger real actions
-* those actions have financial or operational risk
-* you need deterministic control before execution
-
----
-
-## Summary
-
-Waveframe Guard does one thing:
-
-👉 decides whether an action can execute
-
-You control everything else.
-
----
-
-<div align="center">
-  <sub>© 2026 Waveframe Labs — Independent Open-Science Research Entity</sub>
-</div>
+- AI systems can perform writes, deletes, deployments, or transfers
+- policy version traceability matters
+- you need deterministic pre-execution governance, not passive monitoring
