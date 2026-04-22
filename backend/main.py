@@ -175,28 +175,6 @@ def extract_reason(stages: List[Dict[str, Any]]) -> str:
 
     return "Action structurally aligned with governance policy"
 
-def evaluate_approval_requirement(
-    policy: Dict[str, Any],
-    compiled: Dict[str, Any],
-    amount: float,
-) -> tuple[bool, float]:
-    for source in (policy, compiled):
-        threshold = 0.0
-        for rule in source.get("constraints", []):
-            if rule.get("type") != "approval_required":
-                continue
-
-            threshold = float(rule.get("threshold", 0) or 0)
-            if amount > threshold:
-                return True, threshold
-
-    return False, 0.0
-
-def append_required_role(required_roles: List[str], role: str) -> List[str]:
-    if role in required_roles:
-        return required_roles
-    return [*required_roles, role]
-
 def compute_risk_level(
     action: Dict[str, Any],
     allowed: bool,
@@ -217,48 +195,6 @@ def compute_risk_level(
         return "medium"
 
     return "low"
-
-def build_missing_approver_decision(
-    action: Dict[str, Any],
-    amount: float,
-    threshold: float,
-    contract_hash: str,
-    proposer: str,
-    responsible: str,
-    accountable: str,
-    approver: Optional[str],
-) -> Dict[str, Any]:
-    impact = [
-        "transaction exceeded approval threshold",
-        "required approver role was not assigned to a listed identity",
-        "execution blocked at boundary",
-    ]
-    reason = "Approval required but no listed approver provided"
-    risk_level = compute_risk_level(action, False, impact, reason)
-    return {
-        "allowed": False,
-        "summary": f"AI proposed {action.get('type')} on {action.get('system')}/{action.get('resource')}",
-        "reason": reason,
-        "impact": impact,
-        "decision_trace": [
-            {
-                "stage": "approval-check",
-                "passed": False,
-                "messages": [
-                    f"Amount ${amount:,.0f} exceeds threshold (${threshold:,.0f}) but no listed approver was resolved"
-                ],
-            }
-        ],
-        "trace_hash": contract_hash,
-        "error_code": "approval_missing",
-        "risk_level": risk_level,
-        "resolved_identities": {
-            "proposer": proposer,
-            "responsible": responsible,
-            "accountable": accountable,
-            "approver": approver,
-        },
-    }
 
 # ---------------------------
 # CORE VALIDATION
@@ -287,6 +223,7 @@ def run_validation(
         reason = "Identity resolution failed: missing required human context"
         return {
             "allowed": False,
+            "status": "blocked",
             "summary": f"AI proposed action: {action.get('type')}",
             "reason": reason,
             "impact": impact,
@@ -313,39 +250,9 @@ def run_validation(
         json.dumps(compiled, sort_keys=True).encode()
     ).hexdigest()
 
-    required_roles = compiled.get("roles", {}).get(
-        "required",
-        ["proposer", "responsible", "accountable"],
-    )
+    required_roles = ["proposer", "responsible", "accountable", "approver"]
 
-    amount = action.get("amount", 0)
-
-    # 🔥 PRE-FLIGHT BUSINESS LOGIC: ENFORCE APPROVAL RULE
-    approval_required, threshold = evaluate_approval_requirement(policy, compiled, amount)
-    if approval_required:
-        approver = resolve_identity(
-            requested_approver,
-            registry,
-            require_registered=True,
-        )
-
-    # 🚨 HARD STOP (WAVEFRAME GUARD LAYER)
-    if approval_required and not approver:
-        return build_missing_approver_decision(
-            action=action,
-            amount=amount,
-            threshold=threshold,
-            contract_hash=contract_hash,
-            proposer=proposer,
-            responsible=responsible,
-            accountable=accountable,
-            approver=approver,
-        )
-
-    # If it passes business logic, update roles for CRI-CORE structural logic
-    if approval_required:
-        required_roles = append_required_role(required_roles, "approver")
-
+    # Guard builds the proposal shape and hands execution semantics to the kernel.
     actors_list = [
         {"id": proposer, "type": "agent", "role": "proposer"},
         {"id": responsible, "type": "human", "role": "responsible"},
@@ -385,6 +292,7 @@ def run_validation(
     stages = extract_stages(result)
     allowed = getattr(result, "commit_allowed", False)
     reason = extract_reason(stages)
+    status = "allowed" if allowed else ("pending" if "approval" in reason.lower() else "blocked")
 
     if not allowed:
         if "separation" in reason.lower() or "multiple required roles" in reason.lower():
@@ -395,9 +303,9 @@ def run_validation(
             ]
         elif "approval" in reason.lower():
             impact = [
-                "bypassed required approval threshold",
-                "executed financial change without authorization",
-                "created compliance exposure",
+                "awaiting required authorization before execution",
+                "execution held at the governance boundary",
+                "kernel evaluation did not permit commit",
             ]
         else:
             impact = [
@@ -418,6 +326,7 @@ def run_validation(
 
     return {
         "allowed": allowed,
+        "status": status,
         "summary": f"AI proposed {action_type} on {action_system}/{action_resource}",
         "reason": reason,
         "impact": impact,
@@ -535,6 +444,7 @@ async def enforce(
         ]
         decision = {
             "allowed": False,
+            "status": "blocked",
             "summary": f"AI attempted action: {action_type}",
             "reason": error_reason,
             "impact": invalid_impact,
@@ -758,7 +668,7 @@ def simulate_activity():
 
             policy = {
                 "contract_id": "demo-policy",
-                "contract_version": "1.0",
+                "contract_version": "1.0.0",
                 "roles": {"required": ["proposer", "responsible", "accountable"]},
                 "constraints": [
                     {"type": "separation_of_duties", "roles": ["responsible", "accountable"]},
