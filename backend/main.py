@@ -196,6 +196,29 @@ def compute_risk_level(
 
     return "low"
 
+def resolve_required_roles(
+    policy: Dict[str, Any],
+    compiled: Dict[str, Any],
+    action: Dict[str, Any],
+) -> List[str]:
+    required_roles = list(compiled.get("roles", {}).get("required", []))
+    amount = action.get("amount", 0) or 0
+
+    approval_threshold = None
+    for source in (compiled, policy):
+        for rule in source.get("constraints", []):
+            if rule.get("type") != "approval_required":
+                continue
+            approval_threshold = float(rule.get("threshold", 0) or 0)
+            break
+        if approval_threshold is not None:
+            break
+
+    if approval_threshold is not None and amount > approval_threshold and "approver" not in required_roles:
+        required_roles.append("approver")
+
+    return required_roles
+
 # ---------------------------
 # CORE VALIDATION
 # ---------------------------
@@ -250,7 +273,7 @@ def run_validation(
         json.dumps(compiled, sort_keys=True).encode()
     ).hexdigest()
 
-    required_roles = ["proposer", "responsible", "accountable", "approver"]
+    required_roles = resolve_required_roles(policy, compiled, action)
 
     # Guard builds the proposal shape and hands execution semantics to the kernel.
     actors_list = [
@@ -273,7 +296,7 @@ def run_validation(
         },
         contract={
             "id": compiled.get("contract_id", "dynamic"),
-            "version": compiled.get("contract_version", "1.0.0"),
+            "version": compiled["contract_version"],
             "hash": contract_hash,
         },
         run_context={
@@ -1344,8 +1367,11 @@ def ui():
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>Approval required above ($)</label>
-                                <input id="approvalThreshold" type="number" value="1000" />
+                                <label>Governance Policy</label>
+                                <div class="reason-box">
+                                    <div><strong>Policy:</strong> finance-core (v1.2)</div>
+                                    <div style="margin-top:6px;"><strong>Approval threshold:</strong> $1,000</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1423,8 +1449,12 @@ def ui():
                         <div class="identity-value">Executor and authorizer must remain independent</div>
                     </div>
                     <div class="identity-item">
-                        <div class="identity-key">Threshold</div>
-                        <div class="identity-value" id="thresholdPreview">$1,000</div>
+                        <div class="identity-key">Policy</div>
+                        <div class="identity-value">finance-core (v1.2)</div>
+                    </div>
+                    <div class="identity-item">
+                        <div class="identity-key">Approval threshold</div>
+                        <div class="identity-value">$1,000</div>
                     </div>
                 </div>
             </div>
@@ -1532,11 +1562,6 @@ function renderResolvedIdentities(resolved) {
     });
 }
 
-function updateThresholdPreview() {
-    const threshold = parseFloat(document.getElementById("approvalThreshold").value || 0);
-    document.getElementById("thresholdPreview").textContent = `$${threshold.toLocaleString()}`;
-}
-
 function buildExecutiveReasons(allowed, reason, impact) {
     if (allowed) {
         return {
@@ -1570,17 +1595,14 @@ async function runValidation() {
         const responsible = document.getElementById("responsible").value;
         const accountable = document.getElementById("accountable").value;
         const approved_by = document.getElementById("approved_by").value;
-        const threshold = parseFloat(document.getElementById("approvalThreshold").value || 0);
-
-        updateThresholdPreview();
 
         const policy = {
-            contract_id: "demo-finance-policy",
-            contract_version: "1.0.0",
+            contract_id: "finance-core",
+            contract_version: "1.2.0",
             roles: { required: ["proposer", "responsible", "accountable"] },
             constraints: [
                 { type: "separation_of_duties", roles: ["responsible", "accountable"] },
-                { type: "approval_required", threshold: threshold }
+                { type: "approval_required", threshold: 1000 }
             ]
         };
 
@@ -1678,8 +1700,6 @@ async function sendToProduction() {
     console.log("Production decision:", data);
     alert("Sent to production org. Check dashboard.");
 }
-
-updateThresholdPreview();
 </script>
 
 </body>
