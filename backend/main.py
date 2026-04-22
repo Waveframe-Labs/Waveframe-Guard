@@ -273,7 +273,7 @@ def run_validation(
         },
         contract={
             "id": compiled.get("contract_id", "dynamic"),
-            "version": compiled.get("contract_version", "1.0"),
+            "version": compiled.get("contract_version", "1.0.0"),
             "hash": contract_hash,
         },
         run_context={
