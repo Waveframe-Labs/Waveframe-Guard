@@ -73,7 +73,7 @@ class PolicyVersion(Base):
     id = Column(String, primary_key=True, default=lambda: f"ver_{uuid.uuid4().hex[:10]}")
     version = Column(String, nullable=False)
 
-    rules_json = Column(Text, nullable=False)
+    compiled_contract_json = Column(Text, nullable=False)
 
     policy_id = Column(String, ForeignKey("policies.id"))
     policy = relationship("Policy", back_populates="versions")

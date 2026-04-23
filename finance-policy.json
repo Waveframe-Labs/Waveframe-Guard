@@ -1,18 +1,25 @@
 {
   "contract_id": "finance-core",
   "contract_version": "1.2.0",
-  "description": "Deterministic execution-control policy for governed AI actions.",
-  "roles": {
-    "required": ["proposer", "responsible", "accountable"]
+  "description": "Stored compiled execution-control contract for governed AI actions.",
+  "authority_requirements": {
+    "required_roles": ["proposer", "responsible", "accountable"]
   },
-  "constraints": [
+  "artifact_requirements": {
+    "artifacts_present": true
+  },
+  "stage_requirements": {
+    "integrity": {
+      "artifacts_present": true
+    },
+    "publication": {
+      "ready": true
+    }
+  },
+  "invariants": [
     {
       "type": "separation_of_duties",
       "roles": ["responsible", "accountable"]
-    },
-    {
-      "type": "approval_required",
-      "threshold": 1000
     }
   ]
 }

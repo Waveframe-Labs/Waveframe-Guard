@@ -33,7 +33,7 @@ class EventStore:
                     context_json TEXT NOT NULL,
                     allowed INTEGER NOT NULL,
                     reason TEXT NOT NULL,
-                    policy TEXT NOT NULL
+                    policy_id TEXT NOT NULL
                 )
                 """
             )
@@ -52,7 +52,7 @@ class EventStore:
                     context_json,
                     allowed,
                     reason,
-                    policy
+                    policy_id
                 )
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
@@ -65,7 +65,7 @@ class EventStore:
                     json.dumps(event.context),
                     1 if event.allowed else 0,
                     event.reason,
-                    event.policy,
+                    event.policy_id,
                 ),
             )
             conn.commit()
@@ -110,5 +110,5 @@ class EventStore:
             context=json.loads(row["context_json"]),
             allowed=bool(row["allowed"]),
             reason=row["reason"],
-            policy=row["policy"],
+            policy_id=row["policy_id"],
         )

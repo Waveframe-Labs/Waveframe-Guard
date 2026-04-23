@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import tempfile
 import uuid
 import hashlib
 import threading
@@ -18,13 +17,12 @@ from sqlalchemy.orm import Session
 
 from backend.db import init_db, get_db, Organization, APIKey, Policy, PolicyVersion, AuditLog
 
-from compiler.compile_policy_file import compile_policy_file
 from proposal_normalizer.build_proposal import build_proposal
 from cricore.interface.evaluate_proposal import evaluate_proposal
 
 app = FastAPI(
     title="Waveframe Guard",
-    version="3.0.3",
+    version="0.2.0",
     description="Enterprise Multi-Tenant AI Governance Platform"
 )
 
@@ -196,35 +194,49 @@ def compute_risk_level(
 
     return "low"
 
-def resolve_required_roles(
-    policy: Dict[str, Any],
-    compiled: Dict[str, Any],
-    action: Dict[str, Any],
-) -> List[str]:
-    required_roles = list(compiled.get("roles", {}).get("required", []))
-    amount = action.get("amount", 0) or 0
+def contract_hash(compiled_contract: Dict[str, Any]) -> str:
+    return hashlib.sha256(
+        json.dumps(compiled_contract, sort_keys=True).encode()
+    ).hexdigest()
 
-    approval_threshold = None
-    for source in (compiled, policy):
-        for rule in source.get("constraints", []):
-            if rule.get("type") != "approval_required":
+def contract_required_roles(compiled_contract: Dict[str, Any]) -> List[str]:
+    authority = compiled_contract.get("authority_requirements", {})
+
+    if isinstance(authority, dict):
+        roles = authority.get("required_roles", [])
+    elif isinstance(authority, list):
+        roles = []
+        for requirement in authority:
+            if not isinstance(requirement, dict):
                 continue
-            approval_threshold = float(rule.get("threshold", 0) or 0)
-            break
-        if approval_threshold is not None:
-            break
+            if requirement.get("type") == "required_roles":
+                roles.extend(requirement.get("roles", []))
+            elif requirement.get("role"):
+                roles.append(requirement["role"])
+    else:
+        roles = []
 
-    if approval_threshold is not None and amount > approval_threshold and "approver" not in required_roles:
-        required_roles.append("approver")
+    return list(dict.fromkeys(role for role in roles if role))
 
-    return required_roles
+def validate_compiled_contract(compiled_contract: Dict[str, Any]) -> Optional[str]:
+    if not isinstance(compiled_contract, dict):
+        return "Compiled contract must be an object"
+
+    for field in ("contract_id", "contract_version", "authority_requirements"):
+        if not compiled_contract.get(field):
+            return f"Missing compiled contract field: {field}"
+
+    if not contract_required_roles(compiled_contract):
+        return "Compiled contract does not declare authority requirements"
+
+    return None
 
 # ---------------------------
 # CORE VALIDATION
 # ---------------------------
 
 def run_validation(
-    policy: Dict[str, Any],
+    compiled_contract: Dict[str, Any],
     action: Dict[str, Any],
     actor: str,
     context: Dict[str, Any],
@@ -252,28 +264,38 @@ def run_validation(
             "impact": impact,
             "decision_trace": [],
             "resolved_identities": {},
-            "trace_hash": "identity_resolution_failed",
+            "trace_hash": contract_hash(compiled_contract if isinstance(compiled_contract, dict) else {}),
+            "error_code": "identity_resolution_failed",
             "risk_level": compute_risk_level(action, False, impact, reason),
         }
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".json", mode="w", encoding="utf-8") as f:
-        json.dump(policy, f)
-        policy_path = Path(f.name)
+    contract_error = validate_compiled_contract(compiled_contract)
+    if contract_error:
+        impact = [
+            "invalid stored compiled contract",
+            "execution blocked before kernel evaluation",
+            "policy version requires operator review",
+        ]
+        return {
+            "allowed": False,
+            "status": "blocked",
+            "summary": f"AI proposed action: {action.get('type')}",
+            "reason": contract_error,
+            "impact": impact,
+            "decision_trace": [],
+            "resolved_identities": {
+                "proposer": proposer,
+                "responsible": responsible,
+                "accountable": accountable,
+                "approver": approver,
+            },
+            "trace_hash": contract_hash(compiled_contract if isinstance(compiled_contract, dict) else {}),
+            "error_code": "invalid_compiled_contract",
+            "risk_level": compute_risk_level(action, False, impact, contract_error),
+        }
 
-    tmp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".json")
-    compiled_path = Path(tmp_file.name)
-    tmp_file.close()
-
-    contract_path = compile_policy_file(policy_path, compiled_path)
-
-    with open(contract_path, "r", encoding="utf-8") as f:
-        compiled = json.load(f)
-
-    contract_hash = hashlib.sha256(
-        json.dumps(compiled, sort_keys=True).encode()
-    ).hexdigest()
-
-    required_roles = resolve_required_roles(policy, compiled, action)
+    trace_hash = contract_hash(compiled_contract)
+    required_roles = contract_required_roles(compiled_contract)
 
     # Guard builds the proposal shape and hands execution semantics to the kernel.
     actors_list = [
@@ -295,9 +317,9 @@ def run_validation(
             "action": action.get("type", "unknown"),
         },
         contract={
-            "id": compiled.get("contract_id", "dynamic"),
-            "version": compiled["contract_version"],
-            "hash": contract_hash,
+            "id": compiled_contract["contract_id"],
+            "version": compiled_contract["contract_version"],
+            "hash": trace_hash,
         },
         run_context={
             "identities": {
@@ -311,7 +333,7 @@ def run_validation(
     )
 
     # 🛡️ CRYPTOGRAPHIC STRUCTURAL LOGIC (CRI-CORE LAYER)
-    result = evaluate_proposal(proposal, compiled)
+    result = evaluate_proposal(proposal, compiled_contract)
     stages = extract_stages(result)
     allowed = getattr(result, "commit_allowed", False)
     reason = extract_reason(stages)
@@ -355,7 +377,7 @@ def run_validation(
         "impact": impact,
         "risk_level": risk_level,
         "decision_trace": stages,
-        "trace_hash": contract_hash,
+        "trace_hash": trace_hash,
         "resolved_identities": {
             "proposer": proposer,
             "responsible": responsible,
@@ -384,8 +406,10 @@ async def validate(request: Request, db: Session = Depends(get_db)):
     actor = body.get("actor", "ai-agent-v2")
     context = body.get("context", {})
 
+    compiled_contract = body.get("compiled_contract") or body.get("contract") or {}
+
     decision = run_validation(
-        body.get("policy", {}),
+        compiled_contract,
         action,
         actor,
         context,
@@ -445,7 +469,7 @@ async def enforce(
     if not policy_version:
         raise HTTPException(status_code=404, detail="Policy not found")
 
-    policy = json.loads(policy_version.rules_json)
+    compiled_contract = json.loads(policy_version.compiled_contract_json)
 
     action = body.get("action", {})
     actor = body.get("actor", "ai-agent-v2")
@@ -479,11 +503,12 @@ async def enforce(
                     "messages": [error_reason],
                 }
             ],
-            "trace_hash": error_code,
+            "trace_hash": contract_hash(compiled_contract),
+            "error_code": error_code,
             "resolved_identities": {},
         }
     else:
-        decision = run_validation(policy, action, actor, context)
+        decision = run_validation(compiled_contract, action, actor, context)
 
     log = AuditLog(
         id=f"dec_{uuid.uuid4().hex[:10]}",
@@ -612,7 +637,7 @@ def get_audit_record(decision_id: str, db: Session = Depends(get_db)):
         "risk_level": getattr(log, "risk_level", "unknown"),
         "policy": {
             "version_id": log.policy_version_id,
-            "rules": json.loads(policy_version.rules_json) if policy_version else None,
+            "compiled_contract": json.loads(policy_version.compiled_contract_json) if policy_version else None,
         },
         "decision_trace": json.loads(log.decision_trace or "[]"),
         "resolved_identities": json.loads(log.resolved_identities or "{}"),
@@ -689,17 +714,25 @@ def simulate_activity():
                 "resource": resource,
             }
 
-            policy = {
+            compiled_contract = {
                 "contract_id": "demo-policy",
                 "contract_version": "1.0.0",
-                "roles": {"required": ["proposer", "responsible", "accountable"]},
-                "constraints": [
+                "authority_requirements": {
+                    "required_roles": ["proposer", "responsible", "accountable"],
+                },
+                "artifact_requirements": {
+                    "artifacts_present": True,
+                },
+                "stage_requirements": {
+                    "integrity": {"artifacts_present": True},
+                    "publication": {"ready": True},
+                },
+                "invariants": [
                     {"type": "separation_of_duties", "roles": ["responsible", "accountable"]},
-                    {"type": "approval_required", "threshold": 1000},
                 ],
             }
 
-            decision = run_validation(policy, action, "ai-agent-v2", context)
+            decision = run_validation(compiled_contract, action, "ai-agent-v2", context)
 
             log = AuditLog(
                 id=f"dec_{uuid.uuid4().hex[:10]}",
@@ -1596,13 +1629,21 @@ async function runValidation() {
         const accountable = document.getElementById("accountable").value;
         const approved_by = document.getElementById("approved_by").value;
 
-        const policy = {
+        const compiledContract = {
             contract_id: "finance-core",
             contract_version: "1.2.0",
-            roles: { required: ["proposer", "responsible", "accountable"] },
-            constraints: [
-                { type: "separation_of_duties", roles: ["responsible", "accountable"] },
-                { type: "approval_required", threshold: 1000 }
+            authority_requirements: {
+                required_roles: ["proposer", "responsible", "accountable"]
+            },
+            artifact_requirements: {
+                artifacts_present: true
+            },
+            stage_requirements: {
+                integrity: { artifacts_present: true },
+                publication: { ready: true }
+            },
+            invariants: [
+                { type: "separation_of_duties", roles: ["responsible", "accountable"] }
             ]
         };
 
@@ -1615,7 +1656,7 @@ async function runValidation() {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({
-                policy,
+                compiled_contract: compiledContract,
                 action: {
                     type: actionType,
                     amount,

@@ -6,7 +6,7 @@ Waveframe Guard sits at the execution boundary for AI-initiated actions. It buil
 
 ## What it does
 
-- Resolves a stored policy by `policy_id`
+- Resolves a stored compiled contract by `policy_id`
 - Builds a proposal from actor, action, and human execution roles
 - Enforces deterministic policy checks before execution
 - Returns structured outcomes such as `allowed`, `pending`, or `blocked`
@@ -80,8 +80,8 @@ Guard returns deterministic, machine-friendly responses. Typical fields include:
 
 Waveframe Guard is designed around deterministic execution control:
 
-- Policies are resolved from stored policy versions, not injected inline at execution time
-- Guard may shape proposal structure from contract conditions
+- Compiled contracts are resolved from stored policy versions, not injected inline at execution time
+- Guard builds proposal structure without translating human governance semantics
 - The enforcement kernel determines outcome
 - Audit records preserve policy-version linkage and execution trace data
 

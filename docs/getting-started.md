@@ -14,7 +14,7 @@ pip install waveframe-guard
 python -m backend.seed
 ```
 
-This creates a demo organization, API key, and stored policy named `finance-core`.
+This creates a demo organization, API key, and stored compiled contract named `finance-core`.
 
 ## 3. Create a client
 
@@ -79,5 +79,5 @@ The backend exposes:
 Use Waveframe Guard when:
 
 - AI systems can perform writes, deletes, deployments, or transfers
-- policy version traceability matters
+- compiled-contract version traceability matters
 - you need deterministic pre-execution governance, not passive monitoring
