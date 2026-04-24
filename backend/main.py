@@ -889,9 +889,17 @@ def dashboard_embed(db: Session = Depends(get_db)):
           </select>
         </div>
         <a href="/" class="console-nav">Back to Dev Environment</a>
-        <a href="/dashboard" class="console-nav primary">Live Console</a>
+        <a href="/dashboard" target="_top" class="console-nav primary">Open Full Console</a>
       </div>
     </header>
+    <div style="
+        font-size:11px;
+        color: var(--muted);
+        margin: 6px 32px 0;
+        font-family: var(--mono);
+    ">
+        Embedded Mode - Live Console Preview
+    </div>
     <div class="page">
       <section class="hero">
         <div class="hero-card">
@@ -1174,6 +1182,14 @@ def dashboard_embed(db: Session = Depends(get_db)):
     setInterval(refreshLogs, 2000);
     loadOrgs();
     refreshLogs();
+
+    if (window.self !== window.top) {{
+        const navLinks = document.querySelectorAll("a.console-nav.primary");
+        navLinks.forEach(link => {{
+            link.innerText = "Open Full Console";
+            link.setAttribute("target", "_top");
+        }});
+    }}
     </script>
     </body>
     </html>
