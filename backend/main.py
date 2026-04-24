@@ -231,6 +231,53 @@ def validate_compiled_contract(compiled_contract: Dict[str, Any]) -> Optional[st
 
     return None
 
+def evaluate_approval_requirements(
+    compiled_contract: Dict[str, Any],
+    action: Dict[str, Any],
+    context: Dict[str, Any],
+) -> Optional[Dict[str, Any]]:
+    """
+    Returns None if satisfied,
+    otherwise returns failure metadata.
+    """
+
+    approval_rules = compiled_contract.get("approval_requirements", {}).get("thresholds", [])
+
+    for rule in approval_rules:
+        field = rule.get("field")
+        operator = rule.get("operator")
+        value = rule.get("value")
+        required_role = rule.get("requires_role", "approver")
+
+        if field not in action:
+            continue
+
+        action_value = action.get(field)
+        triggered = False
+
+        if operator == ">" and action_value > value:
+            triggered = True
+        elif operator == ">=" and action_value >= value:
+            triggered = True
+        elif operator == "<" and action_value < value:
+            triggered = True
+        elif operator == "<=" and action_value <= value:
+            triggered = True
+        elif operator == "==" and action_value == value:
+            triggered = True
+
+        if triggered:
+            approver = context.get("approved_by")
+
+            if not approver:
+                return {
+                    "reason": f"Approval required: {field} {operator} {value}",
+                    "required_role": required_role,
+                    "threshold": value,
+                }
+
+    return None
+
 def attach_development_metadata(decision: Dict[str, Any]) -> Dict[str, Any]:
     decision["environment"] = "development"
     decision["guarantees"] = [
@@ -308,8 +355,50 @@ def run_validation(
             "risk_level": compute_risk_level(action, False, impact, contract_error),
         }
 
+    approval_failure = evaluate_approval_requirements(
+        compiled_contract,
+        action,
+        context,
+    )
+
+    if approval_failure:
+        impact = [
+            "approval requirement triggered by policy threshold",
+            "execution paused at governance boundary",
+            "awaiting authorized approver",
+        ]
+
+        return {
+            "allowed": False,
+            "status": "pending",
+            "summary": f"AI proposed action: {action.get('type')}",
+            "reason": approval_failure["reason"],
+            "impact": impact,
+            "decision_trace": [
+                {
+                    "stage": "approval-check",
+                    "passed": False,
+                    "messages": [approval_failure["reason"]],
+                }
+            ],
+            "trace_hash": contract_hash(compiled_contract),
+            "error_code": "approval_required",
+            "required_role": approval_failure["required_role"],
+            "threshold": approval_failure["threshold"],
+            "resolved_identities": {
+                "proposer": proposer,
+                "responsible": responsible,
+                "accountable": accountable,
+            },
+            "risk_level": compute_risk_level(action, False, impact, approval_failure["reason"]),
+        }
+
     trace_hash = contract_hash(compiled_contract)
     required_roles = contract_required_roles(compiled_contract)
+    approval_rules = compiled_contract.get("approval_requirements", {}).get("thresholds", [])
+
+    if approval_rules and "approver" not in required_roles:
+        required_roles.append("approver")
 
     # Guard builds the proposal shape and hands execution semantics to the kernel.
     actors_list = [
