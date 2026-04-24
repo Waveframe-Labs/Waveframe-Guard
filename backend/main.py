@@ -23,7 +23,7 @@ from cricore.interface.evaluate_proposal import evaluate_proposal
 app = FastAPI(
     title="Waveframe Guard",
     version="0.2.0",
-    description="Enterprise Multi-Tenant AI Governance Platform"
+    description="Local enforcement SDK and simulation environment for AI governance"
 )
 
 simulation_thread: Optional[threading.Thread] = None
@@ -231,6 +231,20 @@ def validate_compiled_contract(compiled_contract: Dict[str, Any]) -> Optional[st
 
     return None
 
+def attach_development_metadata(decision: Dict[str, Any]) -> Dict[str, Any]:
+    decision["environment"] = "development"
+    decision["guarantees"] = [
+        "no durability guarantee",
+        "no immutable audit guarantee",
+        "no policy lifecycle enforcement",
+    ]
+    decision["execution_context"] = {
+        "mode": "local",
+        "record_type": "simulation",
+        "attestable": False,
+    }
+    return decision
+
 # ---------------------------
 # CORE VALIDATION
 # ---------------------------
@@ -435,6 +449,8 @@ async def validate(request: Request, db: Session = Depends(get_db)):
     db.add(log)
     db.commit()
 
+    attach_development_metadata(decision)
+
     return JSONResponse(decision)
 
 # ---------------------------
@@ -447,6 +463,9 @@ async def enforce(
     current_org: Organization = Depends(get_current_org),
     db: Session = Depends(get_db),
 ):
+    # ⚠️ DEVELOPMENT MODE ONLY
+    # This endpoint simulates enforcement locally.
+    # It does NOT provide durability, immutability, or compliance guarantees.
     """Production Endpoint. Requires API Key. Enforces Org Isolation."""
     body = await request.json()
 
@@ -529,6 +548,8 @@ async def enforce(
 
     db.add(log)
     db.commit()
+
+    attach_development_metadata(decision)
 
     return JSONResponse(decision)
 
@@ -1322,6 +1343,14 @@ def ui():
             <h1>Waveframe Guard — Policy Simulation</h1>
             <div style="margin-top:6px; color:#6b7494; font-size:13px;">
                 Running in: <strong>Dev Environment</strong>
+            </div>
+            <div style="
+                font-size:11px;
+                color: var(--muted);
+                margin-top:6px;
+                font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            ">
+                Development Environment - Simulation Only (No Audit Guarantees)
             </div>
             <p>
                 Simulate AI actions before submitting them to your governed environments.

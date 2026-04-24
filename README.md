@@ -4,13 +4,15 @@ Enterprise AI governance layer for deterministic execution control with policy-b
 
 Waveframe Guard sits at the execution boundary for AI-initiated actions. It builds a governance proposal, routes it through deterministic policy enforcement, and returns a clear decision before your system mutates state.
 
+Guard uses a local policy store for development purposes. Production environments should use a managed policy lifecycle system.
+
 ## What it does
 
 - Resolves a stored compiled contract by `policy_id`
 - Builds a proposal from actor, action, and human execution roles
 - Enforces deterministic policy checks before execution
 - Returns structured outcomes such as `allowed`, `pending`, or `blocked`
-- Produces immutable audit records with policy-version traceability
+- Produces simulation audit records with policy-version traceability
 
 ## What it does not do
 
