@@ -286,6 +286,11 @@ def attach_development_metadata(decision: Dict[str, Any]) -> Dict[str, Any]:
         "type": "simulation",
         "authoritative": False,
     }
+    decision["cloud"] = {
+        "execution_record_id": None,
+        "attestation": None,
+        "ledger_anchor": None,
+    }
     decision["organization_context"] = {
         "type": "simulated",
         "isolation_guaranteed": False,
