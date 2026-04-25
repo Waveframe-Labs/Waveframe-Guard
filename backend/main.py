@@ -282,6 +282,10 @@ def evaluate_approval_requirements(
 def attach_development_metadata(decision: Dict[str, Any]) -> Dict[str, Any]:
     decision["environment"] = ENVIRONMENT
     decision["mode"] = "simulation"
+    decision["record"] = {
+        "type": "simulation",
+        "authoritative": False,
+    }
     decision["guarantees"] = {
         "enforcement": False,
         "immutability": False,
