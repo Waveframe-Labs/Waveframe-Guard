@@ -22,7 +22,7 @@ from cricore.interface.evaluate_proposal import evaluate_proposal
 
 app = FastAPI(
     title="Waveframe Guard",
-    version="0.2.0",
+    version="0.3.0",
     description="Local enforcement SDK and simulation environment for AI governance"
 )
 
@@ -282,6 +282,7 @@ def evaluate_approval_requirements(
 def attach_development_metadata(decision: Dict[str, Any]) -> Dict[str, Any]:
     decision["environment"] = ENVIRONMENT
     decision["mode"] = "simulation"
+    decision["attested"] = False
     decision["record"] = {
         "type": "simulation",
         "authoritative": False,
