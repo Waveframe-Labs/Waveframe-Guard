@@ -785,6 +785,7 @@ def log_detail(id: str, db: Session = Depends(get_db)):
         "impact": json.loads(log.impact or "[]"),
     }
 
+@app.get("/api/simulation-record/{simulation_id}")
 @app.get("/api/audit/{simulation_id}")
 def get_audit_record(simulation_id: str, db: Session = Depends(get_db)):
     log = db.query(AuditLog).filter(AuditLog.id == simulation_id).first()
@@ -803,6 +804,7 @@ def get_audit_record(simulation_id: str, db: Session = Depends(get_db)):
         "environment": ENVIRONMENT,
         "mode": "simulation",
         "authoritative": False,
+        "notice": "This audit record is not immutable and is not suitable for compliance use",
         "timestamp": log.server_timestamp.isoformat() + "Z" if log.server_timestamp else None,
         "actor": log.actor,
         "action": {
@@ -1322,7 +1324,7 @@ def dashboard_embed(db: Session = Depends(get_db)):
                 </div>
 
                 <button id="downloadAuditBtn" class="btn-secondary">
-                    Download Audit Record
+                    Download Simulation Record
                 </button>
 
                 <div style="margin-top:16px;">
@@ -1332,7 +1334,7 @@ def dashboard_embed(db: Session = Depends(get_db)):
 
             const simulationId = log.simulation_id;
             document.getElementById("downloadAuditBtn").onclick = async () => {{
-                const res = await fetch(`/api/audit/${{simulationId}}`);
+                const res = await fetch(`/api/simulation-record/${{simulationId}}`);
                 const data = await res.json();
 
                 const blob = new Blob([JSON.stringify(data, null, 2)], {{
@@ -1343,7 +1345,7 @@ def dashboard_embed(db: Session = Depends(get_db)):
                 const a = document.createElement("a");
 
                 a.href = url;
-                a.download = `audit_${{simulationId}}.json`;
+                a.download = `simulation_record_${{simulationId}}.json`;
                 a.click();
 
                 window.URL.revokeObjectURL(url);
@@ -1642,8 +1644,8 @@ def ui():
 
                     <div id="auditLogNotice" style="display: none; margin-top: 16px; padding: 12px; background: rgba(255,255,255,0.03); border: 1px dashed var(--border); border-radius: 8px; font-size: 13px; color: var(--muted); justify-content: space-between; align-items: center;">
                         <div>
-                            <strong style="color: var(--text);">Immutable Audit Record Created</strong><br>
-                            <span>A cryptographic trace of this execution boundary has been logged.</span>
+                            <strong style="color: var(--text);">Simulation Record Generated (Non-Authoritative)</strong><br>
+                            <span>For testing only - not an immutable audit record</span>
                         </div>
                         <a href="#live-console" style="color: var(--accent); text-decoration: none; font-weight: 600;">View Ledger</a>
                     </div>
