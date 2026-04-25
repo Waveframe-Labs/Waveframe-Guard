@@ -286,6 +286,15 @@ def attach_development_metadata(decision: Dict[str, Any]) -> Dict[str, Any]:
         "type": "simulation",
         "authoritative": False,
     }
+    decision["organization_context"] = {
+        "type": "simulated",
+        "isolation_guaranteed": False,
+    }
+    decision["enforcement"] = {
+        "mode": "local_simulation",
+        "guaranteed": False,
+        "bypass_possible": True,
+    }
     decision["guarantees"] = {
         "enforcement": False,
         "immutability": False,
@@ -538,6 +547,13 @@ async def validate(request: Request, db: Session = Depends(get_db)):
         actor,
         context,
     )
+    decision["contract"] = {
+        "id": compiled_contract["contract_id"],
+        "version": compiled_contract["contract_version"],
+        "hash": decision["trace_hash"],
+        "source": "local",
+        "authoritative": False,
+    }
 
     log = AuditLog(
         id=f"dec_{uuid.uuid4().hex[:10]}",
@@ -562,7 +578,13 @@ async def validate(request: Request, db: Session = Depends(get_db)):
 
     attach_development_metadata(decision)
 
-    return JSONResponse(decision)
+    return JSONResponse(
+        decision,
+        headers={
+            "X-Waveframe-Mode": "development",
+            "X-Enforcement-Guarantee": "none",
+        },
+    )
 
 # ---------------------------
 # PROD ENDPOINT (MULTI-TENANT)
@@ -585,6 +607,7 @@ async def enforce(
     if not policy_id:
         raise HTTPException(status_code=400, detail="policy_id is required")
 
+    # DEV-ONLY: Simulated organization isolation
     policy_version = (
         db.query(PolicyVersion)
         .join(Policy)
@@ -639,6 +662,14 @@ async def enforce(
         }
     else:
         decision = run_validation(compiled_contract, action, actor, context)
+
+    decision["contract"] = {
+        "id": compiled_contract["contract_id"],
+        "version": compiled_contract["contract_version"],
+        "hash": decision["trace_hash"],
+        "source": "local",
+        "authoritative": False,
+    }
 
     log = AuditLog(
         id=f"dec_{uuid.uuid4().hex[:10]}",
