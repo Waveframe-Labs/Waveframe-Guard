@@ -99,6 +99,7 @@ class AuditLog(Base):
 
     # Decision
     allowed = Column(Boolean, nullable=False)
+    authoritative = Column(Boolean, default=False)
     risk_level = Column(String, default="low")
     reason = Column(Text, nullable=False)
     decision_trace = Column(Text, nullable=True)

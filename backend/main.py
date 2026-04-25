@@ -548,6 +548,7 @@ async def validate(request: Request, db: Session = Depends(get_db)):
         action_domain=action.get("system", "unknown"),
         amount=action.get("amount", 0),
         allowed=decision["allowed"],
+        authoritative=False,
         risk_level=decision.get("risk_level", "low"),
         reason=decision["reason"],
         decision_trace=json.dumps(decision.get("decision_trace", [])),
@@ -648,6 +649,7 @@ async def enforce(
         action_domain=action.get("system", "unknown"),
         amount=action_amount,
         allowed=decision["allowed"],
+        authoritative=False,
         risk_level=decision.get("risk_level", "low"),
         reason=decision["reason"],
         decision_trace=json.dumps(decision.get("decision_trace", [])),
@@ -677,10 +679,11 @@ def serialize_audit_logs(rows: List[AuditLog]) -> Dict[str, List[Dict[str, Any]]
         ],
         "logs": [
             {
-                "decision_id": r.id,
+                "simulation_id": r.id,
                 "organization": r.organization.name if r.organization else "Dev Environment",
                 "environment": ENVIRONMENT,
                 "mode": "simulation",
+                "authoritative": False,
                 "domain": r.action_domain or "unknown",
                 "actor": r.actor,
                 "allowed": r.allowed,
@@ -727,9 +730,10 @@ def log_detail(id: str, db: Session = Depends(get_db)):
     policy_id = policy_version.policy.name if policy_version and policy_version.policy else None
 
     return {
-        "decision_id": log.id,
+        "simulation_id": log.id,
         "environment": ENVIRONMENT,
         "mode": "simulation",
+        "authoritative": False,
         "policy_id": policy_id,
         "proposer": resolved_identities.get("proposer"),
         "responsible": resolved_identities.get("responsible"),
@@ -750,9 +754,9 @@ def log_detail(id: str, db: Session = Depends(get_db)):
         "impact": json.loads(log.impact or "[]"),
     }
 
-@app.get("/api/audit/{decision_id}")
-def get_audit_record(decision_id: str, db: Session = Depends(get_db)):
-    log = db.query(AuditLog).filter(AuditLog.id == decision_id).first()
+@app.get("/api/audit/{simulation_id}")
+def get_audit_record(simulation_id: str, db: Session = Depends(get_db)):
+    log = db.query(AuditLog).filter(AuditLog.id == simulation_id).first()
 
     if not log:
         raise HTTPException(status_code=404, detail="Decision not found")
@@ -764,9 +768,10 @@ def get_audit_record(decision_id: str, db: Session = Depends(get_db)):
         ).first()
 
     return {
-        "decision_id": log.id,
+        "simulation_id": log.id,
         "environment": ENVIRONMENT,
         "mode": "simulation",
+        "authoritative": False,
         "timestamp": log.server_timestamp.isoformat() + "Z" if log.server_timestamp else None,
         "actor": log.actor,
         "action": {
@@ -885,6 +890,7 @@ def simulate_activity():
                 action_domain=system,
                 amount=amount,
                 allowed=decision["allowed"],
+                authoritative=False,
                 risk_level=decision.get("risk_level", "low"),
                 reason=decision["reason"],
                 decision_trace=json.dumps(decision.get("decision_trace", [])),
@@ -1170,7 +1176,7 @@ def dashboard_embed(db: Session = Depends(get_db)):
             let previousIds = window.previousLogIds || [];
 
             tbody.innerHTML = data.logs.map(log => {{
-                const isNew = !previousIds.includes(log.decision_id);
+                const isNew = !previousIds.includes(log.simulation_id);
                 const risk = log.risk_level || "low";
                 const riskClass = `risk-${{risk}}`;
 
@@ -1180,11 +1186,11 @@ def dashboard_embed(db: Session = Depends(get_db)):
 
                 return `
                 <tr class="${{isNew ? 'new-row' : ''}}"
-                    onclick="openInspector('${{log.decision_id}}')"
+                    onclick="openInspector('${{log.simulation_id}}')"
                     style="cursor:pointer; border-bottom: 1px solid var(--border);">
                     <td class="td-time">${{ts}}</td>
                     <td class="td-mono">${{log.domain}}/${{log.action.type}}</td>
-                    <td class="td-id">${{log.decision_id}}</td>
+                    <td class="td-id">${{log.simulation_id}}</td>
                     <td>
                         <span class="badge ${{riskClass}}">
                             ${{risk.toUpperCase()}}
@@ -1196,7 +1202,7 @@ def dashboard_embed(db: Session = Depends(get_db)):
                 `;
             }}).join("");
 
-            window.previousLogIds = data.logs.map(l => l.decision_id);
+            window.previousLogIds = data.logs.map(l => l.simulation_id);
 
             if (lastUpdated) {{
                 lastUpdated.textContent = `Last refresh: ${{new Date().toLocaleTimeString()}}`;
@@ -1293,9 +1299,9 @@ def dashboard_embed(db: Session = Depends(get_db)):
                 </div>
             `;
 
-            const decisionId = log.decision_id;
+            const simulationId = log.simulation_id;
             document.getElementById("downloadAuditBtn").onclick = async () => {{
-                const res = await fetch(`/api/audit/${{decisionId}}`);
+                const res = await fetch(`/api/audit/${{simulationId}}`);
                 const data = await res.json();
 
                 const blob = new Blob([JSON.stringify(data, null, 2)], {{
@@ -1306,7 +1312,7 @@ def dashboard_embed(db: Session = Depends(get_db)):
                 const a = document.createElement("a");
 
                 a.href = url;
-                a.download = `audit_${{decisionId}}.json`;
+                a.download = `audit_${{simulationId}}.json`;
                 a.click();
 
                 window.URL.revokeObjectURL(url);
