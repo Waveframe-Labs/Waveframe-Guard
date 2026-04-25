@@ -26,6 +26,7 @@ app = FastAPI(
     description="Local enforcement SDK and simulation environment for AI governance"
 )
 
+ENVIRONMENT = "development"  # future: "cloud"
 simulation_thread: Optional[threading.Thread] = None
 
 # ---------------------------
@@ -279,12 +280,28 @@ def evaluate_approval_requirements(
     return None
 
 def attach_development_metadata(decision: Dict[str, Any]) -> Dict[str, Any]:
-    decision["environment"] = "development"
-    decision["guarantees"] = [
-        "no durability guarantee",
-        "no immutable audit guarantee",
-        "no policy lifecycle enforcement",
+    decision["environment"] = ENVIRONMENT
+    decision["mode"] = "simulation"
+    decision["guarantees"] = {
+        "enforcement": False,
+        "immutability": False,
+        "audit_integrity": False,
+        "policy_version_binding": False,
+    }
+    decision["warnings"] = [
+        "This environment does NOT provide enforcement guarantees",
+        "Logs are NOT immutable and may be modified or deleted",
+        "Decisions are NOT cryptographically attested",
+        "This system is NOT suitable for production use",
     ]
+    decision["upgrade_path"] = {
+        "cloud_required_for": [
+            "immutable audit records",
+            "policy lifecycle enforcement",
+            "cryptographic decision attestation",
+            "production enforcement guarantees",
+        ]
+    }
     decision["execution_context"] = {
         "mode": "local",
         "record_type": "simulation",
@@ -648,10 +665,18 @@ async def enforce(
 
 def serialize_audit_logs(rows: List[AuditLog]) -> Dict[str, List[Dict[str, Any]]]:
     return {
+        "environment": ENVIRONMENT,
+        "mode": "simulation",
+        "warnings": [
+            "Development mode only",
+            "Logs are mutable local records",
+        ],
         "logs": [
             {
                 "decision_id": r.id,
                 "organization": r.organization.name if r.organization else "Dev Environment",
+                "environment": ENVIRONMENT,
+                "mode": "simulation",
                 "domain": r.action_domain or "unknown",
                 "actor": r.actor,
                 "allowed": r.allowed,
@@ -699,6 +724,8 @@ def log_detail(id: str, db: Session = Depends(get_db)):
 
     return {
         "decision_id": log.id,
+        "environment": ENVIRONMENT,
+        "mode": "simulation",
         "policy_id": policy_id,
         "proposer": resolved_identities.get("proposer"),
         "responsible": resolved_identities.get("responsible"),
@@ -734,6 +761,8 @@ def get_audit_record(decision_id: str, db: Session = Depends(get_db)):
 
     return {
         "decision_id": log.id,
+        "environment": ENVIRONMENT,
+        "mode": "simulation",
         "timestamp": log.server_timestamp.isoformat() + "Z" if log.server_timestamp else None,
         "actor": log.actor,
         "action": {
@@ -1021,7 +1050,7 @@ def dashboard_embed(db: Session = Depends(get_db)):
           <div class="hero-meta">
             <div class="pill"><span class="live-dot"></span> Live feed active</div>
             <div class="pill">Scope: All Organizations</div>
-            <div class="pill">Environment: Live Enforcement</div>
+            <div class="pill">Environment: {ENVIRONMENT.title()} Simulation</div>
             <div class="pill">Refresh: 2 seconds</div>
           </div>
         </div>
@@ -1068,6 +1097,7 @@ def dashboard_embed(db: Session = Depends(get_db)):
           <div class="feed-meta">
             <span class="feed-tag">Source: /api/logs</span>
             <span class="feed-tag">Window: 100 decisions</span>
+            <span class="feed-tag">Mode: {ENVIRONMENT.title()} Simulation</span>
           </div>
           <div id="lastUpdated">Last refresh: waiting for feed...</div>
         </div>
@@ -1431,7 +1461,7 @@ def ui():
             <div class="eyebrow">Execution Boundary</div>
             <h1>Waveframe Guard — Policy Simulation</h1>
             <div style="margin-top:6px; color:#6b7494; font-size:13px;">
-                Running in: <strong>Dev Environment</strong>
+                Running in: <strong>{ENVIRONMENT.title()} Environment</strong>
             </div>
             <div style="
                 font-size:11px;
@@ -1439,7 +1469,7 @@ def ui():
                 margin-top:6px;
                 font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
             ">
-                Development Environment - Simulation Only (No Audit Guarantees)
+                {ENVIRONMENT.title()} Environment - Simulation Only (No Audit Guarantees)
             </div>
             <p>
                 Simulate AI actions before submitting them to your governed environments.
@@ -1632,7 +1662,7 @@ def ui():
         <div class="panel">
             <div class="panel-header">
                 <h3 class="panel-title">Live Enforcement Console</h3>
-                <p class="panel-subtitle">Dev environment decisions and ledger monitoring now live in one place.</p>
+                <p class="panel-subtitle">{ENVIRONMENT.title()} environment decisions and ledger monitoring now live in one place.</p>
             </div>
             <div class="panel-body" style="padding: 0;">
                 <iframe
