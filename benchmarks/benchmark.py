@@ -89,6 +89,16 @@ def benchmark_kernel(runs=1000):
     return avg_ms
 
 
+def benchmark_kernel_single():
+    proposal = build_test_proposal()
+
+    start = time.perf_counter()
+    evaluate_proposal(proposal, contract)
+    end = time.perf_counter()
+
+    print(f"Single run: {(end - start)*1000:.4f} ms")
+
+
 def benchmark_proposal_build(runs=1000):
     start = time.perf_counter()
 
