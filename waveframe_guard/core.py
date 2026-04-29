@@ -4,6 +4,7 @@ import getpass
 import hashlib
 import json
 import os
+import sys
 import uuid
 from functools import wraps
 from pathlib import Path
@@ -45,16 +46,6 @@ DEFAULT_COMPILED_CONTRACTS: Dict[str, Dict[str, Any]] = {
 }
 
 
-# ---------------------------
-# BASIC HELPERS
-# ---------------------------
-
-def normalize(v: Optional[str]) -> str:
-    if not v:
-        return ""
-    return v.strip().lower().replace("_", "-")
-
-
 def contract_hash(compiled_contract: Dict[str, Any]) -> str:
     return hashlib.sha256(
         json.dumps(compiled_contract, sort_keys=True).encode()
@@ -83,7 +74,11 @@ def extract_reason(stage_results: List[Any]) -> str:
 
         messages = getattr(stage, "messages", []) or []
         if messages:
-            return str(messages[0])
+            message = str(messages[0])
+            lowered = message.lower()
+            if "identity reused across required roles" in lowered or "multiple required roles" in lowered:
+                return "Same person assigned to multiple required roles"
+            return message
 
         return f"{getattr(stage, 'stage_id', 'unknown')} failed"
 
@@ -142,11 +137,23 @@ def format_amount(value: Any) -> Optional[str]:
     return f"${amount:,.2f}"
 
 
-# ---------------------------
-# ACTION VALIDATION
-# ---------------------------
+def status_prefix(label: str, symbol: str, fallback_symbol: str) -> str:
+    encoding = (getattr(sys.stdout, "encoding", None) or "").lower()
+    icon = symbol if "utf" in encoding else fallback_symbol
+    return f"[Waveframe Guard] {icon} {label}"
 
-def validate_action(action: dict):
+
+def extract_impact(reason: str, allowed: bool) -> str:
+    if allowed:
+        return "Execution allowed under current governance policy"
+    if reason == "Same person assigned to multiple required roles":
+        return "Prevented separation of duties violation"
+    if reason.startswith("Approval required:"):
+        return "Prevented unauthorized financial mutation"
+    return "Prevented unauthorized mutation"
+
+
+def validate_action(action: Dict[str, Any]):
     if not isinstance(action, dict):
         return False, "Action must be a dictionary"
 
@@ -158,10 +165,6 @@ def validate_action(action: dict):
 
     return True, None
 
-
-# ---------------------------
-# CORE ENGINE
-# ---------------------------
 
 def run_validation(
     compiled_contract: Dict[str, Any],
@@ -256,7 +259,7 @@ def run_validation(
     return {
         "allowed": allowed,
         "reason": reason,
-        "impact": "Execution allowed under current governance policy" if allowed else "Prevented unauthorized mutation",
+        "impact": extract_impact(reason, allowed),
         "decision_trace": decision_trace,
         "trace_hash": contract_hash(compiled_contract),
     }
@@ -288,12 +291,12 @@ class Guard:
         impact = decision.get("impact", "Prevented unauthorized mutation")
         amount_line = f"Amount: {amount}\n" if amount else ""
         return (
-            "[Waveframe Guard] BLOCKED\n"
+            f"{status_prefix('BLOCKED', '✕', 'X')}\n"
             f"Action: {action_type} -> {system}/{resource}\n"
             f"{amount_line}"
             f"Reason: {reason}\n"
             f"Impact: {impact}\n"
-            "Execution prevented before mutation"
+            "Execution stopped at the enforcement boundary"
         )
 
     def _format_allowed(self, action: Dict[str, Any]) -> str:
@@ -303,9 +306,10 @@ class Guard:
         amount = format_amount(action.get("amount"))
         amount_line = f"\nAmount: {amount}" if amount else ""
         return (
-            "[Waveframe Guard] ALLOWED\n"
+            f"{status_prefix('ALLOWED', '✓', '+')}\n"
             f"Action: {action_type} -> {system}/{resource}"
-            f"{amount_line}"
+            f"{amount_line}\n"
+            "Execution permitted by policy"
         )
 
     def enforce(self, action_type: str, resource: str):
@@ -327,12 +331,15 @@ class Guard:
                     action["amount"] = kwargs["amount"]
                 elif args and isinstance(args[0], (int, float)):
                     action["amount"] = args[0]
+
                 context = {
                     "proposer": getpass.getuser(),
                     "env": os.getenv("ENV", "local"),
                     "responsible": self.context["responsible"],
                     "accountable": self.context["accountable"],
                 }
+                if "approved_by" in self.context:
+                    context["approved_by"] = self.context["approved_by"]
 
                 decision = run_validation(
                     compiled_contract=self.compiled_contract,
