@@ -1,23 +1,29 @@
-from waveframe_guard import Guard
-
-policy = {
-    "contract_id": "finance-core",
-    "contract_version": "1.0.0",
-    "authority_requirements": {
-        "required_roles": ["proposer", "responsible", "accountable"]
-    }
-}
-
-guard = Guard(policy=policy, mode="shadow")
+from waveframe_guard import Guard, GuardViolation
 
 
-@guard.enforce(
-    action="delete",
-    system="infra",
-    resource="prod-db"
-)
-def dangerous_operation():
-    print("🔥 This should NOT run safely")
+allow_guard = Guard(policy="finance-policy.json")
 
 
-dangerous_operation()
+@allow_guard.enforce(action_type="write", resource="finance/budget")
+def approved_write():
+    print("Budget write executed.\n")
+
+
+block_guard = Guard(policy="finance-policy.json", mode="block")
+block_guard.context["accountable"] = block_guard.context["responsible"]
+
+
+@block_guard.enforce(action_type="write", resource="finance/budget")
+def rejected_write():
+    print("This line should never execute.\n")
+
+
+if __name__ == "__main__":
+    print("\n--- Passing action ---")
+    approved_write()
+
+    print("--- Failing action ---")
+    try:
+        rejected_write()
+    except GuardViolation as exc:
+        print(exc)

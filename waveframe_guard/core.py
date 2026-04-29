@@ -1,11 +1,18 @@
 from __future__ import annotations
 
-import json
+import getpass
 import hashlib
-from typing import Any, Dict, List, Optional
+import json
+import os
+import uuid
+from functools import wraps
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, TypeVar
 
-from proposal_normalizer.build_proposal import build_proposal
 from cricore.interface.evaluate_proposal import evaluate_proposal
+from proposal_normalizer.build_proposal import build_proposal
+
+F = TypeVar("F", bound=Callable[..., Any])
 
 
 # ---------------------------
@@ -27,8 +34,27 @@ def contract_hash(compiled_contract: Dict[str, Any]) -> str:
 def contract_required_roles(compiled_contract: Dict[str, Any]) -> List[str]:
     authority = compiled_contract.get("authority_requirements", {})
     if isinstance(authority, dict):
-        return authority.get("required_roles", [])
+        return list(authority.get("required_roles", []))
     return []
+
+
+def load_compiled_contract(policy: str) -> Dict[str, Any]:
+    with open(Path(policy), "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def extract_reason(stage_results: List[Any]) -> str:
+    for stage in stage_results:
+        if getattr(stage, "passed", True):
+            continue
+
+        messages = getattr(stage, "messages", []) or []
+        if messages:
+            return str(messages[0])
+
+        return f"{getattr(stage, 'stage_id', 'unknown')} failed"
+
+    return "Allowed"
 
 
 # ---------------------------
@@ -42,9 +68,8 @@ def validate_action(action: dict):
     if "type" not in action:
         return False, "Missing required field: type"
 
-    if action["type"] == "transfer":
-        if "amount" not in action:
-            return False, "Missing amount for transfer"
+    if action["type"] == "transfer" and "amount" not in action:
+        return False, "Missing amount for transfer"
 
     return True, None
 
@@ -59,7 +84,6 @@ def run_validation(
     actor: str = "ai-agent",
     context: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
-
     context = context or {}
 
     is_valid, error = validate_action(action)
@@ -69,16 +93,45 @@ def run_validation(
             "reason": error,
             "risk_level": "high",
             "decision_trace": [],
+            "trace_hash": contract_hash(compiled_contract),
         }
 
     required_roles = contract_required_roles(compiled_contract)
+    actors = [{"id": actor, "type": "agent", "role": "proposer"}]
+
+    if "responsible" in required_roles:
+        actors.append(
+            {
+                "id": context.get("responsible", "sdk-responsible"),
+                "type": "human",
+                "role": "responsible",
+            }
+        )
+
+    if "accountable" in required_roles:
+        actors.append(
+            {
+                "id": context.get("accountable", "sdk-accountable"),
+                "type": "human",
+                "role": "accountable",
+            }
+        )
+
+    if "approver" in required_roles:
+        actors.append(
+            {
+                "id": context.get("approved_by", "sdk-approver"),
+                "type": "human",
+                "role": "approver",
+            }
+        )
 
     proposal = build_proposal(
-        proposal_id="sdk-run",
+        proposal_id=str(uuid.uuid4()),
         actor={"id": actor, "type": "agent"},
         artifact_paths=[],
         mutation={
-            "domain": action.get("system", "unknown"),
+            "domain": action.get("system", "local"),
             "resource": action.get("resource", "unknown"),
             "action": action.get("type", "unknown"),
         },
@@ -89,9 +142,7 @@ def run_validation(
         },
         run_context={
             "identities": {
-                "actors": [
-                    {"id": actor, "type": "agent", "role": "proposer"},
-                ],
+                "actors": actors,
                 "required_roles": required_roles,
                 "conflict_flags": {},
             },
@@ -101,13 +152,93 @@ def run_validation(
     )
 
     result = evaluate_proposal(proposal, compiled_contract)
-
     allowed = getattr(result, "commit_allowed", False)
+    decision_trace = getattr(result, "stage_results", [])
+    reason = extract_reason(decision_trace)
 
     return {
         "allowed": allowed,
-        "reason": "Blocked by governance policy" if not allowed else "Allowed",
-        "decision_trace": getattr(result, "stage_results", []),
+        "reason": reason,
+        "decision_trace": decision_trace,
         "trace_hash": contract_hash(compiled_contract),
     }
-    
+
+
+class GuardViolation(Exception):
+    pass
+
+
+class Guard:
+    def __init__(self, policy: str, mode: str = "shadow"):
+        if mode not in {"shadow", "block"}:
+            raise ValueError("mode must be 'shadow' or 'block'")
+
+        self.policy = policy
+        self.mode = mode
+        self.compiled_contract = load_compiled_contract(policy)
+        self.context = {
+            "responsible": "sdk-responsible",
+            "accountable": "sdk-accountable",
+        }
+
+    def _format_violation(self, action: Dict[str, Any], decision: Dict[str, Any]) -> str:
+        action_type = action.get("type", "unknown")
+        system = action.get("system", "local")
+        resource = action.get("resource", "unknown")
+        reason = decision.get("reason", "Blocked by governance policy")
+        return (
+            "[Waveframe Guard] BLOCKED\n"
+            f"Action: {action_type} -> {system}/{resource}\n"
+            f"Reason: {reason}"
+        )
+
+    def _format_allowed(self, action: Dict[str, Any]) -> str:
+        action_type = action.get("type", "unknown")
+        system = action.get("system", "local")
+        resource = action.get("resource", "unknown")
+        return (
+            "[Waveframe Guard] ALLOWED\n"
+            f"Action: {action_type} -> {system}/{resource}"
+        )
+
+    def enforce(self, action_type: str, resource: str):
+        if "/" in resource:
+            system, resource_name = resource.split("/", 1)
+        else:
+            system, resource_name = "local", resource
+
+        def decorator(fn: F) -> F:
+            @wraps(fn)
+            def wrapper(*args: Any, **kwargs: Any):
+                action = {
+                    "type": action_type,
+                    "system": system,
+                    "resource": resource_name,
+                }
+                context = {
+                    "proposer": getpass.getuser(),
+                    "env": os.getenv("ENV", "local"),
+                    "responsible": self.context["responsible"],
+                    "accountable": self.context["accountable"],
+                }
+
+                decision = run_validation(
+                    compiled_contract=self.compiled_contract,
+                    action=action,
+                    actor=context["proposer"],
+                    context=context,
+                )
+
+                if not decision["allowed"]:
+                    message = self._format_violation(action, decision)
+                    if self.mode == "block":
+                        raise GuardViolation(message)
+                    print(message)
+                else:
+                    print(self._format_allowed(action))
+
+                return fn(*args, **kwargs)
+
+            return wrapper  # type: ignore[return-value]
+
+        return decorator

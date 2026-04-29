@@ -1,1 +1,3 @@
-from .guard import Guard
+from .guard import Guard, GuardViolation
+
+__all__ = ["Guard", "GuardViolation"]
