@@ -1,62 +1,23 @@
-from waveframe_guard import WaveframeGuard
+from waveframe_guard import Guard
+
+policy = {
+    "contract_id": "finance-core",
+    "contract_version": "1.0.0",
+    "authority_requirements": {
+        "required_roles": ["proposer", "responsible", "accountable"]
+    }
+}
+
+guard = Guard(policy=policy, mode="shadow")
 
 
-def print_decision(record: dict) -> None:
-    print("\n--- Decision Record ---")
-    print(f"Allowed: {record.get('allowed')}")
-    print(f"Status: {record.get('status')}")
-    print(f"Reason: {record.get('reason')}")
-    print(f"Risk: {record.get('risk_level')}")
-    print(f"Summary: {record.get('summary')}")
-    print("------------------------\n")
-
-
-guard = WaveframeGuard(
-    api_key="wf_test_key_123",
-    policy_id="finance-core",
-    base_url="http://localhost:8000",
+@guard.enforce(
+    action="delete",
+    system="infra",
+    resource="prod-db"
 )
+def dangerous_operation():
+    print("🔥 This should NOT run safely")
 
 
-print("\n==============================")
-print("SCENARIO 1: VALID TRANSFER")
-print("==============================")
-
-result = guard.execute(
-    action={
-        "type": "transfer",
-        "amount": 5000,
-        "system": "finance",
-        "resource": "payroll",
-    },
-    actor="ai-agent-v2",
-    context={
-        "responsible": "user-alice",
-        "accountable": "user-bob",
-        "approved_by": "user-charlie",
-    },
-)
-
-print_decision(result)
-
-
-print("\n==============================")
-print("SCENARIO 2: ROLE VIOLATION")
-print("==============================")
-
-result = guard.execute(
-    action={
-        "type": "transfer",
-        "amount": 5000,
-        "system": "finance",
-        "resource": "payroll",
-    },
-    actor="ai-agent-v2",
-    context={
-        "responsible": "user-bob",
-        "accountable": "user-alice",
-        "approved_by": "user-bob",
-    },
-)
-
-print_decision(result)
+dangerous_operation()

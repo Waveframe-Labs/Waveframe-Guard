@@ -1,3 +1,1 @@
-from .client import WaveframeGuard
-
-__all__ = ["WaveframeGuard"]
+from .guard import Guard
