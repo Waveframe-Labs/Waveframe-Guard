@@ -1,5 +1,8 @@
+import json
+import tempfile
 import time
 import uuid
+from pathlib import Path
 
 from compiler.compile_policy_file import compile_policy_file
 from proposal_normalizer.build_proposal import build_proposal
@@ -11,7 +14,17 @@ from waveframe_guard.core import run_validation
 # TEST DATA
 # ---------------------------
 
-compiled_contract = compile_policy_file("finance-policy.json")
+def load_compiled_contract():
+    with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as tmp:
+        output_path = Path(tmp.name)
+
+    compiled_path = compile_policy_file(Path("finance-policy.json"), output_path)
+
+    with open(compiled_path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+compiled_contract = load_compiled_contract()
 
 action = {
     "type": "transfer",
@@ -78,7 +91,7 @@ def benchmark_kernel_single():
     proposal = build_test_proposal()
 
     start = time.perf_counter()
-    evaluate_proposal(proposal, contract)
+    evaluate_proposal(proposal, compiled_contract)
     end = time.perf_counter()
 
     print(f"Single run: {(end - start)*1000:.4f} ms")
@@ -98,12 +111,10 @@ def benchmark_proposal_build(runs=1000):
 
 
 def benchmark_compiler(runs=100):
-    from compiler.compile_policy_file import compile_policy_file
-
     start = time.perf_counter()
 
     for _ in range(runs):
-        compile_policy_file("finance-policy.json")
+        load_compiled_contract()
 
     end = time.perf_counter()
 
