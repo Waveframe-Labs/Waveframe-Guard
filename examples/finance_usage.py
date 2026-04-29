@@ -1,29 +1,57 @@
+import json
+import tempfile
+from pathlib import Path
+
 from waveframe_guard import Guard, GuardViolation
 
 
-allow_guard = Guard(policy="finance-policy.json")
+POLICY = {
+    "contract_id": "finance-core",
+    "contract_version": "1.2.0",
+    "authority_requirements": {
+        "required_roles": ["proposer", "responsible", "accountable"]
+    },
+    "artifact_requirements": {
+        "artifacts_present": True
+    },
+    "stage_requirements": {
+        "integrity": {"artifacts_present": True},
+        "publication": {"ready": True}
+    },
+    "invariants": [
+        {"type": "separation_of_duties", "roles": ["responsible", "accountable"]}
+    ],
+    "approval_requirements": {
+        "thresholds": [
+            {
+                "field": "amount",
+                "operator": ">",
+                "value": 10000,
+                "requires_role": "approver"
+            }
+        ]
+    }
+}
 
 
-@allow_guard.enforce(action_type="write", resource="finance/budget")
-def approved_write():
-    print("Budget write executed.\n")
+with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False, encoding="utf-8") as tmp:
+    json.dump(POLICY, tmp)
+    POLICY_PATH = Path(tmp.name)
 
 
-block_guard = Guard(policy="finance-policy.json", mode="block")
-block_guard.context["accountable"] = block_guard.context["responsible"]
+guard = Guard(policy=str(POLICY_PATH), mode="block")
 
 
-@block_guard.enforce(action_type="write", resource="finance/budget")
-def rejected_write():
-    print("This line should never execute.\n")
+@guard.enforce(action_type="transfer", resource="company-funds")
+def transfer_funds(amount):
+    print(f"Executing transfer of ${amount:,}")
 
 
 if __name__ == "__main__":
-    print("\n--- Passing action ---")
-    approved_write()
+    print("\n--- Incident Simulation ---")
+    transfer_funds(500)
 
-    print("--- Failing action ---")
     try:
-        rejected_write()
+        transfer_funds(25000)
     except GuardViolation as exc:
         print(exc)

@@ -57,6 +57,58 @@ def extract_reason(stage_results: List[Any]) -> str:
     return "Allowed"
 
 
+def evaluate_approval_requirements(
+    compiled_contract: Dict[str, Any],
+    action: Dict[str, Any],
+    context: Dict[str, Any],
+) -> Optional[Dict[str, Any]]:
+    approval_rules = compiled_contract.get("approval_requirements", {}).get("thresholds", [])
+
+    for rule in approval_rules:
+        field = rule.get("field")
+        operator = rule.get("operator")
+        value = rule.get("value")
+
+        if field not in action:
+            continue
+
+        action_value = action.get(field)
+        triggered = False
+
+        if operator == ">" and action_value > value:
+            triggered = True
+        elif operator == ">=" and action_value >= value:
+            triggered = True
+        elif operator == "<" and action_value < value:
+            triggered = True
+        elif operator == "<=" and action_value <= value:
+            triggered = True
+        elif operator == "==" and action_value == value:
+            triggered = True
+
+        if triggered and not context.get("approved_by"):
+            return {
+                "reason": f"Approval required: {field} {operator} {value}",
+                "impact": "Prevented unauthorized financial mutation",
+            }
+
+    return None
+
+
+def format_amount(value: Any) -> Optional[str]:
+    if value is None:
+        return None
+
+    try:
+        amount = float(value)
+    except (TypeError, ValueError):
+        return None
+
+    if amount.is_integer():
+        return f"${int(amount):,}"
+    return f"${amount:,.2f}"
+
+
 # ---------------------------
 # ACTION VALIDATION
 # ---------------------------
@@ -91,6 +143,18 @@ def run_validation(
         return {
             "allowed": False,
             "reason": error,
+            "impact": "Prevented unauthorized mutation",
+            "risk_level": "high",
+            "decision_trace": [],
+            "trace_hash": contract_hash(compiled_contract),
+        }
+
+    approval_failure = evaluate_approval_requirements(compiled_contract, action, context)
+    if approval_failure:
+        return {
+            "allowed": False,
+            "reason": approval_failure["reason"],
+            "impact": approval_failure["impact"],
             "risk_level": "high",
             "decision_trace": [],
             "trace_hash": contract_hash(compiled_contract),
@@ -159,6 +223,7 @@ def run_validation(
     return {
         "allowed": allowed,
         "reason": reason,
+        "impact": "Execution allowed under current governance policy" if allowed else "Prevented unauthorized mutation",
         "decision_trace": decision_trace,
         "trace_hash": contract_hash(compiled_contract),
     }
@@ -185,27 +250,37 @@ class Guard:
         action_type = action.get("type", "unknown")
         system = action.get("system", "local")
         resource = action.get("resource", "unknown")
+        amount = format_amount(action.get("amount"))
         reason = decision.get("reason", "Blocked by governance policy")
+        impact = decision.get("impact", "Prevented unauthorized mutation")
+        amount_line = f"Amount: {amount}\n" if amount else ""
         return (
             "[Waveframe Guard] BLOCKED\n"
             f"Action: {action_type} -> {system}/{resource}\n"
-            f"Reason: {reason}"
+            f"{amount_line}"
+            f"Reason: {reason}\n"
+            f"Impact: {impact}\n"
+            "Execution prevented before mutation"
         )
 
     def _format_allowed(self, action: Dict[str, Any]) -> str:
         action_type = action.get("type", "unknown")
         system = action.get("system", "local")
         resource = action.get("resource", "unknown")
+        amount = format_amount(action.get("amount"))
+        amount_line = f"\nAmount: {amount}" if amount else ""
         return (
             "[Waveframe Guard] ALLOWED\n"
             f"Action: {action_type} -> {system}/{resource}"
+            f"{amount_line}"
         )
 
     def enforce(self, action_type: str, resource: str):
         if "/" in resource:
             system, resource_name = resource.split("/", 1)
         else:
-            system, resource_name = "local", resource
+            system = "finance" if action_type == "transfer" else "local"
+            resource_name = resource
 
         def decorator(fn: F) -> F:
             @wraps(fn)
@@ -215,6 +290,10 @@ class Guard:
                     "system": system,
                     "resource": resource_name,
                 }
+                if "amount" in kwargs:
+                    action["amount"] = kwargs["amount"]
+                elif args and isinstance(args[0], (int, float)):
+                    action["amount"] = args[0]
                 context = {
                     "proposer": getpass.getuser(),
                     "env": os.getenv("ENV", "local"),
