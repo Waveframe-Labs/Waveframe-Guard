@@ -1,3 +1,4 @@
+import hashlib
 import json
 import tempfile
 import time
@@ -25,6 +26,9 @@ def load_compiled_contract():
 
 
 compiled_contract = load_compiled_contract()
+compiled_contract_hash = hashlib.sha256(
+    json.dumps(compiled_contract, sort_keys=True).encode()
+).hexdigest()
 
 action = {
     "type": "transfer",
@@ -50,7 +54,7 @@ def build_test_proposal():
         contract={
             "id": compiled_contract["contract_id"],
             "version": compiled_contract["contract_version"],
-            "hash": "test",
+            "hash": compiled_contract_hash,
         },
         run_context={
             "identities": {
@@ -141,6 +145,9 @@ def benchmark_full_pipeline(runs=1000):
 
 if __name__ == "__main__":
     print("\n--- Waveframe Guard Benchmark ---\n")
+
+    benchmark_kernel_single()
+    benchmark_compiler()
 
     k = benchmark_kernel()
     p = benchmark_proposal_build()
