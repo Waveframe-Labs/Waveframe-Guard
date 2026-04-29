@@ -112,6 +112,20 @@ def benchmark_proposal_build(runs=1000):
     return avg_ms
 
 
+def benchmark_compiler(runs=100):
+    from compiler.compile_policy_file import compile_policy_file
+
+    start = time.perf_counter()
+
+    for _ in range(runs):
+        compile_policy_file("finance-policy.json")
+
+    end = time.perf_counter()
+
+    avg_ms = (end - start) / runs * 1000
+    print(f"Compiler avg: {avg_ms:.4f} ms")
+
+
 def benchmark_full_pipeline(runs=1000):
     start = time.perf_counter()
 
