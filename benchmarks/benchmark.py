@@ -1,6 +1,7 @@
 import time
 import uuid
 
+from compiler.compile_policy_file import compile_policy_file
 from proposal_normalizer.build_proposal import build_proposal
 from cricore.interface.evaluate_proposal import evaluate_proposal
 from waveframe_guard.core import run_validation
@@ -10,23 +11,7 @@ from waveframe_guard.core import run_validation
 # TEST DATA
 # ---------------------------
 
-contract = {
-    "contract_id": "bench-policy",
-    "contract_version": "1.0.0",
-    "authority_requirements": {
-        "required_roles": ["proposer", "responsible", "accountable"]
-    },
-    "artifact_requirements": {
-        "artifacts_present": True
-    },
-    "stage_requirements": {
-        "integrity": {"artifacts_present": True},
-        "publication": {"ready": True}
-    },
-    "invariants": [
-        {"type": "separation_of_duties", "roles": ["responsible", "accountable"]}
-    ]
-}
+compiled_contract = compile_policy_file("finance-policy.json")
 
 action = {
     "type": "transfer",
@@ -50,8 +35,8 @@ def build_test_proposal():
             "action": action["type"],
         },
         contract={
-            "id": contract["contract_id"],
-            "version": contract["contract_version"],
+            "id": compiled_contract["contract_id"],
+            "version": compiled_contract["contract_version"],
             "hash": "test",
         },
         run_context={
@@ -80,7 +65,7 @@ def benchmark_kernel(runs=1000):
     start = time.perf_counter()
 
     for _ in range(runs):
-        evaluate_proposal(proposal, contract)
+        evaluate_proposal(proposal, compiled_contract)
 
     end = time.perf_counter()
 
@@ -130,7 +115,7 @@ def benchmark_full_pipeline(runs=1000):
     start = time.perf_counter()
 
     for _ in range(runs):
-        run_validation(contract, action, actor, context)
+        run_validation(compiled_contract, action, actor, context)
 
     end = time.perf_counter()
 
