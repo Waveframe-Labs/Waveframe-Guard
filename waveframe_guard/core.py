@@ -14,6 +14,36 @@ from proposal_normalizer.build_proposal import build_proposal
 
 F = TypeVar("F", bound=Callable[..., Any])
 
+DEFAULT_COMPILED_CONTRACTS: Dict[str, Dict[str, Any]] = {
+    "finance-core": {
+        "contract_id": "finance-core",
+        "contract_version": "1.2.0",
+        "authority_requirements": {
+            "required_roles": ["proposer", "responsible", "accountable"]
+        },
+        "artifact_requirements": {
+            "artifacts_present": True
+        },
+        "stage_requirements": {
+            "integrity": {"artifacts_present": True},
+            "publication": {"ready": True}
+        },
+        "invariants": [
+            {"type": "separation_of_duties", "roles": ["responsible", "accountable"]}
+        ],
+        "approval_requirements": {
+            "thresholds": [
+                {
+                    "field": "amount",
+                    "operator": ">",
+                    "value": 10000,
+                    "requires_role": "approver",
+                }
+            ]
+        },
+    }
+}
+
 
 # ---------------------------
 # BASIC HELPERS
@@ -39,6 +69,9 @@ def contract_required_roles(compiled_contract: Dict[str, Any]) -> List[str]:
 
 
 def load_compiled_contract(policy: str) -> Dict[str, Any]:
+    if policy in DEFAULT_COMPILED_CONTRACTS:
+        return json.loads(json.dumps(DEFAULT_COMPILED_CONTRACTS[policy]))
+
     with open(Path(policy), "r", encoding="utf-8") as f:
         return json.load(f)
 

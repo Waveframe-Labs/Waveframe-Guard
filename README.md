@@ -1,25 +1,8 @@
 # Waveframe Guard
 
-Enterprise AI governance layer for deterministic execution control with policy-bound enforcement and immutable audit tracing.
+Local enforcement SDK and simulation environment for AI governance.
 
-Waveframe Guard sits at the execution boundary for AI-initiated actions. It builds a governance proposal, routes it through deterministic policy enforcement, and returns a clear decision before your system mutates state.
-
-Guard uses a local policy store for development purposes. Production environments should use a managed policy lifecycle system.
-
-## What it does
-
-- Resolves a stored compiled contract by `policy_id`
-- Builds a proposal from actor, action, and human execution roles
-- Enforces deterministic policy checks before execution
-- Returns structured outcomes such as `allowed`, `pending`, or `blocked`
-- Produces simulation audit records with policy-version traceability
-
-## What it does not do
-
-- Execute your business action
-- Manage approvals or identity proofing for you
-- Replace your system-of-record or workflow engine
-- Make post-hoc recommendations instead of enforcement decisions
+Waveframe Guard lets you wrap high-risk functions with deterministic pre-execution checks. In local mode it behaves as a serious control simulation: it evaluates the action first, prints a clear decision, and either allows execution or blocks it depending on mode.
 
 ## Install
 
@@ -27,79 +10,48 @@ Guard uses a local policy store for development purposes. Production environment
 pip install waveframe-guard
 ```
 
-## Quick start
-
-```python
-from waveframe_guard import WaveframeGuard
-
-guard = WaveframeGuard(
-    api_key="wf_test_key_123",
-    policy_id="finance-core",
-    base_url="http://localhost:8000",
-)
-
-decision = guard.execute(
-    action={
-        "type": "transfer",
-        "amount": 5000,
-        "system": "finance",
-        "resource": "payroll",
-    },
-    context={
-        "responsible": "user-alice",
-        "accountable": "user-bob",
-        "approved_by": "user-charlie",
-    },
-    actor="ai-agent-v2",
-)
-
-if decision["allowed"]:
-    print("Execute downstream action")
-else:
-    print(decision["status"], decision["reason"])
-```
-
-## Decision model
-
-Guard returns deterministic, machine-friendly responses. Typical fields include:
-
-```json
-{
-  "allowed": false,
-  "status": "pending",
-  "summary": "AI proposed transfer on finance/payroll",
-  "reason": "Approval missing or threshold exceeded",
-  "risk_level": "critical"
-}
-```
-
-- `allowed`: whether the action may proceed
-- `status`: `allowed`, `pending`, or `blocked`
-- `reason`: human-readable explanation derived after enforcement
-- `risk_level`: UX-level severity classification for operators
-
-## Governance model
-
-Waveframe Guard is designed around deterministic execution control:
-
-- Compiled contracts are resolved from stored policy versions, not injected inline at execution time
-- Guard builds proposal structure without translating human governance semantics
-- The enforcement kernel determines outcome
-- Audit records preserve policy-version linkage and execution trace data
-
-## Local development
-
-Run the seeded backend and the example script:
+## Run the example
 
 ```bash
-python -m backend.seed
 python examples/finance_usage.py
 ```
 
-## Release status
+## Quick start
 
-This repository is being prepared for the `v0.2.0` release line.
+```python
+from waveframe_guard import Guard
 
-## License
+guard = Guard(policy="finance-core")
 
-Proprietary. See [LICENSE](LICENSE).
+
+@guard.enforce(action_type="transfer", resource="budget")
+def transfer_funds(amount):
+    print(f"Executing transfer of ${amount:,}")
+
+
+transfer_funds(500)
+transfer_funds(25000)
+```
+
+## Modes
+
+- `shadow` is the default. It never blocks execution, but it prints a serious warning when a policy violation is detected.
+- `block` raises `GuardViolation` before the wrapped function mutates state.
+
+```python
+from waveframe_guard import Guard
+
+guard = Guard(policy="finance-core", mode="block")
+```
+
+## Defaults
+
+Guard keeps local setup minimal:
+
+- actor defaults to the current OS user
+- context defaults to safe fallback identities for `responsible` and `accountable`
+- `finance-core` is available as a built-in local policy alias
+
+## Development scope
+
+Guard uses an in-memory compiled contract for local development and examples. It does not provide immutable audit records, cryptographic attestation, or production enforcement guarantees.
