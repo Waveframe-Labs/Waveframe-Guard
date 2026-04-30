@@ -39,7 +39,8 @@ def startup():
     init_db()
     if simulation_thread is None or not simulation_thread.is_alive():
         simulation_thread = threading.Thread(target=simulate_activity, daemon=True)
-        simulation_thread.start()
+        if ENVIRONMENT == "development" and False:
+            simulation_thread.start()
 
 # ---------------------------
 # AUTH
@@ -862,92 +863,101 @@ def identities():
     }
 
 
-def simulate_activity():
-    """Continuously generates fake AI actions for demo realism."""
+def simulate_activity_once():
+    """Generates one fake AI action for demo realism."""
     from backend.db import SessionLocal
 
-    while True:
-        db = None
-        try:
-            db = SessionLocal()
+    db = None
+    try:
+        db = SessionLocal()
 
-            sandbox = db.query(Organization).filter_by(name="Acme Corp").first()
-            if not sandbox:
-                sandbox = Organization(name="Acme Corp")
-                db.add(sandbox)
-                db.commit()
-                db.refresh(sandbox)
-
-            systems = ["infra", "crm", "finance", "hr"]
-            resources = ["prod-db", "user-records", "payroll", "api-cluster"]
-            actions = ["transfer", "delete", "write", "deploy"]
-
-            system = random.choice(systems)
-            resource = random.choice(resources)
-            action_type = random.choice(actions)
-
-            amount = random.randint(100, 10000)
-
-            context = {
-                "responsible": "user-alice",
-                "accountable": "user-bob",
-                "approved_by": random.choice([None, "user-charlie"]),
-            }
-
-            action = {
-                "type": action_type,
-                "amount": amount,
-                "system": system,
-                "resource": resource,
-            }
-
-            compiled_contract = {
-                "contract_id": "demo-policy",
-                "contract_version": "1.0.0",
-                "authority_requirements": {
-                    "required_roles": ["proposer", "responsible", "accountable"],
-                },
-                "artifact_requirements": {
-                    "artifacts_present": True,
-                },
-                "stage_requirements": {
-                    "integrity": {"artifacts_present": True},
-                    "publication": {"ready": True},
-                },
-                "invariants": [
-                    {"type": "separation_of_duties", "roles": ["responsible", "accountable"]},
-                ],
-            }
-
-            decision = run_validation(compiled_contract, action, "ai-agent-v2", context)
-
-            log = AuditLog(
-                id=f"dec_{uuid.uuid4().hex[:10]}",
-                organization_id=sandbox.id,
-                actor="ai-agent-v2",
-                action_type=action_type,
-                action_domain=system,
-                amount=amount,
-                allowed=decision["allowed"],
-                authoritative=False,
-                risk_level=decision.get("risk_level", "low"),
-                reason=decision["reason"],
-                decision_trace=json.dumps(decision.get("decision_trace", [])),
-                resolved_identities=json.dumps(decision.get("resolved_identities", {})),
-                impact=json.dumps(decision.get("impact", [])),
-                trace_hash=decision["trace_hash"],
-            )
-
-            db.add(log)
+        sandbox = db.query(Organization).filter_by(name="Acme Corp").first()
+        if not sandbox:
+            sandbox = Organization(name="Acme Corp")
+            db.add(sandbox)
             db.commit()
+            db.refresh(sandbox)
 
-        except Exception as e:
-            print("Simulation error:", e)
-        finally:
-            if db is not None:
-                db.close()
+        systems = ["infra", "crm", "finance", "hr"]
+        resources = ["prod-db", "user-records", "payroll", "api-cluster"]
+        actions = ["transfer", "delete", "write", "deploy"]
 
+        system = random.choice(systems)
+        resource = random.choice(resources)
+        action_type = random.choice(actions)
+
+        amount = random.randint(100, 10000)
+
+        context = {
+            "responsible": "user-alice",
+            "accountable": "user-bob",
+            "approved_by": random.choice([None, "user-charlie"]),
+        }
+
+        action = {
+            "type": action_type,
+            "amount": amount,
+            "system": system,
+            "resource": resource,
+        }
+
+        compiled_contract = {
+            "contract_id": "demo-policy",
+            "contract_version": "1.0.0",
+            "authority_requirements": {
+                "required_roles": ["proposer", "responsible", "accountable"],
+            },
+            "artifact_requirements": {
+                "artifacts_present": True,
+            },
+            "stage_requirements": {
+                "integrity": {"artifacts_present": True},
+                "publication": {"ready": True},
+            },
+            "invariants": [
+                {"type": "separation_of_duties", "roles": ["responsible", "accountable"]},
+            ],
+        }
+
+        decision = run_validation(compiled_contract, action, "ai-agent-v2", context)
+
+        log = AuditLog(
+            id=f"dec_{uuid.uuid4().hex[:10]}",
+            organization_id=sandbox.id,
+            actor="ai-agent-v2",
+            action_type=action_type,
+            action_domain=system,
+            amount=amount,
+            allowed=decision["allowed"],
+            authoritative=False,
+            risk_level=decision.get("risk_level", "low"),
+            reason=decision["reason"],
+            decision_trace=json.dumps(decision.get("decision_trace", [])),
+            resolved_identities=json.dumps(decision.get("resolved_identities", {})),
+            impact=json.dumps(decision.get("impact", [])),
+            trace_hash=decision["trace_hash"],
+        )
+
+        db.add(log)
+        db.commit()
+
+    except Exception as e:
+        print("Simulation error:", e)
+    finally:
+        if db is not None:
+            db.close()
+
+def simulate_activity():
+    """Continuously generates fake AI actions for demo realism."""
+    while True:
+        simulate_activity_once()
         time.sleep(random.randint(3, 6))
+
+
+@app.post("/simulate")
+def trigger_simulation():
+    simulate_activity_once()
+    return {"status": "ok", "simulation": "triggered"}
 
 # ---------------------------
 # UI - COMPLIANCE DASHBOARD
