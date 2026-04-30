@@ -10,6 +10,9 @@ from proposal_normalizer.build_proposal import build_proposal
 from cricore.interface.evaluate_proposal import evaluate_proposal
 from waveframe_guard.core import run_validation
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+POLICY_PATH = REPO_ROOT / "finance-policy.json"
+
 
 # ---------------------------
 # TEST DATA
@@ -19,7 +22,7 @@ def load_compiled_contract():
     with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as tmp:
         output_path = Path(tmp.name)
 
-    compiled_path = compile_policy_file(Path("finance-policy.json"), output_path)
+    compiled_path = compile_policy_file(POLICY_PATH, output_path)
 
     with open(compiled_path, "r", encoding="utf-8") as f:
         return json.load(f)

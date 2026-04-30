@@ -63,7 +63,18 @@ def load_compiled_contract(policy: str) -> Dict[str, Any]:
     if policy in DEFAULT_COMPILED_CONTRACTS:
         return json.loads(json.dumps(DEFAULT_COMPILED_CONTRACTS[policy]))
 
-    with open(Path(policy), "r", encoding="utf-8") as f:
+    policy_path = Path(policy).expanduser()
+    if not policy_path.is_absolute():
+        candidate_paths = [
+            Path.cwd() / policy_path,
+            Path(__file__).resolve().parents[1] / policy_path,
+        ]
+        for candidate in candidate_paths:
+            if candidate.exists():
+                policy_path = candidate
+                break
+
+    with open(policy_path, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
