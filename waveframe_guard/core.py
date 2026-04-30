@@ -37,7 +37,19 @@ DEFAULT_COMPILED_CONTRACTS: Dict[str, Dict[str, Any]] = {
                 {
                     "field": "amount",
                     "operator": ">",
-                    "value": 10000,
+                    "value": 1000,
+                    "requires_role": "approver",
+                },
+                {
+                    "field": "type",
+                    "operator": "==",
+                    "value": "delete",
+                    "requires_role": "approver",
+                },
+                {
+                    "field": "type",
+                    "operator": "==",
+                    "value": "deploy",
                     "requires_role": "approver",
                 }
             ]

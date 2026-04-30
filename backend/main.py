@@ -1855,6 +1855,18 @@ async function runValidation() {
                         operator: ">",
                         value: 1000,
                         requires_role: "approver"
+                    },
+                    {
+                        field: "type",
+                        operator: "==",
+                        value: "delete",
+                        requires_role: "approver"
+                    },
+                    {
+                        field: "type",
+                        operator: "==",
+                        value: "deploy",
+                        requires_role: "approver"
                     }
                 ]
             },

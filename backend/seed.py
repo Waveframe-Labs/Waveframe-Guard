@@ -29,6 +29,28 @@ SAMPLE_COMPILED_CONTRACT = {
         "integrity": {"artifacts_present": True},
         "publication": {"ready": True}
     },
+    "approval_requirements": {
+        "thresholds": [
+            {
+                "field": "amount",
+                "operator": ">",
+                "value": 1000,
+                "requires_role": "approver"
+            },
+            {
+                "field": "type",
+                "operator": "==",
+                "value": "delete",
+                "requires_role": "approver"
+            },
+            {
+                "field": "type",
+                "operator": "==",
+                "value": "deploy",
+                "requires_role": "approver"
+            }
+        ]
+    },
     "invariants": [
         {
             "type": "separation_of_duties",
