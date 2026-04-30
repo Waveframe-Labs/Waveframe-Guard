@@ -66,6 +66,19 @@ guard = Guard(policy="finance-core", mode="block")
 - context defaults to safe fallback identities
 - `finance-core` is available as a built-in local policy alias
 
-## Development scope
+## Development Mode
 
-Guard is a local enforcement SDK and simulation environment. It does not provide immutable audit records, cryptographic attestation, or production enforcement guarantees.
+Waveframe Guard runs locally and does NOT provide:
+
+- immutable audit records
+- enforcement guarantees
+- policy lifecycle management
+
+For production enforcement, Waveframe Cloud is required.
+
+## Typical Performance
+
+Typical performance (local simulation):
+
+- Kernel: ~30ms
+- Full pipeline: ~35ms
