@@ -1848,12 +1848,15 @@ async function runValidation() {
             authority_requirements: {
                 required_roles: ["proposer", "responsible", "accountable"]
             },
-            artifact_requirements: {
-                artifacts_present: true
-            },
-            stage_requirements: {
-                integrity: { artifacts_present: true },
-                publication: { ready: true }
+            approval_requirements: {
+                thresholds: [
+                    {
+                        field: "amount",
+                        operator: ">",
+                        value: 1000,
+                        requires_role: "approver"
+                    }
+                ]
             },
             invariants: [
                 { type: "separation_of_duties", roles: ["responsible", "accountable"] }
