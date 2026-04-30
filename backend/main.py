@@ -280,6 +280,22 @@ def evaluate_approval_requirements(
 
     return None
 
+def detect_unconstrained_action(compiled_contract, action):
+    rules = compiled_contract.get("approval_requirements", {}).get("thresholds", [])
+    invariants = compiled_contract.get("invariants", [])
+
+    # If no rules reference this action at all
+    touches_action = False
+
+    for r in rules:
+        if r.get("field") == "type" and r.get("value") == action.get("type"):
+            touches_action = True
+
+    if not rules and not invariants:
+        return True
+
+    return not touches_action
+
 def attach_development_metadata(decision: Dict[str, Any]) -> Dict[str, Any]:
     decision["environment"] = ENVIRONMENT
     decision["mode"] = "simulation"
@@ -478,6 +494,7 @@ def run_validation(
     allowed = getattr(result, "commit_allowed", False)
     reason = extract_reason(stages)
     status = "allowed" if allowed else ("pending" if "approval" in reason.lower() else "blocked")
+    unconstrained = detect_unconstrained_action(compiled_contract, action)
 
     if not allowed:
         if "separation" in reason.lower() or "multiple required roles" in reason.lower():
@@ -503,6 +520,14 @@ def run_validation(
             "approval conditions satisfied",
             "action aligned with policy",
         ]
+        if unconstrained:
+            status = "allowed_unconstrained"
+            reason = "No policy constraints apply to this action"
+            impact = [
+                "action not governed by current policy",
+                "no approval or restriction rules were triggered",
+                "execution allowed by absence of constraints",
+            ]
 
     action_type = action.get("type", "unknown")
     action_system = action.get("system", "unknown")
@@ -1065,6 +1090,10 @@ def dashboard_embed(db: Session = Depends(get_db)):
         }}
       }}
       .new-row {{ animation: fadeInRow 0.4s ease; }}
+      .user-row {{
+        background: rgba(77, 124, 254, 0.15);
+        border-left: 3px solid #4d7cfe;
+      }}
       @media (max-width: 1040px) {{ .hero {{ grid-template-columns: 1fr; }} }}
       @media (max-width: 760px) {{ .header {{ padding: 14px 18px; flex-direction: column; align-items: flex-start; gap: 12px; }} .page {{ padding: 20px 18px 0; }} .hero-stats {{ grid-template-columns: 1fr; }} .panel-head, .feed-footer {{ align-items: flex-start; flex-direction: column; }} }}
     </style>
@@ -1226,6 +1255,7 @@ def dashboard_embed(db: Session = Depends(get_db)):
 
             tbody.innerHTML = data.logs.map(log => {{
                 const isNew = !previousIds.includes(log.simulation_id);
+                const isUserTriggered = log.trace_hash === window.lastDecisionId;
                 const risk = log.risk_level || "low";
                 const riskClass = `risk-${{risk}}`;
 
@@ -1234,7 +1264,7 @@ def dashboard_embed(db: Session = Depends(get_db)):
                     : "Recent";
 
                 return `
-                <tr class="${{isNew ? 'new-row' : ''}}"
+                <tr class="${{isNew ? 'new-row' : ''}} ${{isUserTriggered ? 'user-row' : ''}}"
                     onclick="openInspector('${{log.simulation_id}}')"
                     style="cursor:pointer; border-bottom: 1px solid var(--border);">
                     <td class="td-time">${{ts}}</td>
@@ -1907,6 +1937,7 @@ async function runValidation() {
         });
 
         const data = await res.json();
+        window.lastDecisionId = data.trace_hash;
         const card = document.getElementById("outputCard");
         const allowed = !!data.allowed;
 
