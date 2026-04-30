@@ -19,6 +19,12 @@ def transfer_funds_with_same_actor(amount):
 
 
 if __name__ == "__main__":
+    print("\n--- Allowed Transaction ---")
+    try:
+        transfer_funds(500)  # ✅ below threshold, valid roles
+    except GuardViolation as exc:
+        print(exc)
+
     print("\n--- Approval Threshold Violation ---")
     try:
         transfer_funds(25000)
