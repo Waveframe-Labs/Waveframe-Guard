@@ -1,6 +1,6 @@
 import time
 
-from waveframe_guard import install_guard, guard
+from waveframe_guard import install_guard, guard, GovernanceError
 from compiler.compile_policy import compile_policy
 
 # -------------------------
@@ -56,7 +56,7 @@ start = time.perf_counter()
 for _ in range(N):
     try:
         test_action()
-    except PermissionError:
+    except GovernanceError:
         blocked += 1
 
 end = time.perf_counter()

@@ -79,7 +79,7 @@ def execute(fn, *, args=None, kwargs=None, actor=None, contract=None):
     )
 
     if not result.commit_allowed:
-        raise PermissionError(f"Execution blocked: {_blocked_reason(result)}")
+        raise GovernanceError(f"Execution blocked: {_blocked_reason(result)}")
 
     return fn(*(args or []), **(kwargs or {}))
 
@@ -146,6 +146,8 @@ def _resolve_contract(ctx, explicit_contract=None):
         return cache["compiled_contract"], False
 
     if not ctx.get("api_key"):
+        if ctx.get("fail_mode") == "open":
+            return _resolve_no_policy(ctx)
         if cache:
             _record_cloud_failure(ctx)
             return _resolve_unreachable_cloud(ctx)

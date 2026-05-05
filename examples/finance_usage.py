@@ -1,4 +1,4 @@
-from waveframe_guard import install_guard, guard
+from waveframe_guard import install_guard, guard, GovernanceError
 from compiler.compile_policy import compile_policy
 
 
@@ -27,7 +27,7 @@ if __name__ == "__main__":
 
     try:
         transfer_funds(500)
-    except PermissionError as exc:
+    except GovernanceError as exc:
         print("BLOCKED:", exc)
 
     print("\n--- Allowed Transaction ---")

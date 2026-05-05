@@ -16,8 +16,8 @@ install_guard(
 
 
 @guard
-def test():
+def demo_action():
     return "executed"
 
 
-print(test())
+print(demo_action())
