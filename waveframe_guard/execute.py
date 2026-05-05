@@ -7,7 +7,7 @@ import requests
 from proposal_normalizer.build_proposal import build_proposal
 from cricore.api import evaluate_structured
 
-from .context import get_context
+from .context import get_context, resolve_actor
 
 
 DEFAULT_BASE_URL = "http://localhost:8000"
@@ -20,12 +20,9 @@ class GovernanceError(RuntimeError):
 def execute(fn, *, args=None, kwargs=None, actor=None, contract=None):
     ctx = get_context()
 
-    actor = actor or ctx.get("actor")
+    actor = actor or ctx.get("actor") or resolve_actor()
     mode = ctx.get("mode", "local")
     contract, unverified = _resolve_contract(ctx, contract)
-
-    if actor is None:
-        raise ValueError("Missing actor")
 
     if contract is None:
         if mode == "cloud" and ctx.get("fail_mode") == "open":

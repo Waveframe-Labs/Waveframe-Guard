@@ -1,5 +1,5 @@
 from .guard import guard
-from .context import install_guard
+from .context import install_guard, resolve_actor
 from .execute import GovernanceError, execute
 
-__all__ = ["guard", "install_guard", "execute", "GovernanceError"]
+__all__ = ["guard", "install_guard", "resolve_actor", "execute", "GovernanceError"]

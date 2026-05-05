@@ -1,12 +1,13 @@
 from contextvars import ContextVar
 from datetime import datetime, timedelta, timezone
+import os
 
 _guard_context = ContextVar("guard_context", default={})
 
 
 def install_guard(
     *,
-    actor,
+    actor=None,
     contract,
     api_key=None,
     mode="local",
@@ -47,3 +48,11 @@ def install_guard(
 
 def get_context():
     return _guard_context.get()
+
+
+def resolve_actor():
+    return {
+        "id": os.getenv("USER") or "unknown",
+        "type": "human",
+        "role": os.getenv("WF_ROLE") or "unknown",
+    }
