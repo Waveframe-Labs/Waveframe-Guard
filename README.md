@@ -1,16 +1,10 @@
 # Waveframe Guard
 
-Version: `v0.3.0`
+Stop unsafe AI and automated actions **before they execute**.
 
-Stop unsafe AI actions before they execute, in one decorator.
+Waveframe Guard enforces governance at the execution boundary. If an action violates policy, it never runs.
 
-## Install
-
-```bash
-pip install waveframe-guard
-```
-
-## SDK Surface
+## Example
 
 ```python
 from waveframe_guard import install_guard, guard
@@ -19,14 +13,16 @@ from compiler.compile_policy import compile_policy
 policy = {
     "contract_id": "finance-core",
     "contract_version": "0.3.0",
-    "authority": {"required_roles": ["manager"]},
+    "authority": {
+        "required_roles": ["manager"]
+    }
 }
+
 compiled = compile_policy(policy)
 
 install_guard(
-    actor={"id": "user-1", "type": "human", "role": "manager"},
-    contract=compiled,
-    fail_mode="cache",
+    actor={"id": "user-1", "type": "human", "role": "intern"},
+    contract=compiled
 )
 
 @guard
@@ -36,13 +32,39 @@ def transfer(amount):
 transfer(100)
 ```
 
-## Modes
+```text
+Execution blocked: required role not satisfied: manager
+```
 
-Guard runs locally by default and can optionally synchronize with Waveframe Cloud.
+## What Waveframe Guard Does
 
-- `fail_mode="cache"`: recommended default; enforce with last known policy if Cloud is unavailable and mark decisions unverified
-- `fail_mode="closed"`: block if Cloud is unavailable and no cached policy exists
-- `fail_mode="open"`: allow if Cloud is unavailable and log an unverified warning
+- Intercepts function execution
+- Evaluates governance rules before execution
+- Blocks invalid actions deterministically
+- Continues enforcement even if Cloud is unavailable
+
+## Local vs Cloud
+
+| Mode | Behavior |
+| --- | --- |
+| Local | Fast, local enforcement |
+| Cloud | Policy sync, audit, and attestation |
+
+Guard enforces locally. Cloud provides authority, audit, and verification.
+
+## Fail Modes
+
+| Mode | Behavior |
+| --- | --- |
+| `cache` (default) | Use cached policy if Cloud is unavailable |
+| `closed` | Block if Cloud is unavailable and no cached policy exists |
+| `open` | Allow execution if policy is unavailable and mark the decision unverified |
+
+## Install
+
+```bash
+pip install waveframe-guard
+```
 
 ## Live Demo
 
@@ -55,6 +77,12 @@ The demo shows:
 - an intern blocked by policy
 - a manager allowed by policy
 - cached local enforcement during a simulated Cloud outage
+
+## Why This Exists
+
+Most AI systems can suggest, warn, or log.
+
+Waveframe Guard is the layer that can **stop execution**.
 
 ## Architecture Note
 
