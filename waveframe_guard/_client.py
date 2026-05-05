@@ -1,14 +1,20 @@
+"""
+INTERNAL MODULE - NOT PART OF PUBLIC SDK
+
+This module contains experimental Cloud client functionality
+for future Waveframe Cloud integration.
+
+It is not stable and should not be used directly.
+"""
+
 import requests
+
 
 class WaveframeGuard:
     def __init__(self, api_key: str, policy_id: str, base_url: str = "http://localhost:8000"):
         self.api_key = api_key
         self.policy_id = policy_id
         self.base_url = base_url
-
-    # ---------------------------
-    # PUBLIC API
-    # ---------------------------
 
     def execute(self, action: dict, context: dict, actor: str = "ai-agent-v2"):
         context = self._normalize_context(context)
@@ -18,10 +24,6 @@ class WaveframeGuard:
             context=context,
             actor=actor,
         )
-
-    # ---------------------------
-    # INTERNAL
-    # ---------------------------
 
     def _request(self, action: dict, context: dict, actor: str):
         res = requests.post(
@@ -43,22 +45,16 @@ class WaveframeGuard:
 
         return res.json()
 
-    # ---------------------------
-    # VALIDATION LAYER (CRITICAL)
-    # ---------------------------
-
     def _normalize_context(self, context):
         if not isinstance(context, dict):
             raise TypeError("context must be a dictionary")
 
-        # enforce required fields
         required = ["responsible", "accountable"]
 
         for field in required:
             if field not in context or not context[field]:
                 raise ValueError(f"Missing required context field: {field}")
 
-        # optional field
         if "approved_by" not in context:
             context["approved_by"] = None
 

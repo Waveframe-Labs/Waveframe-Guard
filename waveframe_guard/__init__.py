@@ -10,5 +10,4 @@ __all__ = [
     "resolve_actor",
     "execute",
     "GovernanceError",
-    "__version__",
 ]
