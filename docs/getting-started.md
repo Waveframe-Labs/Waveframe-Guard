@@ -1,83 +1,94 @@
-# Getting Started
+# Getting Started with Waveframe Guard
 
-Use Waveframe Guard when AI systems can trigger real operations and you need deterministic control before execution.
+Waveframe Guard enforces governance rules at execution time. It blocks actions that violate defined policy before they happen.
 
-## 1. Install
+---
+
+## Installation
 
 ```bash
 pip install waveframe-guard
 ```
 
-## 2. Seed local demo data
-
-```bash
-python -m backend.seed
-```
-
-This creates a demo organization, API key, and stored compiled contract named `finance-core`.
-
-## 3. Create a client
+## Basic Usage
 
 ```python
-from waveframe_guard import WaveframeGuard
+from waveframe_guard import install_guard, guard
+from compiler.compile_policy import compile_policy
 
-guard = WaveframeGuard(
-    api_key="wf_test_key_123",
-    policy_id="finance-core",
-    base_url="http://localhost:8000",
+# 1. Define a policy
+policy = {
+    "contract_id": "finance-core",
+    "contract_version": "0.3.0",
+    "authority": {
+        "required_roles": ["manager"]
+    }
+}
+
+compiled = compile_policy(policy)
+
+# 2. Install Guard context
+install_guard(
+    actor={"id": "user-1", "type": "human", "role": "intern"},
+    contract=compiled
+)
+
+# 3. Protect a function
+@guard
+def transfer(amount):
+    print(f"Transferred ${amount}")
+
+# 4. Execute
+transfer(100)
+```
+
+## Expected Behavior
+
+```text
+Execution blocked: required role not satisfied: manager
+```
+
+## Elevating Privileges
+
+```python
+install_guard(
+    actor={"id": "user-1", "type": "human", "role": "manager"},
+    contract=compiled
+)
+
+transfer(100)
+```
+
+```text
+Transferred $100
+```
+
+## Cloud Mode (Optional)
+
+```python
+install_guard(
+    api_key="your_api_key_here",
+    mode="cloud",
+    fail_mode="cache"
 )
 ```
 
-## 4. Evaluate an action
+In cloud mode:
 
-```python
-decision = guard.execute(
-    action={
-        "type": "transfer",
-        "amount": 5000,
-        "system": "finance",
-        "resource": "payroll",
-    },
-    context={
-        "responsible": "user-alice",
-        "accountable": "user-bob",
-        "approved_by": "user-charlie",
-    },
-    actor="ai-agent-v2",
-)
-```
+- Policies are fetched and cached locally
+- Enforcement still happens locally
+- Decisions are asynchronously logged to Waveframe Cloud
 
-## 5. Route downstream execution
+## Fail Modes
 
-```python
-if decision["allowed"]:
-    print("Proceed with downstream execution")
-else:
-    print(decision["status"], decision["reason"])
-```
+| Mode | Behavior |
+| --- | --- |
+| `cache` (default) | Use cached policy if Cloud unavailable |
+| `open` | Allow execution if policy unavailable |
+| `closed` | Block execution if policy unavailable |
 
-## 6. Understand the result
+## Notes
 
-Typical response fields:
-
-- `allowed`: whether execution may proceed
-- `status`: `allowed`, `pending`, or `blocked`
-- `summary`: normalized description of the proposed action
-- `reason`: post-enforcement explanation
-- `risk_level`: operator-facing severity label
-
-## 7. Inspect audit records
-
-The backend exposes:
-
-- `/api/logs` for live feed summaries
-- `/api/log/{decision_id}` for inspector detail
-- `/api/audit/{decision_id}` for full downloadable audit records
-
-## When to use Guard
-
-Use Waveframe Guard when:
-
-- AI systems can perform writes, deletes, deployments, or transfers
-- compiled-contract version traceability matters
-- you need deterministic pre-execution governance, not passive monitoring
+- Guard enforces locally, even if Cloud is unavailable
+- Decisions may be marked as unverified when Cloud cannot be reached
+- Cloud integration provides audit, attestation, and policy management

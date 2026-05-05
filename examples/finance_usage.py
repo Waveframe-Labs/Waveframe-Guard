@@ -1,38 +1,38 @@
-from waveframe_guard import Guard, GuardViolation
+from waveframe_guard import install_guard, guard
+from compiler.compile_policy import compile_policy
 
 
-guard = Guard(policy="finance-core", mode="block")
+policy = {
+    "contract_id": "finance-core",
+    "contract_version": "0.3.0",
+    "authority": {
+        "required_roles": ["manager"]
+    }
+}
+
+compiled = compile_policy(policy)
 
 
-@guard.enforce(action_type="transfer", resource="budget")
+@guard
 def transfer_funds(amount):
-    print(f"Executing transfer of ${amount:,}")
-
-
-same_actor_guard = Guard(policy="finance-core", mode="block")
-same_actor_guard.context["accountable"] = same_actor_guard.context["responsible"]
-
-
-@same_actor_guard.enforce(action_type="transfer", resource="budget")
-def transfer_funds_with_same_actor(amount):
-    print(f"Executing transfer of ${amount:,}")
+    print(f"Transferred ${amount:,}")
 
 
 if __name__ == "__main__":
+    print("\n--- Blocked Transaction ---")
+    install_guard(
+        actor={"id": "user-1", "type": "human", "role": "intern"},
+        contract=compiled
+    )
+
+    try:
+        transfer_funds(500)
+    except PermissionError as exc:
+        print("BLOCKED:", exc)
+
     print("\n--- Allowed Transaction ---")
-    try:
-        transfer_funds(500)  # ✅ below threshold, valid roles
-    except GuardViolation as exc:
-        print(exc)
-
-    print("\n--- Approval Threshold Violation ---")
-    try:
-        transfer_funds(25000)
-    except GuardViolation as exc:
-        print(exc)
-
-    print("\n--- Separation Of Duties Violation ---")
-    try:
-        transfer_funds_with_same_actor(500)
-    except GuardViolation as exc:
-        print(exc)
+    install_guard(
+        actor={"id": "user-1", "type": "human", "role": "manager"},
+        contract=compiled
+    )
+    transfer_funds(500)

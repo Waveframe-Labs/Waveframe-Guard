@@ -79,7 +79,7 @@ def execute(fn, *, args=None, kwargs=None, actor=None, contract=None):
     )
 
     if not result.commit_allowed:
-        raise PermissionError("Execution blocked")
+        raise PermissionError(f"Execution blocked: {_blocked_reason(result)}")
 
     return fn(*(args or []), **(kwargs or {}))
 
@@ -336,3 +336,13 @@ def _serialize_decision(result):
             for stage in result.stage_results
         ],
     }
+
+
+def _blocked_reason(result):
+    for stage in result.stage_results:
+        if stage.passed:
+            continue
+        if stage.messages:
+            return stage.messages[0]
+
+    return result.summary or "policy violation"

@@ -1,162 +1,64 @@
-import hashlib
-import json
-import tempfile
 import time
-import uuid
-from pathlib import Path
 
-from compiler.compile_policy_file import compile_policy_file
-from proposal_normalizer.build_proposal import build_proposal
-from cricore.interface.evaluate_proposal import evaluate_proposal
-from waveframe_guard.core import run_validation
+from waveframe_guard import install_guard, guard
+from compiler.compile_policy import compile_policy
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-POLICY_PATH = REPO_ROOT / "finance-policy.json"
+# -------------------------
+# Setup
+# -------------------------
 
-
-# ---------------------------
-# TEST DATA
-# ---------------------------
-
-def load_compiled_contract():
-    with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as tmp:
-        output_path = Path(tmp.name)
-
-    compiled_path = compile_policy_file(POLICY_PATH, output_path)
-
-    with open(compiled_path, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-
-compiled_contract = load_compiled_contract()
-compiled_contract_hash = hashlib.sha256(
-    json.dumps(compiled_contract, sort_keys=True).encode()
-).hexdigest()
-
-action = {
-    "type": "transfer",
-    "amount": 5000,
-    "system": "finance",
-    "resource": "budget"
+policy = {
+    "contract_id": "bench",
+    "contract_version": "0.3.0",
+    "authority": {
+        "required_roles": ["manager"]
+    }
 }
 
-actor = "ai-agent"
-context = {}
+compiled = compile_policy(policy)
+
+install_guard(
+    actor={"id": "user-1", "type": "human", "role": "manager"},
+    contract=compiled
+)
 
 
-def build_test_proposal():
-    return build_proposal(
-        proposal_id=str(uuid.uuid4()),
-        actor={"id": actor, "type": "agent"},
-        artifact_paths=[],
-        mutation={
-            "domain": action["system"],
-            "resource": action["resource"],
-            "action": action["type"],
-        },
-        contract={
-            "id": compiled_contract["contract_id"],
-            "version": compiled_contract["contract_version"],
-            "hash": compiled_contract_hash,
-        },
-        run_context={
-            "identities": {
-                "actors": [
-                    {"id": actor, "type": "agent", "role": "proposer"},
-                    {"id": "user1", "type": "human", "role": "responsible"},
-                    {"id": "user2", "type": "human", "role": "accountable"},
-                ],
-                "required_roles": ["proposer", "responsible", "accountable"],
-                "conflict_flags": {},
-            },
-            "integrity": {"artifacts_present": True},
-            "publication": {"ready": True},
-        },
-    )
+@guard
+def test_action():
+    return True
 
 
-# ---------------------------
-# BENCHMARKS
-# ---------------------------
+# -------------------------
+# Benchmark
+# -------------------------
 
-def benchmark_kernel(runs=1000):
-    proposal = build_test_proposal()
+N = 1000
 
-    start = time.perf_counter()
+start = time.perf_counter()
 
-    for _ in range(runs):
-        evaluate_proposal(proposal, compiled_contract)
+for _ in range(N):
+    test_action()
 
-    end = time.perf_counter()
+end = time.perf_counter()
 
-    avg_ms = (end - start) / runs * 1000
-    print(f"Kernel avg: {avg_ms:.4f} ms over {runs} runs")
-    return avg_ms
+print(f"Executed {N} guarded calls in {end - start:.6f}s")
+print(f"Avg per call: {(end - start) / N * 1000:.3f} ms")
 
+install_guard(
+    actor={"id": "user-1", "type": "human", "role": "intern"},
+    contract=compiled
+)
 
-def benchmark_kernel_single():
-    proposal = build_test_proposal()
+blocked = 0
 
-    start = time.perf_counter()
-    evaluate_proposal(proposal, compiled_contract)
-    end = time.perf_counter()
+start = time.perf_counter()
 
-    print(f"Single run: {(end - start)*1000:.4f} ms")
+for _ in range(N):
+    try:
+        test_action()
+    except PermissionError:
+        blocked += 1
 
+end = time.perf_counter()
 
-def benchmark_proposal_build(runs=1000):
-    start = time.perf_counter()
-
-    for _ in range(runs):
-        build_test_proposal()
-
-    end = time.perf_counter()
-
-    avg_ms = (end - start) / runs * 1000
-    print(f"Proposal build avg: {avg_ms:.4f} ms")
-    return avg_ms
-
-
-def benchmark_compiler(runs=100):
-    start = time.perf_counter()
-
-    for _ in range(runs):
-        load_compiled_contract()
-
-    end = time.perf_counter()
-
-    avg_ms = (end - start) / runs * 1000
-    print(f"Compiler avg: {avg_ms:.4f} ms")
-
-
-def benchmark_full_pipeline(runs=1000):
-    start = time.perf_counter()
-
-    for _ in range(runs):
-        run_validation(compiled_contract, action, actor, context)
-
-    end = time.perf_counter()
-
-    avg_ms = (end - start) / runs * 1000
-    print(f"Full pipeline avg: {avg_ms:.4f} ms")
-    return avg_ms
-
-
-# ---------------------------
-# RUN
-# ---------------------------
-
-if __name__ == "__main__":
-    print("\n--- Waveframe Guard Benchmark ---\n")
-
-    benchmark_kernel_single()
-    benchmark_compiler()
-
-    k = benchmark_kernel()
-    p = benchmark_proposal_build()
-    f = benchmark_full_pipeline()
-
-    print("\n--- Summary ---")
-    print(f"Kernel: {k:.4f} ms")
-    print(f"Proposal build: {p:.4f} ms")
-    print(f"Full pipeline: {f:.4f} ms")
+print(f"Blocked {blocked}/{N} calls in {end - start:.6f}s")

@@ -8,7 +8,7 @@ _guard_context = ContextVar("guard_context", default=None)
 def install_guard(
     *,
     actor=None,
-    contract,
+    contract=None,
     api_key=None,
     mode="local",
     fail_mode="cache",
