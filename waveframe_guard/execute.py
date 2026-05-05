@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta, timezone
+import hashlib
+import json
 import os
 import sys
 import threading
@@ -27,6 +29,7 @@ def execute(fn, *, args=None, kwargs=None, actor=None, contract=None):
 
     if contract is None:
         if mode == "cloud" and ctx.get("fail_mode") == "open":
+            _print_unverified_decision()
             send_to_cloud_async(
                 {
                     "decision": {
@@ -120,6 +123,7 @@ def send_to_cloud_async(payload, ctx=None):
 
 def _resolve_contract(ctx, explicit_contract=None):
     if explicit_contract is not None:
+        _validate_contract(explicit_contract)
         ctx["policy_source"] = "explicit"
         return explicit_contract, False
 
@@ -140,6 +144,12 @@ def _resolve_contract(ctx, explicit_contract=None):
         _validate_policy_cache(cache)
         ctx["policy_source"] = "local_cache"
         return cache["compiled_contract"], False
+
+    if not ctx.get("api_key"):
+        if cache:
+            _record_cloud_failure(ctx)
+            return _resolve_unreachable_cloud(ctx)
+        raise GovernanceError("Missing API key")
 
     try:
         fetched_contract = fetch_policy(ctx.get("api_key"))
@@ -207,6 +217,7 @@ def _cache_is_fresh(cache):
 
 
 def _store_policy_cache(ctx, contract):
+    _validate_contract(contract)
     now = datetime.now(timezone.utc)
     ctx["contract"] = contract
     ctx["policy_cache"] = {
@@ -219,9 +230,40 @@ def _store_policy_cache(ctx, contract):
 
 def _validate_policy_cache(cache):
     cached_hash = cache.get("contract_hash")
-    contract_hash = cache.get("compiled_contract", {}).get("contract_hash")
-    if cached_hash != contract_hash:
+    contract = cache.get("compiled_contract", {})
+    _validate_contract_shape(contract)
+
+    actual_hash = compute_contract_hash(contract)
+    if actual_hash != cached_hash:
         raise GovernanceError("Cached policy integrity check failed")
+
+
+def _validate_contract(contract):
+    _validate_contract_shape(contract)
+
+    if compute_contract_hash(contract) != contract["contract_hash"]:
+        raise GovernanceError("Invalid policy: hash mismatch")
+
+
+def _validate_contract_shape(contract):
+    required = ["contract_id", "contract_version", "contract_hash"]
+    for key in required:
+        if key not in contract:
+            raise GovernanceError(f"Invalid policy: missing {key}")
+
+
+def compute_contract_hash(contract):
+    canonical_contract = {
+        key: value
+        for key, value in contract.items()
+        if key != "contract_hash"
+    }
+    canonical = json.dumps(
+        canonical_contract,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    return hashlib.sha256(canonical.encode()).hexdigest()
 
 
 def _record_cloud_failure(ctx):
@@ -238,7 +280,7 @@ def _record_cloud_success(ctx):
 def _print_unverified_decision():
     encoding = (getattr(sys.stdout, "encoding", None) or "").lower()
     if "utf" in encoding:
-        print("⚠️ Decision unverified (cloud unavailable)")
+        print("\u26a0\ufe0f Decision unverified (cloud unavailable)")
     else:
         print("WARNING: Decision unverified (cloud unavailable)")
 

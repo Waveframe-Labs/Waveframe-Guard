@@ -9,7 +9,7 @@ import time
 
 policy = {
     "contract_id": "finance-core",
-    "contract_version": "1.0.0",
+    "contract_version": "0.3.0",
     "authority": {
         "required_roles": ["manager"]
     }

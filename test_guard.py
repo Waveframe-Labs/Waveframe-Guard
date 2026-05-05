@@ -4,7 +4,7 @@ from compiler.compile_policy import compile_policy
 
 policy = {
     "contract_id": "finance-core",
-    "contract_version": "1.2.0",
+    "contract_version": "0.3.0",
     "authority": {"required_roles": ["manager"]},
 }
 compiled = compile_policy(policy)

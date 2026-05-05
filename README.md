@@ -1,84 +1,63 @@
 # Waveframe Guard
 
-Stop unsafe AI actions before they execute — in one function call.
+Version: `v0.3.0`
 
-```python
-from waveframe_guard import Guard
-
-guard = Guard(policy="finance-core")
-
-@guard.enforce(action_type="transfer", resource="budget")
-def transfer_funds(amount):
-    print(f"Executing transfer of ${amount}")
-
-transfer_funds(25000)
-```
-
-```text
-[Waveframe Guard] ✕ BLOCKED
-Action: transfer -> finance/budget
-Amount: $25,000
-Reason: Approval required: amount > 10000
-Execution stopped at the enforcement boundary
-```
+Stop unsafe AI actions before they execute, in one decorator.
 
 ## Install
 
 ```bash
 pip install waveframe-guard
-python examples/finance_usage.py
 ```
 
-## What you get
+## SDK Surface
 
-- `Guard` class
-- `@guard.enforce(...)` decorator
-- `shadow` mode by default
-- `block` mode when you need hard-stop behavior
-- clean terminal output with no JSON or debug noise
+```python
+from waveframe_guard import install_guard, guard
+from compiler.compile_policy import compile_policy
 
-## Example violations
+policy = {
+    "contract_id": "finance-core",
+    "contract_version": "0.3.0",
+    "authority": {"required_roles": ["manager"]},
+}
+compiled = compile_policy(policy)
 
-The bundled example shows two memorable failure paths:
+install_guard(
+    actor={"id": "user-1", "type": "human", "role": "manager"},
+    contract=compiled,
+    fail_mode="cache",
+)
 
-- approval threshold violation
-- separation of duties violation
+@guard
+def transfer(amount):
+    print(f"Transferred ${amount}")
+
+transfer(100)
+```
 
 ## Modes
 
-```python
-from waveframe_guard import Guard
+Guard runs locally by default and can optionally synchronize with Waveframe Cloud.
 
-guard = Guard(policy="finance-core")
+- `fail_mode="cache"`: recommended default; enforce with last known policy if Cloud is unavailable and mark decisions unverified
+- `fail_mode="closed"`: block if Cloud is unavailable and no cached policy exists
+- `fail_mode="open"`: allow if Cloud is unavailable and log an unverified warning
+
+## Live Demo
+
+```bash
+python examples/live_enforcement_demo.py
 ```
 
-`shadow` mode never blocks execution. It prints a warning and returns the original function result.
+The demo shows:
 
-```python
-guard = Guard(policy="finance-core", mode="block")
-```
+- an intern blocked by policy
+- a manager allowed by policy
+- cached local enforcement during a simulated Cloud outage
 
-`block` mode raises `GuardViolation` before mutation.
+## Architecture Boundary
 
-## Defaults
+`waveframe_guard/` is the SDK product surface.
 
-- actor defaults to the current OS user
-- context defaults to safe fallback identities
-- `finance-core` is available as a built-in local policy alias
-
-## Development Mode
-
-Waveframe Guard runs locally and does NOT provide:
-
-- immutable audit records
-- enforcement guarantees
-- policy lifecycle management
-
-For production enforcement, Waveframe Cloud is required.
-
-## Typical Performance
-
-Typical performance (local simulation):
-
-- Kernel: ~30ms
-- Full pipeline: ~35ms
+`backend/` is experimental future Cloud control-plane code and is not packaged with the SDK.

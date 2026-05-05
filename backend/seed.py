@@ -18,7 +18,7 @@ POLICY_ID = "demo_policy_1"
 
 SAMPLE_COMPILED_CONTRACT = {
     "contract_id": "finance-core",
-    "contract_version": "1.2.0",
+    "contract_version": "0.3.0",
     "authority_requirements": {
         "required_roles": ["proposer", "responsible", "accountable"]
     },
@@ -122,7 +122,7 @@ def run():
         if not policy.versions:
             version = PolicyVersion(
                 policy_id=policy.id,
-                version="1.2.0",
+                version="0.3.0",
                 compiled_contract_json=json.dumps(SAMPLE_COMPILED_CONTRACT)
             )
             db.add(version)

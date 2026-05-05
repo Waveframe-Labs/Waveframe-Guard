@@ -2,7 +2,7 @@ from contextvars import ContextVar
 from datetime import datetime, timedelta, timezone
 import os
 
-_guard_context = ContextVar("guard_context", default={})
+_guard_context = ContextVar("guard_context", default=None)
 
 
 def install_guard(
@@ -47,7 +47,8 @@ def install_guard(
 
 
 def get_context():
-    return _guard_context.get()
+    ctx = _guard_context.get()
+    return ctx if ctx is not None else {}
 
 
 def resolve_actor():

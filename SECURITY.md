@@ -14,7 +14,7 @@ Security updates are applied to the latest release line only.
 
 Current supported release line:
 
-- `0.2.x`
+- `v0.3.x`
 
 ---
 
