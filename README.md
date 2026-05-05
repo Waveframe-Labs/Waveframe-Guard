@@ -56,8 +56,8 @@ The demo shows:
 - a manager allowed by policy
 - cached local enforcement during a simulated Cloud outage
 
-## Architecture Boundary
+## Architecture Note
 
-`waveframe_guard/` is the SDK product surface.
+The Waveframe Guard SDK operates independently and does not require the backend to enforce governance locally.
 
-`backend/` is experimental future Cloud control-plane code and is not packaged with the SDK.
+The backend directory contains experimental Cloud control plane components and is not required for SDK operation.

@@ -3,6 +3,7 @@
 # ---------------------------
 
 import json
+import os
 from backend.db import (
     SessionLocal,
     init_db,
@@ -13,7 +14,7 @@ from backend.db import (
 )
 
 ORG_ID = "org_demo_001"
-API_KEY_VALUE = "wf_test_key_123"
+API_KEY_VALUE = os.getenv("WF_DEMO_API_KEY", "wf_demo_key_placeholder")
 POLICY_ID = "demo_policy_1"
 
 SAMPLE_COMPILED_CONTRACT = {

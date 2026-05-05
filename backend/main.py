@@ -188,7 +188,7 @@ def compute_risk_level(
     if not allowed and ("approval" in reason.lower() or amount > 5000):
         return "critical"
 
-    if system in ["infra", "production"] or action_type in ["delete", "deploy"]:
+    if system in ["infra", "critical"] or action_type in ["delete", "deploy"]:
         return "high"
 
     if amount > 1000:
@@ -619,7 +619,7 @@ async def validate(request: Request, db: Session = Depends(get_db)):
     )
 
 # ---------------------------
-# PROD ENDPOINT (MULTI-TENANT)
+# CLOUD PREVIEW ENDPOINT (EXPERIMENTAL)
 # ---------------------------
 
 @app.post("/v1/enforce")
@@ -631,7 +631,7 @@ async def enforce(
     # ⚠️ DEVELOPMENT MODE ONLY
     # This endpoint simulates enforcement locally.
     # It does NOT provide durability, immutability, or compliance guarantees.
-    """Production Endpoint. Requires API Key. Enforces Org Isolation."""
+    """Experimental Cloud preview endpoint. Requires a demo API key."""
     body = await request.json()
 
     policy_id = body.get("policy_id")
@@ -904,7 +904,7 @@ def simulate_activity_once():
             db.refresh(sandbox)
 
         systems = ["infra", "crm", "finance", "hr"]
-        resources = ["prod-db", "user-records", "payroll", "api-cluster"]
+        resources = ["critical-db", "user-records", "payroll", "api-cluster"]
         actions = ["transfer", "delete", "write", "deploy"]
 
         system = random.choice(systems)
@@ -1599,7 +1599,7 @@ def ui():
                             </div>
                             <div class="form-group">
                                 <label>Target Resource</label>
-                                <input id="resource" placeholder="e.g. payroll-account, prod-db, user-records" />
+                                <input id="resource" placeholder="e.g. payroll-account, critical-db, user-records" />
                             </div>
                             <div class="form-group">
                                 <label>Action Type</label>
@@ -1664,8 +1664,8 @@ def ui():
 
                     <div class="cta">
                         <button onclick="runValidation()" id="submitBtn">Evaluate Action</button>
-                        <button onclick="sendToProduction()" style="margin-top:10px;">
-                            Submit for Enforcement (Acme Corp)
+                        <button onclick="sendToCloudPreview()" style="margin-top:10px;">
+                            Submit to Cloud Preview (Acme Corp)
                         </button>
                         <div style="margin-top:10px; font-size:12px; color:#6b7494;">
                             This action will be evaluated locally, then optionally submitted to a governed organization.
@@ -1976,7 +1976,7 @@ async function runValidation() {
     }
 }
 
-async function sendToProduction() {
+async function sendToCloudPreview() {
     const amount = parseFloat(document.getElementById("amount").value || 0);
     const responsible = document.getElementById("responsible").value;
     const accountable = document.getElementById("accountable").value;
@@ -1991,7 +1991,7 @@ async function sendToProduction() {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "Authorization": "Bearer wf_test_key_123"
+            "Authorization": "Bearer <demo-api-key>"
         },
         body: JSON.stringify({
             policy_id: document.getElementById("policySelect").value,
@@ -2007,8 +2007,8 @@ async function sendToProduction() {
     });
 
     const data = await res.json();
-    console.log("Production decision:", data);
-    alert("Sent to production org. Check dashboard.");
+    console.log("Cloud preview decision:", data);
+    alert("Sent to Cloud preview org. Check dashboard.");
 }
 </script>
 
