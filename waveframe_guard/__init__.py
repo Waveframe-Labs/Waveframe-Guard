@@ -2,7 +2,7 @@ from .guard import guard
 from .context import install_guard, resolve_actor
 from .execute import GovernanceError, execute
 
-__version__ = "v0.3.0"
+__version__ = "0.3.0"
 
 __all__ = [
     "guard",
