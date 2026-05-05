@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 import os
+import sys
 import threading
 import warnings
 
@@ -62,8 +63,8 @@ def execute(fn, *, args=None, kwargs=None, actor=None, contract=None):
     )
     _tag_decision(result, unverified, ctx.get("policy_source", "cloud"))
 
-    if unverified:
-        print("WARNING: Decision unverified (cloud unavailable)")
+    if result.meta["verification"] == "unverified":
+        _print_unverified_decision()
 
     send_to_cloud_async(
         {
@@ -232,6 +233,14 @@ def _record_cloud_failure(ctx):
 def _record_cloud_success(ctx):
     ctx["failure_count"] = 0
     ctx["offline"] = False
+
+
+def _print_unverified_decision():
+    encoding = (getattr(sys.stdout, "encoding", None) or "").lower()
+    if "utf" in encoding:
+        print("⚠️ Decision unverified (cloud unavailable)")
+    else:
+        print("WARNING: Decision unverified (cloud unavailable)")
 
 
 def _infer_mutation(fn, args, kwargs):
