@@ -1,3 +1,8 @@
-from .core import Guard, GuardViolation
+from .execute import execute
 
-__all__ = ["Guard", "GuardViolation"]
+
+def guard(fn):
+    def wrapped(*args, **kwargs):
+        return execute(fn, args=args, kwargs=kwargs)
+
+    return wrapped
