@@ -86,6 +86,6 @@ Waveframe Guard is the layer that can **stop execution**.
 
 ## Architecture Note
 
-The Waveframe Guard SDK operates independently and does not require the backend to enforce governance locally.
+The Waveframe Guard SDK operates independently and does not require Cloud components to enforce governance locally.
 
-The backend directory contains experimental Cloud control plane components and is not required for SDK operation.
+The cloud directory contains experimental Cloud control plane components and is not required for SDK operation.

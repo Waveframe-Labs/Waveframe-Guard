@@ -1,3 +1,0 @@
-"""
-Waveframe Guard backend package.
-"""

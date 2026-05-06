@@ -15,7 +15,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from sqlalchemy.orm import Session
 
-from backend.db import init_db, get_db, Organization, APIKey, Policy, PolicyVersion, AuditLog
+from cloud.db import init_db, get_db, Organization, APIKey, Policy, PolicyVersion, AuditLog
 
 from proposal_normalizer.build_proposal import build_proposal
 from cricore.interface.evaluate_proposal import evaluate_proposal
@@ -890,7 +890,7 @@ def identities():
 
 def simulate_activity_once():
     """Generates one fake AI action for demo realism."""
-    from backend.db import SessionLocal
+    from cloud.db import SessionLocal
 
     db = None
     try:
@@ -1969,7 +1969,7 @@ async function runValidation() {
 
     } catch (err) {
         console.error(err);
-        alert("Failed to connect to backend. Check console.");
+        alert("Failed to connect to Cloud preview. Check console.");
     } finally {
         btn.innerText = "Evaluate Action";
         btn.disabled = false;

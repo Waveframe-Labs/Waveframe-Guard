@@ -4,7 +4,7 @@
 
 import json
 import os
-from backend.db import (
+from cloud.db import (
     SessionLocal,
     init_db,
     Organization,

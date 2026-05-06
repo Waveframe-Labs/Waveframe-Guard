@@ -1,4 +1,4 @@
-## Waveframe Guard Backend (Experimental)
+## Waveframe Guard Cloud (Experimental)
 
 This directory contains early development code for the Waveframe Cloud control plane.
 
