@@ -63,7 +63,7 @@ Guard enforces locally. Cloud provides authority, audit, and verification.
 ## Install
 
 ```bash
-pip install waveframe-guard
+pip install waveframe-guard cricore-contract-compiler cricore-proposal-normalizer
 ```
 
 ## Live Demo
