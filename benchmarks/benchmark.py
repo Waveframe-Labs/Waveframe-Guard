@@ -10,7 +10,11 @@ from waveframe_guard import install_guard, guard, GovernanceError
 # Setup
 # -------------------------
 
-CONTRACT_PATH = "contracts/finance-core-0.3.0.contract.json"
+CONTRACT_PATH = (
+    Path(__file__).resolve().parents[1]
+    / "contracts"
+    / "finance-core-0.3.0.contract.json"
+)
 
 install_guard(
     actor={"id": "user-1", "type": "human", "role": "manager"},
