@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.1] — Contract Loader Public Surface
+
+### Added
+- Top-level `load_contract` export
+- Published `finance-core-0.3.1.contract.json` contract artifact
+
+### Changed
+- Bumped package, SDK, citation, Cloud preview, docs, examples, and test metadata to `0.3.1`
+
 ## [0.3.0] — Execution Hardening & Cloud Fallback
 
 ### Added

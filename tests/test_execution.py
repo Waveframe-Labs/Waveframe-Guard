@@ -8,7 +8,7 @@ from compiler.compile_policy import compile_policy
 def setup_contract():
     policy = {
         "contract_id": "t",
-        "contract_version": "0.3.0",
+        "contract_version": "0.3.1",
         "authority": {"required_roles": ["manager"]},
     }
     return compile_policy(policy)
@@ -47,7 +47,7 @@ def test_blocked_execution():
 
 def test_contract_path_execution(tmp_path):
     contract = setup_contract()
-    contract_path = tmp_path / "t-0.3.0.contract.json"
+    contract_path = tmp_path / "t-0.3.1.contract.json"
     contract_path.write_text(json.dumps(contract), encoding="utf-8")
 
     install_guard(

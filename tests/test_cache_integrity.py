@@ -8,7 +8,7 @@ from compiler.compile_policy import compile_policy
 def test_cache_tampering_detected():
     policy = {
         "contract_id": "t",
-        "contract_version": "0.3.0",
+        "contract_version": "0.3.1",
         "authority": {"required_roles": ["manager"]},
     }
     contract = compile_policy(policy)

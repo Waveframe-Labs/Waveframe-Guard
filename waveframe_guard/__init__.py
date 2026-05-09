@@ -1,8 +1,9 @@
 from .guard import guard
 from .context import install_guard, resolve_actor
 from .execute import GovernanceError, execute
+from .contracts import load_contract
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 __all__ = [
     "guard",
@@ -10,4 +11,5 @@ __all__ = [
     "resolve_actor",
     "execute",
     "GovernanceError",
+    "load_contract",
 ]

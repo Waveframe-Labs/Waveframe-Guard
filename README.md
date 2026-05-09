@@ -6,7 +6,7 @@ Waveframe Guard enforces governance at the execution boundary. If an action viol
 
 ## Example
 
-This example assumes a published contract artifact exists at `contracts/finance-core-0.3.0.contract.json`. In your application, point `contract_path` at the contract published by your governance workflow.
+This example assumes a published contract artifact exists at `contracts/finance-core-0.3.1.contract.json`. In your application, point `contract_path` at the contract published by your governance workflow.
 
 ```python
 from pathlib import Path
@@ -15,7 +15,7 @@ from waveframe_guard import install_guard, guard
 
 install_guard(
     actor={"id": "user-1", "type": "human", "role": "intern"},
-    contract_path=Path("contracts") / "finance-core-0.3.0.contract.json"
+    contract_path=Path("contracts") / "finance-core-0.3.1.contract.json"
 )
 
 @guard
@@ -81,7 +81,7 @@ from pathlib import Path
 
 install_guard(
     actor={"id": "user-1", "type": "human", "role": "manager"},
-    contract_path=Path("contracts") / "finance-core-0.3.0.contract.json"
+    contract_path=Path("contracts") / "finance-core-0.3.1.contract.json"
 )
 ```
 
@@ -92,7 +92,7 @@ Guard also records contract metadata in runtime context for audit and telemetry:
 ```python
 {
     "contract_id": "finance-core",
-    "contract_version": "0.3.0",
+    "contract_version": "0.3.1",
     "contract_hash": "..."
 }
 ```

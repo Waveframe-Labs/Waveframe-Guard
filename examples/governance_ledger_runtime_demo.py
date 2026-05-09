@@ -19,7 +19,7 @@ from waveframe_guard import install_guard, guard, GovernanceError
 CONTRACT_PATH = (
     Path(__file__).resolve().parents[1]
     / "contracts"
-    / "finance-core-0.3.0.contract.json"
+    / "finance-core-0.3.1.contract.json"
 )
 
 
