@@ -15,7 +15,7 @@ if __name__ == "__main__":
     print("\n--- Blocked Transaction ---")
     install_guard(
         actor={"id": "user-1", "type": "human", "role": "intern"},
-        contract_path="contracts/finance-core-0.1.0.contract.json"
+        contract_path="contracts/finance-core-0.3.0.contract.json"
     )
 
     try:
@@ -26,6 +26,6 @@ if __name__ == "__main__":
     print("\n--- Allowed Transaction ---")
     install_guard(
         actor={"id": "user-1", "type": "human", "role": "manager"},
-        contract_path="contracts/finance-core-0.1.0.contract.json"
+        contract_path="contracts/finance-core-0.3.0.contract.json"
     )
     transfer_funds(500)

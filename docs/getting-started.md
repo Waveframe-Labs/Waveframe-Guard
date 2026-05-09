@@ -18,7 +18,7 @@ from waveframe_guard import install_guard, guard
 # 1. Install Guard context from a published contract
 install_guard(
     actor={"id": "user-1", "type": "human", "role": "intern"},
-    contract_path="contracts/finance-core-0.1.0.contract.json"
+    contract_path="contracts/finance-core-0.3.0.contract.json"
 )
 
 # 2. Protect a function
@@ -41,7 +41,7 @@ Execution blocked: required role not satisfied: manager
 ```python
 install_guard(
     actor={"id": "user-1", "type": "human", "role": "manager"},
-    contract_path="contracts/finance-core-0.1.0.contract.json"
+    contract_path="contracts/finance-core-0.3.0.contract.json"
 )
 
 transfer(100)

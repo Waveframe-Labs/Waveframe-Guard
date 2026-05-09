@@ -11,7 +11,7 @@ from waveframe_guard import install_guard, guard
 
 install_guard(
     actor={"id": "user-1", "type": "human", "role": "intern"},
-    contract_path="contracts/finance-core-0.1.0.contract.json"
+    contract_path="contracts/finance-core-0.3.0.contract.json"
 )
 
 @guard
@@ -75,7 +75,7 @@ Guard runtime consumes published governance authority artifacts:
 ```python
 install_guard(
     actor={"id": "user-1", "type": "human", "role": "manager"},
-    contract_path="contracts/finance-core-0.1.0.contract.json"
+    contract_path="contracts/finance-core-0.3.0.contract.json"
 )
 ```
 
@@ -86,7 +86,7 @@ Guard also records contract metadata in runtime context for audit and telemetry:
 ```python
 {
     "contract_id": "finance-core",
-    "contract_version": "0.1.0",
+    "contract_version": "0.3.0",
     "contract_hash": "..."
 }
 ```

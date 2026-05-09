@@ -11,7 +11,7 @@ import time
 # 1. Use published contract
 # -------------------------
 
-CONTRACT_PATH = "contracts/finance-core-0.1.0.contract.json"
+CONTRACT_PATH = "contracts/finance-core-0.3.0.contract.json"
 
 # -------------------------
 # 2. Install Guard

@@ -7,7 +7,7 @@ from waveframe_guard import install_guard, guard
 
 install_guard(
     actor={"id": "u1", "type": "human", "role": "manager"},
-    contract_path="contracts/finance-core-0.1.0.contract.json",
+    contract_path="contracts/finance-core-0.3.0.contract.json",
 )
 
 
