@@ -14,31 +14,19 @@ pip install waveframe-guard cricore-contract-compiler cricore-proposal-normalize
 
 ```python
 from waveframe_guard import install_guard, guard
-from compiler.compile_policy import compile_policy
 
-# 1. Define a policy
-policy = {
-    "contract_id": "finance-core",
-    "contract_version": "0.3.0",
-    "authority": {
-        "required_roles": ["manager"]
-    }
-}
-
-compiled = compile_policy(policy)
-
-# 2. Install Guard context
+# 1. Install Guard context from a published contract
 install_guard(
     actor={"id": "user-1", "type": "human", "role": "intern"},
-    contract=compiled
+    contract_path="contracts/finance-core-0.1.0.contract.json"
 )
 
-# 3. Protect a function
+# 2. Protect a function
 @guard
 def transfer(amount):
     print(f"Transferred ${amount}")
 
-# 4. Execute
+# 3. Execute
 transfer(100)
 ```
 
@@ -53,7 +41,7 @@ Execution blocked: required role not satisfied: manager
 ```python
 install_guard(
     actor={"id": "user-1", "type": "human", "role": "manager"},
-    contract=compiled
+    contract_path="contracts/finance-core-0.1.0.contract.json"
 )
 
 transfer(100)
@@ -73,6 +61,8 @@ install_guard(
 )
 ```
 
+If no cached contract is available, Cloud mode fetches a published contract before enforcement.
+
 In cloud mode:
 
 - Policies are fetched and cached locally
@@ -90,5 +80,7 @@ In cloud mode:
 ## Notes
 
 - Guard enforces locally, even if Cloud is unavailable
+- Runtime enforcement uses published compiled contract artifacts
+- Contract metadata is available in runtime context for audit and telemetry
 - Decisions may be marked as unverified when Cloud cannot be reached
 - Cloud integration provides audit, attestation, and policy management

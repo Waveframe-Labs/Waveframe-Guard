@@ -1,21 +1,17 @@
+from pathlib import Path
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 from waveframe_guard import install_guard, guard
-from compiler.compile_policy import compile_policy
 import os
 import time
 
 # -------------------------
-# 1. Define policy
+# 1. Use published contract
 # -------------------------
 
-policy = {
-    "contract_id": "finance-core",
-    "contract_version": "0.3.0",
-    "authority": {
-        "required_roles": ["manager"]
-    }
-}
-
-compiled = compile_policy(policy)
+CONTRACT_PATH = "contracts/finance-core-0.1.0.contract.json"
 
 # -------------------------
 # 2. Install Guard
@@ -23,7 +19,7 @@ compiled = compile_policy(policy)
 
 install_guard(
     actor={"id": "user-1", "type": "human", "role": "intern"},
-    contract=compiled,
+    contract_path=CONTRACT_PATH,
     fail_mode="cache"
 )
 
@@ -51,7 +47,7 @@ except Exception as e:
 
 install_guard(
     actor={"id": "user-1", "type": "human", "role": "manager"},
-    contract=compiled
+    contract_path=CONTRACT_PATH
 )
 
 print("\n--- Attempt 2 (manager) ---")
@@ -64,7 +60,7 @@ os.environ["WAVEFRAME_GUARD_URL"] = "http://127.0.0.1:9"
 
 install_guard(
     actor={"id": "user-1", "type": "human", "role": "manager"},
-    contract=compiled,
+    contract_path=CONTRACT_PATH,
     api_key="wf_demo_key",
     mode="cloud",
     fail_mode="cache",

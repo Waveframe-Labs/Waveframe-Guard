@@ -1,17 +1,13 @@
+from pathlib import Path
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 from waveframe_guard import install_guard, guard
-from compiler.compile_policy import compile_policy
-
-
-policy = {
-    "contract_id": "finance-core",
-    "contract_version": "0.3.0",
-    "authority": {"required_roles": ["manager"]},
-}
-compiled = compile_policy(policy)
 
 install_guard(
     actor={"id": "u1", "type": "human", "role": "manager"},
-    contract=compiled,
+    contract_path="contracts/finance-core-0.1.0.contract.json",
 )
 
 

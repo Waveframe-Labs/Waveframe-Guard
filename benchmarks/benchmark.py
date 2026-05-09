@@ -1,25 +1,20 @@
 import time
+from pathlib import Path
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from waveframe_guard import install_guard, guard, GovernanceError
-from compiler.compile_policy import compile_policy
 
 # -------------------------
 # Setup
 # -------------------------
 
-policy = {
-    "contract_id": "bench",
-    "contract_version": "0.3.0",
-    "authority": {
-        "required_roles": ["manager"]
-    }
-}
-
-compiled = compile_policy(policy)
+CONTRACT_PATH = "contracts/finance-core-0.1.0.contract.json"
 
 install_guard(
     actor={"id": "user-1", "type": "human", "role": "manager"},
-    contract=compiled
+    contract_path=CONTRACT_PATH
 )
 
 
@@ -46,7 +41,7 @@ print(f"Avg per call: {(end - start) / N * 1000:.3f} ms")
 
 install_guard(
     actor={"id": "user-1", "type": "human", "role": "intern"},
-    contract=compiled
+    contract_path=CONTRACT_PATH
 )
 
 blocked = 0

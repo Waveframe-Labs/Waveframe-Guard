@@ -2,6 +2,8 @@ from contextvars import ContextVar
 from datetime import datetime, timedelta, timezone
 import os
 
+from .contracts import load_contract
+
 _guard_context = ContextVar("guard_context", default=None)
 
 
@@ -9,6 +11,7 @@ def install_guard(
     *,
     actor=None,
     contract=None,
+    contract_path=None,
     api_key=None,
     mode="local",
     fail_mode="cache",
@@ -19,6 +22,17 @@ def install_guard(
 
     if fail_mode not in {"open", "closed", "cache"}:
         raise ValueError("fail_mode must be 'open', 'closed', or 'cache'")
+
+    if contract_path is not None:
+        contract = load_contract(contract_path)
+
+    contract_metadata = None
+    if contract is not None:
+        contract_metadata = {
+            "contract_id": contract["contract_id"],
+            "contract_version": contract["contract_version"],
+            "contract_hash": contract["contract_hash"],
+        }
 
     policy_cache = None
     if contract is not None:
@@ -34,6 +48,7 @@ def install_guard(
         {
             "actor": actor,
             "contract": contract,
+            "contract_metadata": contract_metadata,
             "api_key": api_key,
             "mode": mode,
             "fail_mode": fail_mode,

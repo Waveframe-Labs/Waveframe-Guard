@@ -222,6 +222,7 @@ def _store_policy_cache(ctx, contract):
     _validate_contract(contract)
     now = datetime.now(timezone.utc)
     ctx["contract"] = contract
+    ctx["contract_metadata"] = _contract_metadata(contract)
     ctx["policy_cache"] = {
         "compiled_contract": contract,
         "contract_hash": contract["contract_hash"],
@@ -268,6 +269,14 @@ def compute_contract_hash(contract):
     return hashlib.sha256(canonical.encode()).hexdigest()
 
 
+def _contract_metadata(contract):
+    return {
+        "contract_id": contract["contract_id"],
+        "contract_version": contract["contract_version"],
+        "contract_hash": contract["contract_hash"],
+    }
+
+
 def _record_cloud_failure(ctx):
     ctx["failure_count"] = ctx.get("failure_count", 0) + 1
     if ctx["failure_count"] >= ctx.get("max_failures", 3):
@@ -304,6 +313,7 @@ def _build_run_context(actor, contract, mode, unverified=False):
     return {
         "mode": mode,
         "decision_status": "unverified" if unverified else "verified",
+        "contract_metadata": _contract_metadata(contract),
         "identities": {
             "actors": [actor],
             "required_roles": required_roles,

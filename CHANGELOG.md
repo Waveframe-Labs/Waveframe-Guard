@@ -8,6 +8,8 @@
 - Circuit breaker for Cloud outages
 - Async decision logging to Cloud
 - Actor auto-discovery fallback
+- Runtime loading from published contract artifacts via `contract_path`
+- Contract metadata exposure in runtime context
 
 ### Improved
 - Deterministic contract validation via canonical hashing

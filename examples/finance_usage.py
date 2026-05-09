@@ -1,16 +1,9 @@
+from pathlib import Path
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 from waveframe_guard import install_guard, guard, GovernanceError
-from compiler.compile_policy import compile_policy
-
-
-policy = {
-    "contract_id": "finance-core",
-    "contract_version": "0.3.0",
-    "authority": {
-        "required_roles": ["manager"]
-    }
-}
-
-compiled = compile_policy(policy)
 
 
 @guard
@@ -22,7 +15,7 @@ if __name__ == "__main__":
     print("\n--- Blocked Transaction ---")
     install_guard(
         actor={"id": "user-1", "type": "human", "role": "intern"},
-        contract=compiled
+        contract_path="contracts/finance-core-0.1.0.contract.json"
     )
 
     try:
@@ -33,6 +26,6 @@ if __name__ == "__main__":
     print("\n--- Allowed Transaction ---")
     install_guard(
         actor={"id": "user-1", "type": "human", "role": "manager"},
-        contract=compiled
+        contract_path="contracts/finance-core-0.1.0.contract.json"
     )
     transfer_funds(500)

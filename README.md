@@ -8,21 +8,10 @@ Waveframe Guard enforces governance at the execution boundary. If an action viol
 
 ```python
 from waveframe_guard import install_guard, guard
-from compiler.compile_policy import compile_policy
-
-policy = {
-    "contract_id": "finance-core",
-    "contract_version": "0.3.0",
-    "authority": {
-        "required_roles": ["manager"]
-    }
-}
-
-compiled = compile_policy(policy)
 
 install_guard(
     actor={"id": "user-1", "type": "human", "role": "intern"},
-    contract=compiled
+    contract_path="contracts/finance-core-0.1.0.contract.json"
 )
 
 @guard
@@ -39,6 +28,7 @@ Execution blocked: required role not satisfied: manager
 ## What Waveframe Guard Does
 
 - Intercepts function execution
+- Loads published contract artifacts
 - Evaluates governance rules before execution
 - Blocks invalid actions deterministically
 - Continues enforcement even if Cloud is unavailable
@@ -77,6 +67,29 @@ The demo shows:
 - an intern blocked by policy
 - a manager allowed by policy
 - cached local enforcement during a simulated Cloud outage
+
+## Published Contracts
+
+Guard runtime consumes published governance authority artifacts:
+
+```python
+install_guard(
+    actor={"id": "user-1", "type": "human", "role": "manager"},
+    contract_path="contracts/finance-core-0.1.0.contract.json"
+)
+```
+
+Inline policy dictionaries are authored and compiled before runtime. Guard loads the compiled contract artifact and enforces against it locally.
+
+Guard also records contract metadata in runtime context for audit and telemetry:
+
+```python
+{
+    "contract_id": "finance-core",
+    "contract_version": "0.1.0",
+    "contract_hash": "..."
+}
+```
 
 ## Why This Exists
 
