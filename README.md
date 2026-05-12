@@ -29,6 +29,37 @@ transfer(100)
 Execution blocked: required role not satisfied: manager
 ```
 
+## Governed Runtime
+
+For applications that want to resolve published contracts from a registry, use `GovernedRuntime`:
+
+```python
+from waveframe_guard import GovernedRuntime
+
+runtime = GovernedRuntime(
+    registry_path="contracts/index.json"
+)
+
+runtime.execute(
+    actor={"id": "user-1", "type": "human", "role": "intern"},
+    contract_id="finance-policy",
+    fn=transfer,
+    args=(1250000,),
+)
+```
+
+The registry can map contract IDs to published contract artifacts:
+
+```json
+{
+  "contracts": {
+    "finance-policy": "finance-core-0.3.1.contract.json"
+  }
+}
+```
+
+Runtime execution is intentionally small in v1: registry lookup, load the published contract, install the Guard context, execute the guarded function, then allow or block.
+
 ## What Waveframe Guard Does
 
 - Intercepts function execution
