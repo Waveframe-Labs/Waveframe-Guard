@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.4.0] - Governed Runtime
+
+### Added
+- `GovernedRuntime` for registry-based contract lookup and guarded execution
+- Runtime context binding with `install_actor()` and `bind_contract()`
+- Function-bound execution with `runtime.execute(fn=...)`
+- Proposal-bound execution with `runtime.execute_proposal(...)`
+- `GovernedExecutionResult` for observable allow/block outcomes
+- Structured runtime audit events with in-memory access through `last_event` and `audit_events`
+- Optional local JSONL audit event emission via `audit_path`
+- Example governed runtime usage and sample `contracts/index.json` registry
+
+### Notes
+- Guard remains SDK-local by default; runtime audit emission does not require Cloud, databases, or external telemetry infrastructure
+- Existing `install_guard()` and `@guard` execution paths remain supported
+
 ## [0.3.1] — Contract Loader Public Surface
 
 ### Added

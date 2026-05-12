@@ -106,7 +106,7 @@ result = runtime.execute_proposal(
 
 `execute_proposal` evaluates the proposal against the bound or supplied contract and returns the same `GovernedExecutionResult` shape.
 
-Each runtime execution also emits a structured audit event. Events are kept in memory on the runtime and attached to non-raising results:
+Each runtime execution also emits a structured SDK-local audit event. Events are kept in memory on the runtime and attached to non-raising results:
 
 ```python
 result = runtime.execute(
