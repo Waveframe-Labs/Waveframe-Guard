@@ -79,6 +79,33 @@ The registry can map contract IDs to published contract artifacts:
 
 Runtime execution is intentionally small in v1: registry lookup, load the published contract, install the Guard context, execute the guarded function, then allow or block.
 
+You can also bind runtime context once and omit it from each execution:
+
+```python
+runtime = GovernedRuntime(registry_path="contracts/index.json")
+runtime.install_actor({"id": "user-1", "type": "human", "role": "manager"})
+runtime.bind_contract("finance-policy")
+
+result = runtime.execute(
+    fn=transfer,
+    args=(1250000,),
+    raise_on_block=False,
+)
+```
+
+Per-call `actor` and `contract_id` values still work and override the bound context for that call.
+
+For proposal-bound execution, pass a normalized proposal directly:
+
+```python
+result = runtime.execute_proposal(
+    proposal,
+    raise_on_block=False,
+)
+```
+
+`execute_proposal` evaluates the proposal against the bound or supplied contract and returns the same `GovernedExecutionResult` shape.
+
 ## What Waveframe Guard Does
 
 - Intercepts function execution
