@@ -3,7 +3,8 @@ import json
 
 from .context import install_guard
 from .contracts import load_contract
-from .execute import execute as execute_guarded
+from .execute import GovernanceError, execute as execute_guarded
+from .result import GovernedExecutionResult
 
 
 class GovernedRuntime:
@@ -11,7 +12,16 @@ class GovernedRuntime:
         self.registry_path = Path(registry_path)
         self.registry = self._load_registry()
 
-    def execute(self, *, actor, contract_id, fn, args=None, kwargs=None):
+    def execute(
+        self,
+        *,
+        actor,
+        contract_id,
+        fn,
+        args=None,
+        kwargs=None,
+        raise_on_block=True,
+    ):
         contract = self._load_contract(contract_id)
 
         install_guard(
@@ -20,12 +30,34 @@ class GovernedRuntime:
             mode="local",
         )
 
-        return execute_guarded(
-            fn,
-            args=args or (),
-            kwargs=kwargs or {},
-            actor=actor,
-            contract=contract,
+        try:
+            value = execute_guarded(
+                fn,
+                args=args or (),
+                kwargs=kwargs or {},
+                actor=actor,
+                contract=contract,
+            )
+        except GovernanceError as exc:
+            if raise_on_block:
+                raise
+
+            error = str(exc)
+            return GovernedExecutionResult(
+                allowed=False,
+                reason=self._blocked_reason(error),
+                error=error,
+                **self._contract_metadata(contract),
+            )
+
+        if raise_on_block:
+            return value
+
+        return GovernedExecutionResult(
+            allowed=True,
+            reason="execution allowed",
+            value=value,
+            **self._contract_metadata(contract),
         )
 
     def _load_registry(self):
@@ -71,3 +103,17 @@ class GovernedRuntime:
             return path
 
         return self.registry_path.parent / path
+
+    def _contract_metadata(self, contract):
+        return {
+            "contract_id": contract.get("contract_id"),
+            "contract_version": contract.get("contract_version"),
+            "contract_hash": contract.get("contract_hash"),
+        }
+
+    def _blocked_reason(self, error):
+        prefix = "Execution blocked: "
+        if error.startswith(prefix):
+            return error[len(prefix):]
+
+        return error

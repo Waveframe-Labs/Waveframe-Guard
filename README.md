@@ -48,6 +48,25 @@ runtime.execute(
 )
 ```
 
+By default, blocked execution raises `GovernanceError`. To observe the decision without raising, pass `raise_on_block=False`:
+
+```python
+result = runtime.execute(
+    actor={"id": "user-1", "type": "human", "role": "intern"},
+    contract_id="finance-policy",
+    fn=transfer,
+    args=(1250000,),
+    raise_on_block=False,
+)
+
+print(result.allowed)
+print(result.reason)
+print(result.contract_hash)
+```
+
+Allowed executions return `GovernedExecutionResult(allowed=True, reason="execution allowed", value=<function return value>, ...)`.
+Blocked executions return `GovernedExecutionResult(allowed=False, reason=<policy reason>, error=<block error>, ...)`.
+
 The registry can map contract IDs to published contract artifacts:
 
 ```json
