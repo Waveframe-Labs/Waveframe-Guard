@@ -1,4 +1,5 @@
 from pathlib import Path
+from datetime import datetime, timezone
 import json
 
 from cricore.api import evaluate_structured
@@ -15,9 +16,12 @@ from .result import GovernedExecutionResult
 
 
 class GovernedRuntime:
-    def __init__(self, *, registry_path):
+    def __init__(self, *, registry_path, audit_path=None):
         self.registry_path = Path(registry_path)
         self.registry = self._load_registry()
+        self.audit_path = Path(audit_path) if audit_path is not None else None
+        self.audit_events = []
+        self.last_event = None
         self.actor = None
         self.contract_id = None
 
@@ -58,16 +62,37 @@ class GovernedRuntime:
                 contract=contract,
             )
         except GovernanceError as exc:
+            error = str(exc)
+            event = self._build_event(
+                actor=actor,
+                contract=contract,
+                execution_type="function",
+                allowed=False,
+                reason=self._blocked_reason(error),
+                error=error,
+                target=getattr(fn, "__name__", None),
+            )
+            self._emit_event(event)
             if raise_on_block:
                 raise
 
-            error = str(exc)
             return GovernedExecutionResult(
                 allowed=False,
                 reason=self._blocked_reason(error),
                 error=error,
+                event=event,
                 **self._contract_metadata(contract),
             )
+
+        event = self._build_event(
+            actor=actor,
+            contract=contract,
+            execution_type="function",
+            allowed=True,
+            reason="execution allowed",
+            target=getattr(fn, "__name__", None),
+        )
+        self._emit_event(event)
 
         if raise_on_block:
             return value
@@ -76,6 +101,7 @@ class GovernedRuntime:
             allowed=True,
             reason="execution allowed",
             value=value,
+            event=event,
             **self._contract_metadata(contract),
         )
 
@@ -104,15 +130,35 @@ class GovernedRuntime:
         )
 
         if decision.commit_allowed:
+            event = self._build_event(
+                actor=actor,
+                contract=contract,
+                execution_type="proposal",
+                allowed=True,
+                reason="execution allowed",
+                target=proposal.get("proposal_id") if isinstance(proposal, dict) else None,
+            )
+            self._emit_event(event)
             return GovernedExecutionResult(
                 allowed=True,
                 reason="execution allowed",
                 value=proposal,
+                event=event,
                 **self._contract_metadata(contract),
             )
 
         reason = decision_blocked_reason(decision)
         error = f"Execution blocked: {reason}"
+        event = self._build_event(
+            actor=actor,
+            contract=contract,
+            execution_type="proposal",
+            allowed=False,
+            reason=reason,
+            error=error,
+            target=proposal.get("proposal_id") if isinstance(proposal, dict) else None,
+        )
+        self._emit_event(event)
         if raise_on_block:
             raise GovernanceError(error)
 
@@ -120,6 +166,7 @@ class GovernedRuntime:
             allowed=False,
             reason=reason,
             error=error,
+            event=event,
             **self._contract_metadata(contract),
         )
 
@@ -185,6 +232,46 @@ class GovernedRuntime:
             "contract_version": contract.get("contract_version"),
             "contract_hash": contract.get("contract_hash"),
         }
+
+    def _build_event(
+        self,
+        *,
+        actor,
+        contract,
+        execution_type,
+        allowed,
+        reason,
+        error=None,
+        target=None,
+    ):
+        event = {
+            "event_type": "governed_execution",
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "execution_type": execution_type,
+            "allowed": allowed,
+            "reason": reason,
+            "actor": actor,
+            **self._contract_metadata(contract),
+        }
+
+        if error is not None:
+            event["error"] = error
+
+        if target is not None:
+            event["target"] = target
+
+        return event
+
+    def _emit_event(self, event):
+        self.last_event = event
+        self.audit_events.append(event)
+
+        if self.audit_path is None:
+            return
+
+        self.audit_path.parent.mkdir(parents=True, exist_ok=True)
+        with self.audit_path.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(event, sort_keys=True) + "\n")
 
     def _blocked_reason(self, error):
         prefix = "Execution blocked: "

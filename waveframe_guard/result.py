@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 
@@ -13,3 +13,4 @@ class GovernedExecutionResult:
     contract_hash: str | None = None
     value: Any = None
     error: str | None = None
+    event: dict[str, Any] | None = field(default=None, compare=False)

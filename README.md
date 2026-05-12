@@ -106,6 +106,47 @@ result = runtime.execute_proposal(
 
 `execute_proposal` evaluates the proposal against the bound or supplied contract and returns the same `GovernedExecutionResult` shape.
 
+Each runtime execution also emits a structured audit event. Events are kept in memory on the runtime and attached to non-raising results:
+
+```python
+result = runtime.execute(
+    fn=transfer,
+    args=(1250000,),
+    raise_on_block=False,
+)
+
+print(result.event)
+print(runtime.last_event)
+print(runtime.audit_events)
+```
+
+Example event:
+
+```python
+{
+    "event_type": "governed_execution",
+    "execution_type": "function",
+    "allowed": False,
+    "reason": "required role not satisfied: manager",
+    "error": "Execution blocked: required role not satisfied: manager",
+    "contract_id": "finance-policy",
+    "contract_version": "0.3.1",
+    "contract_hash": "...",
+    "actor": {"id": "user-1", "type": "human", "role": "intern"},
+    "target": "transfer",
+    "timestamp": "2026-05-12T12:00:00+00:00",
+}
+```
+
+To append events locally as JSON lines:
+
+```python
+runtime = GovernedRuntime(
+    registry_path="contracts/index.json",
+    audit_path="runtime-audit.jsonl",
+)
+```
+
 ## What Waveframe Guard Does
 
 - Intercepts function execution
