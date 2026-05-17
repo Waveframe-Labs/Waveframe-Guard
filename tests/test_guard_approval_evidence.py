@@ -1,20 +1,9 @@
 from __future__ import annotations
 
 import json
-import sys
 from pathlib import Path
 
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-for path in [
-    REPO_ROOT / "integrations" / "contract-compiler" / "src",
-    REPO_ROOT / "integrations" / "guard",
-    REPO_ROOT / "integrations" / "proposal-normalizer",
-    REPO_ROOT / "integrations" / "cricore" / "src",
-]:
-    sys.path.insert(0, str(path))
-
-from compiler.compile_policy import compile_policy
 from waveframe_guard import GovernanceError, GovernedRuntime
 from waveframe_guard.schemas import (
     GOVERNED_EXECUTION_EVENT_V1,
@@ -197,37 +186,46 @@ def test_guard_can_require_verified_authority_lineage(tmp_path):
 
 
 def _compiled_contract():
-    return compile_policy(
-        {
-            "contract_id": "finance-policy",
-            "contract_version": "1.0.0",
-            "authority": {
-                "required_roles": ["manager", "director"],
-                "separation_of_duties": True,
-            },
-            "approvals": {
-                "required": [
-                    {"role": "manager"},
-                    {
-                        "role": "director",
-                        "condition": {
-                            "field": "amount",
-                            "operator": ">",
-                            "value": 10000,
-                        },
-                    },
-                ],
-                "thresholds": [
-                    {
+    contract = {
+        "contract_id": "finance-policy",
+        "contract_version": "1.0.0",
+        "contract_hash": None,
+        "authority_requirements": {
+            "required_roles": ["manager", "director"],
+        },
+        "approval_requirements": {
+            "required": [
+                {"role": "manager"},
+                {
+                    "role": "director",
+                    "condition": {
                         "field": "amount",
                         "operator": ">",
                         "value": 10000,
-                        "requires_role": "director",
-                    }
-                ],
-            },
-        }
-    )
+                    },
+                },
+            ],
+        },
+        "artifact_requirements": {},
+        "stage_requirements": {},
+        "invariants": {
+            "separation_of_duties": True,
+        },
+    }
+    contract["contract_hash"] = _compute_contract_hash(contract)
+    return contract
+
+
+def _compute_contract_hash(contract: dict) -> str:
+    canonical_contract = {
+        key: value
+        for key, value in contract.items()
+        if key != "contract_hash"
+    }
+    canonical = json.dumps(canonical_contract, sort_keys=True, separators=(",", ":"))
+    import hashlib
+
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
 def _write_registry(root: Path, contract: dict) -> Path:

@@ -1,24 +1,11 @@
 from __future__ import annotations
 
 import json
-import sys
 import threading
 from pathlib import Path
 from wsgiref.simple_server import make_server
 
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-INTEGRATION_PATHS = [
-    REPO_ROOT / "integrations" / "contract-compiler" / "src",
-    REPO_ROOT / "integrations" / "guard",
-    REPO_ROOT / "integrations" / "proposal-normalizer",
-    REPO_ROOT / "integrations" / "cricore" / "src",
-]
-
-for path in INTEGRATION_PATHS:
-    sys.path.insert(0, str(path))
-
-from cloud.api.app import create_app
 from compiler.compile_policy import compile_policy
 from waveframe_guard import GovernedRuntime
 
@@ -30,7 +17,7 @@ def transfer(amount: int) -> str:
 def seed_cloud_data(data_root):
     policy = {
         "contract_id": "finance-policy",
-        "contract_version": "0.1.0",
+            "contract_version": "1.0.0",
         "authority": {
             "required_roles": ["manager"],
         },
@@ -38,22 +25,103 @@ def seed_cloud_data(data_root):
     contract = compile_policy(policy)
     contracts_dir = data_root / "contracts"
     contracts_dir.mkdir(parents=True)
-    contract_path = contracts_dir / "finance-policy-0.1.0.contract.json"
+    contract_path = contracts_dir / "finance-policy-1.0.0.contract.json"
     contract_path.write_text(
         json.dumps(contract, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
+    registry = {
+        "contracts": [
+            {
+                "contract_id": contract["contract_id"],
+                "contract_version": contract["contract_version"],
+                "contract_hash": f"sha256:{contract['contract_hash']}",
+                "path": "contracts/finance-policy-1.0.0.contract.json",
+            }
+        ]
+    }
+    registry["registry_hash"] = _registry_hash(registry)
     (contracts_dir / "index.json").write_text(
+        json.dumps(registry, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    return contract
+
+
+def serve_cloud(data_root):
+    app = _registry_app(data_root)
+    server = make_server("127.0.0.1", 0, app)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    return server, f"http://127.0.0.1:{server.server_port}"
+
+
+def _registry_app(data_root):
+    data_root = Path(data_root)
+
+    def app(environ, start_response):
+        method = environ["REQUEST_METHOD"]
+        path = environ["PATH_INFO"].strip("/")
+        if method == "GET" and path == "registry/index.json":
+            return _json_response(start_response, _read_json(data_root / "contracts" / "index.json"))
+        if method == "GET" and path.startswith("contracts/"):
+            _, contract_id, version = path.split("/", 2)
+            contract_path = data_root / "contracts" / f"{contract_id}-{version}.contract.json"
+            return _json_response(start_response, _read_json(contract_path))
+        if method == "POST" and path == "audit-events":
+            length = int(environ.get("CONTENT_LENGTH") or "0")
+            body = environ["wsgi.input"].read(length)
+            event = json.loads(body.decode("utf-8"))
+            receipt = _write_audit_event(data_root, event)
+            return _json_response(start_response, receipt)
+        start_response("404 Not Found", [("Content-Type", "application/json")])
+        return [b'{"error":"not found"}']
+
+    return app
+
+
+def _json_response(start_response, payload):
+    body = json.dumps(payload, sort_keys=True).encode("utf-8")
+    start_response("200 OK", [("Content-Type", "application/json")])
+    return [body]
+
+
+def _read_json(path):
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _write_audit_event(data_root, event):
+    audits_dir = data_root / "audits"
+    audits_dir.mkdir(parents=True, exist_ok=True)
+    event_hash = _json_hash(event)
+    receipt = {
+        "status": "accepted",
+        "event_id": event["event_id"],
+        "authority_ref": event["authority_ref"],
+        "event_hash": event_hash,
+        "received_at": "2026-05-17T00:00:00+00:00",
+        "path": "audits/governed-execution.jsonl",
+    }
+    audit_path = audits_dir / "governed-execution.jsonl"
+    with audit_path.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(event, sort_keys=True) + "\n")
+
+    events = []
+    if audit_path.exists():
+        for line in audit_path.read_text(encoding="utf-8").splitlines():
+            stored = json.loads(line)
+            events.append(
+                {
+                    "event_id": stored["event_id"],
+                    "event_hash": _json_hash(stored),
+                }
+            )
+    (audits_dir / "audit-index.json").write_text(
         json.dumps(
             {
-                "contracts": [
-                    {
-                        "contract_id": contract["contract_id"],
-                        "contract_version": contract["contract_version"],
-                        "contract_hash": f"sha256:{contract['contract_hash']}",
-                        "path": "contracts/finance-policy-0.1.0.contract.json",
-                    }
-                ]
+                "schema_version": "audit_index.v1",
+                "event_count": len(events),
+                "events": events,
             },
             indent=2,
             sort_keys=True,
@@ -61,15 +129,23 @@ def seed_cloud_data(data_root):
         + "\n",
         encoding="utf-8",
     )
-    return contract
+    return receipt
 
 
-def serve_cloud(data_root):
-    app = create_app(data_root=data_root)
-    server = make_server("127.0.0.1", 0, app)
-    thread = threading.Thread(target=server.serve_forever, daemon=True)
-    thread.start()
-    return server, f"http://127.0.0.1:{server.server_port}"
+def _json_hash(payload):
+    import hashlib
+
+    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return f"sha256:{hashlib.sha256(canonical.encode('utf-8')).hexdigest()}"
+
+
+def _registry_hash(registry):
+    canonical_registry = {
+        key: value
+        for key, value in registry.items()
+        if key != "registry_hash"
+    }
+    return _json_hash(canonical_registry)
 
 
 def test_governed_runtime_fetches_contract_from_cloud_and_enforces_locally(tmp_path):
@@ -82,7 +158,7 @@ def test_governed_runtime_fetches_contract_from_cloud_and_enforces_locally(tmp_p
             registry_url=registry_url,
             cache_dir=cache_dir,
         )
-        runtime.bind_contract("finance-policy", "0.1.0")
+        runtime.bind_contract("finance-policy@1.0.0")
 
         runtime.install_actor(
             {
@@ -116,14 +192,14 @@ def test_governed_runtime_fetches_contract_from_cloud_and_enforces_locally(tmp_p
     assert blocked.allowed is False
     assert blocked.reason == "required role not satisfied: manager"
     assert blocked.event["schema_version"] == "governed_execution.v1"
-    assert blocked.event["authority_ref"] == "finance-policy@0.1.0"
-    assert blocked.event["contract_ref"] == "finance-policy@0.1.0"
+    assert blocked.event["authority_ref"] == "finance-policy@1.0.0"
+    assert blocked.event["contract_ref"] == "finance-policy@1.0.0"
     assert blocked.event["decision"] == "BLOCKED"
     assert blocked.event["contract_source"] == "registry_url"
     assert blocked.audit_receipt == blocked.event["audit_receipt"]
     assert blocked.audit_receipt["status"] == "accepted"
     assert blocked.audit_receipt["event_id"] == blocked.event["event_id"]
-    assert blocked.audit_receipt["authority_ref"] == "finance-policy@0.1.0"
+    assert blocked.audit_receipt["authority_ref"] == "finance-policy@1.0.0"
     assert blocked.audit_receipt["event_hash"].startswith("sha256:")
     assert blocked.audit_receipt["received_at"]
     assert blocked.audit_receipt["path"] == "audits/governed-execution.jsonl"
@@ -157,7 +233,7 @@ def test_governed_runtime_fetches_contract_from_cloud_and_enforces_locally(tmp_p
         cache_dir=cache_dir,
         offline=True,
     )
-    offline_runtime.bind_contract("finance-policy", "0.1.0")
+    offline_runtime.bind_contract("finance-policy@1.0.0")
     offline_runtime.install_actor(
         {
             "id": "manager-1",
@@ -174,7 +250,7 @@ def test_governed_runtime_fetches_contract_from_cloud_and_enforces_locally(tmp_p
     assert offline_allowed.event["contract_source"] == "cache"
 
 
-def test_governed_runtime_rejects_ambiguous_contract_binding(tmp_path):
+def test_governed_runtime_rejects_unversioned_contract_binding(tmp_path):
     contract = seed_cloud_data(tmp_path / "cloud-data")
     contracts_dir = tmp_path / "cloud-data" / "contracts"
     second = compile_policy(
@@ -200,19 +276,21 @@ def test_governed_runtime_rejects_ambiguous_contract_binding(tmp_path):
             "path": "contracts/finance-policy-0.2.0.contract.json",
         }
     )
+    registry["registry_hash"] = _registry_hash(registry)
     registry_path.write_text(json.dumps(registry), encoding="utf-8")
     server, registry_url = serve_cloud(tmp_path / "cloud-data")
 
     try:
         runtime = GovernedRuntime(registry_url=registry_url, cache_dir=tmp_path / "guard-cache")
-        runtime.bind_contract("finance-policy")
+        unversioned_authority_ref = "finance-policy"
+        runtime.bind_contract(unversioned_authority_ref)
         runtime.install_actor({"id": "manager-1", "type": "human", "role": "manager"})
         try:
             runtime.execute(fn=transfer, args=(1_250_000,), raise_on_block=False)
         except ValueError as exc:
             assert "Missing contract_version" in str(exc)
         else:
-            raise AssertionError("ambiguous contract binding should fail")
+            raise AssertionError("unversioned contract binding should fail")
     finally:
         server.shutdown()
         server.server_close()
@@ -225,7 +303,7 @@ def test_governed_runtime_rejects_cached_hash_mismatch(tmp_path):
 
     try:
         runtime = GovernedRuntime(registry_url=registry_url, cache_dir=cache_dir)
-        runtime.bind_contract("finance-policy@0.1.0")
+        runtime.bind_contract("finance-policy@1.0.0")
         runtime.install_actor({"id": "manager-1", "type": "human", "role": "manager"})
         runtime.execute(fn=transfer, args=(1_250_000,), raise_on_block=False)
     finally:
@@ -238,7 +316,7 @@ def test_governed_runtime_rejects_cached_hash_mismatch(tmp_path):
     cached_contract.write_text(json.dumps(mutated), encoding="utf-8")
 
     offline_runtime = GovernedRuntime(registry_url=registry_url, cache_dir=cache_dir, offline=True)
-    offline_runtime.bind_contract("finance-policy@0.1.0")
+    offline_runtime.bind_contract("finance-policy@1.0.0")
     offline_runtime.install_actor({"id": "manager-1", "type": "human", "role": "manager"})
     try:
         offline_runtime.execute(fn=transfer, args=(1_250_000,), raise_on_block=False)
@@ -255,7 +333,7 @@ def test_governed_runtime_rejects_cached_registry_hash_mismatch(tmp_path):
 
     try:
         runtime = GovernedRuntime(registry_url=registry_url, cache_dir=cache_dir)
-        runtime.bind_contract("finance-policy@0.1.0")
+        runtime.bind_contract("finance-policy@1.0.0")
         runtime.install_actor({"id": "manager-1", "type": "human", "role": "manager"})
         runtime.execute(fn=transfer, args=(1_250_000,), raise_on_block=False)
     finally:

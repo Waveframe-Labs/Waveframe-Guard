@@ -10,7 +10,7 @@ from .schemas import (
     GOVERNED_EXECUTION_STATE_V1,
 )
 
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 
 __all__ = [
     "guard",

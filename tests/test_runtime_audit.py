@@ -9,7 +9,7 @@ from waveframe_guard import GovernanceError, GovernedRuntime
 def write_contract(tmp_path):
     policy = {
         "contract_id": "finance-policy",
-        "contract_version": "0.3.1",
+        "contract_version": "1.0.0",
         "authority": {"required_roles": ["manager"]},
     }
     contract = compile_policy(policy)
@@ -23,9 +23,13 @@ def write_registry(tmp_path, contract_path):
     registry_path.write_text(
         json.dumps(
             {
-                "contracts": {
-                    "finance-policy": contract_path.name,
-                },
+                "contracts": [
+                    {
+                        "contract_id": "finance-policy",
+                        "contract_version": "1.0.0",
+                        "path": contract_path.name,
+                    }
+                ],
             }
         ),
         encoding="utf-8",
@@ -44,7 +48,7 @@ def test_runtime_returns_and_stores_blocked_execution_event(tmp_path):
 
     result = runtime.execute(
         actor=actor,
-        contract_id="finance-policy",
+        contract_id="finance-policy@1.0.0",
         fn=transfer,
         args=(1250000,),
         raise_on_block=False,
@@ -58,7 +62,7 @@ def test_runtime_returns_and_stores_blocked_execution_event(tmp_path):
     assert result.event["reason"] == "required role not satisfied: manager"
     assert result.event["error"] == "Execution blocked: required role not satisfied: manager"
     assert result.event["contract_id"] == "finance-policy"
-    assert result.event["contract_version"] == "0.3.1"
+    assert result.event["contract_version"] == "1.0.0"
     assert result.event["contract_hash"] == contract["contract_hash"]
     assert result.event["actor"] == actor
     assert result.event["target"] == "transfer"
@@ -76,7 +80,7 @@ def test_runtime_emits_event_before_raising_block(tmp_path):
     with pytest.raises(GovernanceError, match="required role not satisfied"):
         runtime.execute(
             actor={"id": "user-1", "type": "human", "role": "intern"},
-            contract_id="finance-policy",
+            contract_id="finance-policy@1.0.0",
             fn=transfer,
             args=(1250000,),
         )
@@ -97,7 +101,7 @@ def test_runtime_writes_audit_events_to_jsonl(tmp_path):
 
     result = runtime.execute(
         actor={"id": "user-1", "type": "human", "role": "manager"},
-        contract_id="finance-policy",
+        contract_id="finance-policy@1.0.0",
         fn=transfer,
         args=(125,),
         raise_on_block=False,
@@ -134,7 +138,7 @@ def test_execute_proposal_emits_event(tmp_path):
     result = runtime.execute_proposal(
         proposal,
         actor=actor,
-        contract_id="finance-policy",
+        contract_id="finance-policy@1.0.0",
         raise_on_block=False,
     )
 

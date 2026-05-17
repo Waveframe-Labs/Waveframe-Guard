@@ -16,7 +16,7 @@ class EvaluateRequest(BaseModel):
     actor: str
     context: Optional[Dict[str, Any]] = None
     policy_id: Optional[str] = Field(
-        default="finance-core",
+        default="finance-policy",
         description="Stored policy identifier used to resolve the latest compiled contract version",
     )
 

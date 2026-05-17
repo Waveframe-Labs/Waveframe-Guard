@@ -4,9 +4,11 @@ Stop unsafe AI and automated actions **before they execute**.
 
 Waveframe Guard enforces governance at the execution boundary. If an action violates policy, it never runs.
 
+Current release: `0.5.0`.
+
 ## Example
 
-This example assumes a published contract artifact exists at `contracts/finance-core-0.3.1.contract.json`. In your application, point `contract_path` at the contract published by your governance workflow.
+This example assumes a published contract artifact exists at `contracts/finance-policy-1.0.0.contract.json`. In your application, point `contract_path` at the contract published by your governance workflow.
 
 ```python
 from pathlib import Path
@@ -15,7 +17,7 @@ from waveframe_guard import install_guard, guard
 
 install_guard(
     actor={"id": "user-1", "type": "human", "role": "intern"},
-    contract_path=Path("contracts") / "finance-core-0.3.1.contract.json"
+    contract_path=Path("contracts") / "finance-policy-1.0.0.contract.json"
 )
 
 @guard
@@ -39,21 +41,23 @@ from waveframe_guard import GovernedRuntime
 runtime = GovernedRuntime(
     registry_path="contracts/index.json"
 )
+runtime.bind_contract("finance-policy@1.0.0")
 
 runtime.execute(
     actor={"id": "user-1", "type": "human", "role": "intern"},
-    contract_id="finance-policy",
     fn=transfer,
     args=(1250000,),
 )
 ```
+
+Runtime authority refs are explicit and versioned. Bind or pass `finance-policy@1.0.0`; unversioned contract IDs such as `finance-policy` are rejected because replay, audit, and cache integrity depend on deterministic authority identity.
 
 By default, blocked execution raises `GovernanceError`. To observe the decision without raising, pass `raise_on_block=False`:
 
 ```python
 result = runtime.execute(
     actor={"id": "user-1", "type": "human", "role": "intern"},
-    contract_id="finance-policy",
+    contract_id="finance-policy@1.0.0",
     fn=transfer,
     args=(1250000,),
     raise_on_block=False,
@@ -71,20 +75,25 @@ The registry can map contract IDs to published contract artifacts:
 
 ```json
 {
-  "contracts": {
-    "finance-policy": "finance-core-0.3.1.contract.json"
-  }
+  "contracts": [
+    {
+      "contract_id": "finance-policy",
+      "contract_version": "1.0.0",
+      "contract_hash": "sha256:...",
+      "path": "finance-policy-1.0.0.contract.json"
+    }
+  ]
 }
 ```
 
-Runtime execution is intentionally small in v1: registry lookup, load the published contract, install the Guard context, execute the guarded function, then allow or block.
+Runtime execution is intentionally small: registry lookup, load the published contract, install the Guard context, execute the guarded function, then allow or block.
 
 You can also bind runtime context once and omit it from each execution:
 
 ```python
 runtime = GovernedRuntime(registry_path="contracts/index.json")
 runtime.install_actor({"id": "user-1", "type": "human", "role": "manager"})
-runtime.bind_contract("finance-policy")
+runtime.bind_contract("finance-policy@1.0.0")
 
 result = runtime.execute(
     fn=transfer,
@@ -93,7 +102,19 @@ result = runtime.execute(
 )
 ```
 
-Per-call `actor` and `contract_id` values still work and override the bound context for that call.
+Per-call `actor` and versioned `contract_id` values still work and override the bound context for that call.
+
+## Replay Admissibility
+
+Replay systems can evaluate approval evidence without executing the governed function:
+
+```python
+from waveframe_guard import evaluate_admissibility
+
+decision = evaluate_admissibility(contract, execution_state)
+```
+
+The returned decision includes `allowed`, `reason`, `missing_approvals`, and a governed decision trace.
 
 For proposal-bound execution, pass a normalized proposal directly:
 
@@ -127,10 +148,11 @@ Example event:
     "event_type": "governed_execution",
     "execution_type": "function",
     "allowed": False,
+    "authority_ref": "finance-policy@1.0.0",
     "reason": "required role not satisfied: manager",
     "error": "Execution blocked: required role not satisfied: manager",
     "contract_id": "finance-policy",
-    "contract_version": "0.3.1",
+    "contract_version": "1.0.0",
     "contract_hash": "...",
     "actor": {"id": "user-1", "type": "human", "role": "intern"},
     "target": "transfer",
@@ -199,7 +221,7 @@ from pathlib import Path
 
 install_guard(
     actor={"id": "user-1", "type": "human", "role": "manager"},
-    contract_path=Path("contracts") / "finance-core-0.3.1.contract.json"
+    contract_path=Path("contracts") / "finance-policy-1.0.0.contract.json"
 )
 ```
 
@@ -209,8 +231,8 @@ Guard also records contract metadata in runtime context for audit and telemetry:
 
 ```python
 {
-    "contract_id": "finance-core",
-    "contract_version": "0.3.1",
+    "contract_id": "finance-policy",
+    "contract_version": "1.0.0",
     "contract_hash": "..."
 }
 ```

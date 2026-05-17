@@ -9,7 +9,7 @@ from waveframe_guard import GovernanceError, GovernedRuntime
 def write_contract(tmp_path):
     policy = {
         "contract_id": "finance-policy",
-        "contract_version": "0.3.1",
+        "contract_version": "1.0.0",
         "authority": {"required_roles": ["manager"]},
     }
     contract = compile_policy(policy)
@@ -23,9 +23,13 @@ def write_registry(tmp_path, contract_path):
     registry_path.write_text(
         json.dumps(
             {
-                "contracts": {
-                    "finance-policy": contract_path.name,
-                },
+                "contracts": [
+                    {
+                        "contract_id": "finance-policy",
+                        "contract_version": "1.0.0",
+                        "path": contract_path.name,
+                    }
+                ],
             }
         ),
         encoding="utf-8",
@@ -43,7 +47,7 @@ def test_runtime_allows_authorized_actor(tmp_path):
 
     assert runtime.execute(
         actor={"id": "user-1", "type": "human", "role": "manager"},
-        contract_id="finance-policy",
+        contract_id="finance-policy@1.0.0",
         fn=transfer,
         args=(125,),
     ) == "transferred 125"
@@ -60,7 +64,7 @@ def test_runtime_blocks_unauthorized_actor(tmp_path):
     with pytest.raises(GovernanceError, match="required role not satisfied"):
         runtime.execute(
             actor={"id": "user-1", "type": "human", "role": "intern"},
-            contract_id="finance-policy",
+            contract_id="finance-policy@1.0.0",
             fn=transfer,
             args=(1250000,),
         )
@@ -71,9 +75,9 @@ def test_runtime_raises_for_unknown_contract(tmp_path):
     registry_path = write_registry(tmp_path, contract_path)
     runtime = GovernedRuntime(registry_path=registry_path)
 
-    with pytest.raises(KeyError, match="Unknown contract_id"):
+    with pytest.raises(KeyError, match="Unknown contract"):
         runtime.execute(
             actor={"id": "user-1", "type": "human", "role": "manager"},
-            contract_id="missing-policy",
+            contract_id="missing-policy@1.0.0",
             fn=lambda: "ok",
         )

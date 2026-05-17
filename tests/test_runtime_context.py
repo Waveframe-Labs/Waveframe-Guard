@@ -10,7 +10,7 @@ from waveframe_guard import GovernanceError, GovernedExecutionResult, GovernedRu
 def write_contract(tmp_path):
     policy = {
         "contract_id": "finance-policy",
-        "contract_version": "0.3.1",
+        "contract_version": "1.0.0",
         "authority": {"required_roles": ["manager"]},
     }
     contract = compile_policy(policy)
@@ -24,9 +24,13 @@ def write_registry(tmp_path, contract_path):
     registry_path.write_text(
         json.dumps(
             {
-                "contracts": {
-                    "finance-policy": contract_path.name,
-                },
+                "contracts": [
+                    {
+                        "contract_id": "finance-policy",
+                        "contract_version": "1.0.0",
+                        "path": contract_path.name,
+                    }
+                ],
             }
         ),
         encoding="utf-8",
@@ -57,7 +61,7 @@ def test_runtime_uses_bound_actor_and_contract_for_function_execution(tmp_path):
     registry_path = write_registry(tmp_path, contract_path)
     runtime = GovernedRuntime(registry_path=registry_path)
     runtime.install_actor({"id": "user-1", "type": "human", "role": "manager"})
-    runtime.bind_contract("finance-policy")
+    runtime.bind_contract("finance-policy@1.0.0")
 
     def transfer(amount):
         return f"transferred {amount}"
@@ -70,7 +74,7 @@ def test_runtime_call_actor_overrides_bound_actor(tmp_path):
     registry_path = write_registry(tmp_path, contract_path)
     runtime = GovernedRuntime(registry_path=registry_path)
     runtime.install_actor({"id": "user-1", "type": "human", "role": "intern"})
-    runtime.bind_contract("finance-policy")
+    runtime.bind_contract("finance-policy@1.0.0")
 
     def transfer(amount):
         return f"transferred {amount}"
@@ -86,7 +90,7 @@ def test_runtime_requires_actor_context(tmp_path):
     _, contract_path = write_contract(tmp_path)
     registry_path = write_registry(tmp_path, contract_path)
     runtime = GovernedRuntime(registry_path=registry_path)
-    runtime.bind_contract("finance-policy")
+    runtime.bind_contract("finance-policy@1.0.0")
 
     with pytest.raises(ValueError, match="Missing actor"):
         runtime.execute(fn=lambda: "ok")
@@ -107,7 +111,7 @@ def test_execute_proposal_allows_bound_context(tmp_path):
     registry_path = write_registry(tmp_path, contract_path)
     actor = {"id": "user-1", "type": "human", "role": "manager"}
     runtime = GovernedRuntime(registry_path=registry_path)
-    runtime.install_actor(actor).bind_contract("finance-policy")
+    runtime.install_actor(actor).bind_contract("finance-policy@1.0.0")
 
     result = runtime.execute_proposal(
         make_proposal(actor, contract),
@@ -118,7 +122,7 @@ def test_execute_proposal_allows_bound_context(tmp_path):
         allowed=True,
         reason="execution allowed",
         contract_id="finance-policy",
-        contract_version="0.3.1",
+        contract_version="1.0.0",
         contract_hash=contract["contract_hash"],
         value=make_proposal(actor, contract),
     )
@@ -129,7 +133,7 @@ def test_execute_proposal_blocks_bound_context(tmp_path):
     registry_path = write_registry(tmp_path, contract_path)
     actor = {"id": "user-1", "type": "human", "role": "intern"}
     runtime = GovernedRuntime(registry_path=registry_path)
-    runtime.install_actor(actor).bind_contract("finance-policy")
+    runtime.install_actor(actor).bind_contract("finance-policy@1.0.0")
 
     result = runtime.execute_proposal(
         make_proposal(actor, contract),
@@ -140,7 +144,7 @@ def test_execute_proposal_blocks_bound_context(tmp_path):
         allowed=False,
         reason="required role not satisfied: manager",
         contract_id="finance-policy",
-        contract_version="0.3.1",
+        contract_version="1.0.0",
         contract_hash=contract["contract_hash"],
         error="Execution blocked: required role not satisfied: manager",
     )
@@ -151,7 +155,7 @@ def test_execute_proposal_raises_by_default(tmp_path):
     registry_path = write_registry(tmp_path, contract_path)
     actor = {"id": "user-1", "type": "human", "role": "intern"}
     runtime = GovernedRuntime(registry_path=registry_path)
-    runtime.install_actor(actor).bind_contract("finance-policy")
+    runtime.install_actor(actor).bind_contract("finance-policy@1.0.0")
 
     with pytest.raises(GovernanceError, match="required role not satisfied"):
         runtime.execute_proposal(make_proposal(actor, contract))

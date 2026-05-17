@@ -8,7 +8,7 @@ from waveframe_guard import GovernedExecutionResult, GovernedRuntime
 def write_contract(tmp_path):
     policy = {
         "contract_id": "finance-policy",
-        "contract_version": "0.3.1",
+        "contract_version": "1.0.0",
         "authority": {"required_roles": ["manager"]},
     }
     contract = compile_policy(policy)
@@ -22,9 +22,13 @@ def write_registry(tmp_path, contract_path):
     registry_path.write_text(
         json.dumps(
             {
-                "contracts": {
-                    "finance-policy": contract_path.name,
-                },
+                "contracts": [
+                    {
+                        "contract_id": "finance-policy",
+                        "contract_version": "1.0.0",
+                        "path": contract_path.name,
+                    }
+                ],
             }
         ),
         encoding="utf-8",
@@ -42,7 +46,7 @@ def test_runtime_result_for_allowed_execution(tmp_path):
 
     result = runtime.execute(
         actor={"id": "user-1", "type": "human", "role": "manager"},
-        contract_id="finance-policy",
+        contract_id="finance-policy@1.0.0",
         fn=transfer,
         args=(125,),
         raise_on_block=False,
@@ -52,7 +56,7 @@ def test_runtime_result_for_allowed_execution(tmp_path):
         allowed=True,
         reason="execution allowed",
         contract_id="finance-policy",
-        contract_version="0.3.1",
+        contract_version="1.0.0",
         contract_hash=contract["contract_hash"],
         value="transferred 125",
     )
@@ -68,7 +72,7 @@ def test_runtime_result_for_blocked_execution(tmp_path):
 
     result = runtime.execute(
         actor={"id": "user-1", "type": "human", "role": "intern"},
-        contract_id="finance-policy",
+        contract_id="finance-policy@1.0.0",
         fn=transfer,
         args=(1250000,),
         raise_on_block=False,
@@ -78,7 +82,7 @@ def test_runtime_result_for_blocked_execution(tmp_path):
         allowed=False,
         reason="required role not satisfied: manager",
         contract_id="finance-policy",
-        contract_version="0.3.1",
+        contract_version="1.0.0",
         contract_hash=contract["contract_hash"],
         error="Execution blocked: required role not satisfied: manager",
     )

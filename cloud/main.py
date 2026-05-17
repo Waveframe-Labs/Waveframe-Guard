@@ -22,7 +22,7 @@ from cricore.interface.evaluate_proposal import evaluate_proposal
 
 app = FastAPI(
     title="Waveframe Guard",
-    version="0.3.1",
+    version="0.5.0",
     description="Local enforcement SDK and simulation environment for AI governance"
 )
 
@@ -928,7 +928,7 @@ def simulate_activity_once():
 
         compiled_contract = {
             "contract_id": "demo-policy",
-            "contract_version": "0.3.1",
+            "contract_version": "0.5.0",
             "authority_requirements": {
                 "required_roles": ["proposer", "responsible", "accountable"],
             },
@@ -1340,7 +1340,7 @@ def dashboard_embed(db: Session = Depends(get_db)):
                     </div>
                 </div>
 
-                <p><strong>Policy:</strong> ${{log.policy_id || "finance-core"}}</p>
+                <p><strong>Policy:</strong> ${{log.policy_id || "finance-policy"}}</p>
 
                 <div style="margin-bottom:16px;">
                     <div style="font-size:12px; color:gray;">Summary</div>
@@ -1649,13 +1649,13 @@ def ui():
                             <div class="form-group">
                                 <label>Policy</label>
                                 <select id="policySelect">
-                                    <option value="finance-core">finance-core</option>
+                                    <option value="finance-policy">finance-policy</option>
                                 </select>
                             </div>
                             <div class="form-group">
                                 <label>Governance Policy</label>
                                 <div class="reason-box">
-                                    <div><strong>Policy:</strong> finance-core (v1.2)</div>
+                                    <div><strong>Policy:</strong> finance-policy@1.0.0</div>
                                     <div style="margin-top:6px;"><strong>Approval threshold:</strong> $1,000</div>
                                 </div>
                             </div>
@@ -1736,7 +1736,7 @@ def ui():
                     </div>
                     <div class="identity-item">
                         <div class="identity-key">Policy</div>
-                        <div class="identity-value">finance-core (v1.2)</div>
+                        <div class="identity-value">finance-policy@1.0.0</div>
                     </div>
                     <div class="identity-item">
                         <div class="identity-key">Approval threshold</div>
@@ -1883,8 +1883,8 @@ async function runValidation() {
         const approved_by = document.getElementById("approved_by").value;
 
         const compiledContract = {
-            contract_id: "finance-core",
-            contract_version: "0.3.1",
+            contract_id: "finance-policy",
+            contract_version: "0.5.0",
             authority_requirements: {
                 required_roles: ["proposer", "responsible", "accountable"]
             },

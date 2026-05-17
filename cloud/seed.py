@@ -18,8 +18,8 @@ API_KEY_VALUE = os.getenv("WF_DEMO_API_KEY", "wf_demo_key_placeholder")
 POLICY_ID = "demo_policy_1"
 
 SAMPLE_COMPILED_CONTRACT = {
-    "contract_id": "finance-core",
-    "contract_version": "0.3.1",
+    "contract_id": "finance-policy",
+    "contract_version": "1.0.0",
     "authority_requirements": {
         "required_roles": ["proposer", "responsible", "accountable"]
     },
@@ -108,7 +108,7 @@ def run():
         if not policy:
             policy = Policy(
                 id=POLICY_ID,
-                name="finance-core",
+                name="finance-policy",
                 organization_id=ORG_ID
             )
             db.add(policy)
@@ -123,7 +123,7 @@ def run():
         if not policy.versions:
             version = PolicyVersion(
                 policy_id=policy.id,
-                version="0.3.1",
+                version="1.0.0",
                 compiled_contract_json=json.dumps(SAMPLE_COMPILED_CONTRACT)
             )
             db.add(version)

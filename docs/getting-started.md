@@ -12,7 +12,7 @@ pip install waveframe-guard cricore-contract-compiler cricore-proposal-normalize
 
 ## Basic Usage
 
-This example assumes a published contract artifact exists at `contracts/finance-core-0.3.1.contract.json`. In your application, point `contract_path` at the contract published by your governance workflow.
+This example assumes a published contract artifact exists at `contracts/finance-policy-1.0.0.contract.json`. In your application, point `contract_path` at the contract published by your governance workflow.
 
 ```python
 from pathlib import Path
@@ -22,7 +22,7 @@ from waveframe_guard import install_guard, guard
 # 1. Install Guard context from a published contract
 install_guard(
     actor={"id": "user-1", "type": "human", "role": "intern"},
-    contract_path=Path("contracts") / "finance-core-0.3.1.contract.json"
+    contract_path=Path("contracts") / "finance-policy-1.0.0.contract.json"
 )
 
 # 2. Protect a function
@@ -47,7 +47,7 @@ from pathlib import Path
 
 install_guard(
     actor={"id": "user-1", "type": "human", "role": "manager"},
-    contract_path=Path("contracts") / "finance-core-0.3.1.contract.json"
+    contract_path=Path("contracts") / "finance-policy-1.0.0.contract.json"
 )
 
 transfer(100)
@@ -68,6 +68,24 @@ install_guard(
 ```
 
 If no cached contract is available, Cloud mode fetches a published contract before enforcement.
+
+## Governed Runtime
+
+```python
+from waveframe_guard import GovernedRuntime
+
+runtime = GovernedRuntime(registry_path="contracts/index.json")
+runtime.install_actor({"id": "user-1", "type": "human", "role": "manager"})
+runtime.bind_contract("finance-policy@1.0.0")
+
+result = runtime.execute(
+    fn=transfer,
+    args=(100,),
+    raise_on_block=False,
+)
+```
+
+Explicit authority refs are canonical for runtime execution. Bind or pass `finance-policy@1.0.0`, not an unversioned `finance-policy`.
 
 In cloud mode:
 
