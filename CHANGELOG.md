@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- Added `GuardRuntime.from_cloud(...)` as a developer-friendly alias for local-first Cloud-connected runtime setup.
+- Added durable local evidence spooling under `pending/`, `sent/`, and `failed/` with explicit `flush_evidence()`.
+- Added SDK-local runtime diagnostics for authority resolution, revoked authority rejection, lineage validation failures, and admissibility evaluation lifecycle.
+
 ## [0.6.1] - Runtime Lifecycle Patch
 
 ### Fixed

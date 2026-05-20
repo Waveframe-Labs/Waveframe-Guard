@@ -183,6 +183,8 @@ def test_guard_can_require_verified_authority_lineage(tmp_path):
         assert str(exc) == "Authority provenance verification failed: missing lineage"
     else:
         raise AssertionError("expected provenance-gated execution to fail closed")
+    assert runtime.runtime_logs[-1]["event_type"] == "lineage_validation_failed"
+    assert runtime.runtime_logs[-1]["reason"] == "missing lineage"
 
 
 def _compiled_contract():

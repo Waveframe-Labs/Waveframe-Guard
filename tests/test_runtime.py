@@ -101,6 +101,8 @@ def test_runtime_rejects_revoked_authority_before_execution(tmp_path):
         "authority_ref": "finance-policy@1.0.0",
         "status": "revoked",
     }
+    assert runtime.runtime_logs[-1]["event_type"] == "revoked_authority_rejected"
+    assert runtime.runtime_logs[-1]["authority_ref"] == "finance-policy@1.0.0"
     assert runtime.last_event is None
     assert runtime.last_contract_source is None
 

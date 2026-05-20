@@ -36,6 +36,9 @@ class GovernedRuntime:
         registry_url=None,
         audit_path=None,
         cache_dir=None,
+        evidence_dir=None,
+        runtime_log_path=None,
+        cloud_api_key=None,
         offline=False,
         require_verified_lineage=False,
         reject_revoked_authority=True,
@@ -49,6 +52,9 @@ class GovernedRuntime:
         self.registry_path = Path(registry_path) if registry_path is not None else None
         self.registry_url = registry_url.rstrip("/") + "/" if registry_url is not None else None
         self.cache_dir = Path(cache_dir) if cache_dir is not None else self._default_cache_dir()
+        self.evidence_dir = Path(evidence_dir) if evidence_dir is not None else None
+        self.runtime_log_path = Path(runtime_log_path) if runtime_log_path is not None else None
+        self.cloud_api_key = cloud_api_key
         self.offline = offline
         self.require_verified_lineage = require_verified_lineage
         self.reject_revoked_authority = reject_revoked_authority
@@ -56,6 +62,7 @@ class GovernedRuntime:
         self.registry = self._load_registry()
         self.audit_path = Path(audit_path) if audit_path is not None else None
         self.audit_events = []
+        self.runtime_logs = []
         self.last_event = None
         self.last_contract_source = None
         self.last_cache_path = None
@@ -63,6 +70,37 @@ class GovernedRuntime:
         self.actor = None
         self.contract_id = None
         self.contract_version = None
+
+        if self.evidence_dir is not None:
+            for queue in ["pending", "sent", "failed"]:
+                (self.evidence_dir / queue).mkdir(parents=True, exist_ok=True)
+
+    @classmethod
+    def from_cloud(
+        cls,
+        *,
+        authority,
+        api_key,
+        base_url="http://localhost:8000",
+        cache_dir=None,
+        evidence_dir=None,
+        runtime_log_path=None,
+        actor=None,
+        **kwargs,
+    ):
+        evidence_root = Path(evidence_dir) if evidence_dir is not None else Path.cwd() / ".waveframe_guard" / "evidence"
+        runtime = cls(
+            registry_url=base_url,
+            cache_dir=cache_dir,
+            evidence_dir=evidence_root,
+            runtime_log_path=runtime_log_path or evidence_root / "runtime-logs.jsonl",
+            cloud_api_key=api_key,
+            **kwargs,
+        )
+        runtime.bind_contract(authority)
+        if actor is not None:
+            runtime.install_actor(actor)
+        return runtime
 
     def install_actor(self, actor):
         self.actor = actor
@@ -89,6 +127,10 @@ class GovernedRuntime:
     ):
         actor = self._resolve_actor(actor)
         contract_id, contract_version = self._resolve_contract_binding(contract_id, contract_version)
+        self._log_runtime_event(
+            "authority_resolution_started",
+            authority_ref=_contract_ref(contract_id, contract_version),
+        )
         entry = self._resolve_authority_entry(contract_id, contract_version)
         contract = self._load_contract_from_entry(entry)
         self._enforce_authority_lineage(contract)
@@ -105,9 +147,20 @@ class GovernedRuntime:
         except SchemaValidationError as exc:
             raise GovernanceError(f"Malformed execution state: {exc}") from exc
 
+        self._log_runtime_event(
+            "admissibility_evaluation_started",
+            authority_ref=_contract_ref(contract_id, contract_version),
+            action=execution_state.get("action"),
+        )
         approval_decision = _evaluate_approval_admissibility(
             contract=contract,
             execution_state=execution_state,
+        )
+        self._log_runtime_event(
+            "admissibility_evaluation_completed",
+            authority_ref=_contract_ref(contract_id, contract_version),
+            allowed=approval_decision["allowed"],
+            reason=approval_decision["reason"],
         )
         if not approval_decision["allowed"]:
             error = f"Execution blocked: {approval_decision['reason']}"
@@ -216,6 +269,10 @@ class GovernedRuntime:
     ):
         actor = self._resolve_actor(actor)
         contract_id, contract_version = self._resolve_contract_binding(contract_id, contract_version)
+        self._log_runtime_event(
+            "authority_resolution_started",
+            authority_ref=_contract_ref(contract_id, contract_version),
+        )
         entry = self._resolve_authority_entry(contract_id, contract_version)
         contract = self._load_contract_from_entry(entry)
         self._enforce_authority_lineage(contract)
@@ -230,6 +287,13 @@ class GovernedRuntime:
             proposal=proposal,
             compiled_contract=contract,
             run_context=_build_run_context(actor, contract, "local"),
+        )
+        self._log_runtime_event(
+            "admissibility_evaluation_completed",
+            authority_ref=_contract_ref(contract_id, contract_version),
+            allowed=decision.commit_allowed,
+            reason="execution allowed" if decision.commit_allowed else decision_blocked_reason(decision),
+            execution_type="proposal",
         )
 
         if decision.commit_allowed:
@@ -299,7 +363,17 @@ class GovernedRuntime:
         return self._load_contract_from_entry(entry)
 
     def _resolve_authority_entry(self, contract_id, contract_version=None):
-        entry = self._lookup_contract(contract_id, contract_version)
+        authority_ref = _contract_ref(contract_id, contract_version)
+        try:
+            entry = self._lookup_contract(contract_id, contract_version)
+        except Exception as exc:
+            self._log_runtime_event(
+                "authority_resolution_failed",
+                authority_ref=authority_ref,
+                error=str(exc),
+            )
+            raise
+        self._log_runtime_event("authority_resolution_completed", authority_ref=authority_ref)
         self._validate_authority_lifecycle(entry)
         return entry
 
@@ -424,15 +498,22 @@ class GovernedRuntime:
 
     def _fetch_json(self, path):
         url = urljoin(self.registry_url, path)
-        with request.urlopen(url, timeout=5) as response:
+        headers = {}
+        if self.cloud_api_key:
+            headers["Authorization"] = f"Bearer {self.cloud_api_key}"
+        req = request.Request(url, headers=headers, method="GET")
+        with request.urlopen(req, timeout=5) as response:
             return json.loads(response.read().decode("utf-8"))
 
     def _post_json(self, path, payload):
         body = json.dumps(payload, sort_keys=True).encode("utf-8")
+        headers = {"Content-Type": "application/json"}
+        if self.cloud_api_key:
+            headers["Authorization"] = f"Bearer {self.cloud_api_key}"
         req = request.Request(
             urljoin(self.registry_url, path),
             data=body,
-            headers={"Content-Type": "application/json"},
+            headers=headers,
             method="POST",
         )
         with request.urlopen(req, timeout=5) as response:
@@ -476,6 +557,11 @@ class GovernedRuntime:
         authority_ref = lifecycle["authority_ref"]
         status = lifecycle["status"]
         if status == "revoked" and self.reject_revoked_authority:
+            self._log_runtime_event(
+                "revoked_authority_rejected",
+                authority_ref=authority_ref,
+                lifecycle=lifecycle,
+            )
             raise GovernanceError(f"Authority lifecycle invalidated: {authority_ref} is revoked")
         if status == "superseded" and self.warn_on_superseded:
             warnings.warn(
@@ -489,13 +575,32 @@ class GovernedRuntime:
             return
         lineage = contract.get("lineage")
         if not isinstance(lineage, dict):
+            self._log_runtime_event(
+                "lineage_validation_failed",
+                authority_ref=_contract_ref(contract.get("contract_id"), contract.get("contract_version")),
+                reason="missing lineage",
+            )
             raise GovernanceError("Authority provenance verification failed: missing lineage")
         if lineage.get("schema_version") != "governance_authority_lineage.v1":
+            self._log_runtime_event(
+                "lineage_validation_failed",
+                authority_ref=_contract_ref(contract.get("contract_id"), contract.get("contract_version")),
+                reason="unsupported lineage schema",
+            )
             raise GovernanceError("Authority provenance verification failed: unsupported lineage schema")
         for field in ["source_hash", "compilation_report_hash"]:
             value = lineage.get(field)
             if not isinstance(value, str) or not value.startswith("sha256:"):
+                self._log_runtime_event(
+                    "lineage_validation_failed",
+                    authority_ref=_contract_ref(contract.get("contract_id"), contract.get("contract_version")),
+                    reason=f"missing {field}",
+                )
                 raise GovernanceError(f"Authority provenance verification failed: missing {field}")
+        self._log_runtime_event(
+            "lineage_validation_completed",
+            authority_ref=_contract_ref(contract.get("contract_id"), contract.get("contract_version")),
+        )
 
     def _build_event(
         self,
@@ -568,7 +673,9 @@ class GovernedRuntime:
             with self.audit_path.open("a", encoding="utf-8") as f:
                 f.write(json.dumps(event, sort_keys=True) + "\n")
 
-        if self.registry_url is not None and not self.offline:
+        if self.evidence_dir is not None:
+            self._queue_evidence_event(event)
+        elif self.registry_url is not None and not self.offline:
             event["audit_receipt"] = self._post_json("audit-events", event)
 
     def _blocked_reason(self, error):
@@ -577,6 +684,55 @@ class GovernedRuntime:
             return error[len(prefix):]
 
         return error
+
+    def _queue_evidence_event(self, event):
+        pending_path = self.evidence_dir / "pending" / f"{event['event_id']}.json"
+        pending_path.write_text(json.dumps(event, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    def flush_evidence(self):
+        if self.evidence_dir is None:
+            return {"pending": 0, "sent": 0, "failed": 0}
+        if self.registry_url is None or self.offline:
+            return self._evidence_counts()
+
+        for queue in ["pending", "failed"]:
+            for evidence_path in sorted((self.evidence_dir / queue).glob("*.json")):
+                payload = json.loads(evidence_path.read_text(encoding="utf-8"))
+                payload.pop("audit_receipt", None)
+                try:
+                    receipt = self._post_json("audit-events", payload)
+                except Exception as exc:
+                    payload["flush_error"] = str(exc)
+                    failed_path = self.evidence_dir / "failed" / evidence_path.name
+                    failed_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+                    if evidence_path != failed_path:
+                        evidence_path.unlink()
+                    continue
+
+                payload["audit_receipt"] = receipt
+                sent_path = self.evidence_dir / "sent" / evidence_path.name
+                sent_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+                evidence_path.unlink()
+        return self._evidence_counts()
+
+    def _evidence_counts(self):
+        return {
+            queue: len(list((self.evidence_dir / queue).glob("*.json")))
+            for queue in ["pending", "sent", "failed"]
+        }
+
+    def _log_runtime_event(self, event_type, **details):
+        event = {
+            "event_type": event_type,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            **details,
+        }
+        self.runtime_logs.append(event)
+        if self.runtime_log_path is not None:
+            self.runtime_log_path.parent.mkdir(parents=True, exist_ok=True)
+            with self.runtime_log_path.open("a", encoding="utf-8") as f:
+                f.write(json.dumps(event, sort_keys=True) + "\n")
+        return event
 
 
 def _entry_version(entry):
@@ -902,3 +1058,6 @@ def _validate_registry_integrity(registry):
     actual_hash = _normalize_hash(hashlib.sha256(canonical.encode("utf-8")).hexdigest())
     if actual_hash != registry_hash:
         raise GovernanceError("Registry hash mismatch")
+
+
+GuardRuntime = GovernedRuntime

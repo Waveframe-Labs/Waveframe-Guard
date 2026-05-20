@@ -107,6 +107,39 @@ result = runtime.execute(
 
 Per-call `actor` and versioned `contract_id` values still work and override the bound context for that call.
 
+## Cloud-Connected Runtime
+
+For application code, `GuardRuntime.from_cloud(...)` is the ergonomic local-first path:
+
+```python
+from waveframe_guard import GuardRuntime
+
+runtime = GuardRuntime.from_cloud(
+    authority="finance-policy@1.0.0",
+    api_key="...",
+)
+
+result = runtime.execute(
+    actor={"id": "user-1", "type": "human", "role": "manager"},
+    fn=transfer,
+    args=(1250000,),
+    raise_on_block=False,
+)
+
+runtime.flush_evidence()
+```
+
+`execute(...)` still enforces locally. It writes governed execution evidence to a local durable spool first:
+
+```text
+.waveframe_guard/evidence/
+  pending/
+  sent/
+  failed/
+```
+
+Cloud availability is only required when you explicitly call `flush_evidence()`. If a flush fails, evidence is retained under `failed/` and can be flushed again later. Runtime diagnostics such as authority resolution, revoked authority rejection, lineage validation failures, and admissibility evaluation lifecycle are kept in `runtime.runtime_logs` and, for `from_cloud(...)`, appended locally to `runtime-logs.jsonl`.
+
 ## Authority Lifecycle Awareness
 
 Registry entries may include authority lifecycle metadata supplied by Cloud:

@@ -7,7 +7,7 @@ from wsgiref.simple_server import make_server
 
 
 from compiler.compile_policy import compile_policy
-from waveframe_guard import GovernedRuntime
+from waveframe_guard import GuardRuntime, GovernedRuntime
 
 
 def transfer(amount: int) -> str:
@@ -48,16 +48,17 @@ def seed_cloud_data(data_root):
     return contract
 
 
-def serve_cloud(data_root):
-    app = _registry_app(data_root)
+def serve_cloud(data_root, state=None):
+    app = _registry_app(data_root, state=state)
     server = make_server("127.0.0.1", 0, app)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     return server, f"http://127.0.0.1:{server.server_port}"
 
 
-def _registry_app(data_root):
+def _registry_app(data_root, state=None):
     data_root = Path(data_root)
+    state = state or {"audit_available": True}
 
     def app(environ, start_response):
         method = environ["REQUEST_METHOD"]
@@ -69,6 +70,9 @@ def _registry_app(data_root):
             contract_path = data_root / "contracts" / f"{contract_id}-{version}.contract.json"
             return _json_response(start_response, _read_json(contract_path))
         if method == "POST" and path == "audit-events":
+            if not state.get("audit_available", True):
+                start_response("503 Service Unavailable", [("Content-Type", "application/json")])
+                return [b'{"error":"audit unavailable"}']
             length = int(environ.get("CONTENT_LENGTH") or "0")
             body = environ["wsgi.input"].read(length)
             event = json.loads(body.decode("utf-8"))
@@ -248,6 +252,53 @@ def test_governed_runtime_fetches_contract_from_cloud_and_enforces_locally(tmp_p
     )
     assert offline_allowed.allowed is True
     assert offline_allowed.event["contract_source"] == "cache"
+
+
+def test_guard_runtime_from_cloud_spools_evidence_until_explicit_flush(tmp_path):
+    seed_cloud_data(tmp_path / "cloud-data")
+    state = {"audit_available": True}
+    server, registry_url = serve_cloud(tmp_path / "cloud-data", state=state)
+    evidence_dir = tmp_path / "guard-evidence"
+
+    try:
+        runtime = GuardRuntime.from_cloud(
+            authority="finance-policy@1.0.0",
+            api_key="test-key",
+            base_url=registry_url,
+            cache_dir=tmp_path / "guard-cache",
+            evidence_dir=evidence_dir,
+            actor={"id": "manager-1", "type": "human", "role": "manager"},
+        )
+
+        result = runtime.execute(
+            fn=transfer,
+            args=(1_250_000,),
+            raise_on_block=False,
+        )
+        assert result.allowed is True
+        assert result.audit_receipt is None
+        assert runtime._evidence_counts() == {"pending": 1, "sent": 0, "failed": 0}
+        assert not (tmp_path / "cloud-data" / "audits").exists()
+
+        state["audit_available"] = False
+        assert runtime.flush_evidence() == {"pending": 0, "sent": 0, "failed": 1}
+        failed_payload = json.loads(next((evidence_dir / "failed").glob("*.json")).read_text(encoding="utf-8"))
+        assert failed_payload["event_id"] == result.event["event_id"]
+        assert failed_payload["flush_error"]
+
+        state["audit_available"] = True
+        assert runtime.flush_evidence() == {"pending": 0, "sent": 1, "failed": 0}
+        sent_payload = json.loads(next((evidence_dir / "sent").glob("*.json")).read_text(encoding="utf-8"))
+        assert sent_payload["audit_receipt"]["status"] == "accepted"
+
+        runtime_log_types = [event["event_type"] for event in runtime.runtime_logs]
+        assert "authority_resolution_started" in runtime_log_types
+        assert "authority_resolution_completed" in runtime_log_types
+        assert "admissibility_evaluation_started" in runtime_log_types
+        assert "admissibility_evaluation_completed" in runtime_log_types
+    finally:
+        server.shutdown()
+        server.server_close()
 
 
 def test_governed_runtime_rejects_unversioned_contract_binding(tmp_path):
