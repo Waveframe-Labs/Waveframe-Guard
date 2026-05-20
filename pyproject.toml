@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=77.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "waveframe-guard"
-version = "0.5.0"
+version = "0.6.0"
 description = "Local enforcement SDK and simulation environment for AI governance."
 authors = [
     { name = "Shawn Wright", email = "swright@waveframelabs.org" }
@@ -14,12 +14,12 @@ requires-python = ">=3.9"
 keywords = ["ai governance", "policy enforcement", "execution control", "compliance", "audit"]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: Other/Proprietary License",
     "Operating System :: OS Independent",
 ]
 
 # 🔒 Proprietary license
-license = { text = "Proprietary" }
+license = "LicenseRef-Proprietary"
+license-files = ["LICENSE"]
 
 dependencies = [
     "cricore",

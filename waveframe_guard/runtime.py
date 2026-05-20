@@ -2,6 +2,7 @@ from pathlib import Path
 from datetime import datetime, timezone
 import hashlib
 import json
+import warnings
 from uuid import uuid4
 from urllib import request
 from urllib.error import URLError
@@ -37,6 +38,8 @@ class GovernedRuntime:
         cache_dir=None,
         offline=False,
         require_verified_lineage=False,
+        reject_revoked_authority=True,
+        warn_on_superseded=True,
     ):
         if registry_path is None and registry_url is None:
             raise ValueError("registry_path or registry_url is required")
@@ -48,12 +51,15 @@ class GovernedRuntime:
         self.cache_dir = Path(cache_dir) if cache_dir is not None else self._default_cache_dir()
         self.offline = offline
         self.require_verified_lineage = require_verified_lineage
+        self.reject_revoked_authority = reject_revoked_authority
+        self.warn_on_superseded = warn_on_superseded
         self.registry = self._load_registry()
         self.audit_path = Path(audit_path) if audit_path is not None else None
         self.audit_events = []
         self.last_event = None
         self.last_contract_source = None
         self.last_cache_path = None
+        self.last_authority_lifecycle = None
         self.actor = None
         self.contract_id = None
         self.contract_version = None
@@ -288,6 +294,7 @@ class GovernedRuntime:
 
     def _load_contract(self, contract_id, contract_version=None):
         entry = self._lookup_contract(contract_id, contract_version)
+        self._validate_authority_lifecycle(entry)
         if self.registry_url is not None:
             return self._load_remote_contract(entry)
 
@@ -332,7 +339,7 @@ class GovernedRuntime:
             candidates = [
                 entry
                 for entry in contracts
-                if entry.get("contract_id") == contract_id or entry.get("id") == contract_id
+                if _entry_contract_id(entry) == contract_id
             ]
             if contract_version is not None:
                 for entry in candidates:
@@ -372,8 +379,8 @@ class GovernedRuntime:
         if not isinstance(entry, dict):
             raise ValueError("Remote registry entries must be objects")
 
-        contract_id = entry.get("contract_id") or entry.get("id")
-        version = entry.get("contract_version") or entry.get("version")
+        contract_id = _entry_contract_id(entry)
+        version = _entry_version(entry)
         if not contract_id or not version:
             raise ValueError("Remote registry entry is missing contract identity")
 
@@ -442,11 +449,31 @@ class GovernedRuntime:
         path.write_text(serialized, encoding="utf-8")
 
     def _contract_metadata(self, contract):
-        return {
+        metadata = {
             "contract_id": contract.get("contract_id"),
             "contract_version": contract.get("contract_version"),
             "contract_hash": contract.get("contract_hash"),
         }
+        if self.last_authority_lifecycle is not None:
+            metadata["authority_lifecycle"] = self.last_authority_lifecycle
+        return metadata
+
+    def _validate_authority_lifecycle(self, entry):
+        lifecycle = _authority_lifecycle(entry)
+        self.last_authority_lifecycle = lifecycle
+        if lifecycle is None:
+            return
+
+        authority_ref = lifecycle["authority_ref"]
+        status = lifecycle["status"]
+        if status == "revoked" and self.reject_revoked_authority:
+            raise GovernanceError(f"Authority lifecycle invalidated: {authority_ref} is revoked")
+        if status == "superseded" and self.warn_on_superseded:
+            warnings.warn(
+                f"Authority lifecycle warning: {authority_ref} is superseded",
+                RuntimeWarning,
+                stacklevel=3,
+            )
 
     def _enforce_authority_lineage(self, contract):
         if not self.require_verified_lineage:
@@ -545,7 +572,24 @@ class GovernedRuntime:
 
 def _entry_version(entry):
     if isinstance(entry, dict):
-        return entry.get("contract_version") or entry.get("version")
+        version = entry.get("contract_version") or entry.get("version")
+        if version:
+            return version
+        authority_ref = entry.get("authority_ref") or entry.get("contract_ref")
+        if isinstance(authority_ref, str) and "@" in authority_ref:
+            return authority_ref.split("@", 1)[1]
+    return None
+
+
+def _entry_contract_id(entry):
+    if not isinstance(entry, dict):
+        return None
+    contract_id = entry.get("contract_id") or entry.get("id")
+    if contract_id:
+        return contract_id
+    authority_ref = entry.get("authority_ref") or entry.get("contract_ref")
+    if isinstance(authority_ref, str) and "@" in authority_ref:
+        return authority_ref.split("@", 1)[0]
     return None
 
 
@@ -553,6 +597,26 @@ def _contract_ref(contract_id, contract_version=None):
     if contract_version is None:
         return contract_id
     return f"{contract_id}@{contract_version}"
+
+
+def _authority_lifecycle(entry):
+    if not isinstance(entry, dict):
+        return None
+    status = entry.get("status") or entry.get("authority_status") or entry.get("lifecycle_status")
+    if not isinstance(status, str) or not status.strip():
+        return None
+    contract_id = _entry_contract_id(entry)
+    contract_version = _entry_version(entry)
+    authority_ref = entry.get("authority_ref") or _contract_ref(contract_id, contract_version)
+    lifecycle = {
+        "authority_ref": authority_ref,
+        "status": status.strip().lower(),
+    }
+    if entry.get("superseded_by") is not None:
+        lifecycle["superseded_by"] = entry.get("superseded_by")
+    if entry.get("status_reason") is not None:
+        lifecycle["status_reason"] = entry.get("status_reason")
+    return lifecycle
 
 
 def _has_approval_requirements(contract):
@@ -784,7 +848,7 @@ def _version_tuple(version):
 def _validate_contract_against_entry(entry, contract):
     if isinstance(entry, str):
         return
-    contract_id = entry.get("contract_id") or entry.get("id")
+    contract_id = _entry_contract_id(entry)
     contract_version = _entry_version(entry)
     authority_ref = _contract_ref(contract_id, contract_version)
     if contract.get("contract_id") != contract_id:

@@ -22,7 +22,7 @@ from cricore.interface.evaluate_proposal import evaluate_proposal
 
 app = FastAPI(
     title="Waveframe Guard",
-    version="0.5.0",
+    version="0.6.0",
     description="Local enforcement SDK and simulation environment for AI governance"
 )
 
@@ -928,7 +928,7 @@ def simulate_activity_once():
 
         compiled_contract = {
             "contract_id": "demo-policy",
-            "contract_version": "0.5.0",
+            "contract_version": "0.6.0",
             "authority_requirements": {
                 "required_roles": ["proposer", "responsible", "accountable"],
             },
@@ -1884,7 +1884,7 @@ async function runValidation() {
 
         const compiledContract = {
             contract_id: "finance-policy",
-            contract_version: "0.5.0",
+            contract_version: "0.6.0",
             authority_requirements: {
                 required_roles: ["proposer", "responsible", "accountable"]
             },

@@ -4,7 +4,7 @@ Stop unsafe AI and automated actions **before they execute**.
 
 Waveframe Guard enforces governance at the execution boundary. If an action violates policy, it never runs.
 
-Current release: `0.5.0`.
+Current release: `0.6.0`.
 
 ## Example
 
@@ -39,7 +39,9 @@ For applications that want to resolve published contracts from a registry, use `
 from waveframe_guard import GovernedRuntime
 
 runtime = GovernedRuntime(
-    registry_path="contracts/index.json"
+    registry_path="contracts/index.json",
+    reject_revoked_authority=True,
+    warn_on_superseded=True,
 )
 runtime.bind_contract("finance-policy@1.0.0")
 
@@ -80,6 +82,7 @@ The registry can map contract IDs to published contract artifacts:
       "contract_id": "finance-policy",
       "contract_version": "1.0.0",
       "contract_hash": "sha256:...",
+      "status": "active",
       "path": "finance-policy-1.0.0.contract.json"
     }
   ]
@@ -103,6 +106,22 @@ result = runtime.execute(
 ```
 
 Per-call `actor` and versioned `contract_id` values still work and override the bound context for that call.
+
+## Authority Lifecycle Awareness
+
+Registry entries may include authority lifecycle metadata supplied by Cloud:
+
+```json
+{
+  "authority_ref": "finance-policy@1.0.0",
+  "status": "revoked"
+}
+```
+
+Guard evaluates lifecycle state before admissibility or function execution. Cloud can publish lifecycle metadata, but Cloud does not decide admissibility; Guard still evaluates the compiled authority locally.
+
+- `revoked` fails closed with `GovernanceError` when `reject_revoked_authority=True`.
+- `superseded` is warning-only when `warn_on_superseded=True`, records `authority_lifecycle` metadata on the result and event, and still allows intentionally pinned versions to execute.
 
 ## Replay Admissibility
 

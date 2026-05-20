@@ -1,4 +1,5 @@
 import json
+from unittest.mock import patch
 
 import pytest
 from compiler.compile_policy import compile_policy
@@ -18,18 +19,18 @@ def write_contract(tmp_path):
     return contract_path
 
 
-def write_registry(tmp_path, contract_path):
+def write_registry(tmp_path, contract_path, **entry_metadata):
     registry_path = tmp_path / "index.json"
+    entry = {
+        "contract_id": "finance-policy",
+        "contract_version": "1.0.0",
+        "path": contract_path.name,
+    }
+    entry.update(entry_metadata)
     registry_path.write_text(
         json.dumps(
             {
-                "contracts": [
-                    {
-                        "contract_id": "finance-policy",
-                        "contract_version": "1.0.0",
-                        "path": contract_path.name,
-                    }
-                ],
+                "contracts": [entry],
             }
         ),
         encoding="utf-8",
@@ -68,6 +69,71 @@ def test_runtime_blocks_unauthorized_actor(tmp_path):
             fn=transfer,
             args=(1250000,),
         )
+
+
+def test_runtime_rejects_revoked_authority_before_execution(tmp_path):
+    contract_path = write_contract(tmp_path)
+    registry_path = write_registry(tmp_path, contract_path, status="revoked")
+    runtime = GovernedRuntime(registry_path=registry_path)
+    called = False
+
+    def transfer(amount):
+        nonlocal called
+        called = True
+        return f"transferred {amount}"
+
+    with patch("waveframe_guard.runtime._evaluate_approval_admissibility") as admissibility:
+        with pytest.raises(
+            GovernanceError,
+            match="Authority lifecycle invalidated: finance-policy@1.0.0 is revoked",
+        ):
+            runtime.execute(
+                actor={"id": "user-1", "type": "human", "role": "manager"},
+                contract_id="finance-policy@1.0.0",
+                fn=transfer,
+                args=(125,),
+                raise_on_block=False,
+            )
+
+    assert called is False
+    admissibility.assert_not_called()
+    assert runtime.last_authority_lifecycle == {
+        "authority_ref": "finance-policy@1.0.0",
+        "status": "revoked",
+    }
+    assert runtime.last_event is None
+    assert runtime.last_contract_source is None
+
+
+def test_runtime_warns_on_superseded_authority_and_records_metadata(tmp_path):
+    contract_path = write_contract(tmp_path)
+    registry_path = write_registry(
+        tmp_path,
+        contract_path,
+        status="superseded",
+        superseded_by="finance-policy@1.1.0",
+    )
+    runtime = GovernedRuntime(registry_path=registry_path)
+
+    def transfer(amount):
+        return f"transferred {amount}"
+
+    with pytest.warns(RuntimeWarning, match="finance-policy@1.0.0 is superseded"):
+        result = runtime.execute(
+            actor={"id": "user-1", "type": "human", "role": "manager"},
+            contract_id="finance-policy@1.0.0",
+            fn=transfer,
+            args=(125,),
+            raise_on_block=False,
+        )
+
+    assert result.allowed is True
+    assert result.authority_lifecycle == {
+        "authority_ref": "finance-policy@1.0.0",
+        "status": "superseded",
+        "superseded_by": "finance-policy@1.1.0",
+    }
+    assert result.event["authority_lifecycle"] == result.authority_lifecycle
 
 
 def test_runtime_raises_for_unknown_contract(tmp_path):

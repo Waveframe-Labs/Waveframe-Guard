@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.6.0] - Authority Lifecycle Enforcement
+
+### Added
+- Added authority lifecycle validation during runtime authority resolution.
+- Added `reject_revoked_authority` and `warn_on_superseded` runtime configuration flags.
+- Added `authority_lifecycle` metadata to governed execution results and events when registry entries declare lifecycle state.
+
+### Fixed
+- Revoked authorities now fail before admissibility evaluation or governed execution.
+- Superseded authorities now emit warning and result/event lifecycle metadata without blocking intentionally pinned versions.
+
+### Changed
+- Updated package, SDK, citation, README, and Cloud preview metadata for the v0.6.0 release.
+
+### Verified
+- Full Guard suite passes: `34 passed`.
+- Build produces `waveframe_guard-0.6.0.tar.gz` and `waveframe_guard-0.6.0-py3-none-any.whl`.
+- Built wheel metadata reports `Version: 0.6.0`.
+- Built wheel exposes `evaluate_admissibility` from both `waveframe_guard` and `waveframe_guard.runtime`.
+
 ## [0.5.0] - Authority Ref Stabilization
 
 ### Changed
