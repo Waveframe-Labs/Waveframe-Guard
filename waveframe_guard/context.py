@@ -66,6 +66,10 @@ def get_context():
     return ctx if ctx is not None else {}
 
 
+def clear_context():
+    _guard_context.set(None)
+
+
 def resolve_actor():
     return {
         "id": os.getenv("USER") or "unknown",

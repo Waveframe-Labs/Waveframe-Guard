@@ -89,7 +89,8 @@ class GovernedRuntime:
     ):
         actor = self._resolve_actor(actor)
         contract_id, contract_version = self._resolve_contract_binding(contract_id, contract_version)
-        contract = self._load_contract(contract_id, contract_version)
+        entry = self._resolve_authority_entry(contract_id, contract_version)
+        contract = self._load_contract_from_entry(entry)
         self._enforce_authority_lineage(contract)
         execution_state = _build_execution_state(
             actor=actor,
@@ -215,7 +216,8 @@ class GovernedRuntime:
     ):
         actor = self._resolve_actor(actor)
         contract_id, contract_version = self._resolve_contract_binding(contract_id, contract_version)
-        contract = self._load_contract(contract_id, contract_version)
+        entry = self._resolve_authority_entry(contract_id, contract_version)
+        contract = self._load_contract_from_entry(entry)
         self._enforce_authority_lineage(contract)
 
         install_guard(
@@ -293,8 +295,15 @@ class GovernedRuntime:
             return registry
 
     def _load_contract(self, contract_id, contract_version=None):
+        entry = self._resolve_authority_entry(contract_id, contract_version)
+        return self._load_contract_from_entry(entry)
+
+    def _resolve_authority_entry(self, contract_id, contract_version=None):
         entry = self._lookup_contract(contract_id, contract_version)
         self._validate_authority_lifecycle(entry)
+        return entry
+
+    def _load_contract_from_entry(self, entry):
         if self.registry_url is not None:
             return self._load_remote_contract(entry)
 

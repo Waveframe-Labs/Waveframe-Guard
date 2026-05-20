@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.6.1] - Runtime Lifecycle Patch
+
+### Fixed
+- Fixed runtime lifecycle validation ordering for revoked and superseded authorities.
+- Fixed test isolation issues caused by site-packages import precedence during pytest collection.
+- Added explicit Guard context reset between tests.
+- Added repository-local import enforcement in test configuration.
+
+### Reliability
+- Revoked-authority validation is now consistently enforced before admissibility evaluation.
+- Superseded-authority warnings now behave consistently across full-suite execution.
+- Runtime lifecycle semantics verified under isolated and full-suite test execution.
+
+### Verified
+- Full Guard suite passes: `34 passed`.
+- Build produces `waveframe_guard-0.6.1.tar.gz` and `waveframe_guard-0.6.1-py3-none-any.whl`.
+- Built wheel metadata reports `Version: 0.6.1`.
+
 ## [0.6.0] - Authority Lifecycle Enforcement
 
 ### Added
