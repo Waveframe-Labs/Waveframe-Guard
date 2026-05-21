@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.7.1] - Release Metadata Normalization
+
+### Changed
+- Normalized package, SDK, citation, README, Cloud preview, and security metadata for the v0.7.1 release.
+- Kept the Cloud evidence runtime behavior and canonical `finance-policy@1.0.0` sample authority contract unchanged.
+
+### Verified
+- Full Guard suite passes: `35 passed`.
+- Build produces `waveframe_guard-0.7.1.tar.gz` and `waveframe_guard-0.7.1-py3-none-any.whl`.
+- Built wheel metadata reports `Version: 0.7.1`.
+
 ## [0.7.0] - Cloud Evidence Runtime
 
 ### Added
