@@ -1,11 +1,21 @@
 # Changelog
 
-## Unreleased
+## [0.7.0] - Cloud Evidence Runtime
 
 ### Added
 - Added `GuardRuntime.from_cloud(...)` as a developer-friendly alias for local-first Cloud-connected runtime setup.
 - Added durable local evidence spooling under `pending/`, `sent/`, and `failed/` with explicit `flush_evidence()`.
 - Added SDK-local runtime diagnostics for authority resolution, revoked authority rejection, lineage validation failures, and admissibility evaluation lifecycle.
+
+### Changed
+- Updated package, SDK, citation, README, and Cloud preview metadata for the v0.7.0 release.
+- Aligned experimental Cloud demo contracts with the canonical `1.0.0` sample authority version.
+- Modernized package license metadata to avoid setuptools deprecation warnings.
+
+### Verified
+- Full Guard suite passes: `35 passed`.
+- Build produces `waveframe_guard-0.7.0.tar.gz` and `waveframe_guard-0.7.0-py3-none-any.whl`.
+- Built wheel metadata reports `Version: 0.7.0`.
 
 ## [0.6.1] - Runtime Lifecycle Patch
 
