@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.8.0] - Admissibility Continuity Semantics
+
+### Added
+- Added `CONTINUITY_SEMANTICS.md` to define admissibility windows, deterministic revalidation, continuity drift signals, and explicit non-goals.
+- Added runtime continuity metadata: `valid_until`, `revalidation_required_after`, and `continuity_signals`.
+- Added minimal runtime evaluation and deterministic continuity revalidation support for delayed or resumed execution checks.
+- Added deterministic continuity signals for expired admissibility windows, revoked authorities after decision, superseded authorities during resumed execution, and actor continuity breaks.
+- Added focused tests for admissibility window expiration, stale admissibility detection, lifecycle drift, actor continuity drift, and continuity signal emission.
+
+### Changed
+- Bumped package, SDK, citation, README, Cloud preview, and security metadata for the v0.8.0 release.
+- Documented the Guard/Cloud boundary for continuity: Guard evaluates continuity; Cloud displays continuity.
+
+### Non-Goals
+- No orchestration engine.
+- No async scheduler.
+- No distributed workflow management.
+- No probabilistic scoring.
+- No autonomous retry management.
+
+### Verified
+- Full Guard suite passes: `40 passed`.
+- Build produces `waveframe_guard-0.8.0.tar.gz` and `waveframe_guard-0.8.0-py3-none-any.whl`.
+- Built wheel metadata reports `Version: 0.8.0`.
+
 ## [0.7.1] - Release Metadata Normalization
 
 ### Changed

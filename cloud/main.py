@@ -22,7 +22,7 @@ from cricore.interface.evaluate_proposal import evaluate_proposal
 
 app = FastAPI(
     title="Waveframe Guard",
-    version="0.7.1",
+    version="0.8.0",
     description="Local enforcement SDK and simulation environment for AI governance"
 )
 

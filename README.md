@@ -4,7 +4,7 @@ Stop unsafe AI and automated actions **before they execute**.
 
 Waveframe Guard enforces governance at the execution boundary. If an action violates policy, it never runs.
 
-Current release: `0.7.1`.
+Current release: `0.8.0`.
 
 ## Example
 
@@ -106,6 +106,27 @@ result = runtime.execute(
 ```
 
 Per-call `actor` and versioned `contract_id` values still work and override the bound context for that call.
+
+## Admissibility Continuity
+
+Guard can attach bounded continuity metadata to an admissibility evaluation:
+
+```python
+decision = runtime.evaluate(
+    actor={"id": "user-1", "type": "human", "role": "manager"},
+    contract_id="finance-policy@1.0.0",
+    target="transfer",
+    args=(1250000,),
+)
+
+print(decision.valid_until)
+print(decision.revalidation_required_after)
+print(decision.continuity_signals)
+```
+
+`valid_until` and `revalidation_required_after` describe when a delayed or resumed execution must be deterministically revalidated. `continuity_signals` reports structural drift such as expired admissibility windows, revoked or superseded authorities, or actor continuity breaks.
+
+Continuity signals are not admissibility decisions. Guard evaluates continuity locally; Cloud may display continuity evidence, but Cloud does not decide admissibility.
 
 ## Cloud-Connected Runtime
 
