@@ -1,5 +1,5 @@
 from pathlib import Path
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import hashlib
 import json
 import warnings
@@ -28,6 +28,13 @@ from .schemas import (
 )
 
 
+AUTHORITY_SUPERSEDED_DURING_EXECUTION = "AUTHORITY_SUPERSEDED_DURING_EXECUTION"
+AUTHORITY_REVOKED_POST_DECISION = "AUTHORITY_REVOKED_POST_DECISION"
+ADMISSIBILITY_WINDOW_EXPIRED = "ADMISSIBILITY_WINDOW_EXPIRED"
+ACTOR_CONTINUITY_BROKEN = "ACTOR_CONTINUITY_BROKEN"
+REVALIDATION_REQUIRED = "REVALIDATION_REQUIRED"
+
+
 class GovernedRuntime:
     def __init__(
         self,
@@ -43,6 +50,7 @@ class GovernedRuntime:
         require_verified_lineage=False,
         reject_revoked_authority=True,
         warn_on_superseded=True,
+        admissibility_window_seconds=None,
     ):
         if registry_path is None and registry_url is None:
             raise ValueError("registry_path or registry_url is required")
@@ -59,6 +67,7 @@ class GovernedRuntime:
         self.require_verified_lineage = require_verified_lineage
         self.reject_revoked_authority = reject_revoked_authority
         self.warn_on_superseded = warn_on_superseded
+        self.admissibility_window_seconds = admissibility_window_seconds
         self.registry = self._load_registry()
         self.audit_path = Path(audit_path) if audit_path is not None else None
         self.audit_events = []
@@ -67,6 +76,9 @@ class GovernedRuntime:
         self.last_contract_source = None
         self.last_cache_path = None
         self.last_authority_lifecycle = None
+        self.last_valid_until = None
+        self.last_revalidation_required_after = None
+        self.last_continuity_signals = []
         self.actor = None
         self.contract_id = None
         self.contract_version = None
@@ -113,6 +125,113 @@ class GovernedRuntime:
         self.contract_version = contract_version
         return self
 
+    def evaluate(
+        self,
+        *,
+        actor=None,
+        contract_id=None,
+        contract_version=None,
+        fn=None,
+        args=None,
+        kwargs=None,
+        approvals=None,
+        target=None,
+        now=None,
+    ):
+        actor = self._resolve_actor(actor)
+        contract_id, contract_version = self._resolve_contract_binding(contract_id, contract_version)
+        self._log_runtime_event(
+            "authority_resolution_started",
+            authority_ref=_contract_ref(contract_id, contract_version),
+        )
+        entry = self._resolve_authority_entry(contract_id, contract_version)
+        contract = self._load_contract_from_entry(entry)
+        self._enforce_authority_lineage(contract)
+        execution_state = _build_execution_state(
+            actor=actor,
+            contract=contract,
+            fn=fn,
+            args=args or (),
+            kwargs=kwargs or {},
+            approvals=approvals or [],
+            target=target,
+        )
+        try:
+            validate_execution_state(execution_state)
+        except SchemaValidationError as exc:
+            raise GovernanceError(f"Malformed execution state: {exc}") from exc
+
+        self._log_runtime_event(
+            "admissibility_evaluation_started",
+            authority_ref=_contract_ref(contract_id, contract_version),
+            action=execution_state.get("action"),
+        )
+        approval_decision = _evaluate_approval_admissibility(
+            contract=contract,
+            execution_state=execution_state,
+        )
+        self._record_continuity_metadata(entry, now=now)
+        self._log_runtime_event(
+            "admissibility_evaluation_completed",
+            authority_ref=_contract_ref(contract_id, contract_version),
+            allowed=approval_decision["allowed"],
+            reason=approval_decision["reason"],
+            continuity_signals=self.last_continuity_signals,
+        )
+        return GovernedExecutionResult(
+            allowed=approval_decision["allowed"],
+            reason=approval_decision["reason"],
+            missing_approvals=approval_decision["missing_approvals"],
+            execution_state=execution_state,
+            decision_trace=approval_decision.get("trace"),
+            **self._contract_metadata(contract),
+        )
+
+    def revalidate(self, decision, *, actor=None, now=None):
+        execution_state = decision.execution_state if isinstance(decision, GovernedExecutionResult) else decision
+        if not isinstance(execution_state, dict):
+            raise ValueError("revalidate requires a GovernedExecutionResult or execution_state")
+        authority_ref = execution_state.get("authority_ref")
+        contract_id, contract_version = _split_contract_ref(authority_ref)
+        current_actor = actor or execution_state.get("actor")
+        entry = self._lookup_contract(contract_id, contract_version)
+        contract = self._load_contract_from_entry(entry)
+
+        signals = []
+        lifecycle = _authority_lifecycle(entry)
+        if lifecycle is not None:
+            status = lifecycle["status"]
+            if status == "revoked":
+                signals.append(AUTHORITY_REVOKED_POST_DECISION)
+            elif status == "superseded":
+                signals.append(AUTHORITY_SUPERSEDED_DURING_EXECUTION)
+
+        if _actor_identity(current_actor) != _actor_identity(execution_state.get("actor")):
+            signals.append(ACTOR_CONTINUITY_BROKEN)
+
+        valid_until = getattr(decision, "valid_until", None)
+        if _window_expired(valid_until, now or datetime.now(timezone.utc)):
+            signals.append(ADMISSIBILITY_WINDOW_EXPIRED)
+
+        signals = _with_revalidation_required(signals)
+        self.last_authority_lifecycle = lifecycle
+        self.last_valid_until = valid_until
+        self.last_revalidation_required_after = getattr(decision, "revalidation_required_after", None)
+        self.last_continuity_signals = signals
+        self._log_runtime_event(
+            "admissibility_revalidation_completed",
+            authority_ref=authority_ref,
+            continuity_signals=signals,
+        )
+        return GovernedExecutionResult(
+            allowed=decision.allowed if isinstance(decision, GovernedExecutionResult) else True,
+            reason=decision.reason if isinstance(decision, GovernedExecutionResult) else "revalidation completed",
+            execution_state=execution_state,
+            decision_trace=decision.decision_trace if isinstance(decision, GovernedExecutionResult) else None,
+            missing_approvals=decision.missing_approvals if isinstance(decision, GovernedExecutionResult) else [],
+            **self._contract_metadata(contract),
+        )
+
     def execute(
         self,
         *,
@@ -156,11 +275,13 @@ class GovernedRuntime:
             contract=contract,
             execution_state=execution_state,
         )
+        self._record_continuity_metadata(entry)
         self._log_runtime_event(
             "admissibility_evaluation_completed",
             authority_ref=_contract_ref(contract_id, contract_version),
             allowed=approval_decision["allowed"],
             reason=approval_decision["reason"],
+            continuity_signals=self.last_continuity_signals,
         )
         if not approval_decision["allowed"]:
             error = f"Execution blocked: {approval_decision['reason']}"
@@ -543,10 +664,34 @@ class GovernedRuntime:
             "contract_id": contract.get("contract_id"),
             "contract_version": contract.get("contract_version"),
             "contract_hash": contract.get("contract_hash"),
+            "valid_until": self.last_valid_until,
+            "revalidation_required_after": self.last_revalidation_required_after,
+            "continuity_signals": self.last_continuity_signals,
         }
         if self.last_authority_lifecycle is not None:
             metadata["authority_lifecycle"] = self.last_authority_lifecycle
         return metadata
+
+    def _record_continuity_metadata(self, entry, *, now=None):
+        now = now or datetime.now(timezone.utc)
+        valid_until = _valid_until(entry, now, self.admissibility_window_seconds)
+        signals = []
+        lifecycle = _authority_lifecycle(entry)
+        if lifecycle is not None and lifecycle["status"] == "superseded":
+            signals.append(AUTHORITY_SUPERSEDED_DURING_EXECUTION)
+        if lifecycle is not None and lifecycle["status"] == "revoked":
+            signals.append(AUTHORITY_REVOKED_POST_DECISION)
+        if _window_expired(valid_until, now):
+            signals.append(ADMISSIBILITY_WINDOW_EXPIRED)
+        signals = _with_revalidation_required(signals)
+        self.last_valid_until = valid_until
+        self.last_revalidation_required_after = valid_until
+        self.last_continuity_signals = signals
+        return {
+            "valid_until": valid_until,
+            "revalidation_required_after": valid_until,
+            "continuity_signals": signals,
+        }
 
     def _validate_authority_lifecycle(self, entry):
         lifecycle = _authority_lifecycle(entry)
@@ -764,6 +909,12 @@ def _contract_ref(contract_id, contract_version=None):
     return f"{contract_id}@{contract_version}"
 
 
+def _split_contract_ref(authority_ref):
+    if not isinstance(authority_ref, str) or "@" not in authority_ref:
+        raise ValueError("authority_ref must be an explicit versioned authority ref")
+    return authority_ref.split("@", 1)
+
+
 def _authority_lifecycle(entry):
     if not isinstance(entry, dict):
         return None
@@ -782,6 +933,73 @@ def _authority_lifecycle(entry):
     if entry.get("status_reason") is not None:
         lifecycle["status_reason"] = entry.get("status_reason")
     return lifecycle
+
+
+def _valid_until(entry, now, runtime_window_seconds=None):
+    if isinstance(entry, dict):
+        explicit = _first_present(entry, "valid_until", "admissibility_valid_until")
+        if explicit is not None:
+            return _normalize_timestamp(explicit)
+        window_seconds = _first_present(
+            entry,
+            "admissibility_window_seconds",
+            "admissibility_validity_seconds",
+            default=runtime_window_seconds,
+        )
+    else:
+        window_seconds = runtime_window_seconds
+    if window_seconds is None:
+        return None
+    return (now + timedelta(seconds=float(window_seconds))).isoformat()
+
+
+def _first_present(payload, *keys, default=None):
+    for key in keys:
+        if key in payload and payload[key] is not None:
+            return payload[key]
+    return default
+
+
+def _window_expired(valid_until, now):
+    expires_at = _parse_timestamp(valid_until)
+    if expires_at is None:
+        return False
+    return now > expires_at
+
+
+def _normalize_timestamp(value):
+    parsed = _parse_timestamp(value)
+    if parsed is None:
+        raise ValueError("valid_until must be an ISO-8601 timestamp")
+    return parsed.isoformat()
+
+
+def _parse_timestamp(value):
+    if isinstance(value, datetime):
+        parsed = value
+    elif isinstance(value, str) and value:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    else:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed
+
+
+def _with_revalidation_required(signals):
+    deduped = []
+    for signal in signals:
+        if signal not in deduped:
+            deduped.append(signal)
+    if deduped and REVALIDATION_REQUIRED not in deduped:
+        deduped.append(REVALIDATION_REQUIRED)
+    return deduped
+
+
+def _actor_identity(actor):
+    if not isinstance(actor, dict):
+        return None
+    return (actor.get("id"), actor.get("type"), actor.get("role"))
 
 
 def _has_approval_requirements(contract):

@@ -17,6 +17,9 @@ class GovernedExecutionResult:
     contract_version: str | None = None
     contract_hash: str | None = None
     authority_lifecycle: dict[str, Any] | None = field(default=None, compare=False)
+    valid_until: str | None = None
+    revalidation_required_after: str | None = None
+    continuity_signals: list[str] = field(default_factory=list, compare=False)
     value: Any = None
     error: str | None = None
     event: dict[str, Any] | None = field(default=None, compare=False)
@@ -43,6 +46,12 @@ class GovernedExecutionResult:
             "event_id": (self.event or {}).get("event_id"),
             "event_hash": (self.audit_receipt or {}).get("event_hash"),
         }
+        if self.valid_until is not None:
+            payload["valid_until"] = self.valid_until
+        if self.revalidation_required_after is not None:
+            payload["revalidation_required_after"] = self.revalidation_required_after
+        if self.continuity_signals:
+            payload["continuity_signals"] = self.continuity_signals
         if self.authority_lifecycle is not None:
             payload["authority_lifecycle"] = self.authority_lifecycle
         if self.error is not None:
