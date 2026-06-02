@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Waveframe-Labs/.github/main/assets/branding/canon_wf_logo_extended.png" width="700">
+</p>
+
 # Waveframe Guard
 
 Stop unsafe AI and automated actions **before they execute**.
