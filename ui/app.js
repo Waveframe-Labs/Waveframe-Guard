@@ -1,146 +1,16 @@
-const runtimeEvaluation = {
-  authority: {
-    schema_version: "compiled_authority_contract.v1",
-    contract_id: "finance-policy",
-    contract_version: "1.0.0",
-    contract_hash: "sha256:contract",
-    authority_requirements: { required_roles: ["manager"] },
-    approval_requirements: {
-      required: [
-        { role: "manager" },
-        { role: "director", condition: { field: "amount", operator: ">", value: 10000 } }
-      ]
-    },
-    artifact_requirements: {},
-    stage_requirements: {},
-    invariants: { separation_of_duties: true }
-  },
-  request: {
-    schema_version: "normalized_execution_request.v1",
-    request_id: "exec-1",
-    action: "transfer",
-    target: "wire",
-    arguments: { amount: 12500 },
-    artifacts: []
-  },
-  evidence: {
-    schema_version: "guard_runtime_evidence_model.v1",
-    actor_identity: { id: "employee-1", type: "human", role: "employee" },
-    approvals: [{ role: "manager", approved_by: "manager-1" }],
-    replay_evidence: { required: true, replay_id: null },
-    continuity_snapshot: {
-      requires_revalidation: true,
-      signals: ["AUTHORITY_SUPERSEDED_DURING_EXECUTION"]
-    },
-    timestamp_source: {
-      source: "caller_supplied",
-      timestamp: "2026-06-03T22:30:00+00:00"
-    },
-    execution_context: { surface: "sdk", environment: "local", latency_ms: 14 }
-  },
-  continuity: {
-    schema_version: "guard_continuity_posture.v1",
-    authority_ref: "finance-policy@1.0.0",
-    requires_revalidation: true,
-    requires_replay: true,
-    signals: ["AUTHORITY_SUPERSEDED_DURING_EXECUTION"],
-    continuity_requirements: [
-      {
-        requirement: "revalidation",
-        rationale: "authority drift detected during runtime continuity check"
-      }
-    ],
-    replay_obligations: [
-      {
-        obligation: "link_replay",
-        rationale: "execution must be linked to replay before enforcement"
-      }
-    ]
-  },
-  result: {
-    status: "blocked",
-    answer: "No. This execution cannot proceed.",
-    rationale: "Actor role is not authorized by compiled authority.",
-    consequence: "Execution stopped at boundary",
-    next: "Director approval, replay link, and continuity revalidation are required before retry.",
-    violated_constraints: [
-      {
-        constraint: "required_role",
-        required_roles: ["manager"],
-        observed_role: "employee",
-        rationale: "actor role is not authorized by compiled authority"
-      }
-    ],
-    required_evidence: [
-      {
-        evidence: "approval",
-        role: "director",
-        condition: { field: "amount", operator: ">", value: 10000 },
-        rationale: "required approval evidence is missing"
-      }
-    ],
-    replay_obligations: [
-      {
-        obligation: "link_replay",
-        rationale: "execution must be linked to replay before enforcement"
-      }
-    ],
-    continuity_requirements: [
-      {
-        requirement: "revalidation",
-        rationale: "authority drift detected during runtime continuity check"
-      }
-    ],
-    enforcement_outcome: {
-      schema_version: "guard_enforcement_outcome.v1",
-      authority_ref: "finance-policy@1.0.0",
-      status: "blocked",
-      rationale: "actor role is not authorized by compiled authority",
-      consequences: [{ consequence: "block_execution" }],
-      outcome_id: "enforcement_outcome_d7a9e5e1124f",
-      outcome_hash: "sha256:outcome"
-    }
-  },
-  chronology: [
-    ["01", "evaluation_started", "Runtime boundary opened for execution request", "all", "trace"],
-    ["02", "evidence_loaded", "Actor identity, approvals, replay evidence, continuity snapshot, timestamp source, and execution context loaded", "evidence", "evidence"],
-    ["03", "continuity_checked", "Authority supersession signal requires revalidation", "continuity", "continuity"],
-    ["04", "replay_validated", "Replay evidence is incomplete for this execution", "replay", "replay"],
-    ["05", "admissibility_evaluated", "Required role constraint failed and director approval is missing", "all", "trace"],
-    ["06", "enforcement_emitted", "guard_enforcement_outcome.v1 emitted with block consequence", "all", "outcome"]
-  ],
-  trace: {
-    trace_hash: "sha256:trace",
-    evaluated_constraints: [
-      "required_role expected manager, observed employee",
-      "approval requirement evaluated for amount > 10000"
-    ],
-    satisfied_requirements: [
-      "compiled_authority_contract.v1 accepted",
-      "normalized_execution_request.v1 accepted",
-      "manager approval evidence present"
-    ],
-    failed_requirements: [
-      "actor role is not authorized by compiled authority",
-      "director approval missing for amount > 10000"
-    ],
-    escalation_triggers: [
-      "continuity revalidation required",
-      "replay linkage incomplete"
-    ],
-    replay_dependencies: [
-      "link_replay before retrying execution"
-    ]
-  },
-  telemetry: [
-    ["22:30:00.014", "block", "required_role constraint failed"],
-    ["22:30:00.013", "evidence_failure", "director approval missing"],
-    ["22:30:00.012", "continuity_failure", "authority supersession drift detected"],
-    ["22:30:00.011", "replay_mismatch", "replay evidence incomplete"],
-    ["22:30:00.010", "escalate", "revalidation and replay linkage required"]
-  ]
+const state = {
+  inputs: null,
+  latest: null
 };
 
+const inputConfig = [
+  ["compiled_authority", "View compiled authority"],
+  ["execution_request", "View normalized request"],
+  ["runtime_evidence", "View runtime evidence"]
+];
+const outcomeContractSchema = "guard_enforcement_outcome.v1";
+
+const byId = (id) => document.getElementById(id);
 const formatJson = (value) => JSON.stringify(value, null, 2);
 
 const summarize = (value) => {
@@ -155,115 +25,270 @@ const summarize = (value) => {
   return String(value);
 };
 
-const payloads = [
-  ["View compiled authority", runtimeEvaluation.authority],
-  ["View normalized request", runtimeEvaluation.request],
-  ["View runtime evidence", runtimeEvaluation.evidence],
-  ["View continuity posture", runtimeEvaluation.continuity]
-];
+async function loadRuntimeInputs() {
+  setStatus("Loading runtime inputs");
+  const response = await fetch("/api/runtime/inputs", { cache: "no-store" });
+  if (!response.ok) throw new Error(`Input load failed: ${response.status}`);
+  state.inputs = await response.json();
+  renderInputDrawers(state.inputs);
+  setStatus("Runtime inputs loaded");
+}
 
-document.getElementById("payloadDrawers").innerHTML = payloads
-  .map(([title, payload]) => `
-    <details>
-      <summary>${title}</summary>
-      <pre>${formatJson(payload)}</pre>
-    </details>
-  `)
-  .join("");
+async function evaluateCurrentInputs() {
+  setStatus("Evaluating execution");
+  const payload = readInputDrawers();
+  const response = await fetch("/api/runtime/evaluate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  const body = await response.json();
+  if (!response.ok) throw new Error(body.message || body.error || "Evaluation failed");
+  state.latest = body;
+  renderEvaluation(body);
+  setStatus(`Rendered ${body.guard_enforcement_outcome.schema_version || outcomeContractSchema}`);
+}
 
-const outputs = [
-  ["Violated constraints", runtimeEvaluation.result.violated_constraints, "critical"],
-  ["Missing evidence", runtimeEvaluation.result.required_evidence, "critical"],
-  ["Replay obligations", runtimeEvaluation.result.replay_obligations, ""],
-  ["Continuity failures", runtimeEvaluation.result.continuity_requirements, ""]
-];
+async function pollTelemetry() {
+  try {
+    const response = await fetch("/api/runtime/telemetry", { cache: "no-store" });
+    if (!response.ok) return;
+    const body = await response.json();
+    renderTelemetry(body.telemetry_stream || []);
+  } catch {
+    // The local server may not be running yet. The main status surface already reports this.
+  }
+}
 
-document.getElementById("outputGrid").innerHTML = outputs
-  .map(([title, rows, tone]) => `
-    <article class="cognition-card ${tone}">
-      <h3>${title}</h3>
-      <div class="data-list">
-        ${rows.map((row) => `
-          <div class="data-row">
-            <span class="dot"></span>
-            <span>${summarize(row)}</span>
-          </div>
-        `).join("")}
+function renderInputDrawers(inputs) {
+  byId("payloadDrawers").innerHTML = inputConfig
+    .map(([key, title]) => `
+      <details>
+        <summary>${title}</summary>
+        <textarea id="input-${key}" spellcheck="false">${formatJson(inputs[key])}</textarea>
+      </details>
+    `)
+    .join("");
+}
+
+function readInputDrawers() {
+  return Object.fromEntries(
+    inputConfig.map(([key]) => [key, JSON.parse(byId(`input-${key}`).value)])
+  );
+}
+
+function renderEvaluation(payload) {
+  const evaluation = payload.evaluation;
+  const outcome = payload.guard_enforcement_outcome;
+  const inputs = payload.inputs;
+  const request = inputs.execution_request;
+  const evidence = inputs.runtime_evidence;
+  const authorityRef = outcome.authority_ref;
+  const latency = evidence.execution_context?.latency_ms ?? "runtime";
+  const status = outcome.status;
+
+  byId("authorityRef").textContent = authorityRef;
+  byId("requestRef").textContent = request.request_id;
+  byId("targetRef").textContent = `${request.action} -> ${request.target}`;
+  byId("latencyRef").textContent = typeof latency === "number" ? `${latency} ms` : String(latency);
+  byId("decisionState").textContent = status.toUpperCase();
+  byId("decisionRationale").textContent = tightRationale(evaluation.rationale);
+  byId("decisionConsequence").textContent = consequenceText(outcome);
+  byId("decisionNext").textContent = nextActionText(evaluation);
+  document.querySelector(".gate-question strong").textContent = primaryAnswer(status);
+  byId("traceHash").textContent = evaluation.evaluation_trace.trace_hash;
+
+  renderPosture(evaluation);
+  renderOutputs(evaluation);
+  renderTrace(evaluation);
+  renderChronology(payload.chronology || []);
+  renderTelemetry(payload.telemetry_stream || []);
+}
+
+function renderPosture(evaluation) {
+  const chips = [
+    ["Admissibility", postureValue(evaluation.status), toneForStatus(evaluation.status)],
+    ["Continuity", evaluation.continuity_requirements.length ? "Drift Detected" : "Stable", evaluation.continuity_requirements.length ? "warn" : "ok"],
+    ["Replay", evaluation.replay_obligations.length ? "Incomplete" : "Linked", evaluation.replay_obligations.length ? "warn" : "ok"],
+    ["Evidence", evaluation.required_evidence.length ? "Missing Evidence" : "Satisfied", evaluation.required_evidence.length ? "blocked" : "ok"],
+    ["Enforcement", enforcementValue(evaluation.status), toneForStatus(evaluation.status)]
+  ];
+  byId("postureRail").innerHTML = chips
+    .map(([label, value, tone]) => `
+      <div class="posture-chip ${tone}">
+        <span>${label}</span>
+        <strong>${value}</strong>
       </div>
-    </article>
-  `)
-  .join("");
+    `)
+    .join("");
+}
 
-const postureChips = [
-  ["Admissibility", "Blocked", "blocked"],
-  ["Continuity", "Drift Detected", "warn"],
-  ["Replay", "Incomplete", "warn"],
-  ["Evidence", "Missing Approval", "blocked"],
-  ["Enforcement", "Escalation Required", "warn"]
-];
-
-document.getElementById("postureRail").innerHTML = postureChips
-  .map(([label, value, state]) => `
-    <div class="posture-chip ${state}">
-      <span>${label}</span>
-      <strong>${value}</strong>
-    </div>
-  `)
-  .join("");
-
-const renderChronology = (filter = "all") => {
-  const events = runtimeEvaluation.chronology.filter(([, , , group]) => filter === "all" || group === filter);
-  document.getElementById("chronologyList").innerHTML = events
-    .map(([sequence, event, detail, , link]) => `
-      <li>
-        <span class="sequence">${sequence}</span>
-        <div>
-          <strong class="event-name">${event}</strong>
-          <p class="event-detail">${detail}</p>
+function renderOutputs(evaluation) {
+  const outputs = [
+    ["Violated constraints", evaluation.violated_constraints, "critical"],
+    ["Missing evidence", evaluation.required_evidence, "critical"],
+    ["Replay obligations", evaluation.replay_obligations, ""],
+    ["Continuity failures", evaluation.continuity_requirements, ""]
+  ];
+  byId("outputGrid").innerHTML = outputs
+    .map(([title, rows, tone]) => `
+      <article class="cognition-card ${tone}">
+        <h3>${title}</h3>
+        <div class="data-list">
+          ${renderRows(rows)}
         </div>
-        <span class="event-link">${link}-linked</span>
+      </article>
+    `)
+    .join("");
+}
+
+function renderTrace(evaluation) {
+  const trace = evaluation.evaluation_trace;
+  const traceRows = [
+    ["evaluated constraints", evaluation.admissibility_projection.violated_constraints.concat(evaluation.required_evidence)],
+    ["satisfied requirements", trace.steps.filter((step) => step.status === "completed")],
+    ["failed requirements", evaluation.violated_constraints.concat(evaluation.required_evidence)],
+    ["escalation triggers", evaluation.continuity_requirements],
+    ["replay dependencies", evaluation.replay_obligations]
+  ];
+  byId("traceSurface").innerHTML = traceRows
+    .map(([title, rows]) => `
+      <article class="trace-item">
+        <strong>${title}</strong>
+        <p>${rows.length ? rows.map(summarize).join("; ") : "none"}</p>
+      </article>
+    `)
+    .join("");
+}
+
+function renderChronology(events) {
+  byId("chronologyList").innerHTML = events
+    .map((event) => `
+      <li data-kind="${chronologyKind(event.event_type)}">
+        <span class="sequence">${String(event.sequence).padStart(2, "0")}</span>
+        <div>
+          <strong class="event-name">${event.event_type}</strong>
+          <p class="event-detail">${summarize(event.details)}</p>
+        </div>
+        <span class="event-link">${chronologyKind(event.event_type)}-linked</span>
       </li>
     `)
     .join("");
-};
+  applyChronologyFilter(document.querySelector("[data-filter].active")?.dataset.filter || "all");
+}
+
+function renderTelemetry(events) {
+  const latest = [...events].sort((a, b) => b.sequence - a.sequence).slice(0, 40);
+  byId("telemetryStream").innerHTML = latest
+    .map((event) => `
+      <article class="telemetry-event">
+        <strong>${event.event_type}</strong>
+        <p>${summarize(event.details)}</p>
+        <span>${event.timestamp}</span>
+      </article>
+    `)
+    .join("");
+}
+
+function renderRows(rows) {
+  if (!rows.length) {
+    return `<div class="data-row"><span class="dot"></span><span>none</span></div>`;
+  }
+  return rows
+    .map((row) => `
+      <div class="data-row">
+        <span class="dot"></span>
+        <span>${summarize(row)}</span>
+      </div>
+    `)
+    .join("");
+}
+
+function applyChronologyFilter(filter) {
+  document.querySelectorAll("[data-filter]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.filter === filter);
+  });
+  document.querySelectorAll(".chronology-list li").forEach((item) => {
+    item.hidden = filter !== "all" && item.dataset.kind !== filter;
+  });
+}
+
+function chronologyKind(eventType) {
+  if (eventType.includes("evidence")) return "evidence";
+  if (eventType.includes("replay")) return "replay";
+  if (eventType.includes("continuity")) return "continuity";
+  return "all";
+}
+
+function postureValue(status) {
+  if (status === "admissible") return "Allowed";
+  if (status === "escalated") return "Escalated";
+  return "Blocked";
+}
+
+function enforcementValue(status) {
+  if (status === "admissible") return "Proceed";
+  if (status === "escalated") return "Escalation Required";
+  return "Stopped";
+}
+
+function toneForStatus(status) {
+  if (status === "admissible") return "ok";
+  if (status === "escalated") return "warn";
+  return "blocked";
+}
+
+function primaryAnswer(status) {
+  if (status === "admissible") return "Yes. This execution may proceed.";
+  if (status === "escalated") return "Not yet. This execution requires escalation.";
+  return "No. This execution cannot proceed.";
+}
+
+function consequenceText(outcome) {
+  const consequence = outcome.consequences?.[0]?.consequence;
+  if (consequence === "allow_execution") return "Execution authorized at boundary";
+  if (consequence === "escalate_execution") return "Execution held for escalation";
+  return "Execution stopped at boundary";
+}
+
+function nextActionText(evaluation) {
+  const requirements = []
+    .concat(evaluation.required_evidence || [])
+    .concat(evaluation.replay_obligations || [])
+    .concat(evaluation.continuity_requirements || []);
+  if (!requirements.length) return "No blockers remain for this execution.";
+  return requirements.map(summarize).join("; ");
+}
+
+function tightRationale(rationale) {
+  if (!rationale) return "Runtime evaluation completed.";
+  return rationale.endsWith(".") ? rationale : `${rationale}.`;
+}
+
+function setStatus(message) {
+  byId("ingestStatus").textContent = message;
+}
 
 document.querySelectorAll("[data-filter]").forEach((button) => {
-  button.addEventListener("click", () => {
-    document.querySelectorAll("[data-filter]").forEach((item) => item.classList.remove("active"));
-    button.classList.add("active");
-    renderChronology(button.dataset.filter);
-  });
+  button.addEventListener("click", () => applyChronologyFilter(button.dataset.filter));
 });
 
-const traceRows = Object.entries(runtimeEvaluation.trace).filter(([key]) => key !== "trace_hash");
-document.getElementById("traceSurface").innerHTML = traceRows
-  .map(([key, values]) => `
-    <article class="trace-item">
-      <strong>${key.replaceAll("_", " ")}</strong>
-      <p>${values.join("; ")}</p>
-    </article>
-  `)
-  .join("");
+byId("evaluateButton").addEventListener("click", async () => {
+  try {
+    await evaluateCurrentInputs();
+    await pollTelemetry();
+  } catch (error) {
+    setStatus(error.message);
+  }
+});
 
-document.getElementById("telemetryStream").innerHTML = runtimeEvaluation.telemetry
-  .map(([time, event, detail]) => `
-    <article class="telemetry-event">
-      <strong>${event}</strong>
-      <p>${detail}</p>
-      <span>${time}</span>
-    </article>
-  `)
-  .join("");
-
-document.getElementById("authorityRef").textContent = runtimeEvaluation.result.enforcement_outcome.authority_ref;
-document.getElementById("requestRef").textContent = runtimeEvaluation.request.request_id;
-document.getElementById("targetRef").textContent = `${runtimeEvaluation.request.action} -> ${runtimeEvaluation.request.target}`;
-document.getElementById("latencyRef").textContent = `${runtimeEvaluation.evidence.execution_context.latency_ms} ms`;
-document.getElementById("decisionState").textContent = runtimeEvaluation.result.status.toUpperCase();
-document.getElementById("decisionRationale").textContent = runtimeEvaluation.result.rationale;
-document.getElementById("decisionConsequence").textContent = runtimeEvaluation.result.consequence;
-document.getElementById("decisionNext").textContent = runtimeEvaluation.result.next;
-document.querySelector(".gate-question strong").textContent = runtimeEvaluation.result.answer;
-document.getElementById("traceHash").textContent = runtimeEvaluation.trace.trace_hash;
-
-renderChronology();
+(async function start() {
+  try {
+    await loadRuntimeInputs();
+    await evaluateCurrentInputs();
+    await pollTelemetry();
+    setInterval(pollTelemetry, 3000);
+  } catch (error) {
+    setStatus(`Local runtime API unavailable: ${error.message}`);
+  }
+})();

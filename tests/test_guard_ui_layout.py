@@ -8,6 +8,10 @@ UI_ROOT = REPO_ROOT / "ui"
 def test_guard_ui_layout_contains_required_runtime_surfaces():
     html = (UI_ROOT / "index.html").read_text(encoding="utf-8")
     script = (UI_ROOT / "app.js").read_text(encoding="utf-8")
+    server_inputs = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in (REPO_ROOT / "server" / "runtime_inputs").glob("*.json")
+    )
 
     for expected in [
         "Can this execution proceed?",
@@ -25,7 +29,7 @@ def test_guard_ui_layout_contains_required_runtime_surfaces():
         "guard_runtime_evidence_model.v1",
         "guard_enforcement_outcome.v1",
     ]:
-        assert expected in html or expected in script
+        assert expected in html or expected in script or expected in server_inputs
 
 
 def test_guard_ui_uses_canonical_branding_assets():

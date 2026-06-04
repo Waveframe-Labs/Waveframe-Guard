@@ -1,0 +1,38 @@
+{
+  "schema_version": "guard_runtime_evidence_model.v1",
+  "actor_identity": {
+    "id": "employee-1",
+    "type": "human",
+    "role": "employee"
+  },
+  "approvals": [
+    {
+      "role": "manager",
+      "approved_by": "manager-1"
+    }
+  ],
+  "replay_evidence": {
+    "required": true,
+    "obligations": [
+      {
+        "obligation": "link_replay",
+        "rationale": "execution must be linked to replay before enforcement"
+      }
+    ]
+  },
+  "continuity_snapshot": {
+    "requires_revalidation": true,
+    "signals": [
+      "AUTHORITY_SUPERSEDED_DURING_EXECUTION"
+    ]
+  },
+  "timestamp_source": {
+    "source": "caller_supplied",
+    "timestamp": "2026-06-03T22:30:00+00:00"
+  },
+  "execution_context": {
+    "surface": "sdk",
+    "environment": "local",
+    "latency_ms": 14
+  }
+}

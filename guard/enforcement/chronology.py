@@ -22,18 +22,30 @@ def build_chronology(
             {"status": "started"},
         ),
         (
-            "admissibility_cognition_completed",
+            "runtime_evidence_loaded",
             {
-                "status": assessment["status"],
-                "violated_constraints": assessment["violated_constraints"],
+                "evidence_boundary": "guard_runtime_evidence_model.v1",
                 "required_evidence": assessment["required_evidence"],
             },
         ),
         (
-            "continuity_posture_evaluated",
+            "continuity_checked",
             {
                 "continuity_requirements": assessment["continuity_requirements"],
+            },
+        ),
+        (
+            "replay_validated",
+            {
                 "replay_obligations": assessment["replay_obligations"],
+            },
+        ),
+        (
+            "admissibility_evaluated",
+            {
+                "status": assessment["status"],
+                "violated_constraints": assessment["violated_constraints"],
+                "required_evidence": assessment["required_evidence"],
             },
         ),
         (

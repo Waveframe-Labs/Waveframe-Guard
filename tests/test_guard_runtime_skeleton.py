@@ -151,12 +151,14 @@ def test_runtime_chronology_and_telemetry_stream_are_ordered():
         start_sequence=10,
     )
 
-    assert [event["sequence"] for event in result["telemetry_events"]] == [10, 11, 12, 13, 14]
+    assert [event["sequence"] for event in result["telemetry_events"]] == [10, 11, 12, 13, 14, 15, 16]
     assert [event["event_type"] for event in result["telemetry_events"]] == [
         "authority_context_resolved",
         "evaluation_pipeline_started",
-        "admissibility_cognition_completed",
-        "continuity_posture_evaluated",
+        "runtime_evidence_loaded",
+        "continuity_checked",
+        "replay_validated",
+        "admissibility_evaluated",
         "enforcement_outcome_recorded",
     ]
     assert result["telemetry_stream"] == [

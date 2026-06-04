@@ -1,0 +1,31 @@
+{
+  "schema_version": "compiled_authority_contract.v1",
+  "contract_id": "finance-policy",
+  "contract_version": "1.0.0",
+  "contract_hash": "sha256:contract",
+  "authority_requirements": {
+    "required_roles": [
+      "manager"
+    ]
+  },
+  "approval_requirements": {
+    "required": [
+      {
+        "role": "manager"
+      },
+      {
+        "role": "director",
+        "condition": {
+          "field": "amount",
+          "operator": ">",
+          "value": 10000
+        }
+      }
+    ]
+  },
+  "artifact_requirements": {},
+  "stage_requirements": {},
+  "invariants": {
+    "separation_of_duties": true
+  }
+}
