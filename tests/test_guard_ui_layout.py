@@ -14,11 +14,17 @@ def test_guard_ui_layout_contains_required_runtime_surfaces():
     )
 
     for expected in [
-        "Can this execution proceed?",
-        "Runtime Boundary",
-        "Execution Decision",
-        "Runtime posture",
-        "Enforcement Chronology",
+        "Can execution proceed?",
+        "Decision",
+        "Trace",
+        "Runtime Data",
+        "Step 1",
+        "Step 2",
+        "Step 3",
+        "Why?",
+        "What must happen next?",
+        "Runtime execution boundary",
+        "Chronology",
         "Evaluation Trace",
         "Telemetry Stream",
         "View compiled authority",

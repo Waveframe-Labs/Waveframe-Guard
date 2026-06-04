@@ -88,21 +88,28 @@ function renderEvaluation(payload) {
   const status = outcome.status;
 
   byId("authorityRef").textContent = authorityRef;
+  byId("outcomeRef").textContent = outcome.schema_version || outcomeContractSchema;
   byId("requestRef").textContent = request.request_id;
   byId("targetRef").textContent = `${request.action} -> ${request.target}`;
   byId("latencyRef").textContent = typeof latency === "number" ? `${latency} ms` : String(latency);
-  byId("decisionState").textContent = status.toUpperCase();
-  byId("decisionRationale").textContent = tightRationale(evaluation.rationale);
-  byId("decisionConsequence").textContent = consequenceText(outcome);
-  byId("decisionNext").textContent = nextActionText(evaluation);
-  document.querySelector(".gate-question strong").textContent = primaryAnswer(status);
+  byId("decisionState").textContent = decisionAnswer(status);
+  byId("primaryAnswer").textContent = primaryAnswer(status);
   byId("traceHash").textContent = evaluation.evaluation_trace.trace_hash;
 
   renderPosture(evaluation);
-  renderOutputs(evaluation);
+  renderDecisionLists(evaluation);
   renderTrace(evaluation);
   renderChronology(payload.chronology || []);
   renderTelemetry(payload.telemetry_stream || []);
+}
+
+function renderDecisionLists(evaluation) {
+  byId("whyList").innerHTML = shortWhy(evaluation)
+    .map((item) => `<div class="short-item">${item}</div>`)
+    .join("");
+  byId("nextList").innerHTML = shortNextActions(evaluation)
+    .map((item) => `<div class="short-item">${item}</div>`)
+    .join("");
 }
 
 function renderPosture(evaluation) {
@@ -204,6 +211,44 @@ function renderRows(rows) {
     .join("");
 }
 
+function shortWhy(evaluation) {
+  const items = [];
+  if (evaluation.violated_constraints.length) {
+    items.push("failed constraint");
+  }
+  if (evaluation.required_evidence.length) {
+    items.push("missing evidence");
+  }
+  if (evaluation.continuity_requirements.length) {
+    items.push("continuity drift");
+  }
+  if (evaluation.replay_obligations.length) {
+    items.push("replay mismatch");
+  }
+  return items.length ? items : ["requirements satisfied"];
+}
+
+function shortNextActions(evaluation) {
+  const actions = [];
+  for (const evidence of evaluation.required_evidence || []) {
+    if (evidence.role) {
+      actions.push(`obtain ${evidence.role} approval`);
+    } else {
+      actions.push("attach required evidence");
+    }
+  }
+  if (evaluation.replay_obligations.length) {
+    actions.push("attach replay evidence");
+  }
+  if (evaluation.continuity_requirements.length) {
+    actions.push("revalidate continuity");
+  }
+  if (evaluation.status !== "admissible") {
+    actions.push("retry execution");
+  }
+  return actions.length ? [...new Set(actions)] : ["proceed with execution"];
+}
+
 function applyChronologyFilter(filter) {
   document.querySelectorAll("[data-filter]").forEach((button) => {
     button.classList.toggle("active", button.dataset.filter === filter);
@@ -224,6 +269,12 @@ function postureValue(status) {
   if (status === "admissible") return "Allowed";
   if (status === "escalated") return "Escalated";
   return "Blocked";
+}
+
+function decisionAnswer(status) {
+  if (status === "admissible") return "YES";
+  if (status === "escalated") return "ESCALATE";
+  return "NO";
 }
 
 function enforcementValue(status) {
@@ -271,6 +322,18 @@ function setStatus(message) {
 
 document.querySelectorAll("[data-filter]").forEach((button) => {
   button.addEventListener("click", () => applyChronologyFilter(button.dataset.filter));
+});
+
+document.querySelectorAll("[data-tab]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const selected = button.dataset.tab;
+    document.querySelectorAll("[data-tab]").forEach((item) => {
+      item.classList.toggle("active", item.dataset.tab === selected);
+    });
+    document.querySelectorAll(".tab-panel").forEach((panel) => {
+      panel.classList.toggle("active", panel.id === selected);
+    });
+  });
 });
 
 byId("evaluateButton").addEventListener("click", async () => {

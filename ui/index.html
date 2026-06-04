@@ -8,76 +8,119 @@
     <link rel="stylesheet" href="./styles.css">
   </head>
   <body>
-    <div class="app-shell">
-      <aside class="side-rail" aria-label="Guard navigation">
-        <div class="rail-logo">
+    <div class="checkpoint-shell">
+      <header class="checkpoint-header">
+        <div class="brand-lockup">
           <img src="./branding/assets/canon_wf_logo.png" alt="Waveframe Labs">
-        </div>
-        <div class="rail-copy">
-          <span>Waveframe Guard</span>
-          <strong>Runtime Execution Boundary</strong>
-        </div>
-        <nav>
-          <a class="active" href="#decision">Execution Gate</a>
-          <a href="#trace">Evaluation Trace</a>
-          <a href="#chronology">Chronology</a>
-          <a href="#telemetry">Telemetry</a>
-        </nav>
-      </aside>
-
-      <main class="runtime-console">
-        <header class="console-top">
           <div>
-            <p class="section-kicker">Runtime Boundary</p>
-            <h1>Can this execution proceed?</h1>
+            <span>Waveframe Guard</span>
+            <strong>Runtime execution boundary</strong>
           </div>
-          <div class="authority-pill">
-            <span>Authority</span>
-            <strong id="authorityRef">finance-policy@1.0.0</strong>
-          </div>
-        </header>
+        </div>
+        <div class="execution-ref">
+          <span id="requestRef">exec-1</span>
+          <strong id="targetRef">transfer -> wire</strong>
+        </div>
+      </header>
 
-        <section id="decision" class="decision-gate" aria-label="Execution decision">
-          <div class="gate-meta">
-            <span id="requestRef">exec-1</span>
-            <span id="targetRef">transfer -> wire</span>
-            <span id="latencyRef">14 ms</span>
-          </div>
-          <div class="gate-body">
-            <div class="gate-status">
-              <span class="status-label">Execution Decision</span>
-              <strong id="decisionState">BLOCKED</strong>
-              <p id="decisionRationale">Actor role is not authorized by compiled authority.</p>
-            </div>
-            <div class="gate-consequence">
-              <span>Consequence</span>
-              <strong id="decisionConsequence">Execution stopped at boundary</strong>
-              <p id="decisionNext">Director approval, replay link, and continuity revalidation are required before retry.</p>
-            </div>
-          </div>
-          <div class="gate-question">
-            <span>Primary answer</span>
-            <strong>No. This execution cannot proceed.</strong>
-          </div>
-        </section>
+      <nav class="tabbar" aria-label="Guard runtime surfaces">
+        <button class="active" type="button" data-tab="decision">Decision</button>
+        <button type="button" data-tab="trace">Trace</button>
+        <button type="button" data-tab="runtime-data">Runtime Data</button>
+      </nav>
 
-        <section class="posture-strip" aria-label="Runtime posture rail">
-          <div id="postureRail" class="posture-grid"></div>
-        </section>
-
-        <section class="boundary-grid" aria-label="Execution boundary details">
-          <section class="decision-cognition" aria-labelledby="cognition-title">
-            <div class="panel-title">
-              <p class="section-kicker">Admissibility Result</p>
-              <h2 id="cognition-title">Why not?</h2>
+      <main>
+        <section id="decision" class="tab-panel active" aria-label="Execution decision">
+          <section class="decision-hero">
+            <div class="question-block">
+              <p class="section-kicker">Step 1</p>
+              <h1>Can execution proceed?</h1>
             </div>
-            <div id="outputGrid" class="cognition-grid"></div>
+            <div class="answer-block">
+              <span>Answer</span>
+              <strong id="decisionState">NO</strong>
+              <p id="primaryAnswer">This execution cannot proceed.</p>
+            </div>
           </section>
 
-          <section class="payload-drawer" aria-labelledby="payload-title">
+          <section class="decision-summary">
+            <article class="summary-card">
+              <p class="section-kicker">Step 2</p>
+              <h2>Why?</h2>
+              <div id="whyList" class="short-list"></div>
+            </article>
+            <article class="summary-card next-card">
+              <p class="section-kicker">Step 3</p>
+              <h2>What must happen next?</h2>
+              <div id="nextList" class="short-list"></div>
+            </article>
+          </section>
+
+          <section class="posture-strip" aria-label="Runtime posture">
+            <div id="postureRail" class="posture-grid"></div>
+          </section>
+
+          <section class="execution-facts">
+            <div>
+              <span>Authority</span>
+              <strong id="authorityRef">finance-policy@1.0.0</strong>
+            </div>
+            <div>
+              <span>Latency</span>
+              <strong id="latencyRef">14 ms</strong>
+            </div>
+            <div>
+              <span>Outcome contract</span>
+              <strong id="outcomeRef">guard_enforcement_outcome.v1</strong>
+            </div>
+          </section>
+        </section>
+
+        <section id="trace" class="tab-panel" aria-label="Evaluation trace">
+          <section class="trace-panel">
+            <div class="panel-title trace-head">
+              <div>
+                <p class="section-kicker">Advanced explainability</p>
+                <h2>Evaluation Trace</h2>
+              </div>
+              <span id="traceHash" class="hash-chip">sha256:trace</span>
+            </div>
+            <div id="traceSurface" class="trace-surface"></div>
+          </section>
+
+          <section class="chronology-panel">
+            <div class="panel-title chronology-head">
+              <div>
+                <p class="section-kicker">Evidence linked</p>
+                <h2>Chronology</h2>
+              </div>
+              <div class="chronology-tools" role="group" aria-label="Chronology filters">
+                <button class="active" type="button" data-filter="all">All</button>
+                <button type="button" data-filter="evidence">Evidence</button>
+                <button type="button" data-filter="replay">Replay</button>
+                <button type="button" data-filter="continuity">Continuity</button>
+              </div>
+            </div>
+            <ol id="chronologyList" class="chronology-list"></ol>
+          </section>
+
+          <section class="telemetry-panel">
+            <div class="panel-title telemetry-head">
+              <div>
+                <p class="section-kicker">Append-only</p>
+                <h2>Telemetry Stream</h2>
+              </div>
+              <div class="live-indicator"><span></span> Live boundary feed</div>
+            </div>
+            <div id="telemetryStream" class="telemetry-stream"></div>
+          </section>
+        </section>
+
+        <section id="runtime-data" class="tab-panel" aria-label="Runtime data">
+          <section class="payload-drawer">
             <div class="panel-title">
-              <p class="section-kicker">Boundary Inputs</p>
-              <h2 id="payload-title">Inspected only when needed</h2>
+              <p class="section-kicker">Debug mode</p>
+              <h2>Runtime Data</h2>
             </div>
             <div class="ingest-actions">
               <button id="evaluateButton" type="button">Evaluate Execution</button>
@@ -85,44 +128,6 @@
             </div>
             <div id="payloadDrawers" class="drawer-stack"></div>
           </section>
-        </section>
-
-        <section id="trace" class="trace-panel" aria-labelledby="trace-title">
-          <div class="panel-title trace-head">
-            <div>
-              <p class="section-kicker">Evaluation Trace</p>
-              <h2 id="trace-title">Structured runtime reasoning</h2>
-            </div>
-            <span id="traceHash" class="hash-chip">sha256:trace</span>
-          </div>
-          <div id="traceSurface" class="trace-surface"></div>
-        </section>
-
-        <section id="chronology" class="chronology-panel" aria-labelledby="chronology-title">
-          <div class="panel-title chronology-head">
-            <div>
-              <p class="section-kicker">Enforcement Chronology</p>
-              <h2 id="chronology-title">Boundary sequence</h2>
-            </div>
-            <div class="chronology-tools" role="group" aria-label="Chronology filters">
-              <button class="active" type="button" data-filter="all">All</button>
-              <button type="button" data-filter="evidence">Evidence</button>
-              <button type="button" data-filter="replay">Replay</button>
-              <button type="button" data-filter="continuity">Continuity</button>
-            </div>
-          </div>
-          <ol id="chronologyList" class="chronology-list"></ol>
-        </section>
-
-        <section id="telemetry" class="telemetry-panel" aria-labelledby="telemetry-title">
-          <div class="panel-title telemetry-head">
-            <div>
-              <p class="section-kicker">Telemetry Stream</p>
-              <h2 id="telemetry-title">Append-only runtime events</h2>
-            </div>
-            <div class="live-indicator"><span></span> Live boundary feed</div>
-          </div>
-          <div id="telemetryStream" class="telemetry-stream"></div>
         </section>
       </main>
     </div>
