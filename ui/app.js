@@ -36,7 +36,7 @@ const runtimeEvaluation = {
       source: "caller_supplied",
       timestamp: "2026-06-03T22:30:00+00:00"
     },
-    execution_context: { surface: "sdk", environment: "local" }
+    execution_context: { surface: "sdk", environment: "local", latency_ms: 14 }
   },
   continuity: {
     schema_version: "guard_continuity_posture.v1",
@@ -47,7 +47,7 @@ const runtimeEvaluation = {
     continuity_requirements: [
       {
         requirement: "revalidation",
-        rationale: "continuity state requires runtime revalidation"
+        rationale: "authority drift detected during runtime continuity check"
       }
     ],
     replay_obligations: [
@@ -59,7 +59,10 @@ const runtimeEvaluation = {
   },
   result: {
     status: "blocked",
-    rationale: "actor role is not authorized by compiled authority",
+    answer: "No. This execution cannot proceed.",
+    rationale: "Actor role is not authorized by compiled authority.",
+    consequence: "Execution stopped at boundary",
+    next: "Director approval, replay link, and continuity revalidation are required before retry.",
     violated_constraints: [
       {
         constraint: "required_role",
@@ -85,7 +88,7 @@ const runtimeEvaluation = {
     continuity_requirements: [
       {
         requirement: "revalidation",
-        rationale: "continuity state requires runtime revalidation"
+        rationale: "authority drift detected during runtime continuity check"
       }
     ],
     enforcement_outcome: {
@@ -99,18 +102,18 @@ const runtimeEvaluation = {
     }
   },
   chronology: [
-    ["01", "evaluation_started", "Runtime evaluation pipeline opened"],
-    ["02", "evidence_loaded", "Actor identity, approvals, replay evidence, continuity snapshot, timestamp source, and execution context loaded"],
-    ["03", "continuity_checked", "Authority supersession signal requires revalidation"],
-    ["04", "replay_validated", "Replay evidence is incomplete for this execution"],
-    ["05", "admissibility_evaluated", "Required role constraint failed and director approval is missing"],
-    ["06", "enforcement_emitted", "guard_enforcement_outcome.v1 emitted with block consequence"]
+    ["01", "evaluation_started", "Runtime boundary opened for execution request", "all", "trace"],
+    ["02", "evidence_loaded", "Actor identity, approvals, replay evidence, continuity snapshot, timestamp source, and execution context loaded", "evidence", "evidence"],
+    ["03", "continuity_checked", "Authority supersession signal requires revalidation", "continuity", "continuity"],
+    ["04", "replay_validated", "Replay evidence is incomplete for this execution", "replay", "replay"],
+    ["05", "admissibility_evaluated", "Required role constraint failed and director approval is missing", "all", "trace"],
+    ["06", "enforcement_emitted", "guard_enforcement_outcome.v1 emitted with block consequence", "all", "outcome"]
   ],
   trace: {
     trace_hash: "sha256:trace",
     evaluated_constraints: [
-      "required_role: expected manager, observed employee",
-      "separation_of_duties: manager approval does not satisfy director requirement"
+      "required_role expected manager, observed employee",
+      "approval requirement evaluated for amount > 10000"
     ],
     satisfied_requirements: [
       "compiled_authority_contract.v1 accepted",
@@ -126,15 +129,15 @@ const runtimeEvaluation = {
       "replay linkage incomplete"
     ],
     replay_dependencies: [
-      "link_replay before resuming execution"
+      "link_replay before retrying execution"
     ]
   },
   telemetry: [
-    ["block", "required_role constraint failed"],
-    ["evidence_failure", "director approval missing"],
-    ["continuity_failure", "authority supersession drift detected"],
-    ["replay_mismatch", "replay evidence incomplete"],
-    ["escalate", "revalidation and replay linkage required"]
+    ["22:30:00.014", "block", "required_role constraint failed"],
+    ["22:30:00.013", "evidence_failure", "director approval missing"],
+    ["22:30:00.012", "continuity_failure", "authority supersession drift detected"],
+    ["22:30:00.011", "replay_mismatch", "replay evidence incomplete"],
+    ["22:30:00.010", "escalate", "revalidation and replay linkage required"]
   ]
 };
 
@@ -145,39 +148,39 @@ const summarize = (value) => {
   if (Array.isArray(value)) return value.map(summarize).join("; ");
   if (value && typeof value === "object") {
     return Object.entries(value)
+      .filter(([, item]) => item !== null && item !== undefined)
       .map(([key, item]) => `${key}: ${summarize(item)}`)
       .join(", ");
   }
   return String(value);
 };
 
-const inputItems = [
-  ["Compiled authority contract", runtimeEvaluation.authority],
-  ["Normalized execution request", runtimeEvaluation.request],
-  ["Runtime evidence", runtimeEvaluation.evidence],
-  ["Continuity posture", runtimeEvaluation.continuity]
+const payloads = [
+  ["View compiled authority", runtimeEvaluation.authority],
+  ["View normalized request", runtimeEvaluation.request],
+  ["View runtime evidence", runtimeEvaluation.evidence],
+  ["View continuity posture", runtimeEvaluation.continuity]
 ];
 
-document.getElementById("inputStack").innerHTML = inputItems
+document.getElementById("payloadDrawers").innerHTML = payloads
   .map(([title, payload]) => `
-    <article class="input-item">
-      <h3>${title}</h3>
+    <details>
+      <summary>${title}</summary>
       <pre>${formatJson(payload)}</pre>
-    </article>
+    </details>
   `)
   .join("");
 
 const outputs = [
-  ["Violated constraints", runtimeEvaluation.result.violated_constraints],
-  ["Missing evidence", runtimeEvaluation.result.required_evidence],
-  ["Replay obligations", runtimeEvaluation.result.replay_obligations],
-  ["Continuity failures", runtimeEvaluation.result.continuity_requirements],
-  ["Escalation rationale", [runtimeEvaluation.result.rationale]]
+  ["Violated constraints", runtimeEvaluation.result.violated_constraints, "critical"],
+  ["Missing evidence", runtimeEvaluation.result.required_evidence, "critical"],
+  ["Replay obligations", runtimeEvaluation.result.replay_obligations, ""],
+  ["Continuity failures", runtimeEvaluation.result.continuity_requirements, ""]
 ];
 
 document.getElementById("outputGrid").innerHTML = outputs
-  .map(([title, rows]) => `
-    <article class="output-item">
+  .map(([title, rows, tone]) => `
+    <article class="cognition-card ${tone}">
       <h3>${title}</h3>
       <div class="data-list">
         ${rows.map((row) => `
@@ -208,18 +211,29 @@ document.getElementById("postureRail").innerHTML = postureChips
   `)
   .join("");
 
-document.getElementById("chronology").innerHTML = runtimeEvaluation.chronology
-  .map(([sequence, event, detail]) => `
-    <li>
-      <span class="sequence">${sequence}</span>
-      <div>
-        <strong class="event-name">${event}</strong>
-        <p class="event-detail">${detail}</p>
-      </div>
-      <span class="event-time">${runtimeEvaluation.evidence.timestamp_source.timestamp}</span>
-    </li>
-  `)
-  .join("");
+const renderChronology = (filter = "all") => {
+  const events = runtimeEvaluation.chronology.filter(([, , , group]) => filter === "all" || group === filter);
+  document.getElementById("chronologyList").innerHTML = events
+    .map(([sequence, event, detail, , link]) => `
+      <li>
+        <span class="sequence">${sequence}</span>
+        <div>
+          <strong class="event-name">${event}</strong>
+          <p class="event-detail">${detail}</p>
+        </div>
+        <span class="event-link">${link}-linked</span>
+      </li>
+    `)
+    .join("");
+};
+
+document.querySelectorAll("[data-filter]").forEach((button) => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll("[data-filter]").forEach((item) => item.classList.remove("active"));
+    button.classList.add("active");
+    renderChronology(button.dataset.filter);
+  });
+});
 
 const traceRows = Object.entries(runtimeEvaluation.trace).filter(([key]) => key !== "trace_hash");
 document.getElementById("traceSurface").innerHTML = traceRows
@@ -232,20 +246,24 @@ document.getElementById("traceSurface").innerHTML = traceRows
   .join("");
 
 document.getElementById("telemetryStream").innerHTML = runtimeEvaluation.telemetry
-  .map(([event, detail], index) => `
+  .map(([time, event, detail]) => `
     <article class="telemetry-event">
-      <strong>${String(index + 1).padStart(2, "0")} ${event}</strong>
+      <strong>${event}</strong>
       <p>${detail}</p>
+      <span>${time}</span>
     </article>
   `)
   .join("");
 
 document.getElementById("authorityRef").textContent = runtimeEvaluation.result.enforcement_outcome.authority_ref;
-document.getElementById("contractHash").textContent = runtimeEvaluation.authority.contract_hash;
-document.getElementById("rationale").textContent = runtimeEvaluation.result.rationale;
-document.getElementById("outcomeRef").textContent = runtimeEvaluation.result.enforcement_outcome.schema_version;
+document.getElementById("requestRef").textContent = runtimeEvaluation.request.request_id;
+document.getElementById("targetRef").textContent = `${runtimeEvaluation.request.action} -> ${runtimeEvaluation.request.target}`;
+document.getElementById("latencyRef").textContent = `${runtimeEvaluation.evidence.execution_context.latency_ms} ms`;
+document.getElementById("decisionState").textContent = runtimeEvaluation.result.status.toUpperCase();
+document.getElementById("decisionRationale").textContent = runtimeEvaluation.result.rationale;
+document.getElementById("decisionConsequence").textContent = runtimeEvaluation.result.consequence;
+document.getElementById("decisionNext").textContent = runtimeEvaluation.result.next;
+document.querySelector(".gate-question strong").textContent = runtimeEvaluation.result.answer;
 document.getElementById("traceHash").textContent = runtimeEvaluation.trace.trace_hash;
 
-const decisionBadge = document.getElementById("decisionBadge");
-decisionBadge.textContent = runtimeEvaluation.result.status.toUpperCase();
-decisionBadge.className = `decision decision-${runtimeEvaluation.result.status}`;
+renderChronology();

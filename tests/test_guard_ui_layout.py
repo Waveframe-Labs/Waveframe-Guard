@@ -10,11 +10,16 @@ def test_guard_ui_layout_contains_required_runtime_surfaces():
     script = (UI_ROOT / "app.js").read_text(encoding="utf-8")
 
     for expected in [
-        "Runtime Evaluation",
-        "Runtime Posture",
+        "Can this execution proceed?",
+        "Runtime Boundary",
+        "Execution Decision",
+        "Runtime posture",
         "Enforcement Chronology",
         "Evaluation Trace",
         "Telemetry Stream",
+        "View compiled authority",
+        "View normalized request",
+        "View runtime evidence",
         "compiled_authority_contract.v1",
         "normalized_execution_request.v1",
         "guard_runtime_evidence_model.v1",
@@ -26,6 +31,5 @@ def test_guard_ui_layout_contains_required_runtime_surfaces():
 def test_guard_ui_uses_canonical_branding_assets():
     html = (UI_ROOT / "index.html").read_text(encoding="utf-8")
 
-    assert "./branding/assets/canon_wf_logo_extended.png" in html
-    assert "./branding/assets/canon_wf_logo_mark_transparent.png" in html
+    assert "./branding/assets/canon_wf_logo.png" in html
     assert "./branding/assets/favicon.ico" in html
