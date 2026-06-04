@@ -21,6 +21,21 @@ Guard never derives governance meaning from raw policy text.
 8. Enforce the decision by allowing or blocking execution.
 9. Emit telemetry, audit evidence, and posture data.
 
+## Runtime cognition substrate
+
+The operational backbone materializes deterministic runtime payloads:
+
+- `execution_admissibility_projection.v1`
+- `execution_runtime_posture.v1`
+- `guard_runtime_event.v1`
+- `guard_evaluation_trace.v1`
+- `guard_continuity_posture.v1`
+- `guard_enforcement_outcome.v1`
+
+These payloads are Guard-owned runtime surfaces. They are derived from compiled
+authority, execution request, actor identity, continuity state, replay posture,
+and evidence posture. They do not derive governance meaning from raw policy text.
+
 ## Boundary in the flow
 
 The flow begins after governance meaning has already been compiled. Guard may
