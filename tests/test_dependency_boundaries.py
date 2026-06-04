@@ -17,6 +17,14 @@ GUARD_ROOTS = [
 FORBIDDEN_LOCAL_DEFINITIONS = {
     "CompiledAuthorityContract",
     "compile_policy",
+    "parse_policy",
+    "parse_raw_policy",
+    "extract_governance",
+    "extract_semantics",
+    "normalize_proposal",
+    "normalize_execution_request",
+    "persist_cloud_event",
+    "save_cloud_event",
 }
 
 FORBIDDEN_DIRECTORY_NAMES = {
@@ -31,6 +39,15 @@ FORBIDDEN_SCHEMA_MODULE_NAMES = {
     "authority_schema",
     "compiled_authority_schema",
     "governance_schema",
+}
+
+FORBIDDEN_CLOUD_PERSISTENCE_MODULE_NAMES = {
+    "cloud",
+    "persistence",
+    "repository",
+    "database",
+    "db",
+    "store",
 }
 
 
@@ -79,6 +96,70 @@ def test_guard_does_not_import_local_raw_policy_compilers():
                 for alias in node.names:
                     if alias.name.startswith("compiler"):
                         violations.append(f"{_rel(python_file)}:{node.lineno} imports {alias.name}")
+
+    assert violations == []
+
+
+def test_guard_has_upstream_semantics_adapter_boundary():
+    adapter_path = REPO_ROOT / "guard" / "adapters" / "upstream_semantics.py"
+    source = adapter_path.read_text(encoding="utf-8")
+
+    assert "governance_ledger.semantics.execution_projection" in source
+    assert "governance_ledger.semantics.compiler" in source
+    assert "cricore.api" in source
+
+
+def test_guard_does_not_parse_raw_policy_text():
+    violations = []
+    forbidden_names = {
+        "parse_policy",
+        "parse_raw_policy",
+        "extract_governance",
+        "extract_semantics",
+    }
+    for python_file in _guard_python_files():
+        tree = ast.parse(python_file.read_text(encoding="utf-8"), filename=str(python_file))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+                if node.func.id in forbidden_names:
+                    violations.append(f"{_rel(python_file)}:{node.lineno} calls {node.func.id}")
+
+    assert violations == []
+
+
+def test_guard_does_not_duplicate_proposal_normalization_logic():
+    violations = []
+    for python_file in _guard_python_files():
+        if _rel(python_file) == "guard/adapters/proposal_normalizer.py":
+            continue
+        tree = ast.parse(python_file.read_text(encoding="utf-8"), filename=str(python_file))
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                lowered = node.name.lower()
+                is_proposal_or_request_normalization = (
+                    "normaliz" in lowered
+                    and any(term in lowered for term in ["proposal", "execution_request"])
+                )
+                if is_proposal_or_request_normalization:
+                    violations.append(f"{_rel(python_file)}:{node.lineno} defines {node.name}")
+
+    assert violations == []
+
+
+def test_guard_does_not_define_cloud_persistence_behavior():
+    violations = []
+    for python_file in _guard_python_files():
+        parts = {part.lower() for part in python_file.relative_to(REPO_ROOT).parts}
+        stem = python_file.stem.lower()
+        if stem in FORBIDDEN_CLOUD_PERSISTENCE_MODULE_NAMES or parts & FORBIDDEN_CLOUD_PERSISTENCE_MODULE_NAMES:
+            violations.append(_rel(python_file))
+            continue
+        tree = ast.parse(python_file.read_text(encoding="utf-8"), filename=str(python_file))
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                lowered = node.name.lower()
+                if "cloud" in lowered and any(word in lowered for word in ["persist", "save", "store", "write"]):
+                    violations.append(f"{_rel(python_file)}:{node.lineno} defines {node.name}")
 
     assert violations == []
 

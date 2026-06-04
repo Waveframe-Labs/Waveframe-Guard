@@ -11,6 +11,11 @@ GUARD_RUNTIME_EVENT_V1 = "guard_runtime_event.v1"
 GUARD_EVALUATION_TRACE_V1 = "guard_evaluation_trace.v1"
 GUARD_CONTINUITY_POSTURE_V1 = "guard_continuity_posture.v1"
 GUARD_ENFORCEMENT_OUTCOME_V1 = "guard_enforcement_outcome.v1"
+GUARD_ENFORCEMENT_OUTCOME_STATUSES = {"admissible", "blocked", "escalated"}
+
+
+class GuardEnforcementOutcomeError(ValueError):
+    pass
 
 
 def build_execution_admissibility_projection(
@@ -156,7 +161,36 @@ def build_guard_enforcement_outcome(
     }
     payload["outcome_id"] = stable_id("enforcement_outcome", payload)
     payload["outcome_hash"] = stable_hash(payload)
+    validate_guard_enforcement_outcome(payload)
     return payload
+
+
+def validate_guard_enforcement_outcome(payload: dict[str, Any]) -> dict[str, Any]:
+    if not isinstance(payload, dict):
+        raise GuardEnforcementOutcomeError("guard enforcement outcome must be an object")
+    required = {
+        "schema_version",
+        "authority_ref",
+        "status",
+        "rationale",
+        "consequences",
+        "outcome_id",
+        "outcome_hash",
+    }
+    missing = sorted(required - payload.keys())
+    if missing:
+        raise GuardEnforcementOutcomeError(
+            "guard enforcement outcome missing required fields: " + ", ".join(missing)
+        )
+    if payload["schema_version"] != GUARD_ENFORCEMENT_OUTCOME_V1:
+        raise GuardEnforcementOutcomeError(
+            f"guard enforcement outcome schema_version must be {GUARD_ENFORCEMENT_OUTCOME_V1}"
+        )
+    if payload["status"] not in GUARD_ENFORCEMENT_OUTCOME_STATUSES:
+        raise GuardEnforcementOutcomeError("guard enforcement outcome status is not recognized")
+    if not isinstance(payload["consequences"], list):
+        raise GuardEnforcementOutcomeError("guard enforcement outcome consequences must be a list")
+    return dict(payload)
 
 
 def _authority_ref(authority: dict[str, Any]) -> str:

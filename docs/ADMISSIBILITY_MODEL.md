@@ -58,3 +58,18 @@ telemetry, audit, and user posture rendering:
 - `decision_trace`
 
 The decision should explain runtime evaluation, not governance authorship.
+
+## Runtime evidence expected before decision
+
+Guard materializes `guard_runtime_evidence_model.v1` before deciding. The model
+contains:
+
+- actor identity
+- approvals
+- replay evidence
+- continuity snapshot
+- timestamp source
+- execution context
+
+This evidence model is runtime substrate only. It does not compile, parse, or
+extract governance meaning.

@@ -104,3 +104,13 @@ Guard
 
 If a change causes Guard to derive, infer, or redefine governance meaning, that
 change crosses the system boundary and must be moved out of Guard.
+
+## Intake rule
+
+Guard only accepts `compiled_authority_contract.v1` at the authority boundary.
+Raw policy text, semantic extraction payloads, and authority bundles are rejected
+unless they have already been compiled into that contract form upstream.
+
+Execution requests must also arrive through a normalization boundary. Guard may
+call a Proposal Normalizer adapter when available, but Guard must not duplicate
+proposal normalization rules locally.

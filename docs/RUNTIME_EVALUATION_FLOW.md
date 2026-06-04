@@ -11,15 +11,17 @@ Guard never derives governance meaning from raw policy text.
 ## Flow
 
 1. Resolve the authority reference.
-2. Load compiled authority from the registry, cache, or explicit runtime binding.
+2. Load and validate `compiled_authority_contract.v1` from the registry, cache,
+   or explicit runtime binding.
 3. Verify authority identity, version, hash, lifecycle, and lineage metadata.
-4. Build execution state from actor, action, target, arguments, artifacts, and
-   approval evidence.
+4. Accept only a normalized execution request.
 5. Validate execution state as a Guard runtime payload.
-6. Evaluate admissibility against compiled authority.
-7. Record chronology and revalidation metadata.
-8. Enforce the decision by allowing or blocking execution.
-9. Emit telemetry, audit evidence, and posture data.
+6. Materialize `guard_runtime_evidence_model.v1`.
+7. Evaluate admissibility against compiled authority.
+8. Record chronology and revalidation metadata.
+9. Enforce the decision by allowing, blocking, or escalating execution.
+10. Emit telemetry, audit evidence, posture data, and
+    `guard_enforcement_outcome.v1`.
 
 ## Runtime cognition substrate
 

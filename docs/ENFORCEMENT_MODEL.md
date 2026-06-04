@@ -57,6 +57,12 @@ Guard enforcement produces runtime outputs:
 These outputs describe runtime enforcement posture. They do not become source
 authority for governance meaning.
 
+## Outcome contract
+
+Every Guard runtime evaluation emits `guard_enforcement_outcome.v1`. This is the
+stable enforcement bridge object for later Cloud integration. Cloud may persist
+or route it later, but Guard does not own Cloud persistence behavior.
+
 ## Failure posture
 
 When authority cannot be resolved or verified, Guard must treat that as a runtime

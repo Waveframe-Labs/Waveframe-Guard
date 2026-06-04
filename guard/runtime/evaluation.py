@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from guard.adapters.compiled_authority import intake_compiled_authority
+from guard.adapters.proposal_normalizer import require_normalized_execution_request
 from guard.cognition import assess_admissibility
 from guard.enforcement import build_chronology
 from guard.projections import project_execution_surface
@@ -14,6 +16,7 @@ from .builders import (
     build_guard_enforcement_outcome,
     build_guard_evaluation_trace,
 )
+from .evidence import build_runtime_evidence_model, validate_runtime_evidence_model
 
 
 DEFAULT_EVALUATION_TIME = "1970-01-01T00:00:00+00:00"
@@ -30,14 +33,32 @@ def evaluate_runtime(
     evaluation_time: str = DEFAULT_EVALUATION_TIME,
     start_sequence: int = 1,
 ) -> dict[str, Any]:
+    compiled_authority = intake_compiled_authority(compiled_authority)
+    execution_request = require_normalized_execution_request(execution_request)
+    runtime_evidence = build_runtime_evidence_model(
+        actor_identity=actor_identity,
+        approvals=(evidence_posture or {}).get("approvals", []),
+        replay_evidence=replay_posture,
+        continuity_snapshot=continuity_state,
+        timestamp_source={
+            "source": "caller_supplied",
+            "timestamp": evaluation_time,
+        },
+        execution_context=(evidence_posture or {}).get("execution_context", {}),
+    )
+    validate_runtime_evidence_model(runtime_evidence)
+
     authority_ref = _authority_ref(compiled_authority)
     assessment = assess_admissibility(
         compiled_authority=compiled_authority,
         execution_request=execution_request,
-        actor_identity=actor_identity,
+        actor_identity=runtime_evidence["actor_identity"],
         continuity_state=continuity_state,
         replay_posture=replay_posture,
-        evidence_posture=evidence_posture,
+        evidence_posture={
+            "approvals": runtime_evidence["approvals"],
+            "execution_context": runtime_evidence["execution_context"],
+        },
     )
     chronology = build_chronology(
         authority_ref=authority_ref,
@@ -115,6 +136,7 @@ def evaluate_runtime(
         "evaluation_trace": trace,
         "continuity_posture": continuity_posture,
         "enforcement_outcome": outcome,
+        "runtime_evidence": runtime_evidence,
         "execution_posture_surface": project_execution_surface(runtime_posture),
     }
 

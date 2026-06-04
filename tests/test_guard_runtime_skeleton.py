@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from guard import evaluate_runtime
+from guard.adapters import COMPILED_AUTHORITY_CONTRACT_V1, NORMALIZED_EXECUTION_REQUEST_V1
 from guard.runtime.builders import (
     EXECUTION_ADMISSIBILITY_PROJECTION_V1,
     EXECUTION_RUNTIME_POSTURE_V1,
@@ -8,7 +9,9 @@ from guard.runtime.builders import (
     GUARD_ENFORCEMENT_OUTCOME_V1,
     GUARD_EVALUATION_TRACE_V1,
     GUARD_RUNTIME_EVENT_V1,
+    validate_guard_enforcement_outcome,
 )
+from guard.runtime.evidence import GUARD_RUNTIME_EVIDENCE_MODEL_V1
 
 
 EVALUATION_TIME = "2026-06-03T22:30:00+00:00"
@@ -34,6 +37,8 @@ def test_runtime_evaluation_builds_admissible_operational_backbone():
     assert result["evaluation_trace"]["schema_version"] == GUARD_EVALUATION_TRACE_V1
     assert result["continuity_posture"]["schema_version"] == GUARD_CONTINUITY_POSTURE_V1
     assert result["enforcement_outcome"]["schema_version"] == GUARD_ENFORCEMENT_OUTCOME_V1
+    assert validate_guard_enforcement_outcome(result["enforcement_outcome"]) == result["enforcement_outcome"]
+    assert result["runtime_evidence"]["schema_version"] == GUARD_RUNTIME_EVIDENCE_MODEL_V1
     assert result["execution_posture_surface"] == {
         "schema_version": "execution_posture_surface.v1",
         "posture": "admissible",
@@ -169,6 +174,7 @@ def test_runtime_chronology_and_telemetry_stream_are_ordered():
 
 def _authority():
     return {
+        "schema_version": COMPILED_AUTHORITY_CONTRACT_V1,
         "contract_id": "finance-policy",
         "contract_version": "1.0.0",
         "contract_hash": "sha256:contract",
@@ -182,12 +188,15 @@ def _authority():
                 },
             ]
         },
+        "artifact_requirements": {},
+        "stage_requirements": {},
         "invariants": {"separation_of_duties": True},
     }
 
 
 def _request(*, amount):
     return {
+        "schema_version": NORMALIZED_EXECUTION_REQUEST_V1,
         "request_id": "exec-1",
         "action": "transfer",
         "target": "wire",

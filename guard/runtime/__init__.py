@@ -6,7 +6,9 @@ from .builders import (
     build_guard_enforcement_outcome,
     build_guard_evaluation_trace,
     build_guard_runtime_event,
+    validate_guard_enforcement_outcome,
 )
+from .evidence import build_runtime_evidence_model, validate_runtime_evidence_model
 
 __all__ = [
     "evaluate_runtime",
@@ -16,4 +18,7 @@ __all__ = [
     "build_guard_enforcement_outcome",
     "build_guard_evaluation_trace",
     "build_guard_runtime_event",
+    "validate_guard_enforcement_outcome",
+    "build_runtime_evidence_model",
+    "validate_runtime_evidence_model",
 ]
