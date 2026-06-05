@@ -14,10 +14,20 @@ const storageKeys = {
   filter: "waveframe.guard.chronologyFilter",
   scroll: "waveframe.guard.scrollState"
 };
+const tabAliases = {
+  trace: "explainability",
+  "runtime-data": "developer-mode"
+};
 const scrollState = JSON.parse(sessionStorage.getItem(storageKeys.scroll) || "{}");
 
 const byId = (id) => document.getElementById(id);
 const formatJson = (value) => JSON.stringify(value, null, 2);
+const escapeHtml = (value) => String(value)
+  .replaceAll("&", "&amp;")
+  .replaceAll("<", "&lt;")
+  .replaceAll(">", "&gt;")
+  .replaceAll('"', "&quot;")
+  .replaceAll("'", "&#039;");
 
 const summarize = (value) => {
   if (typeof value === "string") return value;
@@ -55,23 +65,12 @@ async function evaluateCurrentInputs() {
   setStatus(`Rendered ${body.guard_enforcement_outcome.schema_version || outcomeContractSchema}`);
 }
 
-async function pollTelemetry() {
-  try {
-    const response = await fetch("/api/runtime/telemetry", { cache: "no-store" });
-    if (!response.ok) return;
-    const body = await response.json();
-    renderTelemetry(body.telemetry_stream || []);
-  } catch {
-    // The local server may not be running yet. The main status surface already reports this.
-  }
-}
-
 function renderInputDrawers(inputs) {
   byId("payloadDrawers").innerHTML = inputConfig
     .map(([key, title]) => `
       <details>
         <summary>${title}</summary>
-        <textarea id="input-${key}" spellcheck="false">${formatJson(inputs[key])}</textarea>
+        <textarea id="input-${key}" spellcheck="false">${escapeHtml(formatJson(inputs[key]))}</textarea>
       </details>
     `)
     .join("");
@@ -106,7 +105,7 @@ function renderEvaluation(payload) {
   renderDecisionLists(evaluation);
   renderTrace(evaluation);
   renderChronology(payload.chronology || []);
-  renderTelemetry(payload.telemetry_stream || []);
+  renderTelemetry(payload.telemetry_appended || evaluation.telemetry_events || []);
 }
 
 function renderDecisionLists(evaluation) {
@@ -156,19 +155,45 @@ function renderOutputs(evaluation) {
 }
 
 function renderTrace(evaluation) {
-  const trace = evaluation.evaluation_trace;
-  const traceRows = [
-    ["evaluated constraints", evaluation.admissibility_projection.violated_constraints.concat(evaluation.required_evidence)],
-    ["satisfied requirements", trace.steps.filter((step) => step.status === "completed")],
-    ["failed requirements", evaluation.violated_constraints.concat(evaluation.required_evidence)],
-    ["escalation triggers", evaluation.continuity_requirements],
-    ["replay dependencies", evaluation.replay_obligations]
+  const cards = [
+    {
+      kicker: "Decision basis",
+      title: postureValue(evaluation.status),
+      summary: primaryAnswer(evaluation.status),
+      details: shortWhy(evaluation).join("; ")
+    },
+    {
+      kicker: "Failed constraint",
+      title: evaluation.violated_constraints.length ? "Constraint failed" : "No failed constraint",
+      summary: firstOrNone(evaluation.violated_constraints, constraintSummary),
+      details: evaluation.violated_constraints
+    },
+    {
+      kicker: "Evidence",
+      title: evaluation.required_evidence.length ? "Evidence missing" : "Evidence satisfied",
+      summary: firstOrNone(evaluation.required_evidence, evidenceSummary),
+      details: evaluation.required_evidence
+    },
+    {
+      kicker: "Continuity",
+      title: evaluation.continuity_requirements.length ? "Revalidation required" : "Continuity stable",
+      summary: firstOrNone(evaluation.continuity_requirements, continuitySummary),
+      details: evaluation.continuity_requirements
+    },
+    {
+      kicker: "Replay",
+      title: evaluation.replay_obligations.length ? "Replay required" : "Replay linked",
+      summary: firstOrNone(evaluation.replay_obligations, replaySummary),
+      details: evaluation.replay_obligations
+    }
   ];
-  byId("traceSurface").innerHTML = traceRows
-    .map(([title, rows]) => `
+  byId("traceSurface").innerHTML = cards
+    .map((card) => `
       <article class="trace-item">
-        <strong>${title}</strong>
-        <p>${rows.length ? rows.map(summarize).join("; ") : "none"}</p>
+        <span>${escapeHtml(card.kicker)}</span>
+        <strong>${escapeHtml(card.title)}</strong>
+        <p>${escapeHtml(card.summary)}</p>
+        ${technicalDetails(card.details)}
       </article>
     `)
     .join("");
@@ -180,10 +205,11 @@ function renderChronology(events) {
       <li data-kind="${chronologyKind(event.event_type)}">
         <span class="sequence">${String(event.sequence).padStart(2, "0")}</span>
         <div>
-          <strong class="event-name">${event.event_type}</strong>
-          <p class="event-detail">${summarize(event.details)}</p>
+          <strong class="event-name">${escapeHtml(eventTitle(event))}</strong>
+          <p class="event-detail">${escapeHtml(eventSummary(event))}</p>
+          ${technicalDetails(event)}
         </div>
-        <span class="event-link">${chronologyKind(event.event_type)}-linked</span>
+        <span class="event-link">${escapeHtml(eventBadge(event.event_type))}</span>
       </li>
     `)
     .join("");
@@ -200,9 +226,10 @@ function renderTelemetry(events) {
   byId("telemetryStream").innerHTML = latest
     .map((event) => `
       <article class="telemetry-event">
-        <strong>${event.event_type}</strong>
-        <p>${summarize(event.details)}</p>
-        <span>${event.timestamp}</span>
+        <strong>${escapeHtml(eventTitle(event))}</strong>
+        <p>${escapeHtml(eventSummary(event))}</p>
+        <span>${escapeHtml(event.timestamp)}</span>
+        ${technicalDetails(event)}
       </article>
     `)
     .join("");
@@ -220,6 +247,126 @@ function renderRows(rows) {
       </div>
     `)
     .join("");
+}
+
+function firstOrNone(rows, formatter) {
+  return rows.length ? formatter(rows[0]) : "No action required.";
+}
+
+function conditionText(condition) {
+  if (!condition) return "";
+  return `${condition.field} ${condition.operator} ${condition.value}`;
+}
+
+function constraintSummary(constraint) {
+  if (constraint.constraint === "required_role") {
+    const required = (constraint.required_roles || []).join(" or ");
+    return `Actor role ${constraint.observed_role} is not authorized; ${required} required.`;
+  }
+  return sentence(constraint.rationale || summarize(constraint));
+}
+
+function evidenceSummary(evidence) {
+  if (evidence.evidence === "approval" && evidence.role) {
+    const condition = conditionText(evidence.condition);
+    return condition
+      ? `${capitalize(evidence.role)} approval missing for ${condition}.`
+      : `${capitalize(evidence.role)} approval missing.`;
+  }
+  return sentence(evidence.rationale || summarize(evidence));
+}
+
+function continuitySummary(requirement) {
+  if (requirement.requirement === "revalidation") {
+    return "Continuity revalidation required before execution can proceed.";
+  }
+  return sentence(requirement.rationale || summarize(requirement));
+}
+
+function replaySummary(obligation) {
+  if (obligation.obligation === "link_replay") {
+    return "Replay evidence must be linked before enforcement.";
+  }
+  return sentence(obligation.rationale || summarize(obligation));
+}
+
+function eventTitle(event) {
+  const labels = {
+    authority_context_resolved: "Compiled authority loaded",
+    evaluation_pipeline_started: "Evaluation started",
+    runtime_evidence_loaded: "Runtime evidence loaded",
+    continuity_checked: "Continuity checked",
+    replay_validated: "Replay checked",
+    admissibility_evaluated: "Admissibility evaluated",
+    enforcement_outcome_recorded: "Enforcement outcome emitted"
+  };
+  return labels[event.event_type] || humanize(event.event_type);
+}
+
+function eventSummary(event) {
+  const details = event.details || {};
+  if (event.event_type === "authority_context_resolved") {
+    return "Compiled authority accepted as the governance boundary.";
+  }
+  if (event.event_type === "evaluation_pipeline_started") {
+    return "Guard began evaluating this execution request.";
+  }
+  if (event.event_type === "runtime_evidence_loaded") {
+    return details.required_evidence?.length
+      ? evidenceSummary(details.required_evidence[0])
+      : "Runtime evidence model loaded.";
+  }
+  if (event.event_type === "continuity_checked") {
+    return details.continuity_requirements?.length
+      ? continuitySummary(details.continuity_requirements[0])
+      : "Continuity is stable.";
+  }
+  if (event.event_type === "replay_validated") {
+    return details.replay_obligations?.length
+      ? replaySummary(details.replay_obligations[0])
+      : "Replay evidence is linked.";
+  }
+  if (event.event_type === "admissibility_evaluated") {
+    if (details.violated_constraints?.length) return constraintSummary(details.violated_constraints[0]);
+    if (details.required_evidence?.length) return evidenceSummary(details.required_evidence[0]);
+    return `Execution evaluated as ${details.status || "admissible"}.`;
+  }
+  if (event.event_type === "enforcement_outcome_recorded") {
+    const consequence = details.consequences?.[0]?.consequence || details.status;
+    if (consequence === "block_execution") return "Execution stopped at the Guard boundary.";
+    if (consequence === "allow_execution") return "Execution may proceed.";
+    if (consequence === "escalate_execution") return "Execution held for escalation.";
+  }
+  return summarize(details) || "Evaluation event generated.";
+}
+
+function eventBadge(eventType) {
+  const kind = chronologyKind(eventType);
+  return kind === "all" ? "evaluation" : kind;
+}
+
+function technicalDetails(value) {
+  if (!value || (Array.isArray(value) && !value.length)) return "";
+  return `
+    <details class="technical-detail">
+      <summary>Technical detail</summary>
+      <pre>${escapeHtml(formatJson(value))}</pre>
+    </details>
+  `;
+}
+
+function sentence(text) {
+  if (!text) return "No action required.";
+  return text.endsWith(".") ? text : `${text}.`;
+}
+
+function capitalize(text) {
+  if (!text) return "";
+  return `${text[0].toUpperCase()}${text.slice(1)}`;
+}
+
+function humanize(text) {
+  return capitalize(String(text).replaceAll("_", " "));
 }
 
 function shortWhy(evaluation) {
@@ -345,6 +492,10 @@ document.querySelectorAll("[data-tab]").forEach((button) => {
 });
 
 function activateTab(selected) {
+  selected = tabAliases[selected] || selected || "decision";
+  if (!document.getElementById(selected)) {
+    selected = "decision";
+  }
   const activePanel = document.querySelector(".tab-panel.active");
   if (activePanel) {
     scrollState[activePanel.id] = window.scrollY;
@@ -365,7 +516,6 @@ function activateTab(selected) {
 byId("evaluateButton").addEventListener("click", async () => {
   try {
     await evaluateCurrentInputs();
-    await pollTelemetry();
   } catch (error) {
     setStatus(error.message);
   }
@@ -376,9 +526,7 @@ byId("evaluateButton").addEventListener("click", async () => {
     activateTab(localStorage.getItem(storageKeys.tab) || "decision");
     await loadRuntimeInputs();
     await evaluateCurrentInputs();
-    await pollTelemetry();
     applyChronologyFilter(localStorage.getItem(storageKeys.filter) || "all");
-    setInterval(pollTelemetry, 3000);
   } catch (error) {
     setStatus(`Local runtime API unavailable: ${error.message}`);
   }
