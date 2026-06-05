@@ -141,20 +141,26 @@
               <span id="runRef" class="hash-chip">no saved run</span>
             </div>
             <div class="ingest-actions">
-              <select id="exampleSelect" aria-label="Example evaluation selector">
-                <option value="finance-policy">Example Evaluation: finance-policy@1.0.0</option>
+              <label class="select-label" for="sampleSelect">Sample input set</label>
+              <select id="sampleSelect" aria-label="Sample input set">
+                <option value="blocked-transfer">Blocked transfer example</option>
+                <option value="allowed-transfer">Allowed transfer example</option>
+                <option value="escalated-queued-job">Escalated queued job example</option>
+                <option value="empty">Empty input set</option>
               </select>
               <button id="pasteRequestButton" type="button">Paste Execution Request</button>
               <button id="uploadArtifactButton" type="button">Upload Evaluation Artifact</button>
               <input id="artifactInput" type="file" accept="application/json,.json">
-              <button id="connectRuntimeButton" type="button">Connect Runtime</button>
+              <button id="loadSampleButton" type="button">Load Sample Inputs</button>
               <button id="clearInputsButton" type="button">Clear Inputs</button>
-              <button id="evaluateButton" type="button">Evaluate Execution</button>
+              <button id="evaluateButton" type="button" disabled>Evaluate Execution</button>
               <button id="saveRunButton" type="button">Save Run</button>
               <button id="replayRunButton" type="button">Replay Saved Evaluation</button>
               <button id="exportReceiptButton" type="button">Export Receipt</button>
               <span id="ingestStatus">Awaiting execution intake</span>
             </div>
+            <div id="intakeChecklist" class="intake-checklist" aria-label="Execution intake checklist"></div>
+            <div id="intakeHelper" class="intake-helper" hidden></div>
             <div id="payloadDrawers" class="drawer-stack"></div>
           </section>
         </section>

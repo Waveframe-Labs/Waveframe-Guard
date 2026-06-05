@@ -44,6 +44,25 @@ def test_local_api_accepts_posted_runtime_ingestion_payload():
     assert response["evaluation"]["continuity_requirements"] == []
 
 
+def test_local_api_exposes_named_sample_input_sets():
+    blocked = local_api.load_runtime_inputs("blocked-transfer")
+    allowed = local_api.load_runtime_inputs("allowed-transfer")
+    escalated = local_api.load_runtime_inputs("escalated-queued-job")
+    empty = local_api.load_runtime_inputs("empty")
+
+    assert blocked["sample_label"] == "Blocked transfer example"
+    assert allowed["sample_label"] == "Allowed transfer example"
+    assert escalated["sample_label"] == "Escalated queued job example"
+    assert empty["sample_label"] == "Empty input set"
+    assert empty["compiled_authority"] == {}
+    assert empty["execution_request"] == {}
+    assert empty["runtime_evidence"] == {}
+
+    assert local_api.evaluate_runtime_request(blocked)["evaluation"]["status"] == "blocked"
+    assert local_api.evaluate_runtime_request(allowed)["evaluation"]["status"] == "admissible"
+    assert local_api.evaluate_runtime_request(escalated)["evaluation"]["status"] == "escalated"
+
+
 def test_local_api_saves_replays_and_exports_local_receipts(tmp_path):
     response = local_api.evaluate_runtime_request()
 

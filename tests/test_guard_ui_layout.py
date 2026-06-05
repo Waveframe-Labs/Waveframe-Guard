@@ -24,10 +24,19 @@ def test_guard_ui_layout_contains_required_runtime_surfaces():
         "Receipt browser",
         "No receipt selected",
         "Execution Intake",
-        "Example Evaluation: finance-policy@1.0.0",
+        "Sample input set",
+        "Blocked transfer example",
+        "Allowed transfer example",
+        "Escalated queued job example",
+        "Empty input set",
         "Paste Execution Request",
+        "Paste normalized_execution_request.v1 JSON here",
+        "Compiled authority loaded",
+        "Execution request loaded",
+        "Runtime evidence loaded",
+        "Continuity posture optional",
         "Upload Evaluation Artifact",
-        "Connect Runtime",
+        "Load Sample Inputs",
         "Clear Inputs",
         "Evaluate Execution",
         "Export Receipt",
@@ -61,12 +70,17 @@ def test_guard_ui_layout_contains_required_runtime_surfaces():
         "Step 1",
         "Step 2",
         "Step 3",
+        "Example Evaluation: finance-policy@1.0.0",
+        "Connect Runtime",
+        "Example evaluation selector",
     ]:
         assert retired not in html
         assert retired not in script
 
     assert "renderEmptyWorkspace();" in script
-    assert "await connectRuntimeInputs();\n    await evaluateCurrentInputs();" not in script
+    assert "await loadSampleInputs();\n    await evaluateCurrentInputs();" not in script
+    assert "requiredInputsPresent()" in script
+    assert "evaluateButton\" type=\"button\" disabled" in html
 
 
 def test_guard_ui_uses_canonical_branding_assets():

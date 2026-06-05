@@ -64,6 +64,14 @@ button:hover {
   background: var(--orange-dark);
 }
 
+button:disabled,
+button:disabled:hover {
+  color: #8b8b8b;
+  background: #ece7df;
+  border-color: #d0c6bb;
+  cursor: not-allowed;
+}
+
 h1,
 h2,
 h3,
@@ -747,8 +755,72 @@ h3 {
   overflow-wrap: anywhere;
 }
 
+.select-label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
 #artifactInput {
   display: none;
+}
+
+.intake-checklist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 14px 0;
+}
+
+.check-item {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 10px;
+  gap: 7px;
+  color: var(--muted);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.check-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.check-item.ok {
+  color: var(--green);
+  background: var(--green-soft);
+  border-color: rgba(35, 92, 69, 0.25);
+}
+
+.check-item.missing {
+  color: var(--red);
+  background: var(--red-soft);
+  border-color: rgba(143, 29, 29, 0.22);
+}
+
+.check-item.optional {
+  color: var(--amber);
+  background: var(--amber-soft);
+  border-color: rgba(154, 97, 0, 0.22);
+}
+
+.intake-helper {
+  margin: 12px 14px 0;
+  padding: 10px 12px;
+  color: var(--ink);
+  background: var(--orange-soft);
+  border: 1px solid rgba(255, 95, 5, 0.35);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 850;
 }
 
 .drawer-stack {

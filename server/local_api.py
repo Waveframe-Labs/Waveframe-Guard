@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import json
 import sys
+from copy import deepcopy
 from datetime import datetime, timezone
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import mimetypes
 from pathlib import Path
 from typing import Any
-from urllib.parse import unquote, urlparse
+from urllib.parse import parse_qs, unquote, urlparse
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -25,15 +26,16 @@ from guard.runtime.evidence import validate_runtime_evidence_model
 LOCAL_WORKSPACE_ROOT = REPO_ROOT / ".guard-local"
 
 
-def load_runtime_inputs() -> dict[str, Any]:
+def load_runtime_inputs(sample: str = "blocked-transfer") -> dict[str, Any]:
     runtime_evidence = _read_json(INPUT_ROOT / "runtime_evidence.json")
-    return {
+    base = {
         "compiled_authority": _read_json(INPUT_ROOT / "compiled_authority.json"),
         "execution_request": _read_json(INPUT_ROOT / "normalized_execution_request.json"),
         "runtime_evidence": runtime_evidence,
         "continuity_posture": runtime_evidence.get("continuity_snapshot", {}),
-        "example_label": "Example Evaluation: finance-policy@1.0.0",
+        "sample_label": "Blocked transfer example",
     }
+    return _sample_inputs(base, sample)
 
 
 def evaluate_runtime_request(payload: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -239,7 +241,8 @@ class GuardLocalRequestHandler(BaseHTTPRequestHandler):
     def _api_get_body(self) -> dict[str, Any] | None:
         path = _request_path(self.path)
         if path == "/api/runtime/inputs":
-            return load_runtime_inputs()
+            sample = _query_param(self.path, "sample", "blocked-transfer")
+            return load_runtime_inputs(sample)
         if path == "/api/runtime/evaluate":
             return evaluate_runtime_request()
         if path == "/api/runtime/history":
@@ -282,6 +285,98 @@ def _coerce_evaluated_payload(payload: dict[str, Any]) -> dict[str, Any]:
 
 def _request_path(raw_path: str) -> str:
     return unquote(urlparse(raw_path).path).rstrip("/")
+
+
+def _query_param(raw_path: str, name: str, default: str) -> str:
+    values = parse_qs(urlparse(raw_path).query).get(name)
+    return values[0] if values else default
+
+
+def _sample_inputs(base: dict[str, Any], sample: str) -> dict[str, Any]:
+    payload = deepcopy(base)
+    if sample == "empty":
+        return {
+            "compiled_authority": {},
+            "execution_request": {},
+            "runtime_evidence": {},
+            "continuity_posture": {},
+            "sample_label": "Empty input set",
+        }
+    if sample == "allowed-transfer":
+        payload["execution_request"] = {
+            **payload["execution_request"],
+            "request_id": "exec-allowed-transfer",
+            "arguments": {"amount": 500},
+        }
+        payload["runtime_evidence"] = {
+            **payload["runtime_evidence"],
+            "actor_identity": {
+                "id": "manager-2",
+                "type": "human",
+                "role": "manager",
+            },
+            "approvals": [
+                {
+                    "role": "manager",
+                    "approved_by": "manager-1",
+                }
+            ],
+            "replay_evidence": {},
+            "continuity_snapshot": {},
+            "execution_context": {
+                "surface": "sdk",
+                "environment": "local",
+                "latency_ms": 9,
+            },
+        }
+        payload["continuity_posture"] = {}
+        payload["sample_label"] = "Allowed transfer example"
+        return payload
+    if sample == "escalated-queued-job":
+        payload["execution_request"] = {
+            "schema_version": "normalized_execution_request.v1",
+            "request_id": "exec-queued-job",
+            "action": "settle_batch",
+            "target": "queue:wire-settlement",
+            "arguments": {
+                "batch_id": "batch-042",
+                "amount": 900,
+            },
+            "artifacts": [],
+        }
+        payload["runtime_evidence"] = {
+            **payload["runtime_evidence"],
+            "actor_identity": {
+                "id": "worker-1",
+                "type": "service",
+                "role": "manager",
+            },
+            "approvals": [
+                {
+                    "role": "manager",
+                    "approved_by": "manager-1",
+                }
+            ],
+            "replay_evidence": {
+                "required": True,
+                "obligations": [
+                    {
+                        "obligation": "attach_worker_replay",
+                        "rationale": "queued execution requires replay evidence before release",
+                    }
+                ],
+            },
+            "continuity_snapshot": {},
+            "execution_context": {
+                "surface": "queue",
+                "environment": "local",
+                "latency_ms": 21,
+            },
+        }
+        payload["continuity_posture"] = {}
+        payload["sample_label"] = "Escalated queued job example"
+        return payload
+    return payload
 
 
 def _is_relative_to(path: Path, root: Path) -> bool:

@@ -44,21 +44,27 @@ const summarize = (value) => {
   return String(value);
 };
 
-async function connectRuntimeInputs() {
-  setStatus("Connecting runtime input source");
-  const response = await fetch("/api/runtime/inputs", { cache: "no-store" });
+async function loadSampleInputs() {
+  const sample = byId("sampleSelect").value;
+  setStatus("Loading sample input set");
+  const response = await fetch(`/api/runtime/inputs?sample=${encodeURIComponent(sample)}`, { cache: "no-store" });
   if (!response.ok) throw new Error(`Input load failed: ${response.status}`);
   state.inputs = await response.json();
-  byId("exampleLabel").textContent = state.inputs.example_label || "Example Evaluation";
+  byId("exampleLabel").textContent = state.inputs.sample_label || "Execution Intake";
   renderInputDrawers(state.inputs);
   state.latest = null;
   state.savedRunId = null;
   byId("runRef").textContent = "no saved run";
-  setStatus("Runtime inputs loaded. Evaluate when ready.");
+  setStatus("Sample inputs loaded. Evaluate when ready.");
   await refreshHistory();
 }
 
 async function evaluateCurrentInputs() {
+  updateIntakeChecklist();
+  if (!requiredInputsPresent()) {
+    setStatus("Load compiled authority, normalized request, and runtime evidence before evaluation");
+    return;
+  }
   setStatus("Evaluating execution");
   const payload = readInputDrawers();
   const response = await fetch("/api/runtime/evaluate", {
@@ -152,10 +158,12 @@ function renderInputDrawers(inputs) {
     .map(([key, title]) => `
       <details>
         <summary>${title}</summary>
-        <textarea id="input-${key}" spellcheck="false">${escapeHtml(formatJson(inputs[key] || {}))}</textarea>
+        <textarea id="input-${key}" spellcheck="false" placeholder="${escapeHtml(inputPlaceholder(key))}">${escapeHtml(formatJson(inputs[key] || {}))}</textarea>
       </details>
     `)
     .join("");
+  bindInputReadiness();
+  updateIntakeChecklist();
 }
 
 function renderEmptyWorkspace() {
@@ -177,12 +185,86 @@ function renderEmptyWorkspace() {
   byId("chronologyList").innerHTML = "";
   byId("telemetryStream").innerHTML = "";
   renderReceipt(null);
+  byId("exampleLabel").textContent = "Execution Intake";
 }
 
 function readInputDrawers() {
   return Object.fromEntries(
     inputConfig.map(([key]) => [key, JSON.parse(byId(`input-${key}`).value)])
   );
+}
+
+function readInputDrawer(key) {
+  const input = byId(`input-${key}`);
+  if (!input) return null;
+  try {
+    return JSON.parse(input.value || "{}");
+  } catch {
+    return null;
+  }
+}
+
+function inputPlaceholder(key) {
+  const placeholders = {
+    compiled_authority: "Paste compiled_authority_contract.v1 JSON here.",
+    execution_request: "Paste normalized_execution_request.v1 JSON here.",
+    runtime_evidence: "Paste guard_runtime_evidence_model.v1 JSON here.",
+    continuity_posture: "Paste optional continuity posture JSON here, or leave as {}."
+  };
+  return placeholders[key] || "Paste JSON here.";
+}
+
+function requiredInputsPresent() {
+  return inputReady("compiled_authority", "compiled_authority_contract.v1")
+    && inputReady("execution_request", "normalized_execution_request.v1")
+    && inputReady("runtime_evidence", "guard_runtime_evidence_model.v1");
+}
+
+function inputReady(key, schemaVersion) {
+  const payload = readInputDrawer(key);
+  return Boolean(payload && payload.schema_version === schemaVersion);
+}
+
+function continuityLoaded() {
+  const posture = readInputDrawer("continuity_posture");
+  return Boolean(posture && Object.keys(posture).length > 0);
+}
+
+function bindInputReadiness() {
+  inputConfig.forEach(([key]) => {
+    const input = byId(`input-${key}`);
+    if (input) {
+      input.addEventListener("input", updateIntakeChecklist);
+    }
+  });
+}
+
+function updateIntakeChecklist() {
+  const items = [
+    {
+      label: "Compiled authority loaded",
+      state: inputReady("compiled_authority", "compiled_authority_contract.v1") ? "ok" : "missing"
+    },
+    {
+      label: "Execution request loaded",
+      state: inputReady("execution_request", "normalized_execution_request.v1") ? "ok" : "missing"
+    },
+    {
+      label: "Runtime evidence loaded",
+      state: inputReady("runtime_evidence", "guard_runtime_evidence_model.v1") ? "ok" : "missing"
+    },
+    {
+      label: "Continuity posture optional",
+      state: continuityLoaded() ? "ok" : "optional"
+    }
+  ];
+  byId("intakeChecklist").innerHTML = items.map((item) => `
+    <span class="check-item ${item.state}">
+      <span class="check-dot" aria-hidden="true"></span>
+      ${escapeHtml(item.label)}
+    </span>
+  `).join("");
+  byId("evaluateButton").disabled = !requiredInputsPresent();
 }
 
 function renderEvaluation(payload) {
@@ -201,7 +283,7 @@ function renderEvaluation(payload) {
   byId("targetRef").textContent = `${request.action} -> ${request.target}`;
   byId("latencyRef").textContent = typeof latency === "number" ? `${latency} ms` : String(latency);
   byId("executionTitle").textContent = `Execution #${request.request_id}`;
-  byId("decisionState").textContent = status.toUpperCase();
+  byId("decisionState").textContent = postureValue(status).toUpperCase();
   byId("decisionState").className = `status-pill ${toneForStatus(status)}`;
   byId("primaryAnswer").textContent = primaryAnswer(status);
   byId("traceHash").textContent = evaluation.evaluation_trace.trace_hash;
@@ -217,7 +299,7 @@ function renderHistory(evaluations) {
   byId("historyList").innerHTML = evaluations.length
     ? evaluations.map((item) => `
         <button type="button" class="history-row" data-run-id="${escapeHtml(item.run_id)}">
-          <span class="history-status ${toneForStatus(item.status)}">${escapeHtml(item.status.toUpperCase())}</span>
+          <span class="history-status ${toneForStatus(item.status)}">${escapeHtml(postureValue(item.status).toUpperCase())}</span>
           <strong>${escapeHtml(item.request_id || item.run_id)}</strong>
           <span>${escapeHtml(item.action || "execution")} -> ${escapeHtml(item.target || "runtime")}</span>
           <small>${escapeHtml(item.rationale)}</small>
@@ -638,6 +720,9 @@ function clearInputs() {
   state.latest = null;
   state.savedRunId = null;
   byId("runRef").textContent = "no saved run";
+  byId("exampleLabel").textContent = "Execution Intake";
+  hideIntakeHelper();
+  updateIntakeChecklist();
   setStatus("Inputs cleared");
 }
 
@@ -645,8 +730,21 @@ function focusExecutionRequestInput() {
   const input = byId("input-execution_request");
   if (!input) return;
   input.closest("details").open = true;
+  showIntakeHelper("Paste a normalized_execution_request.v1 JSON object below. Guard does not normalize raw request text in this surface.");
   input.focus();
   setStatus("Paste normalized_execution_request.v1 into the execution request input");
+}
+
+function showIntakeHelper(message) {
+  const helper = byId("intakeHelper");
+  helper.textContent = message;
+  helper.hidden = false;
+}
+
+function hideIntakeHelper() {
+  const helper = byId("intakeHelper");
+  helper.textContent = "";
+  helper.hidden = true;
 }
 
 async function uploadEvaluationArtifact(file) {
@@ -723,9 +821,10 @@ byId("evaluateButton").addEventListener("click", async () => {
   }
 });
 
-byId("connectRuntimeButton").addEventListener("click", async () => {
+byId("loadSampleButton").addEventListener("click", async () => {
   try {
-    await connectRuntimeInputs();
+    hideIntakeHelper();
+    await loadSampleInputs();
   } catch (error) {
     setStatus(error.message);
   }
