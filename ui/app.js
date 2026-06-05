@@ -42,12 +42,12 @@ const summarize = (value) => {
 };
 
 async function loadRuntimeInputs() {
-  setStatus("Loading runtime inputs");
+  setStatus("Loading example evaluation inputs");
   const response = await fetch("/api/runtime/inputs", { cache: "no-store" });
   if (!response.ok) throw new Error(`Input load failed: ${response.status}`);
   state.inputs = await response.json();
   renderInputDrawers(state.inputs);
-  setStatus("Runtime inputs loaded");
+  setStatus("Example evaluation inputs loaded");
 }
 
 async function evaluateCurrentInputs() {
