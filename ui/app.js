@@ -1,12 +1,14 @@
 const state = {
   inputs: null,
-  latest: null
+  latest: null,
+  savedRunId: null
 };
 
 const inputConfig = [
   ["compiled_authority", "View compiled authority"],
   ["execution_request", "View normalized request"],
-  ["runtime_evidence", "View runtime evidence"]
+  ["runtime_evidence", "View runtime evidence"],
+  ["continuity_posture", "View continuity posture"]
 ];
 const outcomeContractSchema = "guard_enforcement_outcome.v1";
 const storageKeys = {
@@ -41,13 +43,17 @@ const summarize = (value) => {
   return String(value);
 };
 
-async function loadRuntimeInputs() {
-  setStatus("Loading example evaluation inputs");
+async function connectRuntimeInputs() {
+  setStatus("Connecting runtime input source");
   const response = await fetch("/api/runtime/inputs", { cache: "no-store" });
   if (!response.ok) throw new Error(`Input load failed: ${response.status}`);
   state.inputs = await response.json();
+  byId("exampleLabel").textContent = state.inputs.example_label || "Example Evaluation";
   renderInputDrawers(state.inputs);
-  setStatus("Example evaluation inputs loaded");
+  state.latest = null;
+  state.savedRunId = null;
+  byId("runRef").textContent = "no saved run";
+  setStatus("Runtime inputs loaded. Evaluate when ready.");
 }
 
 async function evaluateCurrentInputs() {
@@ -65,15 +71,77 @@ async function evaluateCurrentInputs() {
   setStatus(`Rendered ${body.guard_enforcement_outcome.schema_version || outcomeContractSchema}`);
 }
 
+async function saveCurrentRun() {
+  if (!state.latest) throw new Error("Evaluate execution before saving a run");
+  setStatus("Saving local run");
+  const response = await fetch("/api/runtime/save", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(state.latest)
+  });
+  const body = await response.json();
+  if (!response.ok) throw new Error(body.message || body.error || "Save run failed");
+  state.savedRunId = body.saved_run.run_id;
+  byId("runRef").textContent = state.savedRunId;
+  setStatus(`Saved local run ${state.savedRunId}`);
+}
+
+async function replaySavedRun() {
+  if (!state.savedRunId) throw new Error("Save a run before replay");
+  setStatus("Replaying saved run");
+  const response = await fetch("/api/runtime/replay", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ run_id: state.savedRunId })
+  });
+  const body = await response.json();
+  if (!response.ok) throw new Error(body.message || body.error || "Replay run failed");
+  state.latest = body;
+  renderEvaluation(body);
+  setStatus(body.replay.matches ? "Replay matched saved outcome" : "Replay differed from saved outcome");
+}
+
+async function exportCurrentReceipt() {
+  if (!state.latest) throw new Error("Evaluate execution before exporting a receipt");
+  setStatus("Exporting enforcement receipt");
+  const response = await fetch("/api/runtime/export_receipt", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(state.latest)
+  });
+  const body = await response.json();
+  if (!response.ok) throw new Error(body.message || body.error || "Export receipt failed");
+  downloadJson(body.receipt, `${body.receipt.run_id}.receipt.json`);
+  setStatus(`Exported receipt ${body.receipt.run_id}`);
+}
+
 function renderInputDrawers(inputs) {
   byId("payloadDrawers").innerHTML = inputConfig
     .map(([key, title]) => `
       <details>
         <summary>${title}</summary>
-        <textarea id="input-${key}" spellcheck="false">${escapeHtml(formatJson(inputs[key]))}</textarea>
+        <textarea id="input-${key}" spellcheck="false">${escapeHtml(formatJson(inputs[key] || {}))}</textarea>
       </details>
     `)
     .join("");
+}
+
+function renderEmptyWorkspace() {
+  renderInputDrawers({});
+  byId("authorityRef").textContent = "none loaded";
+  byId("outcomeRef").textContent = "not emitted";
+  byId("requestRef").textContent = "no execution";
+  byId("targetRef").textContent = "awaiting intake";
+  byId("latencyRef").textContent = "not evaluated";
+  byId("decisionState").textContent = "WAIT";
+  byId("primaryAnswer").textContent = "Load execution inputs, then evaluate.";
+  byId("whyList").innerHTML = `<div class="short-item muted">no evaluation yet</div>`;
+  byId("nextList").innerHTML = `<div class="short-item muted">connect or paste execution inputs</div>`;
+  byId("postureRail").innerHTML = "";
+  byId("traceHash").textContent = "not evaluated";
+  byId("traceSurface").innerHTML = "";
+  byId("chronologyList").innerHTML = "";
+  byId("telemetryStream").innerHTML = "";
 }
 
 function readInputDrawers() {
@@ -105,7 +173,7 @@ function renderEvaluation(payload) {
   renderDecisionLists(evaluation);
   renderTrace(evaluation);
   renderChronology(payload.chronology || []);
-  renderTelemetry(payload.telemetry_appended || evaluation.telemetry_events || []);
+  renderTelemetry(payload.evaluation_events || evaluation.telemetry_events || []);
 }
 
 function renderDecisionLists(evaluation) {
@@ -481,6 +549,59 @@ function setStatus(message) {
   byId("ingestStatus").textContent = message;
 }
 
+function clearInputs() {
+  for (const [key] of inputConfig) {
+    const input = byId(`input-${key}`);
+    if (input) input.value = "{}";
+  }
+  state.latest = null;
+  state.savedRunId = null;
+  byId("runRef").textContent = "no saved run";
+  setStatus("Inputs cleared");
+}
+
+function focusExecutionRequestInput() {
+  const input = byId("input-execution_request");
+  if (!input) return;
+  input.closest("details").open = true;
+  input.focus();
+  setStatus("Paste normalized_execution_request.v1 into the execution request input");
+}
+
+async function uploadEvaluationArtifact(file) {
+  if (!file) return;
+  const artifact = JSON.parse(await file.text());
+  if (artifact.evaluation && artifact.inputs) {
+    state.latest = artifact;
+    renderInputDrawers(artifact.inputs);
+    renderEvaluation(artifact);
+    setStatus("Loaded evaluation artifact");
+    return;
+  }
+  if (artifact.receipt && artifact.inputs && artifact.evaluation) {
+    state.latest = artifact;
+    renderInputDrawers(artifact.inputs);
+    renderEvaluation(artifact);
+    setStatus("Loaded saved evaluation artifact");
+    return;
+  }
+  renderInputDrawers(artifact);
+  state.latest = null;
+  setStatus("Loaded execution input artifact. Evaluate when ready.");
+}
+
+function downloadJson(payload, filename) {
+  const blob = new Blob([`${formatJson(payload)}\n`], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
 document.querySelectorAll("[data-filter]").forEach((button) => {
   button.addEventListener("click", () => applyChronologyFilter(button.dataset.filter));
 });
@@ -521,11 +642,59 @@ byId("evaluateButton").addEventListener("click", async () => {
   }
 });
 
+byId("connectRuntimeButton").addEventListener("click", async () => {
+  try {
+    await connectRuntimeInputs();
+  } catch (error) {
+    setStatus(error.message);
+  }
+});
+
+byId("pasteRequestButton").addEventListener("click", focusExecutionRequestInput);
+
+byId("uploadArtifactButton").addEventListener("click", () => {
+  byId("artifactInput").click();
+});
+
+byId("artifactInput").addEventListener("change", async (event) => {
+  try {
+    await uploadEvaluationArtifact(event.target.files[0]);
+    event.target.value = "";
+  } catch (error) {
+    setStatus(error.message);
+  }
+});
+
+byId("clearInputsButton").addEventListener("click", clearInputs);
+
+byId("saveRunButton").addEventListener("click", async () => {
+  try {
+    await saveCurrentRun();
+  } catch (error) {
+    setStatus(error.message);
+  }
+});
+
+byId("replayRunButton").addEventListener("click", async () => {
+  try {
+    await replaySavedRun();
+  } catch (error) {
+    setStatus(error.message);
+  }
+});
+
+byId("exportReceiptButton").addEventListener("click", async () => {
+  try {
+    await exportCurrentReceipt();
+  } catch (error) {
+    setStatus(error.message);
+  }
+});
+
 (async function start() {
   try {
     activateTab(localStorage.getItem(storageKeys.tab) || "decision");
-    await loadRuntimeInputs();
-    await evaluateCurrentInputs();
+    renderEmptyWorkspace();
     applyChronologyFilter(localStorage.getItem(storageKeys.filter) || "all");
   } catch (error) {
     setStatus(`Local runtime API unavailable: ${error.message}`);

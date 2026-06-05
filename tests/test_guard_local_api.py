@@ -4,35 +4,29 @@ from server import local_api
 
 
 def test_local_api_loads_runtime_inputs_and_evaluates_real_guard_output():
-    local_api.TELEMETRY_LOG.clear()
-
     response = local_api.evaluate_runtime_request()
 
     assert response["inputs"]["compiled_authority"]["schema_version"] == "compiled_authority_contract.v1"
     assert response["inputs"]["execution_request"]["schema_version"] == "normalized_execution_request.v1"
     assert response["inputs"]["runtime_evidence"]["schema_version"] == "guard_runtime_evidence_model.v1"
+    assert response["inputs"]["continuity_posture"] == response["inputs"]["runtime_evidence"]["continuity_snapshot"]
     assert response["guard_enforcement_outcome"]["schema_version"] == "guard_enforcement_outcome.v1"
     assert response["evaluation"]["status"] == "blocked"
     assert response["chronology"] == local_api.reconstruct_chronology(response["evaluation"]["telemetry_events"])
-    assert len(response["telemetry_appended"]) == len(response["evaluation"]["telemetry_events"])
-    assert local_api.TELEMETRY_LOG == response["telemetry_stream"]
+    assert response["evaluation_events"] == response["evaluation"]["telemetry_events"]
 
 
-def test_local_api_appends_telemetry_across_runtime_evaluations():
-    local_api.TELEMETRY_LOG.clear()
-
+def test_local_api_keeps_evaluation_events_scoped_to_current_evaluation():
     first = local_api.evaluate_runtime_request()
     second = local_api.evaluate_runtime_request()
 
-    assert first["telemetry_appended"][0]["sequence"] == 1
-    assert second["telemetry_appended"][0]["sequence"] == len(first["telemetry_appended"]) + 1
-    assert len(local_api.TELEMETRY_LOG) == (
-        len(first["telemetry_appended"]) + len(second["telemetry_appended"])
-    )
+    assert first["evaluation_events"][0]["sequence"] == 1
+    assert second["evaluation_events"][0]["sequence"] == 1
+    assert "telemetry_stream" not in first
+    assert "telemetry_stream" not in second
 
 
 def test_local_api_accepts_posted_runtime_ingestion_payload():
-    local_api.TELEMETRY_LOG.clear()
     payload = local_api.load_runtime_inputs()
     payload["runtime_evidence"]["actor_identity"]["role"] = "manager"
     payload["runtime_evidence"]["approvals"].append(
@@ -40,6 +34,7 @@ def test_local_api_accepts_posted_runtime_ingestion_payload():
     )
     payload["runtime_evidence"]["replay_evidence"] = {}
     payload["runtime_evidence"]["continuity_snapshot"] = {}
+    payload["continuity_posture"] = {}
 
     response = local_api.evaluate_runtime_request(payload)
 
@@ -47,3 +42,18 @@ def test_local_api_accepts_posted_runtime_ingestion_payload():
     assert response["guard_enforcement_outcome"]["status"] == "admissible"
     assert response["evaluation"]["required_evidence"] == []
     assert response["evaluation"]["continuity_requirements"] == []
+
+
+def test_local_api_saves_replays_and_exports_local_receipts(tmp_path):
+    response = local_api.evaluate_runtime_request()
+
+    saved = local_api.save_runtime_evaluation(response, store_root=tmp_path)
+    run_id = saved["saved_run"]["run_id"]
+    replayed = local_api.replay_runtime_evaluation(run_id, store_root=tmp_path)
+    exported = local_api.export_runtime_receipt(response)
+
+    assert saved["saved_run"]["receipt"]["schema_version"] == "guard_enforcement_receipt.v1"
+    assert (tmp_path / "receipts" / f"{run_id}.json").exists()
+    assert replayed["replay"]["matches"] is True
+    assert replayed["guard_enforcement_outcome"]["schema_version"] == "guard_enforcement_outcome.v1"
+    assert exported["receipt"]["schema_version"] == "guard_enforcement_receipt.v1"

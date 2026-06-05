@@ -18,8 +18,8 @@
           </div>
         </div>
         <div class="execution-ref">
-          <span id="requestRef">exec-1</span>
-          <strong id="targetRef">transfer -> wire</strong>
+          <span id="requestRef">no execution</span>
+          <strong id="targetRef">awaiting intake</strong>
         </div>
       </header>
 
@@ -38,8 +38,8 @@
             </div>
             <div class="answer-block">
               <span>Answer</span>
-              <strong id="decisionState">NO</strong>
-              <p id="primaryAnswer">This execution cannot proceed.</p>
+              <strong id="decisionState">WAIT</strong>
+              <p id="primaryAnswer">Load execution inputs, then evaluate.</p>
             </div>
           </section>
 
@@ -47,12 +47,16 @@
             <article class="summary-card">
               <p class="section-kicker">Step 2</p>
               <h2>Why?</h2>
-              <div id="whyList" class="short-list"></div>
+              <div id="whyList" class="short-list">
+                <div class="short-item muted">no evaluation yet</div>
+              </div>
             </article>
             <article class="summary-card next-card">
               <p class="section-kicker">Step 3</p>
               <h2>What must happen next?</h2>
-              <div id="nextList" class="short-list"></div>
+              <div id="nextList" class="short-list">
+                <div class="short-item muted">connect or paste execution inputs</div>
+              </div>
             </article>
           </section>
 
@@ -63,15 +67,15 @@
           <section class="execution-facts">
             <div>
               <span>Authority</span>
-              <strong id="authorityRef">finance-policy@1.0.0</strong>
+              <strong id="authorityRef">none loaded</strong>
             </div>
             <div>
               <span>Latency</span>
-              <strong id="latencyRef">14 ms</strong>
+              <strong id="latencyRef">not evaluated</strong>
             </div>
             <div>
               <span>Outcome contract</span>
-              <strong id="outcomeRef">guard_enforcement_outcome.v1</strong>
+              <strong id="outcomeRef">not emitted</strong>
             </div>
           </section>
         </section>
@@ -117,13 +121,27 @@
 
         <section id="developer-mode" class="tab-panel" aria-label="Developer mode">
           <section class="payload-drawer">
-            <div class="panel-title">
-              <p class="section-kicker">Debug mode</p>
-              <h2>Developer Mode</h2>
+            <div class="panel-title workspace-head">
+              <div>
+                <p id="exampleLabel" class="section-kicker">Execution Intake</p>
+                <h2>Developer Mode</h2>
+              </div>
+              <span id="runRef" class="hash-chip">no saved run</span>
             </div>
             <div class="ingest-actions">
-              <button id="evaluateButton" type="button">Load Example Evaluation</button>
-              <span id="ingestStatus">Loading runtime inputs</span>
+              <select id="exampleSelect" aria-label="Example evaluation selector">
+                <option value="finance-policy">Example Evaluation: finance-policy@1.0.0</option>
+              </select>
+              <button id="pasteRequestButton" type="button">Paste Execution Request</button>
+              <button id="uploadArtifactButton" type="button">Upload Evaluation Artifact</button>
+              <input id="artifactInput" type="file" accept="application/json,.json">
+              <button id="connectRuntimeButton" type="button">Connect Runtime</button>
+              <button id="clearInputsButton" type="button">Clear Inputs</button>
+              <button id="evaluateButton" type="button">Evaluate Execution</button>
+              <button id="saveRunButton" type="button">Save Run</button>
+              <button id="replayRunButton" type="button">Replay Saved Evaluation</button>
+              <button id="exportReceiptButton" type="button">Export Receipt</button>
+              <span id="ingestStatus">Awaiting execution intake</span>
             </div>
             <div id="payloadDrawers" class="drawer-stack"></div>
           </section>

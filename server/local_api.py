@@ -19,16 +19,20 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from guard import evaluate_runtime
+from guard.sdk.local_persistence import LocalEvaluationStore, build_enforcement_receipt
 from guard.runtime.evidence import validate_runtime_evidence_model
 
-TELEMETRY_LOG: list[dict[str, Any]] = []
+LOCAL_WORKSPACE_ROOT = REPO_ROOT / ".guard-local"
 
 
 def load_runtime_inputs() -> dict[str, Any]:
+    runtime_evidence = _read_json(INPUT_ROOT / "runtime_evidence.json")
     return {
         "compiled_authority": _read_json(INPUT_ROOT / "compiled_authority.json"),
         "execution_request": _read_json(INPUT_ROOT / "normalized_execution_request.json"),
-        "runtime_evidence": _read_json(INPUT_ROOT / "runtime_evidence.json"),
+        "runtime_evidence": runtime_evidence,
+        "continuity_posture": runtime_evidence.get("continuity_snapshot", {}),
+        "example_label": "Example Evaluation: finance-policy@1.0.0",
     }
 
 
@@ -38,48 +42,76 @@ def evaluate_runtime_request(payload: dict[str, Any] | None = None) -> dict[str,
     execution_request = payload.get("execution_request")
     runtime_evidence = validate_runtime_evidence_model(payload.get("runtime_evidence"))
     timestamp = runtime_evidence["timestamp_source"].get("timestamp") or _now()
+    continuity_state = payload.get("continuity_posture")
+    if continuity_state is None:
+        continuity_state = runtime_evidence["continuity_snapshot"]
 
     result = evaluate_runtime(
         compiled_authority=compiled_authority,
         execution_request=execution_request,
         actor_identity=runtime_evidence["actor_identity"],
-        continuity_state=runtime_evidence["continuity_snapshot"],
+        continuity_state=continuity_state,
         replay_posture=runtime_evidence["replay_evidence"],
         evidence_posture={
             "approvals": runtime_evidence["approvals"],
             "execution_context": runtime_evidence["execution_context"],
         },
         evaluation_time=timestamp,
-        start_sequence=len(TELEMETRY_LOG) + 1,
+        start_sequence=1,
     )
-    appended = append_telemetry(result["telemetry_events"], outcome=result["enforcement_outcome"])
     return {
         "inputs": {
             "compiled_authority": compiled_authority,
             "execution_request": execution_request,
             "runtime_evidence": runtime_evidence,
+            "continuity_posture": continuity_state,
         },
         "evaluation": result,
         "guard_enforcement_outcome": result["enforcement_outcome"],
         "chronology": reconstruct_chronology(result["telemetry_events"]),
-        "telemetry_appended": appended,
-        "telemetry_stream": TELEMETRY_LOG,
+        "evaluation_events": result["telemetry_events"],
     }
 
 
-def append_telemetry(events: list[dict[str, Any]], *, outcome: dict[str, Any]) -> list[dict[str, Any]]:
-    appended = []
-    received_at = _now()
-    for event in events:
-        telemetry_event = {
-            "received_at": received_at,
-            "outcome_id": outcome["outcome_id"],
-            "outcome_status": outcome["status"],
-            **event,
+def save_runtime_evaluation(payload: dict[str, Any], *, store_root: Path | None = None) -> dict[str, Any]:
+    evaluated = _coerce_evaluated_payload(payload)
+    store = LocalEvaluationStore(store_root or LOCAL_WORKSPACE_ROOT)
+    record = store.save_evaluation(
+        inputs=evaluated["inputs"],
+        evaluation=evaluated["evaluation"],
+    )
+    return {
+        "saved_run": {
+            "run_id": record["run_id"],
+            "record_hash": record["record_hash"],
+            "receipt": record["receipt"],
         }
-        TELEMETRY_LOG.append(telemetry_event)
-        appended.append(telemetry_event)
-    return appended
+    }
+
+
+def replay_runtime_evaluation(run_id: str, *, store_root: Path | None = None) -> dict[str, Any]:
+    store = LocalEvaluationStore(store_root or LOCAL_WORKSPACE_ROOT)
+    replay = store.replay(run_id)
+    evaluation = replay["replayed_evaluation"]
+    return {
+        "replay": replay,
+        "evaluation": evaluation,
+        "guard_enforcement_outcome": evaluation["enforcement_outcome"],
+        "chronology": reconstruct_chronology(evaluation["telemetry_events"]),
+        "evaluation_events": evaluation["telemetry_events"],
+        "inputs": store.load_run(run_id)["inputs"],
+    }
+
+
+def export_runtime_receipt(payload: dict[str, Any]) -> dict[str, Any]:
+    evaluated = _coerce_evaluated_payload(payload)
+    return {
+        "receipt": build_enforcement_receipt(
+            inputs=evaluated["inputs"],
+            evaluation=evaluated["evaluation"],
+            recorded_at=_now(),
+        )
+    }
 
 
 def reconstruct_chronology(events: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -107,11 +139,24 @@ class GuardLocalRequestHandler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:
         path = _request_path(self.path)
-        if path != "/api/runtime/evaluate":
+        if path not in {
+            "/api/runtime/evaluate",
+            "/api/runtime/save",
+            "/api/runtime/replay",
+            "/api/runtime/export_receipt",
+        }:
             self._send_json({"error": "not found"}, status=HTTPStatus.NOT_FOUND)
             return
         try:
-            self._send_json(evaluate_runtime_request(self._read_body()))
+            body = self._read_body()
+            if path == "/api/runtime/evaluate":
+                self._send_json(evaluate_runtime_request(body))
+            elif path == "/api/runtime/save":
+                self._send_json(save_runtime_evaluation(body))
+            elif path == "/api/runtime/replay":
+                self._send_json(replay_runtime_evaluation(body["run_id"]))
+            elif path == "/api/runtime/export_receipt":
+                self._send_json(export_runtime_receipt(body))
         except Exception as exc:
             self._send_error(exc)
 
@@ -152,10 +197,6 @@ class GuardLocalRequestHandler(BaseHTTPRequestHandler):
             return load_runtime_inputs()
         if path == "/api/runtime/evaluate":
             return evaluate_runtime_request()
-        if path == "/api/runtime/telemetry":
-            return {"telemetry_stream": TELEMETRY_LOG}
-        if path == "/api/runtime/chronology":
-            return {"chronology": reconstruct_chronology(TELEMETRY_LOG)}
         if path.startswith("/api"):
             return {"error": "unknown api route", "path": path}
         return None
@@ -184,6 +225,12 @@ def run(host: str = "127.0.0.1", port: int = 4173) -> None:
 
 def _read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _coerce_evaluated_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    if "evaluation" in payload and "inputs" in payload:
+        return payload
+    return evaluate_runtime_request(payload)
 
 
 def _request_path(raw_path: str) -> str:

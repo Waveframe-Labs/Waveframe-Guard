@@ -45,6 +45,19 @@ button {
   cursor: pointer;
 }
 
+select {
+  min-height: 40px;
+  max-width: 100%;
+  padding: 0 12px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 900;
+}
+
 button.active,
 button:hover {
   color: #fff;
@@ -269,6 +282,10 @@ h3 {
   line-height: 1.15;
 }
 
+.short-item.muted {
+  color: var(--muted);
+}
+
 .short-item::before {
   content: "";
   width: 9px;
@@ -366,7 +383,8 @@ h3 {
 
 .trace-head,
 .chronology-head,
-.telemetry-head {
+.telemetry-head,
+.workspace-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -580,13 +598,22 @@ h3 {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
   padding: 14px 14px 0;
 }
 
 .ingest-actions span {
+  min-width: 0;
   color: var(--muted);
   font-size: 13px;
   font-weight: 850;
+  overflow-wrap: anywhere;
+}
+
+#artifactInput {
+  display: none;
 }
 
 .drawer-stack {
@@ -721,8 +748,14 @@ details textarea {
   .trace-head,
   .chronology-head,
   .telemetry-head,
+  .workspace-head,
   .ingest-actions {
     display: grid;
+  }
+
+  .ingest-actions > * {
+    width: 100%;
+    min-width: 0;
   }
 
   .chronology-list li,

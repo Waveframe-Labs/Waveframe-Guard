@@ -18,6 +18,16 @@ def test_guard_ui_layout_contains_required_runtime_surfaces():
         "Decision",
         "Explainability",
         "Developer Mode",
+        "Execution Intake",
+        "Example Evaluation: finance-policy@1.0.0",
+        "Paste Execution Request",
+        "Upload Evaluation Artifact",
+        "Connect Runtime",
+        "Clear Inputs",
+        "Evaluate Execution",
+        "Export Receipt",
+        "Save Run",
+        "Replay Saved Evaluation",
         "Step 1",
         "Step 2",
         "Step 3",
@@ -30,6 +40,7 @@ def test_guard_ui_layout_contains_required_runtime_surfaces():
         "View compiled authority",
         "View normalized request",
         "View runtime evidence",
+        "View continuity posture",
         "Technical detail",
         "compiled_authority_contract.v1",
         "normalized_execution_request.v1",
@@ -43,8 +54,15 @@ def test_guard_ui_layout_contains_required_runtime_surfaces():
         "LIVE BOUNDARY FEED",
         "Append-only runtime events",
         "Telemetry Stream",
+        "/api/runtime/telemetry",
+        "/api/runtime/chronology",
+        "setInterval",
     ]:
         assert retired not in html
+        assert retired not in script
+
+    assert "renderEmptyWorkspace();" in script
+    assert "await connectRuntimeInputs();\n    await evaluateCurrentInputs();" not in script
 
 
 def test_guard_ui_uses_canonical_branding_assets():
