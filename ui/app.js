@@ -1,7 +1,8 @@
 const state = {
   inputs: null,
   latest: null,
-  savedRunId: null
+  savedRunId: null,
+  history: []
 };
 
 const inputConfig = [
@@ -54,6 +55,7 @@ async function connectRuntimeInputs() {
   state.savedRunId = null;
   byId("runRef").textContent = "no saved run";
   setStatus("Runtime inputs loaded. Evaluate when ready.");
+  await refreshHistory();
 }
 
 async function evaluateCurrentInputs() {
@@ -83,6 +85,8 @@ async function saveCurrentRun() {
   if (!response.ok) throw new Error(body.message || body.error || "Save run failed");
   state.savedRunId = body.saved_run.run_id;
   byId("runRef").textContent = state.savedRunId;
+  renderReceipt(body.saved_run.receipt);
+  await refreshHistory();
   setStatus(`Saved local run ${state.savedRunId}`);
 }
 
@@ -98,6 +102,7 @@ async function replaySavedRun() {
   if (!response.ok) throw new Error(body.message || body.error || "Replay run failed");
   state.latest = body;
   renderEvaluation(body);
+  renderReceipt(receiptForRun(state.savedRunId));
   setStatus(body.replay.matches ? "Replay matched saved outcome" : "Replay differed from saved outcome");
 }
 
@@ -112,7 +117,34 @@ async function exportCurrentReceipt() {
   const body = await response.json();
   if (!response.ok) throw new Error(body.message || body.error || "Export receipt failed");
   downloadJson(body.receipt, `${body.receipt.run_id}.receipt.json`);
+  renderReceipt(body.receipt);
   setStatus(`Exported receipt ${body.receipt.run_id}`);
+}
+
+async function refreshHistory() {
+  const response = await fetch("/api/runtime/history", { cache: "no-store" });
+  if (!response.ok) return;
+  const body = await response.json();
+  state.history = body.evaluations || [];
+  renderHistory(state.history);
+}
+
+async function loadSavedRun(runId) {
+  setStatus(`Loading saved run ${runId}`);
+  const response = await fetch("/api/runtime/load_run", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ run_id: runId })
+  });
+  const body = await response.json();
+  if (!response.ok) throw new Error(body.message || body.error || "Load run failed");
+  state.latest = body;
+  state.savedRunId = runId;
+  byId("runRef").textContent = runId;
+  renderInputDrawers(body.inputs);
+  renderEvaluation(body);
+  renderReceipt(body.saved_run.receipt);
+  setStatus(`Loaded saved run ${runId}`);
 }
 
 function renderInputDrawers(inputs) {
@@ -133,7 +165,9 @@ function renderEmptyWorkspace() {
   byId("requestRef").textContent = "no execution";
   byId("targetRef").textContent = "awaiting intake";
   byId("latencyRef").textContent = "not evaluated";
-  byId("decisionState").textContent = "WAIT";
+  byId("executionTitle").textContent = "Execution intake";
+  byId("decisionState").textContent = "WAITING";
+  byId("decisionState").className = "status-pill waiting";
   byId("primaryAnswer").textContent = "Load execution inputs, then evaluate.";
   byId("whyList").innerHTML = `<div class="short-item muted">no evaluation yet</div>`;
   byId("nextList").innerHTML = `<div class="short-item muted">connect or paste execution inputs</div>`;
@@ -142,6 +176,7 @@ function renderEmptyWorkspace() {
   byId("traceSurface").innerHTML = "";
   byId("chronologyList").innerHTML = "";
   byId("telemetryStream").innerHTML = "";
+  renderReceipt(null);
 }
 
 function readInputDrawers() {
@@ -165,7 +200,9 @@ function renderEvaluation(payload) {
   byId("requestRef").textContent = request.request_id;
   byId("targetRef").textContent = `${request.action} -> ${request.target}`;
   byId("latencyRef").textContent = typeof latency === "number" ? `${latency} ms` : String(latency);
-  byId("decisionState").textContent = decisionAnswer(status);
+  byId("executionTitle").textContent = `Execution #${request.request_id}`;
+  byId("decisionState").textContent = status.toUpperCase();
+  byId("decisionState").className = `status-pill ${toneForStatus(status)}`;
   byId("primaryAnswer").textContent = primaryAnswer(status);
   byId("traceHash").textContent = evaluation.evaluation_trace.trace_hash;
 
@@ -174,6 +211,50 @@ function renderEvaluation(payload) {
   renderTrace(evaluation);
   renderChronology(payload.chronology || []);
   renderTelemetry(payload.evaluation_events || evaluation.telemetry_events || []);
+}
+
+function renderHistory(evaluations) {
+  byId("historyList").innerHTML = evaluations.length
+    ? evaluations.map((item) => `
+        <button type="button" class="history-row" data-run-id="${escapeHtml(item.run_id)}">
+          <span class="history-status ${toneForStatus(item.status)}">${escapeHtml(item.status.toUpperCase())}</span>
+          <strong>${escapeHtml(item.request_id || item.run_id)}</strong>
+          <span>${escapeHtml(item.action || "execution")} -> ${escapeHtml(item.target || "runtime")}</span>
+          <small>${escapeHtml(item.rationale)}</small>
+        </button>
+      `).join("")
+    : `<div class="empty-record">No saved evaluations yet.</div>`;
+  document.querySelectorAll("[data-run-id]").forEach((item) => {
+    item.addEventListener("click", async () => {
+      try {
+        await loadSavedRun(item.dataset.runId);
+      } catch (error) {
+        setStatus(error.message);
+      }
+    });
+  });
+}
+
+function renderReceipt(receipt) {
+  if (!receipt || !receipt.schema_version) {
+    byId("receiptTitle").textContent = "No receipt selected";
+    byId("receiptBrowser").textContent = "Save or select a run to inspect its receipt.";
+    return;
+  }
+  byId("receiptTitle").textContent = receipt.run_id || "Receipt";
+  byId("receiptBrowser").innerHTML = `
+    <dl class="receipt-fields">
+      <div><dt>Status</dt><dd>${escapeHtml(receipt.outcome_status || "unknown")}</dd></div>
+      <div><dt>Authority</dt><dd>${escapeHtml(receipt.authority_ref || "unknown")}</dd></div>
+      <div><dt>Outcome</dt><dd>${escapeHtml(receipt.outcome_hash || "")}</dd></div>
+      <div><dt>Trace</dt><dd>${escapeHtml(receipt.evaluation_trace_hash || "")}</dd></div>
+      <div><dt>Events</dt><dd>${escapeHtml(String((receipt.chronology_event_ids || []).length))}</dd></div>
+    </dl>
+  `;
+}
+
+function receiptForRun(runId) {
+  return (state.history.find((item) => item.run_id === runId) || {}).receipt || null;
 }
 
 function renderDecisionLists(evaluation) {
@@ -695,6 +776,7 @@ byId("exportReceiptButton").addEventListener("click", async () => {
   try {
     activateTab(localStorage.getItem(storageKeys.tab) || "decision");
     renderEmptyWorkspace();
+    await refreshHistory();
     applyChronologyFilter(localStorage.getItem(storageKeys.filter) || "all");
   } catch (error) {
     setStatus(`Local runtime API unavailable: ${error.message}`);

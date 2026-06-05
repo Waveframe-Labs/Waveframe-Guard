@@ -14,10 +14,15 @@ def test_guard_ui_layout_contains_required_runtime_surfaces():
     )
 
     for expected in [
-        "Can execution proceed?",
-        "Decision",
+        "Workspace",
         "Explainability",
         "Developer Mode",
+        "Execution Workspace",
+        "Current Execution",
+        "Execution intake",
+        "Recent Evaluations",
+        "Receipt browser",
+        "No receipt selected",
         "Execution Intake",
         "Example Evaluation: finance-policy@1.0.0",
         "Paste Execution Request",
@@ -28,11 +33,6 @@ def test_guard_ui_layout_contains_required_runtime_surfaces():
         "Export Receipt",
         "Save Run",
         "Replay Saved Evaluation",
-        "Step 1",
-        "Step 2",
-        "Step 3",
-        "Why?",
-        "What must happen next?",
         "Runtime execution boundary",
         "Operational explainability",
         "Generated execution chronology",
@@ -57,6 +57,10 @@ def test_guard_ui_layout_contains_required_runtime_surfaces():
         "/api/runtime/telemetry",
         "/api/runtime/chronology",
         "setInterval",
+        "Can execution proceed?",
+        "Step 1",
+        "Step 2",
+        "Step 3",
     ]:
         assert retired not in html
         assert retired not in script

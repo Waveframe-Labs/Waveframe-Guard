@@ -24,39 +24,51 @@
       </header>
 
       <nav class="tabbar" aria-label="Guard runtime surfaces">
-        <button class="active" type="button" data-tab="decision">Decision</button>
+        <button class="active" type="button" data-tab="decision">Workspace</button>
         <button type="button" data-tab="explainability">Explainability</button>
         <button type="button" data-tab="developer-mode">Developer Mode</button>
       </nav>
 
       <main>
-        <section id="decision" class="tab-panel active" aria-label="Execution decision">
-          <section class="decision-hero">
-            <div class="question-block">
-              <p class="section-kicker">Step 1</p>
-              <h1>Can execution proceed?</h1>
-            </div>
-            <div class="answer-block">
-              <span>Answer</span>
-              <strong id="decisionState">WAIT</strong>
-              <p id="primaryAnswer">Load execution inputs, then evaluate.</p>
-            </div>
+        <section id="decision" class="tab-panel active" aria-label="Execution Workspace">
+          <section class="execution-workspace">
+            <article class="execution-record">
+              <div class="record-main">
+                <p class="section-kicker">Current Execution</p>
+                <h1 id="executionTitle">Execution intake</h1>
+                <p id="primaryAnswer">Load execution inputs, then evaluate.</p>
+              </div>
+              <div id="decisionState" class="status-pill waiting">WAITING</div>
+            </article>
+
+            <aside class="history-panel">
+              <div class="panel-title compact-title">
+                <p class="section-kicker">Local history</p>
+                <h2>Recent Evaluations</h2>
+              </div>
+              <div id="historyList" class="history-list"></div>
+            </aside>
           </section>
 
-          <section class="decision-summary">
-            <article class="summary-card">
-              <p class="section-kicker">Step 2</p>
-              <h2>Why?</h2>
-              <div id="whyList" class="short-list">
+          <section class="record-grid">
+            <article class="summary-card compact-card">
+              <p class="section-kicker">Reason</p>
+              <div id="whyList" class="short-list compact-list">
                 <div class="short-item muted">no evaluation yet</div>
               </div>
             </article>
-            <article class="summary-card next-card">
-              <p class="section-kicker">Step 3</p>
-              <h2>What must happen next?</h2>
-              <div id="nextList" class="short-list">
+            <article class="summary-card compact-card next-card">
+              <p class="section-kicker">Next action</p>
+              <div id="nextList" class="short-list compact-list">
                 <div class="short-item muted">connect or paste execution inputs</div>
               </div>
+            </article>
+            <article class="receipt-panel">
+              <div class="panel-title compact-title">
+                <p class="section-kicker">Receipt browser</p>
+                <h2 id="receiptTitle">No receipt selected</h2>
+              </div>
+              <div id="receiptBrowser" class="receipt-browser">Save or select a run to inspect its receipt.</div>
             </article>
           </section>
 

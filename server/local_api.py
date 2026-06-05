@@ -103,6 +103,48 @@ def replay_runtime_evaluation(run_id: str, *, store_root: Path | None = None) ->
     }
 
 
+def load_saved_runtime_evaluation(run_id: str, *, store_root: Path | None = None) -> dict[str, Any]:
+    store = LocalEvaluationStore(store_root or LOCAL_WORKSPACE_ROOT)
+    record = store.load_run(run_id)
+    evaluation = record["evaluation"]
+    return {
+        "saved_run": {
+            "run_id": record["run_id"],
+            "record_hash": record["record_hash"],
+            "recorded_at": record["recorded_at"],
+            "receipt": record["receipt"],
+        },
+        "evaluation": evaluation,
+        "guard_enforcement_outcome": evaluation["enforcement_outcome"],
+        "chronology": reconstruct_chronology(evaluation["telemetry_events"]),
+        "evaluation_events": evaluation["telemetry_events"],
+        "inputs": record["inputs"],
+    }
+
+
+def runtime_history(*, store_root: Path | None = None, limit: int = 20) -> dict[str, Any]:
+    store = LocalEvaluationStore(store_root or LOCAL_WORKSPACE_ROOT)
+    records = list(reversed(store.history()))[:limit]
+    return {
+        "schema_version": "guard_local_evaluation_history.v1",
+        "evaluations": [
+            {
+                "run_id": record["run_id"],
+                "recorded_at": record["recorded_at"],
+                "record_hash": record["record_hash"],
+                "request_id": record["inputs"]["execution_request"].get("request_id"),
+                "action": record["inputs"]["execution_request"].get("action"),
+                "target": record["inputs"]["execution_request"].get("target"),
+                "authority_ref": record["guard_enforcement_outcome"]["authority_ref"],
+                "status": record["guard_enforcement_outcome"]["status"],
+                "rationale": record["guard_enforcement_outcome"]["rationale"],
+                "receipt": record["receipt"],
+            }
+            for record in records
+        ],
+    }
+
+
 def export_runtime_receipt(payload: dict[str, Any]) -> dict[str, Any]:
     evaluated = _coerce_evaluated_payload(payload)
     return {
@@ -143,6 +185,7 @@ class GuardLocalRequestHandler(BaseHTTPRequestHandler):
             "/api/runtime/evaluate",
             "/api/runtime/save",
             "/api/runtime/replay",
+            "/api/runtime/load_run",
             "/api/runtime/export_receipt",
         }:
             self._send_json({"error": "not found"}, status=HTTPStatus.NOT_FOUND)
@@ -155,6 +198,8 @@ class GuardLocalRequestHandler(BaseHTTPRequestHandler):
                 self._send_json(save_runtime_evaluation(body))
             elif path == "/api/runtime/replay":
                 self._send_json(replay_runtime_evaluation(body["run_id"]))
+            elif path == "/api/runtime/load_run":
+                self._send_json(load_saved_runtime_evaluation(body["run_id"]))
             elif path == "/api/runtime/export_receipt":
                 self._send_json(export_runtime_receipt(body))
         except Exception as exc:
@@ -197,6 +242,8 @@ class GuardLocalRequestHandler(BaseHTTPRequestHandler):
             return load_runtime_inputs()
         if path == "/api/runtime/evaluate":
             return evaluate_runtime_request()
+        if path == "/api/runtime/history":
+            return runtime_history()
         if path.startswith("/api"):
             return {"error": "unknown api route", "path": path}
         return None

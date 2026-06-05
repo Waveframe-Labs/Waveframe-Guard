@@ -57,3 +57,19 @@ def test_local_api_saves_replays_and_exports_local_receipts(tmp_path):
     assert replayed["replay"]["matches"] is True
     assert replayed["guard_enforcement_outcome"]["schema_version"] == "guard_enforcement_outcome.v1"
     assert exported["receipt"]["schema_version"] == "guard_enforcement_receipt.v1"
+
+
+def test_local_api_lists_and_loads_local_evaluation_history(tmp_path):
+    response = local_api.evaluate_runtime_request()
+    saved = local_api.save_runtime_evaluation(response, store_root=tmp_path)
+    run_id = saved["saved_run"]["run_id"]
+
+    history = local_api.runtime_history(store_root=tmp_path)
+    loaded = local_api.load_saved_runtime_evaluation(run_id, store_root=tmp_path)
+
+    assert history["schema_version"] == "guard_local_evaluation_history.v1"
+    assert history["evaluations"][0]["run_id"] == run_id
+    assert history["evaluations"][0]["status"] == "blocked"
+    assert history["evaluations"][0]["receipt"]["schema_version"] == "guard_enforcement_receipt.v1"
+    assert loaded["saved_run"]["run_id"] == run_id
+    assert loaded["guard_enforcement_outcome"]["schema_version"] == "guard_enforcement_outcome.v1"

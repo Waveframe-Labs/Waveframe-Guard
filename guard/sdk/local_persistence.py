@@ -72,7 +72,7 @@ class LocalEvaluationStore:
             compiled_authority=inputs["compiled_authority"],
             execution_request=inputs["execution_request"],
             actor_identity=runtime_evidence["actor_identity"],
-            continuity_state=runtime_evidence.get("continuity_snapshot"),
+            continuity_state=inputs.get("continuity_posture", runtime_evidence.get("continuity_snapshot")),
             replay_posture=runtime_evidence.get("replay_evidence"),
             evidence_posture={
                 "approvals": runtime_evidence.get("approvals", []),
