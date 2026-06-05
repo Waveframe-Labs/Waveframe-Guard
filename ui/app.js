@@ -9,6 +9,12 @@ const inputConfig = [
   ["runtime_evidence", "View runtime evidence"]
 ];
 const outcomeContractSchema = "guard_enforcement_outcome.v1";
+const storageKeys = {
+  tab: "waveframe.guard.activeTab",
+  filter: "waveframe.guard.chronologyFilter",
+  scroll: "waveframe.guard.scrollState"
+};
+const scrollState = JSON.parse(sessionStorage.getItem(storageKeys.scroll) || "{}");
 
 const byId = (id) => document.getElementById(id);
 const formatJson = (value) => JSON.stringify(value, null, 2);
@@ -181,7 +187,12 @@ function renderChronology(events) {
       </li>
     `)
     .join("");
-  applyChronologyFilter(document.querySelector("[data-filter].active")?.dataset.filter || "all");
+  applyChronologyFilter(
+    localStorage.getItem(storageKeys.filter)
+      || document.querySelector("[data-filter].active")?.dataset.filter
+      || "all",
+    { persist: false }
+  );
 }
 
 function renderTelemetry(events) {
@@ -249,7 +260,10 @@ function shortNextActions(evaluation) {
   return actions.length ? [...new Set(actions)] : ["proceed with execution"];
 }
 
-function applyChronologyFilter(filter) {
+function applyChronologyFilter(filter, options = {}) {
+  if (options.persist !== false) {
+    localStorage.setItem(storageKeys.filter, filter);
+  }
   document.querySelectorAll("[data-filter]").forEach((button) => {
     button.classList.toggle("active", button.dataset.filter === filter);
   });
@@ -326,15 +340,27 @@ document.querySelectorAll("[data-filter]").forEach((button) => {
 
 document.querySelectorAll("[data-tab]").forEach((button) => {
   button.addEventListener("click", () => {
-    const selected = button.dataset.tab;
-    document.querySelectorAll("[data-tab]").forEach((item) => {
-      item.classList.toggle("active", item.dataset.tab === selected);
-    });
-    document.querySelectorAll(".tab-panel").forEach((panel) => {
-      panel.classList.toggle("active", panel.id === selected);
-    });
+    activateTab(button.dataset.tab);
   });
 });
+
+function activateTab(selected) {
+  const activePanel = document.querySelector(".tab-panel.active");
+  if (activePanel) {
+    scrollState[activePanel.id] = window.scrollY;
+    sessionStorage.setItem(storageKeys.scroll, JSON.stringify(scrollState));
+  }
+  localStorage.setItem(storageKeys.tab, selected);
+  document.querySelectorAll("[data-tab]").forEach((item) => {
+    item.classList.toggle("active", item.dataset.tab === selected);
+  });
+  document.querySelectorAll(".tab-panel").forEach((panel) => {
+    panel.classList.toggle("active", panel.id === selected);
+  });
+  requestAnimationFrame(() => {
+    window.scrollTo({ top: scrollState[selected] || 0, behavior: "instant" });
+  });
+}
 
 byId("evaluateButton").addEventListener("click", async () => {
   try {
@@ -347,9 +373,11 @@ byId("evaluateButton").addEventListener("click", async () => {
 
 (async function start() {
   try {
+    activateTab(localStorage.getItem(storageKeys.tab) || "decision");
     await loadRuntimeInputs();
     await evaluateCurrentInputs();
     await pollTelemetry();
+    applyChronologyFilter(localStorage.getItem(storageKeys.filter) || "all");
     setInterval(pollTelemetry, 3000);
   } catch (error) {
     setStatus(`Local runtime API unavailable: ${error.message}`);
