@@ -46,6 +46,16 @@
                 <p class="section-kicker">SDK run history</p>
                 <h2>Recent Evaluations</h2>
               </div>
+              <div class="history-tools">
+                <input id="historySearch" type="search" placeholder="Search request, target, authority">
+                <select id="historyFilter" aria-label="Evaluation status filter">
+                  <option value="all">All statuses</option>
+                  <option value="blocked">Blocked</option>
+                  <option value="admissible">Allowed</option>
+                  <option value="escalated">Escalated</option>
+                </select>
+                <button id="exportHistoryButton" class="secondary-action" type="button">Export</button>
+              </div>
               <div id="historyList" class="history-list"></div>
             </aside>
           </section>
@@ -84,6 +94,10 @@
             <div>
               <span>Latency</span>
               <strong id="latencyRef">not evaluated</strong>
+            </div>
+            <div>
+              <span>Evaluation kernel</span>
+              <strong id="kernelRef">CRI-CORE</strong>
             </div>
             <div>
               <span>Outcome contract</span>
@@ -148,21 +162,39 @@ guard = Guard.local(workspace=".guard-local")
 def wire_transfer(request):
     return execute_transfer(request)</code></pre>
               <div class="code-notes">
-                <p>Guard SDK evaluates the execution before mutation.</p>
-                <p>Blocked, allowed, or escalated outcomes emit local runs and receipts.</p>
-                <p>This inspector reads saved evaluation artifacts from <code>.guard-local/</code>.</p>
+                <p>Guard SDK intercepts execution before mutation.</p>
+                <p>CRI-CORE evaluation returns allowed, blocked, or escalated.</p>
+                <p>Guard emits receipts and saved runs into <code>.guard-local/</code>.</p>
               </div>
             </div>
           </section>
           <section class="payload-drawer">
             <div class="panel-title workspace-head">
               <div>
-                <p id="exampleLabel" class="section-kicker">Evaluation artifact inputs</p>
-                <h2>Inspect or replay an evaluation artifact</h2>
+                <p id="exampleLabel" class="section-kicker">Artifact Intake</p>
+                <h2>Open an SDK evaluation artifact</h2>
               </div>
               <span id="runRef" class="hash-chip">no saved run</span>
             </div>
-            <div class="ingest-actions">
+            <div class="artifact-intake-grid">
+              <button id="uploadArtifactButton" class="intake-card primary-intake" type="button">
+                <span>Load artifact</span>
+                <strong>Open evaluation JSON</strong>
+              </button>
+              <button id="loadSavedRunButton" class="intake-card" type="button">
+                <span>Load saved run</span>
+                <strong>Most recent .guard-local run</strong>
+              </button>
+              <button id="connectWorkspaceButton" class="intake-card" type="button">
+                <span>Connect SDK workspace</span>
+                <strong>Refresh .guard-local history</strong>
+              </button>
+              <button id="replayRunButton" class="intake-card" type="button">
+                <span>Replay evaluation</span>
+                <strong>Verify deterministic outcome</strong>
+              </button>
+            </div>
+            <div class="ingest-actions secondary-intake-actions">
               <label class="select-label" for="sampleSelect">Example input set</label>
               <select id="sampleSelect" aria-label="Example input set">
                 <option value="blocked-transfer">Blocked transfer example</option>
@@ -170,14 +202,12 @@ def wire_transfer(request):
                 <option value="escalated-queued-job">Escalated queued job example</option>
                 <option value="empty">Empty input set</option>
               </select>
-              <button id="pasteRequestButton" class="secondary-action" type="button">Edit Request JSON</button>
-              <button id="uploadArtifactButton" type="button">Upload Evaluation Artifact</button>
               <input id="artifactInput" type="file" accept="application/json,.json">
               <button id="loadSampleButton" type="button">Load Example Inputs</button>
+              <button id="pasteRequestButton" class="secondary-action" type="button">Advanced: Edit JSON</button>
               <button id="clearInputsButton" type="button">Clear Inputs</button>
               <button id="evaluateButton" type="button" disabled>Evaluate Execution</button>
               <button id="saveRunButton" type="button">Save Run</button>
-              <button id="replayRunButton" type="button">Replay Saved Evaluation</button>
               <button id="exportReceiptButton" type="button">Export Receipt</button>
               <span id="ingestStatus">Awaiting execution intake</span>
             </div>

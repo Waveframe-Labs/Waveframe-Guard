@@ -2,14 +2,16 @@ const state = {
   inputs: null,
   latest: null,
   savedRunId: null,
-  history: []
+  history: [],
+  historySearch: "",
+  historyFilter: "all"
 };
 
 const inputConfig = [
-  ["compiled_authority", "View compiled authority"],
-  ["execution_request", "View normalized request"],
-  ["runtime_evidence", "View runtime evidence"],
-  ["continuity_posture", "View continuity posture"]
+  ["compiled_authority", "Compiled authority"],
+  ["execution_request", "Execution request"],
+  ["runtime_evidence", "Runtime evidence"],
+  ["continuity_posture", "Continuity posture"]
 ];
 const outcomeContractSchema = "guard_enforcement_outcome.v1";
 const storageKeys = {
@@ -50,7 +52,7 @@ async function loadSampleInputs() {
   const response = await fetch(`/api/runtime/inputs?sample=${encodeURIComponent(sample)}`, { cache: "no-store" });
   if (!response.ok) throw new Error(`Input load failed: ${response.status}`);
   state.inputs = await response.json();
-  byId("exampleLabel").textContent = state.inputs.sample_label || "Evaluation artifact inputs";
+  byId("exampleLabel").textContent = state.inputs.sample_label || "Artifact Intake";
   renderInputDrawers(state.inputs);
   state.latest = null;
   state.savedRunId = null;
@@ -62,7 +64,7 @@ async function loadSampleInputs() {
 async function evaluateCurrentInputs() {
   updateIntakeChecklist();
   if (!requiredInputsPresent()) {
-    setStatus("Load compiled authority, normalized request, and runtime evidence before evaluation");
+    setStatus("Load compiled authority, execution request, and runtime evidence before evaluation");
     return;
   }
   setStatus("Evaluating execution");
@@ -135,6 +137,12 @@ async function refreshHistory() {
   renderHistory(state.history);
 }
 
+async function loadMostRecentRun() {
+  await refreshHistory();
+  if (!state.history.length) throw new Error("No saved SDK runs found in .guard-local");
+  await loadSavedRun(state.history[0].run_id);
+}
+
 async function loadSavedRun(runId) {
   setStatus(`Loading saved run ${runId}`);
   const response = await fetch("/api/runtime/load_run", {
@@ -154,14 +162,22 @@ async function loadSavedRun(runId) {
 }
 
 function renderInputDrawers(inputs) {
-  byId("payloadDrawers").innerHTML = inputConfig
+  byId("payloadDrawers").innerHTML = `
+    <details class="advanced-json">
+      <summary>Advanced JSON inputs</summary>
+      <div class="advanced-json-note">Schemas are preserved for debugging and integration tests. Normal use starts from a Guard SDK run, saved receipt, or evaluation artifact.</div>
+      <div class="schema-drawer-stack">
+        ${inputConfig
     .map(([key, title]) => `
       <details>
         <summary>${title}</summary>
         <textarea id="input-${key}" spellcheck="false" placeholder="${escapeHtml(inputPlaceholder(key))}">${escapeHtml(formatJson(inputs[key] || {}))}</textarea>
       </details>
     `)
-    .join("");
+    .join("")}
+      </div>
+    </details>
+  `;
   bindInputReadiness();
   updateIntakeChecklist();
 }
@@ -173,6 +189,7 @@ function renderEmptyWorkspace() {
   byId("requestRef").textContent = "no execution";
   byId("targetRef").textContent = "awaiting SDK run or artifact";
   byId("latencyRef").textContent = "not evaluated";
+  byId("kernelRef").textContent = "CRI-CORE";
   byId("executionTitle").textContent = "Evaluation inspector";
   byId("decisionState").textContent = "WAITING";
   byId("decisionState").className = "status-pill waiting";
@@ -185,7 +202,7 @@ function renderEmptyWorkspace() {
   byId("chronologyList").innerHTML = "";
   byId("telemetryStream").innerHTML = "";
   renderReceipt(null);
-  byId("exampleLabel").textContent = "Evaluation artifact inputs";
+  byId("exampleLabel").textContent = "Artifact Intake";
 }
 
 function readInputDrawers() {
@@ -282,6 +299,7 @@ function renderEvaluation(payload) {
   byId("requestRef").textContent = request.request_id;
   byId("targetRef").textContent = `${request.action} -> ${request.target}`;
   byId("latencyRef").textContent = typeof latency === "number" ? `${latency} ms` : String(latency);
+  byId("kernelRef").textContent = "CRI-CORE";
   byId("executionTitle").textContent = `Execution #${request.request_id}`;
   byId("decisionState").textContent = postureValue(status).toUpperCase();
   byId("decisionState").className = `status-pill ${toneForStatus(status)}`;
@@ -296,16 +314,17 @@ function renderEvaluation(payload) {
 }
 
 function renderHistory(evaluations) {
-  byId("historyList").innerHTML = evaluations.length
-    ? evaluations.map((item) => `
+  const filtered = filterHistory(evaluations);
+  byId("historyList").innerHTML = filtered.length
+    ? filtered.map((item) => `
         <button type="button" class="history-row" data-run-id="${escapeHtml(item.run_id)}">
           <span class="history-status ${toneForStatus(item.status)}">${escapeHtml(postureValue(item.status).toUpperCase())}</span>
           <strong>${escapeHtml(item.request_id || item.run_id)}</strong>
           <span>${escapeHtml(item.action || "execution")} -> ${escapeHtml(item.target || "runtime")}</span>
-          <small>${escapeHtml(item.rationale)}</small>
+          <small>${escapeHtml(item.authority_ref || "unknown authority")} | ${escapeHtml(item.rationale)}</small>
         </button>
       `).join("")
-    : `<div class="empty-record">No saved evaluations yet.</div>`;
+    : `<div class="empty-record">${evaluations.length ? "No evaluations match the current filter." : "No saved evaluations yet."}</div>`;
   document.querySelectorAll("[data-run-id]").forEach((item) => {
     item.addEventListener("click", async () => {
       try {
@@ -317,22 +336,86 @@ function renderHistory(evaluations) {
   });
 }
 
+function filterHistory(evaluations) {
+  const query = state.historySearch.trim().toLowerCase();
+  return evaluations.filter((item) => {
+    if (state.historyFilter !== "all" && item.status !== state.historyFilter) return false;
+    if (!query) return true;
+    return [
+      item.run_id,
+      item.request_id,
+      item.action,
+      item.target,
+      item.authority_ref,
+      item.rationale,
+      item.receipt?.receipt_hash
+    ].some((value) => String(value || "").toLowerCase().includes(query));
+  });
+}
+
 function renderReceipt(receipt) {
   if (!receipt || !receipt.schema_version) {
     byId("receiptTitle").textContent = "No receipt selected";
-    byId("receiptBrowser").textContent = "Save or select a run to inspect its receipt.";
+    byId("receiptBrowser").innerHTML = `
+      <div class="lineage-empty">Save or select a run to inspect its governance lineage.</div>
+    `;
     return;
   }
+  const latest = state.latest || {};
+  const inputs = latest.inputs || {};
+  const evaluation = latest.evaluation || {};
+  const authority = inputs.compiled_authority || {};
+  const evidence = inputs.runtime_evidence || {};
+  const request = inputs.execution_request || {};
+  const continuity = inputs.continuity_posture || evidence.continuity_snapshot || {};
+  const replay = evidence.replay_evidence || {};
   byId("receiptTitle").textContent = receipt.run_id || "Receipt";
   byId("receiptBrowser").innerHTML = `
-    <dl class="receipt-fields">
-      <div><dt>Status</dt><dd>${escapeHtml(receipt.outcome_status || "unknown")}</dd></div>
+    <div class="lineage-path" aria-label="Evaluation lineage">
+      <span>Guard SDK</span>
+      <span>CRI-CORE evaluation</span>
+      <span>Guard receipt</span>
+    </div>
+    <dl class="receipt-fields lineage-fields">
+      <div><dt>Decision</dt><dd>${escapeHtml(postureValue(receipt.outcome_status || "blocked"))}</dd></div>
       <div><dt>Authority</dt><dd>${escapeHtml(receipt.authority_ref || "unknown")}</dd></div>
-      <div><dt>Outcome</dt><dd>${escapeHtml(receipt.outcome_hash || "")}</dd></div>
-      <div><dt>Trace</dt><dd>${escapeHtml(receipt.evaluation_trace_hash || "")}</dd></div>
+      <div><dt>Contract hash</dt><dd>${escapeHtml(authority.contract_hash || "not available")}</dd></div>
+      <div><dt>Actor</dt><dd>${escapeHtml(actorSummary(evidence.actor_identity))}</dd></div>
+      <div><dt>Evidence</dt><dd>${escapeHtml(evidenceSummaryLine(evidence))}</dd></div>
+      <div><dt>Replay</dt><dd>${escapeHtml(replaySummaryLine(replay, evaluation))}</dd></div>
+      <div><dt>Continuity</dt><dd>${escapeHtml(continuitySummaryLine(continuity, evaluation))}</dd></div>
+      <div><dt>Mutation domain</dt><dd>${escapeHtml(`${request.action || "execution"} -> ${request.target || "runtime"}`)}</dd></div>
+      <div><dt>Trace hash</dt><dd>${escapeHtml(receipt.evaluation_trace_hash || "")}</dd></div>
+      <div><dt>Outcome hash</dt><dd>${escapeHtml(receipt.outcome_hash || "")}</dd></div>
+      <div><dt>Receipt hash</dt><dd>${escapeHtml(receipt.receipt_hash || "")}</dd></div>
       <div><dt>Events</dt><dd>${escapeHtml(String((receipt.chronology_event_ids || []).length))}</dd></div>
     </dl>
   `;
+}
+
+function actorSummary(actor) {
+  if (!actor) return "not available";
+  return [actor.id, actor.role, actor.type].filter(Boolean).join(" | ") || "not available";
+}
+
+function evidenceSummaryLine(evidence) {
+  const approvals = evidence.approvals || [];
+  if (!approvals.length) return "no approvals attached";
+  return `${approvals.length} approval${approvals.length === 1 ? "" : "s"} attached`;
+}
+
+function replaySummaryLine(replay, evaluation) {
+  const obligations = evaluation.replay_obligations || [];
+  if (obligations.length) return `${obligations.length} replay obligation${obligations.length === 1 ? "" : "s"}`;
+  if (replay.required) return "replay required";
+  return "replay satisfied or not required";
+}
+
+function continuitySummaryLine(continuity, evaluation) {
+  const requirements = evaluation.continuity_requirements || [];
+  if (requirements.length) return `${requirements.length} continuity requirement${requirements.length === 1 ? "" : "s"}`;
+  if (continuity.requires_revalidation) return "revalidation required";
+  return "stable";
 }
 
 function receiptForRun(runId) {
@@ -720,7 +803,7 @@ function clearInputs() {
   state.latest = null;
   state.savedRunId = null;
   byId("runRef").textContent = "no saved run";
-  byId("exampleLabel").textContent = "Evaluation artifact inputs";
+  byId("exampleLabel").textContent = "Artifact Intake";
   hideIntakeHelper();
   updateIntakeChecklist();
   setStatus("Inputs cleared");
@@ -729,6 +812,8 @@ function clearInputs() {
 function focusExecutionRequestInput() {
   const input = byId("input-execution_request");
   if (!input) return;
+  const advanced = input.closest(".advanced-json");
+  if (advanced) advanced.open = true;
   input.closest("details").open = true;
   showIntakeHelper("Paste a normalized_execution_request.v1 JSON object below. Guard does not normalize raw request text in this surface.");
   input.focus();
@@ -779,6 +864,19 @@ function downloadJson(payload, filename) {
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
+}
+
+function exportHistory() {
+  const filtered = filterHistory(state.history);
+  downloadJson(
+    {
+      schema_version: "guard_evaluation_history_export.v1",
+      exported_count: filtered.length,
+      evaluations: filtered
+    },
+    "guard-evaluation-history.json"
+  );
+  setStatus(`Exported ${filtered.length} evaluation history record${filtered.length === 1 ? "" : "s"}`);
 }
 
 document.querySelectorAll("[data-filter]").forEach((button) => {
@@ -834,6 +932,35 @@ byId("pasteRequestButton").addEventListener("click", focusExecutionRequestInput)
 
 byId("uploadArtifactButton").addEventListener("click", () => {
   byId("artifactInput").click();
+});
+
+byId("loadSavedRunButton").addEventListener("click", async () => {
+  try {
+    await loadMostRecentRun();
+  } catch (error) {
+    setStatus(error.message);
+  }
+});
+
+byId("connectWorkspaceButton").addEventListener("click", async () => {
+  try {
+    await refreshHistory();
+    setStatus("Refreshed local .guard-local evaluation history");
+  } catch (error) {
+    setStatus(error.message);
+  }
+});
+
+byId("exportHistoryButton").addEventListener("click", exportHistory);
+
+byId("historySearch").addEventListener("input", (event) => {
+  state.historySearch = event.target.value;
+  renderHistory(state.history);
+});
+
+byId("historyFilter").addEventListener("change", (event) => {
+  state.historyFilter = event.target.value;
+  renderHistory(state.history);
 });
 
 byId("artifactInput").addEventListener("change", async (event) => {

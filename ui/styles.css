@@ -380,6 +380,33 @@ h3 {
   overflow: auto;
 }
 
+.history-tools {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 130px 80px;
+  gap: 8px;
+  padding: 0 14px 12px;
+}
+
+.history-tools input,
+.history-tools select {
+  min-width: 0;
+  min-height: 36px;
+  padding: 0 10px;
+  color: var(--ink);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.history-tools button {
+  min-height: 36px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
 .history-row {
   display: grid;
   grid-template-columns: 92px minmax(0, 1fr);
@@ -430,6 +457,29 @@ h3 {
   font-weight: 750;
 }
 
+.lineage-empty {
+  color: var(--muted);
+}
+
+.lineage-path {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.lineage-path span {
+  min-width: 0;
+  padding: 9px 10px;
+  color: var(--ink);
+  background: var(--orange-soft);
+  border: 1px solid rgba(255, 95, 5, 0.25);
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 950;
+  text-align: center;
+}
+
 .receipt-fields {
   display: grid;
   gap: 8px;
@@ -454,6 +504,19 @@ h3 {
   overflow-wrap: anywhere;
   font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
   font-size: 12px;
+}
+
+.lineage-fields {
+  gap: 1px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--line);
+}
+
+.lineage-fields div {
+  padding: 9px 10px;
+  background: var(--surface);
 }
 
 .posture-grid {
@@ -505,7 +568,7 @@ h3 {
 
 .execution-facts {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1px;
   overflow: hidden;
   margin-top: 14px;
@@ -775,6 +838,50 @@ h3 {
   text-transform: uppercase;
 }
 
+.artifact-intake-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  padding: 14px 14px 0;
+}
+
+.intake-card {
+  display: grid;
+  align-content: center;
+  min-height: 92px;
+  padding: 12px;
+  color: var(--ink);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  text-align: left;
+}
+
+.intake-card:hover,
+.intake-card.primary-intake {
+  color: #fff;
+  background: var(--orange-dark);
+  border-color: var(--orange-dark);
+}
+
+.intake-card span {
+  color: inherit;
+  opacity: 0.76;
+  font-size: 11px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.intake-card strong {
+  margin-top: 6px;
+  font-size: 15px;
+  line-height: 1.1;
+}
+
+.secondary-intake-actions {
+  padding-top: 12px;
+}
+
 .code-production-panel {
   margin-bottom: 14px;
   padding: 14px;
@@ -891,10 +998,35 @@ h3 {
   padding: 14px;
 }
 
+.advanced-json {
+  background: var(--surface-2);
+}
+
+.advanced-json-note {
+  margin: 0 14px 12px;
+  padding: 10px 12px;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.schema-drawer-stack {
+  display: grid;
+  gap: 10px;
+  padding: 0 14px 14px;
+}
+
 details {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface-2);
+}
+
+details:not([open]) > :not(summary) {
+  display: none;
 }
 
 summary {
@@ -942,6 +1074,11 @@ details textarea {
 
   .code-flow {
     grid-template-columns: 1fr;
+  }
+
+  .artifact-intake-grid,
+  .lineage-path {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -996,7 +1133,10 @@ details textarea {
 
   .posture-grid,
   .execution-facts,
-  .trace-surface {
+  .trace-surface,
+  .artifact-intake-grid,
+  .lineage-path,
+  .history-tools {
     grid-template-columns: 1fr;
   }
 
