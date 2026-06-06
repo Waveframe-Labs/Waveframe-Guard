@@ -46,16 +46,16 @@ const summarize = (value) => {
 
 async function loadSampleInputs() {
   const sample = byId("sampleSelect").value;
-  setStatus("Loading sample input set");
+  setStatus("Loading example input set");
   const response = await fetch(`/api/runtime/inputs?sample=${encodeURIComponent(sample)}`, { cache: "no-store" });
   if (!response.ok) throw new Error(`Input load failed: ${response.status}`);
   state.inputs = await response.json();
-  byId("exampleLabel").textContent = state.inputs.sample_label || "Execution Intake";
+  byId("exampleLabel").textContent = state.inputs.sample_label || "Evaluation artifact inputs";
   renderInputDrawers(state.inputs);
   state.latest = null;
   state.savedRunId = null;
   byId("runRef").textContent = "no saved run";
-  setStatus("Sample inputs loaded. Evaluate when ready.");
+  setStatus("Example inputs loaded. Evaluate when ready.");
   await refreshHistory();
 }
 
@@ -171,21 +171,21 @@ function renderEmptyWorkspace() {
   byId("authorityRef").textContent = "none loaded";
   byId("outcomeRef").textContent = "not emitted";
   byId("requestRef").textContent = "no execution";
-  byId("targetRef").textContent = "awaiting intake";
+  byId("targetRef").textContent = "awaiting SDK run or artifact";
   byId("latencyRef").textContent = "not evaluated";
-  byId("executionTitle").textContent = "Execution intake";
+  byId("executionTitle").textContent = "Evaluation inspector";
   byId("decisionState").textContent = "WAITING";
   byId("decisionState").className = "status-pill waiting";
-  byId("primaryAnswer").textContent = "Load execution inputs, then evaluate.";
+  byId("primaryAnswer").textContent = "Open a Guard SDK run or load an evaluation artifact.";
   byId("whyList").innerHTML = `<div class="short-item muted">no evaluation yet</div>`;
-  byId("nextList").innerHTML = `<div class="short-item muted">connect or paste execution inputs</div>`;
+  byId("nextList").innerHTML = `<div class="short-item muted">load a saved run, upload an artifact, or use an example input set</div>`;
   byId("postureRail").innerHTML = "";
   byId("traceHash").textContent = "not evaluated";
   byId("traceSurface").innerHTML = "";
   byId("chronologyList").innerHTML = "";
   byId("telemetryStream").innerHTML = "";
   renderReceipt(null);
-  byId("exampleLabel").textContent = "Execution Intake";
+  byId("exampleLabel").textContent = "Evaluation artifact inputs";
 }
 
 function readInputDrawers() {
@@ -720,7 +720,7 @@ function clearInputs() {
   state.latest = null;
   state.savedRunId = null;
   byId("runRef").textContent = "no saved run";
-  byId("exampleLabel").textContent = "Execution Intake";
+  byId("exampleLabel").textContent = "Evaluation artifact inputs";
   hideIntakeHelper();
   updateIntakeChecklist();
   setStatus("Inputs cleared");
@@ -732,7 +732,7 @@ function focusExecutionRequestInput() {
   input.closest("details").open = true;
   showIntakeHelper("Paste a normalized_execution_request.v1 JSON object below. Guard does not normalize raw request text in this surface.");
   input.focus();
-  setStatus("Paste normalized_execution_request.v1 into the execution request input");
+  setStatus("Edit normalized_execution_request.v1 in the request input");
 }
 
 function showIntakeHelper(message) {

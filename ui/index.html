@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Waveframe Guard Runtime Boundary</title>
+    <title>Waveframe Guard Evaluation Inspector</title>
     <link rel="icon" href="./branding/assets/favicon.ico">
     <link rel="stylesheet" href="./styles.css">
   </head>
@@ -14,27 +14,27 @@
           <img src="./branding/assets/canon_wf_logo.png" alt="Waveframe Labs">
           <div>
             <span>Waveframe Guard</span>
-            <strong>Runtime execution boundary</strong>
+            <strong>Evaluation Inspector</strong>
           </div>
         </div>
         <div class="execution-ref">
           <span id="requestRef">no execution</span>
-          <strong id="targetRef">awaiting intake</strong>
+          <strong id="targetRef">awaiting SDK run or artifact</strong>
         </div>
       </header>
 
-      <nav class="tabbar" aria-label="Guard runtime surfaces">
-        <button class="active" type="button" data-tab="decision">Workspace</button>
+      <nav class="tabbar" aria-label="Guard evaluation inspector surfaces">
+        <button class="active" type="button" data-tab="decision">Inspector</button>
         <button type="button" data-tab="explainability">Explainability</button>
-        <button type="button" data-tab="developer-mode">Developer Mode</button>
+        <button type="button" data-tab="developer-mode">Inputs</button>
       </nav>
 
       <main>
-        <section id="decision" class="tab-panel active" aria-label="Execution Workspace">
+        <section id="decision" class="tab-panel active" aria-label="Guard Evaluation Inspector">
           <section class="execution-workspace">
             <article class="execution-record">
               <div class="record-main">
-                <p class="section-kicker">Current Execution</p>
+                <p class="section-kicker">Guard Evaluation Inspector</p>
                 <h1 id="executionTitle">Execution intake</h1>
                 <p id="primaryAnswer">Load execution inputs, then evaluate.</p>
               </div>
@@ -43,7 +43,7 @@
 
             <aside class="history-panel">
               <div class="panel-title compact-title">
-                <p class="section-kicker">Local history</p>
+                <p class="section-kicker">SDK run history</p>
                 <h2>Recent Evaluations</h2>
               </div>
               <div id="historyList" class="history-list"></div>
@@ -60,7 +60,7 @@
             <article class="summary-card compact-card next-card">
               <p class="section-kicker">Next action</p>
               <div id="nextList" class="short-list compact-list">
-                <div class="short-item muted">connect or paste execution inputs</div>
+                <div class="short-item muted">load a saved run, upload an artifact, or use an example input set</div>
               </div>
             </article>
             <article class="receipt-panel">
@@ -131,27 +131,49 @@
           </section>
         </section>
 
-        <section id="developer-mode" class="tab-panel" aria-label="Developer mode">
+        <section id="developer-mode" class="tab-panel" aria-label="Evaluation inputs">
+          <section class="code-production-panel">
+            <div class="panel-title compact-title">
+              <div>
+                <p class="section-kicker">Guard SDK primary path</p>
+                <h2>How this is produced in code</h2>
+              </div>
+            </div>
+            <div class="code-flow">
+              <pre><code>from guard.sdk import Guard
+
+guard = Guard.local(workspace=".guard-local")
+
+@guard.protect(authority="compiled_authority_contract.v1")
+def wire_transfer(request):
+    return execute_transfer(request)</code></pre>
+              <div class="code-notes">
+                <p>Guard SDK evaluates the execution before mutation.</p>
+                <p>Blocked, allowed, or escalated outcomes emit local runs and receipts.</p>
+                <p>This inspector reads saved evaluation artifacts from <code>.guard-local/</code>.</p>
+              </div>
+            </div>
+          </section>
           <section class="payload-drawer">
             <div class="panel-title workspace-head">
               <div>
-                <p id="exampleLabel" class="section-kicker">Execution Intake</p>
-                <h2>Developer Mode</h2>
+                <p id="exampleLabel" class="section-kicker">Evaluation artifact inputs</p>
+                <h2>Inspect or replay an evaluation artifact</h2>
               </div>
               <span id="runRef" class="hash-chip">no saved run</span>
             </div>
             <div class="ingest-actions">
-              <label class="select-label" for="sampleSelect">Sample input set</label>
-              <select id="sampleSelect" aria-label="Sample input set">
+              <label class="select-label" for="sampleSelect">Example input set</label>
+              <select id="sampleSelect" aria-label="Example input set">
                 <option value="blocked-transfer">Blocked transfer example</option>
                 <option value="allowed-transfer">Allowed transfer example</option>
                 <option value="escalated-queued-job">Escalated queued job example</option>
                 <option value="empty">Empty input set</option>
               </select>
-              <button id="pasteRequestButton" type="button">Paste Execution Request</button>
+              <button id="pasteRequestButton" class="secondary-action" type="button">Edit Request JSON</button>
               <button id="uploadArtifactButton" type="button">Upload Evaluation Artifact</button>
               <input id="artifactInput" type="file" accept="application/json,.json">
-              <button id="loadSampleButton" type="button">Load Sample Inputs</button>
+              <button id="loadSampleButton" type="button">Load Example Inputs</button>
               <button id="clearInputsButton" type="button">Clear Inputs</button>
               <button id="evaluateButton" type="button" disabled>Evaluate Execution</button>
               <button id="saveRunButton" type="button">Save Run</button>
