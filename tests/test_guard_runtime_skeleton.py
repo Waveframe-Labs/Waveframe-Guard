@@ -27,6 +27,8 @@ def test_runtime_evaluation_builds_admissible_operational_backbone():
     )
 
     assert result["status"] == "admissible"
+    assert result["execution_state"] == "allowed"
+    assert result["enforcement_outcome"]["execution_state"] == "allowed"
     assert result["admissible"] is True
     assert result["blocked"] is False
     assert result["escalated"] is False
@@ -63,6 +65,8 @@ def test_runtime_evaluation_blocks_on_compiled_authority_constraints():
     )
 
     assert result["status"] == "blocked"
+    assert result["execution_state"] == "blocked"
+    assert result["enforcement_outcome"]["execution_state"] == "blocked"
     assert result["admissible"] is False
     assert result["violated_constraints"] == [
         {
@@ -108,6 +112,8 @@ def test_runtime_evaluation_escalates_for_continuity_and_replay_requirements():
     )
 
     assert result["status"] == "escalated"
+    assert result["execution_state"] == "escalated"
+    assert result["enforcement_outcome"]["execution_state"] == "escalated"
     assert result["continuity_requirements"] == [
         {
             "requirement": "revalidation",

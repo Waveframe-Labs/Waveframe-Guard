@@ -1,0 +1,146 @@
+from __future__ import annotations
+
+from functools import wraps
+from pathlib import Path
+from typing import Any, Callable
+
+from guard.adapters import NORMALIZED_EXECUTION_REQUEST_V1
+
+from .execution import GuardRuntimeBoundary
+from .local_persistence import LocalEvaluationStore
+
+
+class Guard:
+    """Product-facing Guard SDK facade for local runtime interception."""
+
+    def __init__(
+        self,
+        *,
+        workspace: str | Path,
+        authorities: dict[str, dict[str, Any]] | None = None,
+        authority_loader: Callable[[str], dict[str, Any]] | None = None,
+        actor_identity: dict[str, Any] | None = None,
+        approvals: list[dict[str, Any]] | None = None,
+        continuity_state: dict[str, Any] | None = None,
+        replay_posture: dict[str, Any] | None = None,
+        execution_context: dict[str, Any] | None = None,
+        evaluation_time_source: Callable[[], str] | None = None,
+    ):
+        self.workspace = Path(workspace)
+        self.store = LocalEvaluationStore(self.workspace)
+        self.authorities = authorities or {}
+        self.authority_loader = authority_loader
+        self.actor_identity = actor_identity or {"id": "unknown", "type": "unknown", "role": "unknown"}
+        self.approvals = approvals or []
+        self.continuity_state = continuity_state or {}
+        self.replay_posture = replay_posture or {}
+        self.execution_context = execution_context or {"surface": "guard_sdk"}
+        self.evaluation_time_source = evaluation_time_source
+
+    @classmethod
+    def local(
+        cls,
+        *,
+        workspace: str | Path = ".guard-local",
+        authorities: dict[str, dict[str, Any]] | None = None,
+        authority_loader: Callable[[str], dict[str, Any]] | None = None,
+        actor_identity: dict[str, Any] | None = None,
+        approvals: list[dict[str, Any]] | None = None,
+        continuity_state: dict[str, Any] | None = None,
+        replay_posture: dict[str, Any] | None = None,
+        execution_context: dict[str, Any] | None = None,
+        evaluation_time_source: Callable[[], str] | None = None,
+    ) -> "Guard":
+        return cls(
+            workspace=workspace,
+            authorities=authorities,
+            authority_loader=authority_loader,
+            actor_identity=actor_identity,
+            approvals=approvals,
+            continuity_state=continuity_state,
+            replay_posture=replay_posture,
+            execution_context=execution_context,
+            evaluation_time_source=evaluation_time_source,
+        )
+
+    def protect(
+        self,
+        *,
+        authority: str,
+        request_builder: Callable[..., dict[str, Any]] | None = None,
+        actor_identity: dict[str, Any] | None = None,
+        approvals: list[dict[str, Any]] | None = None,
+        continuity_state: dict[str, Any] | None = None,
+        replay_posture: dict[str, Any] | None = None,
+        execution_context: dict[str, Any] | None = None,
+        raise_on_block: bool = True,
+    ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+        boundary = self.boundary_for(
+            authority,
+            actor_identity=actor_identity,
+            approvals=approvals,
+            continuity_state=continuity_state,
+            replay_posture=replay_posture,
+            execution_context=execution_context,
+        )
+
+        def decorate(fn: Callable[..., Any]) -> Callable[..., Any]:
+            @wraps(fn)
+            def wrapped(*args: Any, **kwargs: Any) -> Any:
+                execution_request = (
+                    request_builder(*args, **kwargs)
+                    if request_builder is not None
+                    else _normalized_request_from_call(args, kwargs)
+                )
+                result = boundary.execute(
+                    fn,
+                    execution_request=execution_request,
+                    args=args,
+                    kwargs=kwargs,
+                    raise_on_block=raise_on_block,
+                )
+                return result["value"] if result["executed"] else result
+
+            return wrapped
+
+        return decorate
+
+    def boundary_for(
+        self,
+        authority: str,
+        *,
+        actor_identity: dict[str, Any] | None = None,
+        approvals: list[dict[str, Any]] | None = None,
+        continuity_state: dict[str, Any] | None = None,
+        replay_posture: dict[str, Any] | None = None,
+        execution_context: dict[str, Any] | None = None,
+    ) -> GuardRuntimeBoundary:
+        return GuardRuntimeBoundary(
+            compiled_authority=self.resolve_authority(authority),
+            actor_identity=actor_identity or self.actor_identity,
+            approvals=approvals if approvals is not None else self.approvals,
+            continuity_state=continuity_state if continuity_state is not None else self.continuity_state,
+            replay_posture=replay_posture if replay_posture is not None else self.replay_posture,
+            execution_context=execution_context if execution_context is not None else self.execution_context,
+            evaluation_time_source=self.evaluation_time_source,
+            store=self.store,
+        )
+
+    def resolve_authority(self, authority: str) -> dict[str, Any]:
+        if authority in self.authorities:
+            return self.authorities[authority]
+        if self.authority_loader is not None:
+            return self.authority_loader(authority)
+        raise KeyError(f"compiled authority not available for Guard SDK authority reference: {authority}")
+
+
+def _normalized_request_from_call(args: tuple[Any, ...], kwargs: dict[str, Any]) -> dict[str, Any]:
+    candidate = kwargs.get("execution_request")
+    if candidate is None and args:
+        candidate = args[0]
+    if not isinstance(candidate, dict) or candidate.get("schema_version") != NORMALIZED_EXECUTION_REQUEST_V1:
+        raise ValueError(
+            "Guard SDK protect() requires a normalized_execution_request.v1 payload "
+            "or an explicit request_builder adapter"
+        )
+    return candidate

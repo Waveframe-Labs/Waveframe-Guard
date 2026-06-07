@@ -6,6 +6,7 @@ from guard.adapters import COMPILED_AUTHORITY_CONTRACT_V1, NORMALIZED_EXECUTION_
 from guard.sdk import (
     ENFORCEMENT_RECEIPT_V1,
     SAVED_EVALUATION_V1,
+    Guard,
     GuardExecutionBlocked,
     GuardRuntimeBoundary,
     LocalEvaluationStore,
@@ -71,6 +72,51 @@ def test_decorator_flow_uses_supplied_normalized_request_builder():
         return {"transferred": amount}
 
     assert transfer(500) == {"transferred": 500}
+
+
+def test_guard_local_protect_emits_inspector_discoverable_artifacts(tmp_path):
+    mutation_log = []
+    guard = Guard.local(
+        workspace=tmp_path / ".guard-local",
+        authorities={"finance-policy@1.0.0": _authority()},
+        actor_identity={"id": "employee-1", "type": "human", "role": "employee"},
+        evaluation_time_source=lambda: EVALUATION_TIME,
+    )
+
+    @guard.protect(authority="finance-policy@1.0.0")
+    def wire_transfer(execution_request):
+        mutation_log.append(execution_request["arguments"]["amount"])
+        return {"wire_sent": execution_request["arguments"]["amount"]}
+
+    with pytest.raises(GuardExecutionBlocked):
+        wire_transfer(_request(amount=12500))
+
+    history = guard.store.history()
+    run_id = history[0]["run_id"]
+
+    assert mutation_log == []
+    assert history[0]["guard_enforcement_outcome"]["status"] == "blocked"
+    assert (tmp_path / ".guard-local" / "receipts" / f"{run_id}.json").exists()
+    assert (tmp_path / ".guard-local" / "manifests" / f"{run_id}.json").exists()
+    assert guard.store.replay(run_id)["matches"] is True
+    assert (tmp_path / ".guard-local" / "replays" / f"{run_id}.json").exists()
+
+
+def test_guard_local_protect_requires_normalized_request_boundary(tmp_path):
+    guard = Guard.local(
+        workspace=tmp_path,
+        authorities={"finance-policy@1.0.0": _authority()},
+        actor_identity={"id": "manager-1", "type": "human", "role": "manager"},
+        approvals=[{"role": "manager", "approved_by": "manager-approval"}],
+        evaluation_time_source=lambda: EVALUATION_TIME,
+    )
+
+    @guard.protect(authority="finance-policy@1.0.0")
+    def wire_transfer(raw_request):
+        return raw_request
+
+    with pytest.raises(ValueError, match="normalized_execution_request.v1"):
+        wire_transfer({"amount": 500})
 
 
 def test_local_persistence_saves_receipt_and_replays_deterministically(tmp_path):

@@ -13,6 +13,7 @@ from .execution import (
     GuardExecutionEscalated,
     GuardRuntimeBoundary,
 )
+from .guard import Guard
 from .local_persistence import (
     ENFORCEMENT_RECEIPT_V1,
     GUARD_ARTIFACT_MANIFEST_V1,
@@ -25,6 +26,7 @@ from .local_persistence import (
 __all__ = [
     "evaluate_runtime",
     "GuardRuntimeBoundary",
+    "Guard",
     "GuardExecutionError",
     "GuardExecutionBlocked",
     "GuardExecutionEscalated",

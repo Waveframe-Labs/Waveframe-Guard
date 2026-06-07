@@ -15,6 +15,7 @@ from .builders import (
     build_guard_continuity_posture,
     build_guard_enforcement_outcome,
     build_guard_evaluation_trace,
+    execution_state_for_status,
 )
 from .evidence import build_runtime_evidence_model, validate_runtime_evidence_model
 
@@ -120,6 +121,7 @@ def evaluate_runtime(
 
     return {
         "status": assessment["status"],
+        "execution_state": execution_state_for_status(assessment["status"]),
         "admissible": assessment["status"] == "admissible",
         "blocked": assessment["status"] == "blocked",
         "escalated": assessment["status"] == "escalated",

@@ -692,7 +692,7 @@ function renderReplayDiagnostics(replay) {
     <div class="replay-diagnostics-head">
       <div>
         <p class="section-kicker">Replay basis</p>
-        <h2>${escapeHtml(replay.matches ? "Replay verified" : "Replay mismatch detected")}</h2>
+        <h2>${escapeHtml(replay.matches ? "Replay verified" : "Deterministic trust failed")}</h2>
       </div>
       <span class="status-pill ${replay.matches ? "ok" : "blocked"}">${escapeHtml(replay.matches ? "MATCH" : "MISMATCH")}</span>
     </div>
@@ -707,7 +707,7 @@ function renderReplayDiagnostics(replay) {
     .map((reason) => `
         <article>
           <strong>${escapeHtml(replayClassLabel(reason.class))}</strong>
-          <p>${escapeHtml(reason.message || "Replay mismatch detected.")}</p>
+          <p>${escapeHtml(replayReasonMessage(reason))}</p>
           <small>${escapeHtml(reason.field || "artifact")} ${hashDelta(reason)}</small>
         </article>
       `)
@@ -808,17 +808,14 @@ function replaySummary(obligation) {
 }
 
 function replayTitle(evaluation, replay) {
-  if (replay?.replay_failure_reasons?.length) return "Replay mismatch";
+  if (replay?.replay_failure_reasons?.length) return "Deterministic trust failed";
   if (replay?.matches) return "Replay verified";
   return evaluation.replay_obligations.length ? "Replay required" : "Replay linked";
 }
 
 function replayExplainabilitySummary(evaluation, replay) {
   if (replay?.replay_failure_reasons?.length) {
-    return replay.replay_failure_reasons
-      .slice(0, 2)
-      .map((reason) => replayClassLabel(reason.class))
-      .join("; ");
+    return "This execution can no longer be trusted because the replay basis diverged from the original deterministic identity.";
   }
   if (replay?.matches) return "Guard Receipt replay basis matched the CRI-CORE evaluation output.";
   return firstOrNone(evaluation.replay_obligations, replaySummary);
@@ -835,6 +832,19 @@ function replayClassLabel(value) {
     deterministic_replay_match: "deterministic replay match"
   };
   return labels[value] || humanize(value || "replay mismatch");
+}
+
+function replayReasonMessage(reason) {
+  const messages = {
+    contract_drift: "Compiled authority changed after the Guard Receipt was emitted.",
+    evidence_mutation: "Runtime evidence changed after the Guard Receipt was emitted.",
+    chronology_mutation: "Generated execution chronology changed after the Guard Receipt was emitted.",
+    continuity_mismatch: "Lineage continuity no longer matches the original evaluation.",
+    request_mismatch: "Execution request changed after the Guard Receipt was emitted.",
+    manifest_integrity_failure: "Artifact manifest integrity failed for this evaluation artifact.",
+    deterministic_replay_match: "Guard Receipt replay basis matched the emitted CRI-CORE evaluation outcome."
+  };
+  return messages[reason?.class] || reason?.message || "Replay basis diverged from the original deterministic identity.";
 }
 
 function artifactErrorLabel(value) {

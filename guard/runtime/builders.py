@@ -12,6 +12,7 @@ GUARD_EVALUATION_TRACE_V1 = "guard_evaluation_trace.v1"
 GUARD_CONTINUITY_POSTURE_V1 = "guard_continuity_posture.v1"
 GUARD_ENFORCEMENT_OUTCOME_V1 = "guard_enforcement_outcome.v1"
 GUARD_ENFORCEMENT_OUTCOME_STATUSES = {"admissible", "blocked", "escalated"}
+GUARD_EXECUTION_STATES = {"allowed", "blocked", "escalated"}
 
 
 class GuardEnforcementOutcomeError(ValueError):
@@ -156,6 +157,7 @@ def build_guard_enforcement_outcome(
         "schema_version": GUARD_ENFORCEMENT_OUTCOME_V1,
         "authority_ref": authority_ref,
         "status": status,
+        "execution_state": execution_state_for_status(status),
         "rationale": rationale,
         "consequences": consequences or [],
     }
@@ -188,9 +190,19 @@ def validate_guard_enforcement_outcome(payload: dict[str, Any]) -> dict[str, Any
         )
     if payload["status"] not in GUARD_ENFORCEMENT_OUTCOME_STATUSES:
         raise GuardEnforcementOutcomeError("guard enforcement outcome status is not recognized")
+    if payload.get("execution_state", execution_state_for_status(payload["status"])) not in GUARD_EXECUTION_STATES:
+        raise GuardEnforcementOutcomeError("guard enforcement outcome execution_state is not recognized")
     if not isinstance(payload["consequences"], list):
         raise GuardEnforcementOutcomeError("guard enforcement outcome consequences must be a list")
     return dict(payload)
+
+
+def execution_state_for_status(status: str) -> str:
+    if status == "admissible":
+        return "allowed"
+    if status == "escalated":
+        return "escalated"
+    return "blocked"
 
 
 def _authority_ref(authority: dict[str, Any]) -> str:

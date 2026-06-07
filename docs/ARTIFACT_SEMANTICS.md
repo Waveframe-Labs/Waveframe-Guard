@@ -41,6 +41,35 @@ Receipts are exported to:
 .guard-local/receipts/<run_id>.json
 ```
 
+Artifact manifests are exported to:
+
+```text
+.guard-local/manifests/<run_id>.json
+```
+
+Replay records are exported to:
+
+```text
+.guard-local/replays/<run_id>.json
+```
+
+The Guard Inspector observes this local workspace. The normal operational loop
+is:
+
+```python
+from guard.sdk import Guard
+
+guard = Guard.local(workspace=".guard-local")
+
+@guard.protect(authority="finance-policy@1.0.0")
+def wire_transfer(request):
+    return execute_transfer(request)
+```
+
+The SDK intercepts before mutation, emits the Evaluation artifact, Guard
+Receipt, Artifact manifest, and Replay basis, and the Inspector loads those
+artifacts from disk.
+
 ## Hashed artifacts
 
 Guard uses canonical JSON for artifact hashing:
@@ -92,7 +121,17 @@ The replay basis is:
 The receipt stores `replay_basis_hash`.
 
 Replay succeeds when the replayed enforcement outcome hash equals the original
-receipt outcome hash.
+receipt outcome hash and the replay basis has not diverged from the original
+deterministic identity.
+
+Replay failure classes are deterministic:
+
+- `contract_drift`
+- `evidence_mutation`
+- `chronology_mutation`
+- `continuity_mismatch`
+- `request_mismatch`
+- `manifest_integrity_failure`
 
 ## Deterministic identity
 
