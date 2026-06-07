@@ -15,8 +15,10 @@ from .execution import (
 )
 from .local_persistence import (
     ENFORCEMENT_RECEIPT_V1,
+    GUARD_ARTIFACT_MANIFEST_V1,
     SAVED_EVALUATION_V1,
     LocalEvaluationStore,
+    build_artifact_manifest,
     build_enforcement_receipt,
 )
 
@@ -27,9 +29,11 @@ __all__ = [
     "GuardExecutionBlocked",
     "GuardExecutionEscalated",
     "LocalEvaluationStore",
+    "build_artifact_manifest",
     "build_enforcement_receipt",
     "SAVED_EVALUATION_V1",
     "ENFORCEMENT_RECEIPT_V1",
+    "GUARD_ARTIFACT_MANIFEST_V1",
     "python_callable_adapter",
     "http_middleware_adapter",
     "webhook_enforcement_adapter",

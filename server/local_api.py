@@ -87,6 +87,7 @@ def save_runtime_evaluation(payload: dict[str, Any], *, store_root: Path | None 
             "run_id": record["run_id"],
             "record_hash": record["record_hash"],
             "receipt": record["receipt"],
+            "artifact_manifest": record["artifact_manifest"],
         }
     }
 
@@ -115,7 +116,9 @@ def load_saved_runtime_evaluation(run_id: str, *, store_root: Path | None = None
             "record_hash": record["record_hash"],
             "recorded_at": record["recorded_at"],
             "receipt": record["receipt"],
+            "artifact_manifest": record["artifact_manifest"],
         },
+        "artifact_manifest": record["artifact_manifest"],
         "evaluation": evaluation,
         "guard_enforcement_outcome": evaluation["enforcement_outcome"],
         "chronology": reconstruct_chronology(evaluation["telemetry_events"]),
@@ -141,6 +144,7 @@ def runtime_history(*, store_root: Path | None = None, limit: int = 20) -> dict[
                 "status": record["guard_enforcement_outcome"]["status"],
                 "rationale": record["guard_enforcement_outcome"]["rationale"],
                 "receipt": record["receipt"],
+                "artifact_manifest_hash": record["artifact_manifest"]["manifest_hash"],
             }
             for record in records
         ],

@@ -72,6 +72,7 @@ def test_local_api_saves_replays_and_exports_local_receipts(tmp_path):
     exported = local_api.export_runtime_receipt(response)
 
     assert saved["saved_run"]["receipt"]["schema_version"] == "guard_enforcement_receipt.v1"
+    assert saved["saved_run"]["artifact_manifest"]["schema_version"] == "guard_artifact_manifest.v1"
     assert (tmp_path / "receipts" / f"{run_id}.json").exists()
     assert replayed["replay"]["matches"] is True
     assert replayed["guard_enforcement_outcome"]["schema_version"] == "guard_enforcement_outcome.v1"
@@ -90,5 +91,7 @@ def test_local_api_lists_and_loads_local_evaluation_history(tmp_path):
     assert history["evaluations"][0]["run_id"] == run_id
     assert history["evaluations"][0]["status"] == "blocked"
     assert history["evaluations"][0]["receipt"]["schema_version"] == "guard_enforcement_receipt.v1"
+    assert history["evaluations"][0]["artifact_manifest_hash"].startswith("sha256:")
     assert loaded["saved_run"]["run_id"] == run_id
+    assert loaded["artifact_manifest"]["schema_version"] == "guard_artifact_manifest.v1"
     assert loaded["guard_enforcement_outcome"]["schema_version"] == "guard_enforcement_outcome.v1"
