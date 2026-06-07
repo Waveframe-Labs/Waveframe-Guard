@@ -13,8 +13,8 @@
         <div class="brand-lockup">
           <img src="./branding/assets/canon_wf_logo.png" alt="Waveframe Labs">
           <div>
-            <span>Waveframe Guard</span>
-            <strong>Evaluation Inspector</strong>
+            <span>Guard Inspector</span>
+            <strong>powered by CRI-CORE</strong>
           </div>
         </div>
         <div class="execution-ref">
@@ -80,6 +80,23 @@
               </div>
               <div id="receiptBrowser" class="receipt-browser">Save or select a run to inspect its receipt.</div>
             </article>
+          </section>
+
+          <section class="comparison-panel">
+            <div class="panel-title comparison-head">
+              <div>
+                <p class="section-kicker">Multi-run comparison</p>
+                <h2>Compare evaluation outcomes</h2>
+              </div>
+              <div class="comparison-tools">
+                <select id="compareRunA" aria-label="Run A"></select>
+                <select id="compareRunB" aria-label="Run B"></select>
+                <button id="compareRunsButton" type="button">Compare</button>
+              </div>
+            </div>
+            <div id="comparisonOutput" class="comparison-output">
+              Select two saved evaluations to compare authority, evidence, continuity, replay, and actor changes.
+            </div>
           </section>
 
           <section class="posture-strip" aria-label="Runtime posture">

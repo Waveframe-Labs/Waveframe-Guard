@@ -17,6 +17,8 @@ def test_guard_ui_layout_contains_required_runtime_surfaces():
         "Inspector",
         "Explainability",
         "Inputs",
+        "Guard Inspector",
+        "powered by CRI-CORE",
         "Guard Evaluation Inspector",
         "Evaluation inspector",
         "Recent Evaluations",
@@ -33,6 +35,11 @@ def test_guard_ui_layout_contains_required_runtime_surfaces():
         ".guard-local/",
         "CRI-CORE",
         "Evaluation kernel",
+        "Multi-run comparison",
+        "Compare evaluation outcomes",
+        "Run A",
+        "Run B",
+        "authority, evidence, continuity, replay, and actor changes",
         "Load artifact",
         "Load saved run",
         "Connect SDK workspace",
@@ -68,6 +75,9 @@ def test_guard_ui_layout_contains_required_runtime_surfaces():
         "Contract hash",
         "Mutation domain",
         "Receipt hash",
+        "Copy",
+        "copy-hash",
+        "hash-value",
         "Technical detail",
         "compiled_authority_contract.v1",
         "normalized_execution_request.v1",
@@ -112,6 +122,8 @@ def test_guard_ui_layout_contains_required_runtime_surfaces():
     assert "await loadSampleInputs();\n    await evaluateCurrentInputs();" not in script
     assert "requiredInputsPresent()" in script
     assert "evaluateButton\" type=\"button\" disabled" in html
+    assert "max-width: 1400px" in (UI_ROOT / "styles.css").read_text(encoding="utf-8")
+    assert "text-overflow: ellipsis" in (UI_ROOT / "styles.css").read_text(encoding="utf-8")
 
 
 def test_guard_ui_uses_canonical_branding_assets():

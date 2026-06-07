@@ -160,7 +160,8 @@ h3 {
 .execution-ref {
   display: grid;
   gap: 5px;
-  min-width: 220px;
+  width: clamp(220px, 28vw, 360px);
+  min-width: 0;
   padding: 13px 15px;
   background: #151515;
   border: 1px solid #303030;
@@ -179,7 +180,10 @@ h3 {
 
 .execution-ref strong {
   color: #fff;
-  overflow-wrap: anywhere;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .tabbar {
@@ -295,6 +299,16 @@ h3 {
   margin-top: 14px;
 }
 
+.comparison-panel {
+  min-width: 0;
+  margin-top: 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
 .summary-card,
 .posture-strip,
 .execution-facts,
@@ -368,6 +382,15 @@ h3 {
   border-radius: 10px;
   box-shadow: var(--shadow);
   overflow: hidden;
+}
+
+#receiptTitle {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 20px;
 }
 
 .compact-title {
@@ -488,8 +511,9 @@ h3 {
 
 .receipt-fields div {
   display: grid;
-  grid-template-columns: 92px minmax(0, 1fr);
+  grid-template-columns: 112px minmax(0, 1fr);
   gap: 10px;
+  min-width: 0;
 }
 
 .receipt-fields dt {
@@ -501,9 +525,33 @@ h3 {
 
 .receipt-fields dd {
   margin: 0;
-  overflow-wrap: anywhere;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
   font-size: 12px;
+}
+
+.hash-dd {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.hash-value {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.copy-hash {
+  min-height: 28px;
+  padding: 0 8px;
+  font-size: 11px;
 }
 
 .lineage-fields {
@@ -622,6 +670,121 @@ h3 {
   background: var(--surface-2);
   font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
   font-size: 12px;
+}
+
+.comparison-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.comparison-tools {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) minmax(150px, 1fr) auto;
+  gap: 8px;
+  min-width: min(100%, 560px);
+}
+
+.comparison-output {
+  padding: 14px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.comparison-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.comparison-run-card {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-2);
+}
+
+.comparison-run-card span,
+.comparison-diff span,
+.comparison-diff strong {
+  display: block;
+  font-size: 11px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.comparison-run-card span,
+.comparison-diff span {
+  color: var(--muted);
+}
+
+.comparison-run-card strong {
+  display: block;
+  margin-top: 6px;
+  color: var(--ink);
+  font-size: 22px;
+}
+
+.comparison-run-card p,
+.comparison-diff p {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.comparison-run-card p {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.comparison-run-card.blocked {
+  border-left: 5px solid var(--red);
+}
+
+.comparison-run-card.warn {
+  border-left: 5px solid var(--amber);
+}
+
+.comparison-run-card.ok {
+  border-left: 5px solid var(--green);
+}
+
+.comparison-diff {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.comparison-diff article {
+  min-width: 0;
+  padding: 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.comparison-diff article.changed {
+  background: var(--orange-soft);
+  border-color: rgba(255, 95, 5, 0.3);
+}
+
+.comparison-diff strong {
+  margin-top: 4px;
+  color: var(--ink);
+}
+
+.comparison-diff p {
+  margin-top: 6px;
+  color: #333;
+  font-size: 12px;
+  font-weight: 750;
 }
 
 .trace-surface {
@@ -1053,6 +1216,20 @@ details textarea {
   line-height: 1.45;
 }
 
+@media (max-width: 1400px) {
+  .record-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .receipt-panel {
+    grid-column: 1 / -1;
+  }
+
+  .comparison-diff {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 1040px) {
   .checkpoint-header,
   .execution-workspace,
@@ -1065,7 +1242,7 @@ details textarea {
   }
 
   .execution-ref {
-    min-width: 0;
+    width: 100%;
   }
 
   .trace-surface {
@@ -1073,6 +1250,15 @@ details textarea {
   }
 
   .code-flow {
+    grid-template-columns: 1fr;
+  }
+
+  .comparison-head,
+  .comparison-tools {
+    display: grid;
+  }
+
+  .comparison-tools {
     grid-template-columns: 1fr;
   }
 
@@ -1136,7 +1322,9 @@ details textarea {
   .trace-surface,
   .artifact-intake-grid,
   .lineage-path,
-  .history-tools {
+  .history-tools,
+  .comparison-summary,
+  .comparison-diff {
     grid-template-columns: 1fr;
   }
 

@@ -4,7 +4,9 @@ const state = {
   savedRunId: null,
   history: [],
   historySearch: "",
-  historyFilter: "all"
+  historyFilter: "all",
+  compareA: "",
+  compareB: ""
 };
 
 const inputConfig = [
@@ -311,6 +313,7 @@ function renderEvaluation(payload) {
   renderTrace(evaluation);
   renderChronology(payload.chronology || []);
   renderTelemetry(payload.evaluation_events || evaluation.telemetry_events || []);
+  renderCompareControls();
 }
 
 function renderHistory(evaluations) {
@@ -334,6 +337,7 @@ function renderHistory(evaluations) {
       }
     });
   });
+  renderCompareControls();
 }
 
 function filterHistory(evaluations) {
@@ -356,6 +360,7 @@ function filterHistory(evaluations) {
 function renderReceipt(receipt) {
   if (!receipt || !receipt.schema_version) {
     byId("receiptTitle").textContent = "No receipt selected";
+    byId("receiptTitle").removeAttribute("title");
     byId("receiptBrowser").innerHTML = `
       <div class="lineage-empty">Save or select a run to inspect its governance lineage.</div>
     `;
@@ -370,6 +375,7 @@ function renderReceipt(receipt) {
   const continuity = inputs.continuity_posture || evidence.continuity_snapshot || {};
   const replay = evidence.replay_evidence || {};
   byId("receiptTitle").textContent = receipt.run_id || "Receipt";
+  byId("receiptTitle").title = receipt.run_id || "Receipt";
   byId("receiptBrowser").innerHTML = `
     <div class="lineage-path" aria-label="Evaluation lineage">
       <span>Guard SDK</span>
@@ -385,11 +391,24 @@ function renderReceipt(receipt) {
       <div><dt>Replay</dt><dd>${escapeHtml(replaySummaryLine(replay, evaluation))}</dd></div>
       <div><dt>Continuity</dt><dd>${escapeHtml(continuitySummaryLine(continuity, evaluation))}</dd></div>
       <div><dt>Mutation domain</dt><dd>${escapeHtml(`${request.action || "execution"} -> ${request.target || "runtime"}`)}</dd></div>
-      <div><dt>Trace hash</dt><dd>${escapeHtml(receipt.evaluation_trace_hash || "")}</dd></div>
-      <div><dt>Outcome hash</dt><dd>${escapeHtml(receipt.outcome_hash || "")}</dd></div>
-      <div><dt>Receipt hash</dt><dd>${escapeHtml(receipt.receipt_hash || "")}</dd></div>
+      ${hashField("Trace hash", receipt.evaluation_trace_hash)}
+      ${hashField("Outcome hash", receipt.outcome_hash)}
+      ${hashField("Receipt hash", receipt.receipt_hash)}
       <div><dt>Events</dt><dd>${escapeHtml(String((receipt.chronology_event_ids || []).length))}</dd></div>
     </dl>
+  `;
+}
+
+function hashField(label, value) {
+  const safeValue = value || "";
+  return `
+    <div>
+      <dt>${escapeHtml(label)}</dt>
+      <dd class="hash-dd">
+        <span class="hash-value" title="${escapeHtml(safeValue)}">${escapeHtml(safeValue)}</span>
+        <button class="copy-hash" type="button" data-copy="${escapeHtml(safeValue)}">Copy</button>
+      </dd>
+    </div>
   `;
 }
 
@@ -420,6 +439,130 @@ function continuitySummaryLine(continuity, evaluation) {
 
 function receiptForRun(runId) {
   return (state.history.find((item) => item.run_id === runId) || {}).receipt || null;
+}
+
+function renderCompareControls() {
+  const selects = [byId("compareRunA"), byId("compareRunB")].filter(Boolean);
+  if (!selects.length) return;
+  const options = state.history.map((item) => `
+    <option value="${escapeHtml(item.run_id)}">${escapeHtml(compareOptionLabel(item))}</option>
+  `).join("");
+  const empty = `<option value="">Select run</option>`;
+  const currentA = state.compareA || state.history[0]?.run_id || "";
+  const currentB = state.compareB || state.history.find((item) => item.run_id !== currentA)?.run_id || "";
+  state.compareA = currentA;
+  state.compareB = currentB;
+  byId("compareRunA").innerHTML = empty + options;
+  byId("compareRunB").innerHTML = empty + options;
+  byId("compareRunA").value = currentA;
+  byId("compareRunB").value = currentB;
+}
+
+function compareOptionLabel(item) {
+  return `${postureValue(item.status)} | ${item.request_id || item.run_id}`;
+}
+
+async function compareRuns() {
+  const runA = byId("compareRunA").value;
+  const runB = byId("compareRunB").value;
+  state.compareA = runA;
+  state.compareB = runB;
+  if (!runA || !runB) {
+    byId("comparisonOutput").textContent = "Select two saved evaluations to compare.";
+    return;
+  }
+  if (runA === runB) {
+    byId("comparisonOutput").textContent = "Choose two different evaluations.";
+    return;
+  }
+  setStatus("Comparing saved evaluations");
+  const [a, b] = await Promise.all([fetchSavedRun(runA), fetchSavedRun(runB)]);
+  renderRunComparison(a, b);
+  setStatus("Rendered multi-run comparison");
+}
+
+async function fetchSavedRun(runId) {
+  const response = await fetch("/api/runtime/load_run", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ run_id: runId })
+  });
+  const body = await response.json();
+  if (!response.ok) throw new Error(body.message || body.error || "Load run failed");
+  return body;
+}
+
+function renderRunComparison(a, b) {
+  const rows = comparisonRows(a, b);
+  byId("comparisonOutput").innerHTML = `
+    <div class="comparison-summary">
+      ${comparisonRunCard("Run A", a)}
+      ${comparisonRunCard("Run B", b)}
+    </div>
+    <div class="comparison-diff">
+      ${rows.map((row) => `
+        <article class="${row.changed ? "changed" : ""}">
+          <span>${escapeHtml(row.label)}</span>
+          <strong>${row.changed ? "Changed" : "Same"}</strong>
+          <p><b>A</b> ${escapeHtml(row.a)}</p>
+          <p><b>B</b> ${escapeHtml(row.b)}</p>
+        </article>
+      `).join("")}
+    </div>
+  `;
+}
+
+function comparisonRunCard(label, payload) {
+  const outcome = payload.guard_enforcement_outcome;
+  const request = payload.inputs.execution_request;
+  return `
+    <section class="comparison-run-card ${toneForStatus(outcome.status)}">
+      <span>${escapeHtml(label)}</span>
+      <strong>${escapeHtml(postureValue(outcome.status))}</strong>
+      <p>${escapeHtml(request.request_id)} | ${escapeHtml(request.action)} -> ${escapeHtml(request.target)}</p>
+    </section>
+  `;
+}
+
+function comparisonRows(a, b) {
+  const av = comparisonVector(a);
+  const bv = comparisonVector(b);
+  return [
+    ["Decision", av.decision, bv.decision],
+    ["Authority", av.authority, bv.authority],
+    ["Contract hash", av.contractHash, bv.contractHash],
+    ["Actor", av.actor, bv.actor],
+    ["Evidence", av.evidence, bv.evidence],
+    ["Continuity", av.continuity, bv.continuity],
+    ["Replay", av.replay, bv.replay],
+    ["Mutation domain", av.mutation, bv.mutation],
+  ].map(([label, aValue, bValue]) => ({
+    label,
+    a: aValue,
+    b: bValue,
+    changed: aValue !== bValue
+  }));
+}
+
+function comparisonVector(payload) {
+  const inputs = payload.inputs || {};
+  const evaluation = payload.evaluation || {};
+  const outcome = payload.guard_enforcement_outcome || {};
+  const authority = inputs.compiled_authority || {};
+  const request = inputs.execution_request || {};
+  const evidence = inputs.runtime_evidence || {};
+  const continuity = inputs.continuity_posture || evidence.continuity_snapshot || {};
+  const replay = evidence.replay_evidence || {};
+  return {
+    decision: postureValue(outcome.status),
+    authority: outcome.authority_ref || "unknown",
+    contractHash: authority.contract_hash || "not available",
+    actor: actorSummary(evidence.actor_identity),
+    evidence: evidenceSummaryLine(evidence),
+    continuity: continuitySummaryLine(continuity, evaluation),
+    replay: replaySummaryLine(replay, evaluation),
+    mutation: `${request.action || "execution"} -> ${request.target || "runtime"}`
+  };
 }
 
 function renderDecisionLists(evaluation) {
@@ -961,6 +1104,33 @@ byId("historySearch").addEventListener("input", (event) => {
 byId("historyFilter").addEventListener("change", (event) => {
   state.historyFilter = event.target.value;
   renderHistory(state.history);
+});
+
+byId("compareRunA").addEventListener("change", (event) => {
+  state.compareA = event.target.value;
+});
+
+byId("compareRunB").addEventListener("change", (event) => {
+  state.compareB = event.target.value;
+});
+
+byId("compareRunsButton").addEventListener("click", async () => {
+  try {
+    await compareRuns();
+  } catch (error) {
+    setStatus(error.message);
+  }
+});
+
+byId("receiptBrowser").addEventListener("click", async (event) => {
+  const button = event.target.closest("[data-copy]");
+  if (!button) return;
+  try {
+    await navigator.clipboard.writeText(button.dataset.copy || "");
+    setStatus("Copied hash");
+  } catch {
+    setStatus("Copy unavailable in this browser context");
+  }
 });
 
 byId("artifactInput").addEventListener("change", async (event) => {
