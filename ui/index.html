@@ -23,23 +23,61 @@
         </div>
       </header>
 
-      <nav class="tabbar" aria-label="Guard evaluation inspector surfaces">
-        <button class="active" type="button" data-tab="decision">Inspector</button>
-        <button type="button" data-tab="explainability">Explainability</button>
-        <button type="button" data-tab="developer-mode">Inputs</button>
+      <nav class="tabbar" aria-label="Guard evaluation lifecycle">
+        <button class="active" type="button" data-tab="execution">Execution</button>
+        <button type="button" data-tab="evaluation">Evaluation</button>
+        <button type="button" data-tab="artifacts">Replay / Artifacts</button>
       </nav>
 
+      <section class="sticky-execution-context" aria-label="Current execution context">
+        <div class="context-title">
+          <span>Current execution</span>
+          <strong id="contextExecutionId">no execution loaded</strong>
+        </div>
+        <div>
+          <span>Authority</span>
+          <strong id="contextAuthority">none loaded</strong>
+        </div>
+        <div>
+          <span>Actor</span>
+          <strong id="contextActor">unknown actor</strong>
+        </div>
+        <div>
+          <span>Target mutation</span>
+          <strong id="contextTarget">awaiting SDK run or artifact</strong>
+        </div>
+        <div>
+          <span>State</span>
+          <strong id="contextState" class="context-state waiting">WAITING</strong>
+        </div>
+      </section>
+
       <main>
-        <section id="decision" class="tab-panel active" aria-label="Guard Evaluation Inspector">
+        <section id="execution" class="tab-panel active" aria-label="Execution intake">
           <section class="execution-workspace">
-            <article class="execution-record">
-              <div class="record-main">
-                <p class="section-kicker">Guard Evaluation Inspector</p>
-                <h1 id="executionTitle">Execution intake</h1>
-                <p id="primaryAnswer">Load execution inputs, then evaluate.</p>
+            <section class="code-production-panel">
+              <div class="panel-title compact-title">
+                <div>
+                  <p class="section-kicker">Execution Intake</p>
+                  <h2>Guard SDK interception path</h2>
+                </div>
               </div>
-              <div id="decisionState" class="status-pill waiting">WAITING</div>
-            </article>
+              <div class="code-flow">
+                <pre><code>from guard.sdk import Guard
+
+guard = Guard.local(workspace=".guard-local")
+
+@guard.protect(authority="finance-policy@1.0.0")
+def wire_transfer(request):
+    return execute_transfer(request)</code></pre>
+                <div class="code-notes">
+                  <p>Guard SDK intercepts execution before mutation.</p>
+                  <p>CRI-CORE evaluation returns allowed, blocked, or escalated.</p>
+                  <p>Guard emits receipts and saved runs into <code>.guard-local/</code>.</p>
+                  <p>Each evaluation artifact has an artifact manifest, replay basis, and lineage continuity hash.</p>
+                </div>
+              </div>
+            </section>
 
             <aside class="history-panel">
               <div class="panel-title compact-title">
@@ -60,138 +98,10 @@
             </aside>
           </section>
 
-          <section class="record-grid">
-            <article class="summary-card compact-card">
-              <p class="section-kicker">Reason</p>
-              <div id="whyList" class="short-list compact-list">
-                <div class="short-item muted">no evaluation yet</div>
-              </div>
-            </article>
-            <article class="summary-card compact-card next-card">
-              <p class="section-kicker">Next action</p>
-              <div id="nextList" class="short-list compact-list">
-                <div class="short-item muted">load a saved run, upload an artifact, or use an example input set</div>
-              </div>
-            </article>
-            <article class="receipt-panel">
-              <div class="panel-title compact-title">
-                <p class="section-kicker">Receipt browser</p>
-                <h2 id="receiptTitle">No receipt selected</h2>
-              </div>
-              <div id="receiptBrowser" class="receipt-browser">Save or select a run to inspect its receipt.</div>
-            </article>
-          </section>
-
-          <section id="replayDiagnostics" class="replay-diagnostics" hidden></section>
-
-          <section class="comparison-panel">
-            <div class="panel-title comparison-head">
-              <div>
-                <p class="section-kicker">Multi-run comparison</p>
-                <h2>Compare evaluation outcomes</h2>
-              </div>
-              <div class="comparison-tools">
-                <select id="compareRunA" aria-label="Run A"></select>
-                <select id="compareRunB" aria-label="Run B"></select>
-                <button id="compareRunsButton" type="button">Compare</button>
-              </div>
-            </div>
-            <div id="comparisonOutput" class="comparison-output">
-              Select two saved evaluations to compare authority, evidence, continuity, replay, and actor changes.
-            </div>
-          </section>
-
-          <section class="posture-strip" aria-label="Runtime posture">
-            <div id="postureRail" class="posture-grid"></div>
-          </section>
-
-          <section class="execution-facts">
-            <div>
-              <span>Authority</span>
-              <strong id="authorityRef">none loaded</strong>
-            </div>
-            <div>
-              <span>Latency</span>
-              <strong id="latencyRef">not evaluated</strong>
-            </div>
-            <div>
-              <span>Evaluation kernel</span>
-              <strong id="kernelRef">CRI-CORE</strong>
-            </div>
-            <div>
-              <span>Outcome contract</span>
-              <strong id="outcomeRef">not emitted</strong>
-            </div>
-          </section>
-        </section>
-
-        <section id="explainability" class="tab-panel" aria-label="Operational explainability">
-          <section class="trace-panel">
-            <div class="panel-title trace-head">
-              <div>
-                <p class="section-kicker">Operational explainability</p>
-                <h2>Why Guard reached this result</h2>
-              </div>
-              <span id="traceHash" class="hash-chip">sha256:trace</span>
-            </div>
-            <div id="traceSurface" class="trace-surface"></div>
-          </section>
-
-          <section class="chronology-panel">
-            <div class="panel-title chronology-head">
-              <div>
-                <p class="section-kicker">Generated execution chronology</p>
-                <h2>Evaluation chain</h2>
-              </div>
-              <div class="chronology-tools" role="group" aria-label="Chronology filters">
-                <button class="active" type="button" data-filter="all">All</button>
-                <button type="button" data-filter="evidence">Evidence</button>
-                <button type="button" data-filter="replay">Replay</button>
-                <button type="button" data-filter="continuity">Continuity</button>
-              </div>
-            </div>
-            <ol id="chronologyList" class="chronology-list"></ol>
-          </section>
-
-          <section class="telemetry-panel">
-            <div class="panel-title telemetry-head">
-              <div>
-                <p class="section-kicker">Evaluation output</p>
-                <h2>Generated Evaluation Events</h2>
-              </div>
-            </div>
-            <div id="telemetryStream" class="telemetry-stream"></div>
-          </section>
-        </section>
-
-        <section id="developer-mode" class="tab-panel" aria-label="Evaluation inputs">
-          <section class="code-production-panel">
-            <div class="panel-title compact-title">
-              <div>
-                <p class="section-kicker">Guard SDK primary path</p>
-                <h2>How this is produced in code</h2>
-              </div>
-            </div>
-            <div class="code-flow">
-              <pre><code>from guard.sdk import Guard
-
-guard = Guard.local(workspace=".guard-local")
-
-@guard.protect(authority="finance-policy@1.0.0")
-def wire_transfer(request):
-    return execute_transfer(request)</code></pre>
-              <div class="code-notes">
-                <p>Guard SDK intercepts execution before mutation.</p>
-                <p>CRI-CORE evaluation returns allowed, blocked, or escalated.</p>
-                <p>Guard emits receipts and saved runs into <code>.guard-local/</code>.</p>
-                <p>Each evaluation artifact has an artifact manifest, replay basis, and lineage continuity hash.</p>
-              </div>
-            </div>
-          </section>
           <section class="payload-drawer">
             <div class="panel-title workspace-head">
               <div>
-                <p id="exampleLabel" class="section-kicker">Artifact Intake</p>
+                <p id="exampleLabel" class="section-kicker">Execution Intake</p>
                 <h2>Open an SDK evaluation artifact</h2>
               </div>
               <span id="runRef" class="hash-chip">no saved run</span>
@@ -234,6 +144,123 @@ def wire_transfer(request):
             <div id="intakeChecklist" class="intake-checklist" aria-label="Execution intake checklist"></div>
             <div id="intakeHelper" class="intake-helper" hidden></div>
             <div id="payloadDrawers" class="drawer-stack"></div>
+          </section>
+
+          <section class="execution-facts">
+            <div>
+              <span>Authority</span>
+              <strong id="authorityRef">none loaded</strong>
+            </div>
+            <div>
+              <span>Latency</span>
+              <strong id="latencyRef">not evaluated</strong>
+            </div>
+            <div>
+              <span>Evaluation kernel</span>
+              <strong id="kernelRef">CRI-CORE</strong>
+            </div>
+            <div>
+              <span>Outcome contract</span>
+              <strong id="outcomeRef">not emitted</strong>
+            </div>
+          </section>
+        </section>
+
+        <section id="evaluation" class="tab-panel" aria-label="Execution evaluation">
+          <section class="execution-record evaluation-hero">
+            <div class="record-main">
+              <p class="section-kicker">Guard Evaluation Inspector</p>
+              <h1 id="executionTitle">Evaluation inspector</h1>
+              <p id="primaryAnswer">Open a Guard SDK run or load an evaluation artifact.</p>
+            </div>
+            <div id="decisionState" class="status-pill waiting">WAITING</div>
+          </section>
+
+          <section class="record-grid evaluation-summary-grid">
+            <article class="summary-card compact-card">
+              <p class="section-kicker">Reason</p>
+              <div id="whyList" class="short-list compact-list">
+                <div class="short-item muted">no evaluation yet</div>
+              </div>
+            </article>
+            <article class="summary-card compact-card next-card">
+              <p class="section-kicker">Next action</p>
+              <div id="nextList" class="short-list compact-list">
+                <div class="short-item muted">load a saved run, upload an artifact, or use an example input set</div>
+              </div>
+            </article>
+          </section>
+
+          <section class="posture-strip" aria-label="Runtime posture">
+            <div id="postureRail" class="posture-grid"></div>
+          </section>
+
+          <section class="trace-panel">
+            <div class="panel-title trace-head">
+              <div>
+                <p class="section-kicker">Operational explainability</p>
+                <h2>Why Guard reached this result</h2>
+              </div>
+              <span id="traceHash" class="hash-chip">sha256:trace</span>
+            </div>
+            <div id="traceSurface" class="trace-surface"></div>
+          </section>
+
+          <section class="chronology-panel">
+            <div class="panel-title chronology-head">
+              <div>
+                <p class="section-kicker">Generated execution chronology</p>
+                <h2>Evaluation chain</h2>
+              </div>
+              <div class="chronology-tools" role="group" aria-label="Chronology filters">
+                <button class="active" type="button" data-filter="all">All</button>
+                <button type="button" data-filter="evidence">Evidence</button>
+                <button type="button" data-filter="replay">Replay</button>
+                <button type="button" data-filter="continuity">Continuity</button>
+              </div>
+            </div>
+            <ol id="chronologyList" class="chronology-list"></ol>
+          </section>
+
+          <section class="telemetry-panel">
+            <div class="panel-title telemetry-head">
+              <div>
+                <p class="section-kicker">Evaluation output</p>
+                <h2>Generated Evaluation Events</h2>
+              </div>
+            </div>
+            <div id="telemetryStream" class="telemetry-stream"></div>
+          </section>
+        </section>
+
+        <section id="artifacts" class="tab-panel" aria-label="Replay and artifacts">
+          <section id="replayDiagnostics" class="replay-diagnostics" hidden></section>
+
+          <section class="artifact-grid">
+            <article class="receipt-panel">
+              <div class="panel-title compact-title">
+                <p class="section-kicker">Receipt browser</p>
+                <h2 id="receiptTitle">No receipt selected</h2>
+              </div>
+              <div id="receiptBrowser" class="receipt-browser">Save or select a run to inspect its receipt.</div>
+            </article>
+
+            <section class="comparison-panel">
+              <div class="panel-title comparison-head">
+                <div>
+                  <p class="section-kicker">Multi-run comparison</p>
+                  <h2>Compare evaluation outcomes</h2>
+                </div>
+                <div class="comparison-tools">
+                  <select id="compareRunA" aria-label="Run A"></select>
+                  <select id="compareRunB" aria-label="Run B"></select>
+                  <button id="compareRunsButton" type="button">Compare</button>
+                </div>
+              </div>
+              <div id="comparisonOutput" class="comparison-output">
+                Select two saved evaluations to compare authority, evidence, continuity, replay, and actor changes.
+              </div>
+            </section>
           </section>
         </section>
       </main>

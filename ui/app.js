@@ -22,8 +22,13 @@ const storageKeys = {
   scroll: "waveframe.guard.scrollState"
 };
 const tabAliases = {
-  trace: "explainability",
-  "runtime-data": "developer-mode"
+  decision: "evaluation",
+  inspector: "evaluation",
+  explainability: "evaluation",
+  trace: "evaluation",
+  "runtime-data": "artifacts",
+  "developer-mode": "execution",
+  inputs: "execution"
 };
 const scrollState = JSON.parse(sessionStorage.getItem(storageKeys.scroll) || "{}");
 
@@ -59,6 +64,7 @@ async function loadSampleInputs() {
   state.latest = null;
   state.savedRunId = null;
   byId("runRef").textContent = "no saved run";
+  renderExecutionContext();
   setStatus("Example inputs loaded. Evaluate when ready.");
   await refreshHistory();
 }
@@ -191,6 +197,7 @@ function renderEmptyWorkspace() {
   byId("outcomeRef").textContent = "not emitted";
   byId("requestRef").textContent = "no execution";
   byId("targetRef").textContent = "awaiting SDK run or artifact";
+  renderExecutionContext();
   byId("latencyRef").textContent = "not evaluated";
   byId("kernelRef").textContent = "CRI-CORE";
   byId("executionTitle").textContent = "Evaluation inspector";
@@ -297,6 +304,7 @@ function renderEvaluation(payload) {
   const authorityRef = outcome.authority_ref;
   const latency = evidence.execution_context?.latency_ms ?? "runtime";
   const status = outcome.status;
+  const actor = evidence.actor_identity || {};
 
   byId("authorityRef").textContent = authorityRef;
   byId("outcomeRef").textContent = outcome.schema_version || outcomeContractSchema;
@@ -310,6 +318,13 @@ function renderEvaluation(payload) {
   byId("primaryAnswer").textContent = primaryAnswer(status);
   byId("traceHash").textContent = evaluation.evaluation_trace.trace_hash;
 
+  renderExecutionContext({
+    executionId: request.request_id,
+    authority: authorityRef,
+    actor: actorSummary(actor),
+    target: `${request.action} -> ${request.target}`,
+    status
+  });
   renderPosture(evaluation);
   renderDecisionLists(evaluation);
   renderTrace(evaluation, payload.replay);
@@ -317,6 +332,16 @@ function renderEvaluation(payload) {
   renderTelemetry(payload.evaluation_events || evaluation.telemetry_events || []);
   renderReplayDiagnostics(payload.replay);
   renderCompareControls();
+}
+
+function renderExecutionContext(details = {}) {
+  const status = details.status || "waiting";
+  byId("contextExecutionId").textContent = details.executionId ? `Execution #${details.executionId}` : "no execution loaded";
+  byId("contextAuthority").textContent = details.authority || "none loaded";
+  byId("contextActor").textContent = details.actor || "unknown actor";
+  byId("contextTarget").textContent = details.target || "awaiting SDK run or artifact";
+  byId("contextState").textContent = status === "waiting" ? "WAITING" : postureValue(status).toUpperCase();
+  byId("contextState").className = `context-state ${status === "waiting" ? "waiting" : toneForStatus(status)}`;
 }
 
 function renderHistory(evaluations) {
@@ -1069,6 +1094,7 @@ function clearInputs() {
   state.latest = null;
   state.savedRunId = null;
   byId("runRef").textContent = "no saved run";
+  renderExecutionContext();
   byId("exampleLabel").textContent = "Artifact Intake";
   hideIntakeHelper();
   updateIntakeChecklist();
@@ -1117,6 +1143,7 @@ async function uploadEvaluationArtifact(file) {
   }
   renderInputDrawers(artifact);
   state.latest = null;
+  renderExecutionContext();
   setStatus("Loaded execution input artifact. Evaluate when ready.");
 }
 
@@ -1156,9 +1183,9 @@ document.querySelectorAll("[data-tab]").forEach((button) => {
 });
 
 function activateTab(selected) {
-  selected = tabAliases[selected] || selected || "decision";
+  selected = tabAliases[selected] || selected || "execution";
   if (!document.getElementById(selected)) {
-    selected = "decision";
+    selected = "execution";
   }
   const activePanel = document.querySelector(".tab-panel.active");
   if (activePanel) {
