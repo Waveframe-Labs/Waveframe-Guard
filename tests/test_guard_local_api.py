@@ -74,6 +74,8 @@ def test_local_api_saves_replays_and_exports_local_receipts(tmp_path):
     assert saved["saved_run"]["receipt"]["schema_version"] == "guard_enforcement_receipt.v1"
     assert saved["saved_run"]["artifact_manifest"]["schema_version"] == "guard_artifact_manifest.v1"
     assert (tmp_path / "receipts" / f"{run_id}.json").exists()
+    assert (tmp_path / "manifests" / f"{run_id}.json").exists()
+    assert (tmp_path / "replays" / f"{run_id}.json").exists()
     assert replayed["replay"]["matches"] is True
     assert replayed["guard_enforcement_outcome"]["schema_version"] == "guard_enforcement_outcome.v1"
     assert exported["receipt"]["schema_version"] == "guard_enforcement_receipt.v1"
@@ -88,6 +90,8 @@ def test_local_api_lists_and_loads_local_evaluation_history(tmp_path):
     loaded = local_api.load_saved_runtime_evaluation(run_id, store_root=tmp_path)
 
     assert history["schema_version"] == "guard_local_evaluation_history.v1"
+    assert history["workspace_root"] == str(tmp_path.resolve())
+    assert history["artifact_errors"] == []
     assert history["evaluations"][0]["run_id"] == run_id
     assert history["evaluations"][0]["status"] == "blocked"
     assert history["evaluations"][0]["receipt"]["schema_version"] == "guard_enforcement_receipt.v1"
@@ -95,3 +99,12 @@ def test_local_api_lists_and_loads_local_evaluation_history(tmp_path):
     assert loaded["saved_run"]["run_id"] == run_id
     assert loaded["artifact_manifest"]["schema_version"] == "guard_artifact_manifest.v1"
     assert loaded["guard_enforcement_outcome"]["schema_version"] == "guard_enforcement_outcome.v1"
+
+
+def test_local_api_reports_corrupt_history_as_operational_artifact_error(tmp_path):
+    (tmp_path / "evaluation-history.jsonl").write_text("{not-json\n", encoding="utf-8")
+
+    history = local_api.runtime_history(store_root=tmp_path)
+
+    assert history["evaluations"] == []
+    assert history["artifact_errors"][0]["error_class"] == "unreadable_receipt"

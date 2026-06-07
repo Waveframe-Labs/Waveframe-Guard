@@ -82,6 +82,8 @@
             </article>
           </section>
 
+          <section id="replayDiagnostics" class="replay-diagnostics" hidden></section>
+
           <section class="comparison-panel">
             <div class="panel-title comparison-head">
               <div>
@@ -182,6 +184,7 @@ def wire_transfer(request):
                 <p>Guard SDK intercepts execution before mutation.</p>
                 <p>CRI-CORE evaluation returns allowed, blocked, or escalated.</p>
                 <p>Guard emits receipts and saved runs into <code>.guard-local/</code>.</p>
+                <p>Each evaluation artifact has an artifact manifest, replay basis, and lineage continuity hash.</p>
               </div>
             </div>
           </section>

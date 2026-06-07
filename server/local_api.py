@@ -20,7 +20,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from guard import evaluate_runtime
-from guard.sdk.local_persistence import LocalEvaluationStore, build_enforcement_receipt
+from guard.sdk.local_persistence import GuardArtifactError, LocalEvaluationStore, build_enforcement_receipt
 from guard.runtime.evidence import validate_runtime_evidence_model
 
 LOCAL_WORKSPACE_ROOT = REPO_ROOT / ".guard-local"
@@ -129,9 +129,12 @@ def load_saved_runtime_evaluation(run_id: str, *, store_root: Path | None = None
 
 def runtime_history(*, store_root: Path | None = None, limit: int = 20) -> dict[str, Any]:
     store = LocalEvaluationStore(store_root or LOCAL_WORKSPACE_ROOT)
-    records = list(reversed(store.history()))[:limit]
+    history = store.history_with_errors()
+    records = list(reversed(history["records"]))[:limit]
     return {
         "schema_version": "guard_local_evaluation_history.v1",
+        "workspace_root": str((store_root or LOCAL_WORKSPACE_ROOT).resolve()),
+        "artifact_errors": history["errors"],
         "evaluations": [
             {
                 "run_id": record["run_id"],
@@ -144,7 +147,7 @@ def runtime_history(*, store_root: Path | None = None, limit: int = 20) -> dict[
                 "status": record["guard_enforcement_outcome"]["status"],
                 "rationale": record["guard_enforcement_outcome"]["rationale"],
                 "receipt": record["receipt"],
-                "artifact_manifest_hash": record["artifact_manifest"]["manifest_hash"],
+                "artifact_manifest_hash": record.get("artifact_manifest", {}).get("manifest_hash", "missing"),
             }
             for record in records
         ],
@@ -227,9 +230,11 @@ class GuardLocalRequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def _send_error(self, exc: Exception) -> None:
+        error_class = exc.error_class if isinstance(exc, GuardArtifactError) else exc.__class__.__name__
         self._send_json(
             {
                 "error": exc.__class__.__name__,
+                "error_class": error_class,
                 "message": str(exc),
             },
             status=HTTPStatus.BAD_REQUEST,

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from copy import deepcopy
 
 from guard.runtime.identity import stable_hash
@@ -129,3 +130,116 @@ def test_replayable_artifacts_verify_against_original_outcome(tmp_path):
     assert replay["replay"]["matches"] is True
     assert replay["replay"]["original_outcome_hash"] == record["receipt"]["outcome_hash"]
     assert replay["replay"]["replayed_outcome_hash"] == record["receipt"]["outcome_hash"]
+
+
+def test_local_workspace_persists_receipts_manifests_and_replay_records(tmp_path):
+    response = local_api.evaluate_runtime_request()
+    saved = local_api.save_runtime_evaluation(response, store_root=tmp_path)
+    run_id = saved["saved_run"]["run_id"]
+    replay = local_api.replay_runtime_evaluation(run_id, store_root=tmp_path)
+
+    assert (tmp_path / "evaluation-history.jsonl").exists()
+    assert (tmp_path / "receipts" / f"{run_id}.json").exists()
+    assert (tmp_path / "manifests" / f"{run_id}.json").exists()
+    assert (tmp_path / "replays" / f"{run_id}.json").exists()
+    assert replay["replay"]["schema_version"] == "guard_replay_result.v1"
+    assert replay["replay"]["mismatch_classes"] == []
+    assert replay["replay"]["replay_failure_reasons"] == []
+
+
+def test_replay_reports_contract_drift(tmp_path):
+    run_id, record = _saved_record(tmp_path)
+    record["inputs"]["compiled_authority"]["contract_hash"] = "sha256:drifted"
+    _rewrite_history(tmp_path, record)
+
+    replay = LocalEvaluationStore(tmp_path).replay(run_id)
+
+    assert replay["matches"] is False
+    assert "contract_drift" in replay["mismatch_classes"]
+
+
+def test_replay_reports_request_mismatch(tmp_path):
+    run_id, record = _saved_record(tmp_path)
+    record["inputs"]["execution_request"]["arguments"]["amount"] = 999
+    _rewrite_history(tmp_path, record)
+
+    replay = LocalEvaluationStore(tmp_path).replay(run_id)
+
+    assert replay["matches"] is False
+    assert "request_mismatch" in replay["mismatch_classes"]
+
+
+def test_replay_reports_evidence_mutation(tmp_path):
+    run_id, record = _saved_record(tmp_path)
+    record["inputs"]["runtime_evidence"]["approvals"].append(
+        {"role": "director", "approved_by": "director-9"}
+    )
+    _rewrite_history(tmp_path, record)
+
+    replay = LocalEvaluationStore(tmp_path).replay(run_id)
+
+    assert replay["matches"] is False
+    assert "evidence_mutation" in replay["mismatch_classes"]
+
+
+def test_replay_reports_chronology_mutation(tmp_path):
+    run_id, record = _saved_record(tmp_path)
+    record["evaluation"]["telemetry_events"][0]["event_id"] = "guard_event_mutated"
+    _rewrite_history(tmp_path, record)
+
+    replay = LocalEvaluationStore(tmp_path).replay(run_id)
+
+    assert replay["matches"] is False
+    assert "chronology_mutation" in replay["mismatch_classes"]
+
+
+def test_replay_reports_continuity_mismatch(tmp_path):
+    run_id, record = _saved_record(tmp_path)
+    record["inputs"]["continuity_posture"] = {"requires_revalidation": True, "reason": "drift"}
+    _rewrite_history(tmp_path, record)
+
+    replay = LocalEvaluationStore(tmp_path).replay(run_id)
+
+    assert replay["matches"] is False
+    assert "continuity_mismatch" in replay["mismatch_classes"]
+
+
+def test_replay_reports_manifest_integrity_failure(tmp_path):
+    run_id, record = _saved_record(tmp_path)
+    record["artifact_manifest"]["manifest_hash"] = "sha256:corrupt"
+    _rewrite_history(tmp_path, record)
+
+    replay = LocalEvaluationStore(tmp_path).replay(run_id)
+
+    assert replay["matches"] is False
+    assert "manifest_integrity_failure" in replay["mismatch_classes"]
+
+
+def test_replay_reports_missing_replay_basis_and_unsupported_manifest_schema(tmp_path):
+    run_id, record = _saved_record(tmp_path)
+    record["artifact_manifest"]["schema_version"] = "guard_artifact_manifest.v0"
+    record["artifact_manifest"].pop("replay_basis_hash")
+    _rewrite_history(tmp_path, record)
+
+    replay = LocalEvaluationStore(tmp_path).replay(run_id)
+
+    assert replay["matches"] is False
+    assert "manifest_integrity_failure" in replay["mismatch_classes"]
+    assert {reason.get("error_class") for reason in replay["replay_failure_reasons"]} >= {
+        "missing_replay_basis",
+        "unsupported_schema_version",
+    }
+
+
+def _saved_record(tmp_path):
+    response = local_api.evaluate_runtime_request()
+    saved = local_api.save_runtime_evaluation(response, store_root=tmp_path)
+    run_id = saved["saved_run"]["run_id"]
+    return run_id, LocalEvaluationStore(tmp_path).load_run(run_id)
+
+
+def _rewrite_history(tmp_path, record):
+    (tmp_path / "evaluation-history.jsonl").write_text(
+        json.dumps(record, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )

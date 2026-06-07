@@ -113,7 +113,7 @@ async function replaySavedRun() {
   state.latest = body;
   renderEvaluation(body);
   renderReceipt(receiptForRun(state.savedRunId));
-  setStatus(body.replay.matches ? "Replay matched saved outcome" : "Replay differed from saved outcome");
+  setStatus(body.replay.matches ? "Replay matched saved outcome" : "Replay failure classes detected");
 }
 
 async function exportCurrentReceipt() {
@@ -137,6 +137,7 @@ async function refreshHistory() {
   const body = await response.json();
   state.history = body.evaluations || [];
   renderHistory(state.history);
+  renderWorkspaceErrors(body.artifact_errors || []);
 }
 
 async function loadMostRecentRun() {
@@ -203,6 +204,7 @@ function renderEmptyWorkspace() {
   byId("traceSurface").innerHTML = "";
   byId("chronologyList").innerHTML = "";
   byId("telemetryStream").innerHTML = "";
+  renderReplayDiagnostics(null);
   renderReceipt(null);
   byId("exampleLabel").textContent = "Artifact Intake";
 }
@@ -310,9 +312,10 @@ function renderEvaluation(payload) {
 
   renderPosture(evaluation);
   renderDecisionLists(evaluation);
-  renderTrace(evaluation);
+  renderTrace(evaluation, payload.replay);
   renderChronology(payload.chronology || []);
   renderTelemetry(payload.evaluation_events || evaluation.telemetry_events || []);
+  renderReplayDiagnostics(payload.replay);
   renderCompareControls();
 }
 
@@ -334,10 +337,28 @@ function renderHistory(evaluations) {
         await loadSavedRun(item.dataset.runId);
       } catch (error) {
         setStatus(error.message);
+        renderOperationalError("Saved run unavailable", error.message);
       }
     });
   });
   renderCompareControls();
+}
+
+function renderWorkspaceErrors(errors) {
+  if (!errors.length) return;
+  renderOperationalError("Local workspace artifact error", errors[0].message, errors[0].error_class);
+}
+
+function renderOperationalError(title, message, errorClass = "artifact_error") {
+  const panel = byId("replayDiagnostics");
+  panel.hidden = false;
+  panel.innerHTML = `
+    <article class="operational-error">
+      <span>${escapeHtml(artifactErrorLabel(errorClass))}</span>
+      <strong>${escapeHtml(title)}</strong>
+      <p>${escapeHtml(message)}</p>
+    </article>
+  `;
 }
 
 function filterHistory(evaluations) {
@@ -380,7 +401,7 @@ function renderReceipt(receipt) {
     <div class="lineage-path" aria-label="Evaluation lineage">
       <span>Guard SDK</span>
       <span>CRI-CORE evaluation</span>
-      <span>Guard receipt</span>
+      <span>Guard Receipt</span>
     </div>
     <dl class="receipt-fields lineage-fields">
       <div><dt>Decision</dt><dd>${escapeHtml(postureValue(receipt.outcome_status || "blocked"))}</dd></div>
@@ -611,7 +632,7 @@ function renderOutputs(evaluation) {
     .join("");
 }
 
-function renderTrace(evaluation) {
+function renderTrace(evaluation, replay = null) {
   const cards = [
     {
       kicker: "Decision basis",
@@ -639,9 +660,9 @@ function renderTrace(evaluation) {
     },
     {
       kicker: "Replay",
-      title: evaluation.replay_obligations.length ? "Replay required" : "Replay linked",
-      summary: firstOrNone(evaluation.replay_obligations, replaySummary),
-      details: evaluation.replay_obligations
+      title: replayTitle(evaluation, replay),
+      summary: replayExplainabilitySummary(evaluation, replay),
+      details: replay?.replay_failure_reasons?.length ? replay.replay_failure_reasons : evaluation.replay_obligations
     }
   ];
   byId("traceSurface").innerHTML = cards
@@ -654,6 +675,45 @@ function renderTrace(evaluation) {
       </article>
     `)
     .join("");
+}
+
+function renderReplayDiagnostics(replay) {
+  const panel = byId("replayDiagnostics");
+  if (!panel) return;
+  if (!replay) {
+    panel.hidden = true;
+    panel.innerHTML = "";
+    return;
+  }
+  const classes = replay.mismatch_classes || [];
+  const reasons = replay.replay_failure_reasons || [];
+  panel.hidden = false;
+  panel.innerHTML = `
+    <div class="replay-diagnostics-head">
+      <div>
+        <p class="section-kicker">Replay basis</p>
+        <h2>${escapeHtml(replay.matches ? "Replay verified" : "Replay mismatch detected")}</h2>
+      </div>
+      <span class="status-pill ${replay.matches ? "ok" : "blocked"}">${escapeHtml(replay.matches ? "MATCH" : "MISMATCH")}</span>
+    </div>
+    <div class="mismatch-class-row">
+      ${(classes.length ? classes : ["deterministic_replay_match"])
+    .map((item) => `<span class="mismatch-chip">${escapeHtml(replayClassLabel(item))}</span>`)
+    .join("")}
+    </div>
+    <div class="replay-reason-list">
+      ${(reasons.length ? reasons : [{ class: "deterministic_replay_match", message: "Guard Receipt replay basis matched the emitted CRI-CORE evaluation outcome.", field: "replay_basis" }])
+    .slice(0, 6)
+    .map((reason) => `
+        <article>
+          <strong>${escapeHtml(replayClassLabel(reason.class))}</strong>
+          <p>${escapeHtml(reason.message || "Replay mismatch detected.")}</p>
+          <small>${escapeHtml(reason.field || "artifact")} ${hashDelta(reason)}</small>
+        </article>
+      `)
+    .join("")}
+    </div>
+  `;
 }
 
 function renderChronology(events) {
@@ -745,6 +805,59 @@ function replaySummary(obligation) {
     return "Replay evidence must be linked before enforcement.";
   }
   return sentence(obligation.rationale || summarize(obligation));
+}
+
+function replayTitle(evaluation, replay) {
+  if (replay?.replay_failure_reasons?.length) return "Replay mismatch";
+  if (replay?.matches) return "Replay verified";
+  return evaluation.replay_obligations.length ? "Replay required" : "Replay linked";
+}
+
+function replayExplainabilitySummary(evaluation, replay) {
+  if (replay?.replay_failure_reasons?.length) {
+    return replay.replay_failure_reasons
+      .slice(0, 2)
+      .map((reason) => replayClassLabel(reason.class))
+      .join("; ");
+  }
+  if (replay?.matches) return "Guard Receipt replay basis matched the CRI-CORE evaluation output.";
+  return firstOrNone(evaluation.replay_obligations, replaySummary);
+}
+
+function replayClassLabel(value) {
+  const labels = {
+    contract_drift: "contract drift",
+    evidence_mutation: "evidence mutation",
+    chronology_mutation: "chronology mutation",
+    continuity_mismatch: "continuity mismatch",
+    request_mismatch: "request mismatch",
+    manifest_integrity_failure: "manifest integrity failure",
+    deterministic_replay_match: "deterministic replay match"
+  };
+  return labels[value] || humanize(value || "replay mismatch");
+}
+
+function artifactErrorLabel(value) {
+  const labels = {
+    invalid_manifest: "invalid manifest",
+    missing_replay_basis: "missing replay basis",
+    hash_mismatch: "hash mismatch",
+    unsupported_schema_version: "unsupported schema version",
+    unreadable_receipt: "unreadable receipt"
+  };
+  return labels[value] || humanize(value || "artifact error");
+}
+
+function hashDelta(reason) {
+  const expected = String(reason.expected || "");
+  const observed = String(reason.observed || "");
+  if (!expected && !observed) return "";
+  return `| expected ${truncateHash(expected)} observed ${truncateHash(observed)}`;
+}
+
+function truncateHash(value) {
+  if (value.length <= 20) return value;
+  return `${value.slice(0, 13)}...${value.slice(-6)}`;
 }
 
 function eventTitle(event) {
@@ -1059,6 +1172,7 @@ byId("evaluateButton").addEventListener("click", async () => {
     await evaluateCurrentInputs();
   } catch (error) {
     setStatus(error.message);
+    renderOperationalError("Evaluation failed", error.message);
   }
 });
 
@@ -1068,6 +1182,7 @@ byId("loadSampleButton").addEventListener("click", async () => {
     await loadSampleInputs();
   } catch (error) {
     setStatus(error.message);
+    renderOperationalError("Example input unavailable", error.message);
   }
 });
 
@@ -1082,6 +1197,7 @@ byId("loadSavedRunButton").addEventListener("click", async () => {
     await loadMostRecentRun();
   } catch (error) {
     setStatus(error.message);
+    renderOperationalError("Saved run unavailable", error.message);
   }
 });
 
@@ -1091,6 +1207,7 @@ byId("connectWorkspaceButton").addEventListener("click", async () => {
     setStatus("Refreshed local .guard-local evaluation history");
   } catch (error) {
     setStatus(error.message);
+    renderOperationalError("SDK workspace unavailable", error.message);
   }
 });
 
@@ -1119,6 +1236,7 @@ byId("compareRunsButton").addEventListener("click", async () => {
     await compareRuns();
   } catch (error) {
     setStatus(error.message);
+    renderOperationalError("Comparison unavailable", error.message);
   }
 });
 
@@ -1139,6 +1257,7 @@ byId("artifactInput").addEventListener("change", async (event) => {
     event.target.value = "";
   } catch (error) {
     setStatus(error.message);
+    renderOperationalError("Artifact unreadable", error.message, "unreadable_receipt");
   }
 });
 
@@ -1149,6 +1268,7 @@ byId("saveRunButton").addEventListener("click", async () => {
     await saveCurrentRun();
   } catch (error) {
     setStatus(error.message);
+    renderOperationalError("Save run failed", error.message);
   }
 });
 
@@ -1157,6 +1277,7 @@ byId("replayRunButton").addEventListener("click", async () => {
     await replaySavedRun();
   } catch (error) {
     setStatus(error.message);
+    renderOperationalError("Replay failed", error.message);
   }
 });
 
@@ -1165,6 +1286,7 @@ byId("exportReceiptButton").addEventListener("click", async () => {
     await exportCurrentReceipt();
   } catch (error) {
     setStatus(error.message);
+    renderOperationalError("Receipt export failed", error.message);
   }
 });
 
