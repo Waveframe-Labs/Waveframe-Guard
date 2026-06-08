@@ -15,6 +15,7 @@ def assess_admissibility(
     continuity_state = continuity_state or {}
     replay_posture = replay_posture or {}
     evidence_posture = evidence_posture or {}
+    continuation_status = evidence_posture.get("continuation_status") or {}
 
     violated_constraints = []
     required_evidence = []
@@ -38,6 +39,11 @@ def assess_admissibility(
     )
     continuity_requirements.extend(_continuity_requirements(continuity_state))
     replay_obligations.extend(_replay_obligations(replay_posture))
+    violated_constraints.extend(_continuation_constraints(continuation_status))
+    if not continuity_requirements:
+        continuity_requirements.extend(_continuation_requirements(continuation_status))
+    if not replay_obligations:
+        replay_obligations.extend(_continuation_replay_obligations(continuation_status))
 
     if violated_constraints or required_evidence:
         status = "blocked"
@@ -65,6 +71,7 @@ def assess_admissibility(
         "replay_obligations": replay_obligations,
         "continuity_requirements": continuity_requirements,
         "enforcement_consequences": enforcement_consequences,
+        "continuation_status": continuation_status,
     }
 
 
@@ -156,6 +163,44 @@ def _replay_obligations(replay_posture: dict[str, Any]) -> list[dict[str, Any]]:
             }
         )
     return obligations
+
+
+def _continuation_constraints(continuation_status: dict[str, Any]) -> list[dict[str, Any]]:
+    status = continuation_status.get("status")
+    if status not in {"invalidated", "expired"}:
+        return []
+    return [
+        {
+            "constraint": "continuation_validity",
+            "continuation_status": status,
+            "dependency_failures": continuation_status.get("dependency_failures", []),
+            "rationale": "continuation invalidated by runtime dependency state"
+            if status == "invalidated"
+            else "continuation expired before execution",
+        }
+    ]
+
+
+def _continuation_requirements(continuation_status: dict[str, Any]) -> list[dict[str, Any]]:
+    if continuation_status.get("status") != "revalidation_required":
+        return []
+    return [
+        {
+            "requirement": "continuation_revalidation",
+            "rationale": "continuation requires runtime revalidation before execution",
+        }
+    ]
+
+
+def _continuation_replay_obligations(continuation_status: dict[str, Any]) -> list[dict[str, Any]]:
+    if continuation_status.get("status") != "escalation_required":
+        return []
+    return [
+        {
+            "obligation": "continuation_escalation",
+            "rationale": "continuation requires escalation before execution",
+        }
+    ]
 
 
 def _enforcement_consequences(

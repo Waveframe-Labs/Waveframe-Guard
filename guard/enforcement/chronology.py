@@ -12,6 +12,7 @@ def build_chronology(
     assessment: dict[str, Any],
     start_sequence: int = 1,
 ) -> list[dict[str, Any]]:
+    continuation_status = assessment.get("continuation_status") or {}
     event_specs = [
         (
             "authority_context_resolved",
@@ -40,6 +41,7 @@ def build_chronology(
                 "replay_obligations": assessment["replay_obligations"],
             },
         ),
+        *_continuation_event_specs(continuation_status),
         (
             "admissibility_evaluated",
             {
@@ -66,3 +68,31 @@ def build_chronology(
         )
         for index, (event_type, details) in enumerate(event_specs)
     ]
+
+
+def _continuation_event_specs(continuation_status: dict[str, Any]) -> list[tuple[str, dict[str, Any]]]:
+    if not continuation_status:
+        return []
+    specs: list[tuple[str, dict[str, Any]]] = []
+    failures = continuation_status.get("dependency_failures") or []
+    if failures:
+        event_type = "runtime_dependency_expired" if continuation_status.get("expired") else "runtime_dependency_invalidated"
+        specs.append(
+            (
+                event_type,
+                {
+                    "continuation_status": continuation_status.get("status"),
+                    "dependency_failures": failures,
+                },
+            )
+        )
+    if continuation_status.get("status") != "admissible":
+        specs.append(
+            (
+                "continuation_evaluated",
+                {
+                    "continuation_status": continuation_status,
+                },
+            )
+        )
+    return specs

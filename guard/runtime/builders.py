@@ -30,6 +30,7 @@ def build_execution_admissibility_projection(
     required_evidence: list[dict[str, Any]] | None = None,
     replay_obligations: list[dict[str, Any]] | None = None,
     continuity_requirements: list[dict[str, Any]] | None = None,
+    continuation_status: dict[str, Any] | None = None,
     enforcement_consequences: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     payload = {
@@ -44,6 +45,7 @@ def build_execution_admissibility_projection(
         "required_evidence": required_evidence or [],
         "replay_obligations": replay_obligations or [],
         "continuity_requirements": continuity_requirements or [],
+        "continuation_status": continuation_status or {},
         "enforcement_consequences": enforcement_consequences or [],
     }
     payload["projection_id"] = stable_id("admissibility_projection", payload)
@@ -70,6 +72,7 @@ def build_execution_runtime_posture(
         "actor_identity": admissibility_projection["actor_identity"],
         "runtime_blockers": blockers,
         "continuity_state": continuity_posture,
+        "continuation_status": admissibility_projection.get("continuation_status", {}),
         "replay_requirements": admissibility_projection.get("replay_obligations", []),
         "enforcement_outcome": enforcement_outcome,
         "chronology_event_ids": [event["event_id"] for event in chronology],

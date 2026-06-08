@@ -80,6 +80,60 @@ Replay failures should be explained operationally first:
 Hash deltas remain available as technical details. They should not be the
 primary operator explanation.
 
+## Continuation validity
+
+Guard evaluates continuation validity as runtime state, not governance meaning.
+The first continuation engine accepts:
+
+- evidence validity
+- replay validity
+- dependency validity
+- continuity validity
+- dependency expiration
+
+It emits `guard_continuation_status.v1` with one canonical status:
+
+- `admissible`
+- `invalidated`
+- `expired`
+- `revalidation_required`
+- `escalation_required`
+
+`invalidated` and `expired` block execution. `revalidation_required` and
+`escalation_required` escalate execution.
+
+Runtime dependencies are represented as evidence:
+
+```json
+{
+  "runtime_dependencies": [
+    {
+      "type": "approval",
+      "id": "director-approval-1",
+      "hash": "sha256:...",
+      "valid_until": "2026-06-03T23:30:00+00:00"
+    }
+  ]
+}
+```
+
+Dependency hash drift, invalidation, or expiration can invalidate continuation.
+The Guard Receipt binds runtime dependency hashes into replay basis and lineage
+continuity.
+
+## Expiration-aware chronology
+
+Guard chronology may include continuation events when dependencies expire or
+drift:
+
+- `runtime_dependency_expired`
+- `runtime_dependency_invalidated`
+- `continuation_evaluated`
+
+The Guard Inspector presents these with both audit time and relative execution
+delta so operators can distinguish durable audit evidence from execution
+progression.
+
 ## Local and Cloud boundary
 
 Guard local owns:

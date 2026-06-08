@@ -57,6 +57,7 @@ def evaluate_runtime_request(payload: dict[str, Any] | None = None) -> dict[str,
         evidence_posture={
             "approvals": runtime_evidence["approvals"],
             "execution_context": runtime_evidence["execution_context"],
+            "runtime_dependencies": runtime_evidence.get("runtime_dependencies", []),
         },
         evaluation_time=timestamp,
         start_sequence=1,
@@ -272,6 +273,7 @@ class GuardLocalRequestHandler(BaseHTTPRequestHandler):
         self.send_response(HTTPStatus.OK.value)
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(body)))
+        self.send_header("Cache-Control", "no-store")
         self.end_headers()
         self.wfile.write(body)
 

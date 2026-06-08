@@ -17,6 +17,7 @@ from .builders import (
     build_guard_evaluation_trace,
     execution_state_for_status,
 )
+from .continuation import evaluate_continuation, evaluate_runtime_dependencies
 from .evidence import build_runtime_evidence_model, validate_runtime_evidence_model
 
 
@@ -46,10 +47,23 @@ def evaluate_runtime(
             "timestamp": evaluation_time,
         },
         execution_context=(evidence_posture or {}).get("execution_context", {}),
+        runtime_dependencies=(evidence_posture or {}).get("runtime_dependencies", []),
     )
     validate_runtime_evidence_model(runtime_evidence)
 
     authority_ref = _authority_ref(compiled_authority)
+    dependency_posture = evaluate_runtime_dependencies(
+        runtime_evidence.get("runtime_dependencies", []),
+        evaluation_time=evaluation_time,
+    )
+    continuation_status = evaluate_continuation(
+        evidence_valid=True,
+        replay_valid=not bool((replay_posture or {}).get("required")),
+        dependency_valid=dependency_posture["valid"],
+        continuity_valid=not bool((continuity_state or {}).get("requires_revalidation")),
+        expired=dependency_posture["expired"],
+        dependency_failures=dependency_posture["failures"],
+    )
     assessment = assess_admissibility(
         compiled_authority=compiled_authority,
         execution_request=execution_request,
@@ -59,6 +73,8 @@ def evaluate_runtime(
         evidence_posture={
             "approvals": runtime_evidence["approvals"],
             "execution_context": runtime_evidence["execution_context"],
+            "runtime_dependencies": runtime_evidence["runtime_dependencies"],
+            "continuation_status": continuation_status,
         },
     )
     chronology = build_chronology(
@@ -130,6 +146,7 @@ def evaluate_runtime(
         "required_evidence": assessment["required_evidence"],
         "replay_obligations": assessment["replay_obligations"],
         "continuity_requirements": assessment["continuity_requirements"],
+        "continuation_status": continuation_status,
         "enforcement_consequences": assessment["enforcement_consequences"],
         "admissibility_projection": projection,
         "runtime_posture": runtime_posture,

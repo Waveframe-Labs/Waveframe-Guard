@@ -142,6 +142,7 @@ class LocalEvaluationStore:
             evidence_posture={
                 "approvals": runtime_evidence.get("approvals", []),
                 "execution_context": runtime_evidence.get("execution_context", {}),
+                "runtime_dependencies": runtime_evidence.get("runtime_dependencies", []),
             },
             evaluation_time=runtime_evidence["timestamp_source"]["timestamp"],
             start_sequence=_start_sequence(record["evaluation"]),
@@ -275,6 +276,7 @@ def build_artifact_manifest(
             "outcome_hash",
             "evaluation_trace_hash",
             "chronology_hash",
+            "runtime_dependencies_hash",
         ],
     }
     manifest["manifest_hash"] = stable_hash(manifest)
@@ -322,6 +324,7 @@ def _artifact_replay_failure_reasons(record: dict[str, Any]) -> list[dict[str, A
     _compare_hash(reasons, "evidence_mutation", "actor_identity", recorded_input_hashes.get("actor_identity_hash"), current_input_hashes.get("actor_identity_hash"), "Actor identity changed after receipt emission.")
     _compare_hash(reasons, "evidence_mutation", "approvals", recorded_input_hashes.get("approval_evidence_hash"), current_input_hashes.get("approval_evidence_hash"), "Approval evidence changed after receipt emission.")
     _compare_hash(reasons, "evidence_mutation", "timestamp_source", recorded_input_hashes.get("timestamp_source_hash"), current_input_hashes.get("timestamp_source_hash"), "Timestamp source changed after receipt emission.")
+    _compare_hash(reasons, "evidence_mutation", "runtime_dependencies", recorded_input_hashes.get("runtime_dependencies_hash"), current_input_hashes.get("runtime_dependencies_hash"), "Runtime dependencies changed after receipt emission.")
     _compare_hash(reasons, "continuity_mismatch", "continuity_posture", recorded_input_hashes.get("continuity_posture_hash"), current_input_hashes.get("continuity_posture_hash"), "Lineage continuity changed after receipt emission.")
     _compare_hash(reasons, "chronology_mutation", "chronology", receipt.get("chronology_hash"), stable_hash(evaluation.get("telemetry_events", [])), "Generated execution chronology changed after receipt emission.")
     _compare_hash(reasons, "chronology_mutation", "chronology_event_ids", stable_hash(receipt.get("chronology_event_ids", [])), stable_hash([event.get("event_id") for event in evaluation.get("telemetry_events", [])]), "Chronology event identity changed after receipt emission.")
@@ -422,6 +425,7 @@ def _input_hashes(inputs: dict[str, Any]) -> dict[str, str]:
         "approval_evidence_hash": stable_hash(runtime_evidence.get("approvals", [])),
         "execution_context_hash": stable_hash(runtime_evidence.get("execution_context", {})),
         "timestamp_source_hash": stable_hash(runtime_evidence.get("timestamp_source", {})),
+        "runtime_dependencies_hash": stable_hash(runtime_evidence.get("runtime_dependencies", [])),
     }
 
 
@@ -436,6 +440,7 @@ def _replay_basis(inputs: dict[str, Any], evaluation: dict[str, Any]) -> dict[st
         "evidence_posture": {
             "approvals": runtime_evidence.get("approvals", []),
             "execution_context": runtime_evidence.get("execution_context", {}),
+            "runtime_dependencies": runtime_evidence.get("runtime_dependencies", []),
         },
         "evaluation_time": runtime_evidence["timestamp_source"]["timestamp"],
         "start_sequence": _start_sequence(evaluation),
@@ -457,6 +462,7 @@ def _lineage_continuity_basis(
         "runtime_evidence_hash": input_hashes["runtime_evidence_hash"],
         "continuity_posture_hash": input_hashes["continuity_posture_hash"],
         "replay_posture_hash": input_hashes["replay_posture_hash"],
+        "runtime_dependencies_hash": input_hashes["runtime_dependencies_hash"],
         "outcome_hash": outcome["outcome_hash"],
         "evaluation_trace_hash": evaluation["evaluation_trace"]["trace_hash"],
         "chronology_hash": chronology_hash,

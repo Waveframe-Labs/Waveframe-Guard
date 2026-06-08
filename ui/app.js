@@ -625,6 +625,7 @@ function renderPosture(evaluation) {
     ["Admissibility", postureValue(evaluation.status), toneForStatus(evaluation.status)],
     ["Continuity", evaluation.continuity_requirements.length ? "Drift Detected" : "Stable", evaluation.continuity_requirements.length ? "warn" : "ok"],
     ["Replay", evaluation.replay_obligations.length ? "Incomplete" : "Linked", evaluation.replay_obligations.length ? "warn" : "ok"],
+    ["Continuation", continuationValue(evaluation.continuation_status), continuationTone(evaluation.continuation_status)],
     ["Evidence", evaluation.required_evidence.length ? "Missing Evidence" : "Satisfied", evaluation.required_evidence.length ? "blocked" : "ok"],
     ["Enforcement", enforcementValue(evaluation.status), toneForStatus(evaluation.status)]
   ];
@@ -688,6 +689,12 @@ function renderTrace(evaluation, replay = null) {
       title: replayTitle(evaluation, replay),
       summary: replayExplainabilitySummary(evaluation, replay),
       details: replay?.replay_failure_reasons?.length ? replay.replay_failure_reasons : evaluation.replay_obligations
+    },
+    {
+      kicker: "Continuation",
+      title: continuationValue(evaluation.continuation_status),
+      summary: continuationSummary(evaluation.continuation_status),
+      details: evaluation.continuation_status || {}
     }
   ];
   byId("traceSurface").innerHTML = cards
@@ -922,6 +929,9 @@ function eventTitle(event) {
     runtime_evidence_loaded: "Runtime evidence loaded",
     continuity_checked: "Continuity checked",
     replay_validated: "Replay checked",
+    runtime_dependency_expired: "Runtime dependency expired",
+    runtime_dependency_invalidated: "Runtime dependency invalidated",
+    continuation_evaluated: "Continuation evaluated",
     admissibility_evaluated: "Admissibility evaluated",
     enforcement_outcome_recorded: "Enforcement outcome emitted"
   };
@@ -950,6 +960,17 @@ function eventSummary(event) {
     return details.replay_obligations?.length
       ? replaySummary(details.replay_obligations[0])
       : "Replay evidence is linked.";
+  }
+  if (event.event_type === "runtime_dependency_expired") {
+    const failure = details.dependency_failures?.[0] || {};
+    return `${humanize(failure.dependency_type || "dependency")} ${failure.dependency_id || "dependency"} expired.`;
+  }
+  if (event.event_type === "runtime_dependency_invalidated") {
+    const failure = details.dependency_failures?.[0] || {};
+    return `${humanize(failure.dependency_type || "dependency")} ${failure.dependency_id || "dependency"} drift detected.`;
+  }
+  if (event.event_type === "continuation_evaluated") {
+    return continuationSummary(details.continuation_status || {});
   }
   if (event.event_type === "admissibility_evaluated") {
     if (details.violated_constraints?.length) return constraintSummary(details.violated_constraints[0]);
@@ -1045,10 +1066,39 @@ function applyChronologyFilter(filter, options = {}) {
 }
 
 function chronologyKind(eventType) {
+  if (eventType.includes("dependency")) return "evidence";
   if (eventType.includes("evidence")) return "evidence";
   if (eventType.includes("replay")) return "replay";
   if (eventType.includes("continuity")) return "continuity";
   return "all";
+}
+
+function continuationValue(continuation) {
+  const status = continuation?.status || "admissible";
+  const labels = {
+    admissible: "Valid",
+    invalidated: "Invalidated",
+    expired: "Expired",
+    revalidation_required: "Revalidation Required",
+    escalation_required: "Escalation Required"
+  };
+  return labels[status] || humanize(status);
+}
+
+function continuationTone(continuation) {
+  const status = continuation?.status || "admissible";
+  if (status === "admissible") return "ok";
+  if (status === "invalidated" || status === "expired") return "blocked";
+  return "warn";
+}
+
+function continuationSummary(continuation) {
+  const status = continuation?.status || "admissible";
+  if (status === "expired") return "Continuation expired before execution; execution is blocked.";
+  if (status === "invalidated") return "Dependency drift invalidated this continuation; execution is blocked.";
+  if (status === "revalidation_required") return "Continuation requires runtime revalidation before execution.";
+  if (status === "escalation_required") return "Continuation requires escalation before execution.";
+  return "Continuation remains valid for this execution.";
 }
 
 function postureValue(status) {

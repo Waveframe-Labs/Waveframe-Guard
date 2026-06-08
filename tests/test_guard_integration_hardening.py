@@ -111,6 +111,7 @@ def test_runtime_evidence_model_is_materialized_before_decision():
             "timestamp": "2026-06-03T22:30:00+00:00",
         },
         "execution_context": {"surface": "sdk"},
+        "runtime_dependencies": [],
     }
 
 

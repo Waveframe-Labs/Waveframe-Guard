@@ -28,6 +28,7 @@ def build_runtime_evidence_model(
     continuity_snapshot: dict[str, Any] | None = None,
     timestamp_source: dict[str, Any] | None = None,
     execution_context: dict[str, Any] | None = None,
+    runtime_dependencies: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     payload = {
         "schema_version": GUARD_RUNTIME_EVIDENCE_MODEL_V1,
@@ -37,6 +38,7 @@ def build_runtime_evidence_model(
         "continuity_snapshot": dict(continuity_snapshot or {}),
         "timestamp_source": dict(timestamp_source or {}),
         "execution_context": dict(execution_context or {}),
+        "runtime_dependencies": list(runtime_dependencies or []),
     }
     validate_runtime_evidence_model(payload)
     return payload
@@ -57,4 +59,6 @@ def validate_runtime_evidence_model(payload: dict[str, Any]) -> dict[str, Any]:
             raise RuntimeEvidenceError(f"runtime evidence {field} must be an object")
     if not isinstance(payload.get("approvals"), list):
         raise RuntimeEvidenceError("runtime evidence approvals must be a list")
+    if not isinstance(payload.get("runtime_dependencies", []), list):
+        raise RuntimeEvidenceError("runtime evidence runtime_dependencies must be a list")
     return dict(payload)

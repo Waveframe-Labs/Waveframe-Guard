@@ -12,6 +12,7 @@ from guard.runtime.builders import (
     validate_guard_enforcement_outcome,
 )
 from guard.runtime.evidence import GUARD_RUNTIME_EVIDENCE_MODEL_V1
+from guard.runtime.continuation import evaluate_continuation
 
 
 EVALUATION_TIME = "2026-06-03T22:30:00+00:00"
@@ -133,6 +134,86 @@ def test_runtime_evaluation_escalates_for_continuity_and_replay_requirements():
     ]
     assert result["continuity_posture"]["requires_revalidation"] is True
     assert result["continuity_posture"]["requires_replay"] is True
+
+
+def test_continuation_validity_engine_returns_canonical_statuses():
+    assert evaluate_continuation(
+        evidence_valid=True,
+        replay_valid=False,
+        dependency_valid=True,
+        continuity_valid=False,
+    )["status"] == "revalidation_required"
+    assert evaluate_continuation(
+        evidence_valid=True,
+        replay_valid=False,
+        dependency_valid=True,
+        continuity_valid=True,
+    )["status"] == "escalation_required"
+    assert evaluate_continuation(
+        evidence_valid=True,
+        replay_valid=True,
+        dependency_valid=False,
+        continuity_valid=True,
+    )["status"] == "invalidated"
+    assert evaluate_continuation(
+        evidence_valid=True,
+        replay_valid=True,
+        dependency_valid=True,
+        continuity_valid=True,
+        expired=True,
+    )["status"] == "expired"
+
+
+def test_runtime_blocks_when_dependency_expiration_invalidates_continuation():
+    result = evaluate_runtime(
+        compiled_authority=_authority(),
+        execution_request=_request(amount=500),
+        actor_identity={"id": "manager-1", "type": "human", "role": "manager"},
+        evidence_posture={
+            "approvals": [{"role": "manager", "approved_by": "approver-1"}],
+            "runtime_dependencies": [
+                {
+                    "type": "approval",
+                    "id": "director-approval-1",
+                    "hash": "sha256:approval",
+                    "valid_until": "2026-06-03T22:29:00+00:00",
+                }
+            ],
+        },
+        evaluation_time=EVALUATION_TIME,
+    )
+
+    assert result["status"] == "blocked"
+    assert result["continuation_status"]["status"] == "expired"
+    assert result["violated_constraints"][0]["constraint"] == "continuation_validity"
+    assert result["runtime_evidence"]["runtime_dependencies"][0]["id"] == "director-approval-1"
+    assert "runtime_dependency_expired" in [event["event_type"] for event in result["telemetry_events"]]
+    assert "continuation_evaluated" in [event["event_type"] for event in result["telemetry_events"]]
+
+
+def test_runtime_blocks_when_dependency_drift_invalidates_continuation():
+    result = evaluate_runtime(
+        compiled_authority=_authority(),
+        execution_request=_request(amount=500),
+        actor_identity={"id": "manager-1", "type": "human", "role": "manager"},
+        evidence_posture={
+            "approvals": [{"role": "manager", "approved_by": "approver-1"}],
+            "runtime_dependencies": [
+                {
+                    "type": "approval",
+                    "id": "director-approval-1",
+                    "hash": "sha256:expected",
+                    "observed_hash": "sha256:changed",
+                    "valid_until": "2026-06-03T23:30:00+00:00",
+                }
+            ],
+        },
+        evaluation_time=EVALUATION_TIME,
+    )
+
+    assert result["status"] == "blocked"
+    assert result["continuation_status"]["status"] == "invalidated"
+    assert result["continuation_status"]["dependency_failures"][0]["reason"] == "dependency_drift"
 
 
 def test_runtime_evaluation_is_deterministic_for_identical_inputs():

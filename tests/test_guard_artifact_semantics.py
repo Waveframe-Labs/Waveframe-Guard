@@ -63,6 +63,7 @@ def test_receipt_hashes_inputs_replay_identity_and_lineage_continuity(tmp_path):
         "evidence_posture": {
             "approvals": runtime_evidence["approvals"],
             "execution_context": runtime_evidence["execution_context"],
+            "runtime_dependencies": runtime_evidence.get("runtime_dependencies", []),
         },
         "evaluation_time": runtime_evidence["timestamp_source"]["timestamp"],
         "start_sequence": evaluation["telemetry_events"][0]["sequence"],
@@ -87,6 +88,7 @@ def test_receipt_hashes_inputs_replay_identity_and_lineage_continuity(tmp_path):
         "runtime_evidence_hash": receipt["input_hashes"]["runtime_evidence_hash"],
         "continuity_posture_hash": receipt["input_hashes"]["continuity_posture_hash"],
         "replay_posture_hash": receipt["input_hashes"]["replay_posture_hash"],
+        "runtime_dependencies_hash": receipt["input_hashes"]["runtime_dependencies_hash"],
         "outcome_hash": receipt["outcome_hash"],
         "evaluation_trace_hash": receipt["evaluation_trace_hash"],
         "chronology_hash": receipt["chronology_hash"],

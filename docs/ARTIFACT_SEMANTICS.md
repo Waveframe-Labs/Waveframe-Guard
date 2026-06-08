@@ -18,6 +18,7 @@ The saved evaluation contains:
   - `compiled_authority_contract.v1`
   - `normalized_execution_request.v1`
   - `guard_runtime_evidence_model.v1`
+  - runtime dependencies
   - optional continuity posture
 - `evaluation`
   - runtime admissibility result
@@ -98,6 +99,7 @@ The receipt also carries hashes for:
 - approval evidence
 - execution context
 - timestamp source
+- runtime dependencies
 - chronology
 
 ## Replay basis
@@ -115,6 +117,7 @@ The replay basis is:
 - evidence posture
   - approvals
   - execution context
+  - runtime dependencies
 - evaluation time
 - start sequence
 
@@ -165,6 +168,7 @@ The lineage continuity basis is:
 - runtime evidence hash
 - continuity posture hash
 - replay posture hash
+- runtime dependency hash
 - outcome hash
 - evaluation trace hash
 - chronology hash
