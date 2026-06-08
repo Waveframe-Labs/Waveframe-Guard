@@ -6,7 +6,9 @@ const state = {
   historySearch: "",
   historyFilter: "all",
   compareA: "",
-  compareB: ""
+  compareB: "",
+  receiptPanel: "receipt",
+  currentReceipt: null
 };
 
 const inputConfig = [
@@ -405,6 +407,7 @@ function filterHistory(evaluations) {
 
 function renderReceipt(receipt) {
   if (!receipt || !receipt.schema_version) {
+    state.currentReceipt = null;
     byId("receiptTitle").textContent = "No receipt selected";
     byId("receiptTitle").removeAttribute("title");
     byId("receiptBrowser").innerHTML = `
@@ -412,6 +415,8 @@ function renderReceipt(receipt) {
     `;
     return;
   }
+  state.currentReceipt = receipt;
+  state.receiptPanel = state.receiptPanel || "receipt";
   const latest = state.latest || {};
   const inputs = latest.inputs || {};
   const evaluation = latest.evaluation || {};
@@ -420,29 +425,89 @@ function renderReceipt(receipt) {
   const request = inputs.execution_request || {};
   const continuity = inputs.continuity_posture || evidence.continuity_snapshot || {};
   const replay = evidence.replay_evidence || {};
+  const panels = [
+    ["sdk", "Guard SDK"],
+    ["evaluation", "CRI-CORE evaluation"],
+    ["receipt", "Guard Receipt"]
+  ];
   byId("receiptTitle").textContent = receipt.run_id || "Receipt";
   byId("receiptTitle").title = receipt.run_id || "Receipt";
   byId("receiptBrowser").innerHTML = `
     <div class="lineage-path" aria-label="Evaluation lineage">
-      <span>Guard SDK</span>
-      <span>CRI-CORE evaluation</span>
-      <span>Guard Receipt</span>
+      ${panels.map(([panel, label]) => `
+        <button
+          type="button"
+          class="lineage-tab ${state.receiptPanel === panel ? "active" : ""}"
+          data-receipt-panel="${escapeHtml(panel)}"
+          aria-pressed="${state.receiptPanel === panel ? "true" : "false"}"
+        >${escapeHtml(label)}</button>
+      `).join("")}
     </div>
-    <dl class="receipt-fields lineage-fields">
-      <div><dt>Decision</dt><dd>${escapeHtml(postureValue(receipt.outcome_status || "blocked"))}</dd></div>
-      <div><dt>Authority</dt><dd>${escapeHtml(receipt.authority_ref || "unknown")}</dd></div>
-      <div><dt>Contract hash</dt><dd>${escapeHtml(authority.contract_hash || "not available")}</dd></div>
+    ${receiptPanelHtml(state.receiptPanel, { receipt, authority, evidence, request, continuity, replay, evaluation })}
+  `;
+}
+
+function receiptPanelHtml(panel, context) {
+  if (panel === "sdk") return sdkReceiptPanel(context);
+  if (panel === "evaluation") return evaluationReceiptPanel(context);
+  return guardReceiptPanel(context);
+}
+
+function sdkReceiptPanel({ receipt, evidence, request }) {
+  const executionContext = evidence.execution_context || {};
+  const dependencies = evidence.runtime_dependencies || [];
+  return `
+    <dl class="receipt-fields lineage-fields receipt-detail-panel">
+      <div><dt>Panel</dt><dd>Guard SDK interception detail</dd></div>
+      <div><dt>Run</dt><dd>${escapeHtml(receipt.run_id || "unsaved receipt")}</dd></div>
+      <div><dt>Workspace</dt><dd>.guard-local/</dd></div>
       <div><dt>Actor</dt><dd>${escapeHtml(actorSummary(evidence.actor_identity))}</dd></div>
+      <div><dt>Mutation domain</dt><dd>${escapeHtml(`${request.action || "execution"} -> ${request.target || "runtime"}`)}</dd></div>
+      <div><dt>Context</dt><dd>${escapeHtml(executionContext.environment || executionContext.runtime || "local runtime")}</dd></div>
+      <div><dt>Runtime dependencies</dt><dd>${escapeHtml(dependencies.length ? `${dependencies.length} linked` : "none linked")}</dd></div>
+      <div><dt>Receipt emitted</dt><dd>${escapeHtml(receipt.recorded_at || "not recorded")}</dd></div>
+    </dl>
+  `;
+}
+
+function evaluationReceiptPanel({ receipt, evidence, replay, continuity, evaluation }) {
+  return `
+    <dl class="receipt-fields lineage-fields receipt-detail-panel">
+      <div><dt>Panel</dt><dd>CRI-CORE evaluation detail</dd></div>
+      <div><dt>Decision</dt><dd>${escapeHtml(postureValue(receipt.outcome_status || evaluation.status || "blocked"))}</dd></div>
+      <div><dt>Continuation</dt><dd>${escapeHtml(continuationValue(evaluation.continuation_status))}</dd></div>
+      <div><dt>Condition checks</dt><dd>${escapeHtml(runtimeConditionSummary(evaluation.runtime_condition_checks))}</dd></div>
       <div><dt>Evidence</dt><dd>${escapeHtml(evidenceSummaryLine(evidence))}</dd></div>
       <div><dt>Replay</dt><dd>${escapeHtml(replaySummaryLine(replay, evaluation))}</dd></div>
       <div><dt>Continuity</dt><dd>${escapeHtml(continuitySummaryLine(continuity, evaluation))}</dd></div>
-      <div><dt>Mutation domain</dt><dd>${escapeHtml(`${request.action || "execution"} -> ${request.target || "runtime"}`)}</dd></div>
+      <div><dt>Constraints</dt><dd>${escapeHtml(String((evaluation.violated_constraints || []).length))}</dd></div>
+      <div><dt>Missing evidence</dt><dd>${escapeHtml(String((evaluation.required_evidence || []).length))}</dd></div>
       ${hashField("Trace hash", receipt.evaluation_trace_hash)}
+    </dl>
+  `;
+}
+
+function guardReceiptPanel({ receipt, authority }) {
+  return `
+    <dl class="receipt-fields lineage-fields receipt-detail-panel">
+      <div><dt>Panel</dt><dd>Guard Receipt detail</dd></div>
+      <div><dt>Authority</dt><dd>${escapeHtml(receipt.authority_ref || "unknown")}</dd></div>
+      <div><dt>Contract hash</dt><dd>${escapeHtml(authority.contract_hash || "not available")}</dd></div>
+      ${hashField("Deterministic ID", receipt.deterministic_identity_hash)}
+      ${hashField("Replay basis", receipt.replay_basis_hash)}
+      ${hashField("Lineage continuity", receipt.lineage_continuity_hash)}
       ${hashField("Outcome hash", receipt.outcome_hash)}
       ${hashField("Receipt hash", receipt.receipt_hash)}
       <div><dt>Events</dt><dd>${escapeHtml(String((receipt.chronology_event_ids || []).length))}</dd></div>
     </dl>
   `;
+}
+
+function runtimeConditionSummary(checks = []) {
+  if (!checks.length) return "conditions not emitted";
+  const failed = checks.filter((check) => check.valid === false);
+  if (!failed.length) return `${checks.length} checks satisfied`;
+  return failed.map((check) => humanize(check.condition || "condition")).join(", ");
 }
 
 function hashField(label, value) {
@@ -1348,6 +1413,12 @@ byId("compareRunsButton").addEventListener("click", async () => {
 });
 
 byId("receiptBrowser").addEventListener("click", async (event) => {
+  const tab = event.target.closest("[data-receipt-panel]");
+  if (tab) {
+    state.receiptPanel = tab.dataset.receiptPanel || "receipt";
+    renderReceipt(state.currentReceipt);
+    return;
+  }
   const button = event.target.closest("[data-copy]");
   if (!button) return;
   try {

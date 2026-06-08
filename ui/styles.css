@@ -587,16 +587,31 @@ h3 {
   margin-bottom: 12px;
 }
 
-.lineage-path span {
+.lineage-path button {
   min-width: 0;
   padding: 9px 10px;
   color: var(--ink);
-  background: var(--orange-soft);
-  border: 1px solid rgba(255, 95, 5, 0.25);
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: 8px;
   font-size: 12px;
   font-weight: 950;
   text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lineage-path button.active {
+  color: var(--ink);
+  background: var(--orange-soft);
+  border-color: rgba(255, 95, 5, 0.45);
+  box-shadow: inset 0 -2px 0 var(--orange);
+}
+
+.lineage-path button:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 2px;
 }
 
 .receipt-fields {
@@ -661,6 +676,11 @@ h3 {
 .lineage-fields div {
   padding: 9px 10px;
   background: var(--surface);
+}
+
+.receipt-detail-panel {
+  min-height: 286px;
+  align-content: start;
 }
 
 .posture-grid {

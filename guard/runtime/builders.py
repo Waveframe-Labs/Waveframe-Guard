@@ -155,6 +155,10 @@ def build_guard_enforcement_outcome(
     status: str,
     rationale: str,
     consequences: list[dict[str, Any]] | None = None,
+    continuation_status: dict[str, Any] | None = None,
+    continuation_requirements: list[dict[str, Any]] | None = None,
+    invalidation_reasons: list[dict[str, Any]] | None = None,
+    runtime_condition_checks: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     payload = {
         "schema_version": GUARD_ENFORCEMENT_OUTCOME_V1,
@@ -163,6 +167,10 @@ def build_guard_enforcement_outcome(
         "execution_state": execution_state_for_status(status),
         "rationale": rationale,
         "consequences": consequences or [],
+        "continuation_status": continuation_status or {},
+        "continuation_requirements": continuation_requirements or [],
+        "invalidation_reasons": invalidation_reasons or [],
+        "runtime_condition_checks": runtime_condition_checks or [],
     }
     payload["outcome_id"] = stable_id("enforcement_outcome", payload)
     payload["outcome_hash"] = stable_hash(payload)

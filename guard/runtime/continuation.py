@@ -71,6 +71,84 @@ def evaluate_runtime_dependencies(
     }
 
 
+def continuation_requirements(continuation_status: dict[str, Any]) -> list[dict[str, Any]]:
+    status = continuation_status.get("status")
+    if status == "revalidation_required":
+        return [
+            {
+                "requirement": "revalidate_continuation",
+                "rationale": "lineage continuity must be revalidated before execution can proceed",
+            }
+        ]
+    if status == "escalation_required":
+        return [
+            {
+                "requirement": "escalate_continuation",
+                "rationale": "replay posture requires an external continuation decision",
+            }
+        ]
+    if status == "expired":
+        return [
+            {
+                "requirement": "refresh_runtime_dependencies",
+                "rationale": "one or more runtime dependencies expired before execution",
+            }
+        ]
+    if status == "invalidated":
+        return [
+            {
+                "requirement": "rebuild_replay_basis",
+                "rationale": "one or more runtime conditions diverged from the replay basis",
+            }
+        ]
+    return []
+
+
+def invalidation_reasons(continuation_status: dict[str, Any]) -> list[dict[str, Any]]:
+    status = continuation_status.get("status")
+    if status not in {"invalidated", "expired"}:
+        return []
+    failures = continuation_status.get("dependency_failures") or []
+    if failures:
+        return failures
+    return [
+        {
+            "reason": status,
+            "rationale": "continuation validity failed before execution",
+        }
+    ]
+
+
+def runtime_condition_checks(continuation_status: dict[str, Any]) -> list[dict[str, Any]]:
+    return [
+        {
+            "condition": "evidence_valid",
+            "valid": bool(continuation_status.get("evidence_valid", True)),
+            "rationale": "runtime evidence validity checked",
+        },
+        {
+            "condition": "replay_valid",
+            "valid": bool(continuation_status.get("replay_valid", True)),
+            "rationale": "replay posture validity checked",
+        },
+        {
+            "condition": "dependency_valid",
+            "valid": bool(continuation_status.get("dependency_valid", True)),
+            "rationale": "runtime dependency validity checked",
+        },
+        {
+            "condition": "continuity_valid",
+            "valid": bool(continuation_status.get("continuity_valid", True)),
+            "rationale": "lineage continuity validity checked",
+        },
+        {
+            "condition": "not_expired",
+            "valid": not bool(continuation_status.get("expired", False)),
+            "rationale": "continuation did not expire before execution",
+        },
+    ]
+
+
 def _dependency_failure(dependency: dict[str, Any], reason: str, rationale: str) -> dict[str, Any]:
     return {
         "dependency_type": dependency.get("type"),

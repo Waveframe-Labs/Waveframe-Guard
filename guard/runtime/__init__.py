@@ -9,7 +9,13 @@ from .builders import (
     validate_guard_enforcement_outcome,
 )
 from .evidence import build_runtime_evidence_model, validate_runtime_evidence_model
-from .continuation import evaluate_continuation, evaluate_runtime_dependencies
+from .continuation import (
+    continuation_requirements,
+    evaluate_continuation,
+    evaluate_runtime_dependencies,
+    invalidation_reasons,
+    runtime_condition_checks,
+)
 
 __all__ = [
     "evaluate_runtime",
@@ -24,4 +30,7 @@ __all__ = [
     "validate_runtime_evidence_model",
     "evaluate_continuation",
     "evaluate_runtime_dependencies",
+    "continuation_requirements",
+    "invalidation_reasons",
+    "runtime_condition_checks",
 ]

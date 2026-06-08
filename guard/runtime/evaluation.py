@@ -17,7 +17,13 @@ from .builders import (
     build_guard_evaluation_trace,
     execution_state_for_status,
 )
-from .continuation import evaluate_continuation, evaluate_runtime_dependencies
+from .continuation import (
+    continuation_requirements,
+    evaluate_continuation,
+    evaluate_runtime_dependencies,
+    invalidation_reasons,
+    runtime_condition_checks,
+)
 from .evidence import build_runtime_evidence_model, validate_runtime_evidence_model
 
 
@@ -64,6 +70,9 @@ def evaluate_runtime(
         expired=dependency_posture["expired"],
         dependency_failures=dependency_posture["failures"],
     )
+    continuation_requirements_ = continuation_requirements(continuation_status)
+    invalidation_reasons_ = invalidation_reasons(continuation_status)
+    runtime_condition_checks_ = runtime_condition_checks(continuation_status)
     assessment = assess_admissibility(
         compiled_authority=compiled_authority,
         execution_request=execution_request,
@@ -127,6 +136,10 @@ def evaluate_runtime(
         status=assessment["status"],
         rationale=assessment["rationale"],
         consequences=assessment["enforcement_consequences"],
+        continuation_status=continuation_status,
+        continuation_requirements=continuation_requirements_,
+        invalidation_reasons=invalidation_reasons_,
+        runtime_condition_checks=runtime_condition_checks_,
     )
     runtime_posture = build_execution_runtime_posture(
         admissibility_projection=projection,
@@ -147,6 +160,9 @@ def evaluate_runtime(
         "replay_obligations": assessment["replay_obligations"],
         "continuity_requirements": assessment["continuity_requirements"],
         "continuation_status": continuation_status,
+        "continuation_requirements": continuation_requirements_,
+        "invalidation_reasons": invalidation_reasons_,
+        "runtime_condition_checks": runtime_condition_checks_,
         "enforcement_consequences": assessment["enforcement_consequences"],
         "admissibility_projection": projection,
         "runtime_posture": runtime_posture,

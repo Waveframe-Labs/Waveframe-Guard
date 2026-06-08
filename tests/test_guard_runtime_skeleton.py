@@ -41,6 +41,12 @@ def test_runtime_evaluation_builds_admissible_operational_backbone():
     assert result["continuity_posture"]["schema_version"] == GUARD_CONTINUITY_POSTURE_V1
     assert result["enforcement_outcome"]["schema_version"] == GUARD_ENFORCEMENT_OUTCOME_V1
     assert validate_guard_enforcement_outcome(result["enforcement_outcome"]) == result["enforcement_outcome"]
+    assert result["continuation_status"]["status"] == "admissible"
+    assert result["continuation_requirements"] == []
+    assert result["invalidation_reasons"] == []
+    assert result["runtime_condition_checks"]
+    assert result["enforcement_outcome"]["continuation_status"] == result["continuation_status"]
+    assert result["enforcement_outcome"]["runtime_condition_checks"] == result["runtime_condition_checks"]
     assert result["runtime_evidence"]["schema_version"] == GUARD_RUNTIME_EVIDENCE_MODEL_V1
     assert result["execution_posture_surface"] == {
         "schema_version": "execution_posture_surface.v1",
@@ -93,6 +99,10 @@ def test_runtime_evaluation_blocks_on_compiled_authority_constraints():
     ]
     assert result["enforcement_consequences"][0]["consequence"] == "block_execution"
     assert result["runtime_posture"]["posture"] == "blocked"
+    assert "continuation_status" in result["enforcement_outcome"]
+    assert "continuation_requirements" in result["enforcement_outcome"]
+    assert "invalidation_reasons" in result["enforcement_outcome"]
+    assert "runtime_condition_checks" in result["enforcement_outcome"]
 
 
 def test_runtime_evaluation_escalates_for_continuity_and_replay_requirements():
@@ -134,6 +144,22 @@ def test_runtime_evaluation_escalates_for_continuity_and_replay_requirements():
     ]
     assert result["continuity_posture"]["requires_revalidation"] is True
     assert result["continuity_posture"]["requires_replay"] is True
+    assert result["continuation_status"]["status"] == "revalidation_required"
+    assert result["continuation_requirements"] == [
+        {
+            "requirement": "revalidate_continuation",
+            "rationale": "lineage continuity must be revalidated before execution can proceed",
+        }
+    ]
+    assert result["invalidation_reasons"] == []
+    assert result["runtime_condition_checks"][3] == {
+        "condition": "continuity_valid",
+        "valid": False,
+        "rationale": "lineage continuity validity checked",
+    }
+    assert result["enforcement_outcome"]["continuation_status"] == result["continuation_status"]
+    assert result["enforcement_outcome"]["continuation_requirements"] == result["continuation_requirements"]
+    assert result["enforcement_outcome"]["runtime_condition_checks"] == result["runtime_condition_checks"]
 
 
 def test_continuation_validity_engine_returns_canonical_statuses():
@@ -185,6 +211,10 @@ def test_runtime_blocks_when_dependency_expiration_invalidates_continuation():
 
     assert result["status"] == "blocked"
     assert result["continuation_status"]["status"] == "expired"
+    assert result["continuation_requirements"][0]["requirement"] == "refresh_runtime_dependencies"
+    assert result["invalidation_reasons"][0]["reason"] == "dependency_expired"
+    assert result["runtime_condition_checks"][-1]["valid"] is False
+    assert result["enforcement_outcome"]["invalidation_reasons"] == result["invalidation_reasons"]
     assert result["violated_constraints"][0]["constraint"] == "continuation_validity"
     assert result["runtime_evidence"]["runtime_dependencies"][0]["id"] == "director-approval-1"
     assert "runtime_dependency_expired" in [event["event_type"] for event in result["telemetry_events"]]
@@ -214,6 +244,8 @@ def test_runtime_blocks_when_dependency_drift_invalidates_continuation():
     assert result["status"] == "blocked"
     assert result["continuation_status"]["status"] == "invalidated"
     assert result["continuation_status"]["dependency_failures"][0]["reason"] == "dependency_drift"
+    assert result["continuation_requirements"][0]["requirement"] == "rebuild_replay_basis"
+    assert result["invalidation_reasons"][0]["reason"] == "dependency_drift"
 
 
 def test_runtime_evaluation_is_deterministic_for_identical_inputs():

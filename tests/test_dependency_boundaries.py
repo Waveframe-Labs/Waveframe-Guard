@@ -164,6 +164,20 @@ def test_guard_does_not_define_cloud_persistence_behavior():
     assert violations == []
 
 
+def test_continuation_governance_is_guard_subsystem_not_repo_split():
+    doc = (REPO_ROOT / "docs" / "CONTINUATION_GOVERNANCE_MODEL.md").read_text(encoding="utf-8").lower()
+
+    assert "status: emerging subsystem" in doc
+    assert "not a separate repository" in doc
+    assert "not a separate package" in doc
+    assert "not a repo split" in doc
+    assert "not a package split" in doc
+    assert "guard evaluates admissibility against compiled authority" in doc
+    assert (REPO_ROOT / "guard" / "runtime" / "continuation.py").exists()
+    assert not (REPO_ROOT / "continuation").exists()
+    assert not (REPO_ROOT / "waveframe_continuation").exists()
+
+
 def _guard_python_files():
     for root in GUARD_ROOTS:
         yield from root.rglob("*.py")
