@@ -27,6 +27,8 @@ The first subsystem fields are:
 - `continuation_requirements`
 - `invalidation_reasons`
 - `runtime_condition_checks`
+- `runtime_dependency_posture`
+- `runtime_lifecycle_state`
 
 ## Status Values
 
@@ -59,6 +61,20 @@ Initial checks:
 Runtime dependencies may include approvals, replay evidence, external execution
 context, and other artifacts whose identity is part of the replay basis.
 
+Canonical runtime dependencies use `guard_runtime_dependency.v1`:
+
+```json
+{
+  "schema_version": "guard_runtime_dependency.v1",
+  "dependency_type": "approval",
+  "dependency_id": "director-approval-1",
+  "dependency_hash": "sha256:...",
+  "current_hash": "sha256:...",
+  "valid_until": "2026-06-03T22:31:00Z",
+  "status": "valid"
+}
+```
+
 Dependency invalidation occurs when a dependency:
 
 - expires
@@ -67,6 +83,40 @@ Dependency invalidation occurs when a dependency:
 
 Dependency failures can invalidate continuation without requiring Guard to parse
 policy text or compile governance meaning.
+
+## Runtime Lifecycle
+
+Continuation governance formalizes the runtime lifecycle as:
+
+- `pending`
+- `admissible`
+- `continuation_required`
+- `revalidation_required`
+- `invalidated`
+- `expired`
+- `escalated`
+- `blocked`
+- `released`
+- `executed`
+
+This lifecycle is distinct from the enforcement outcome states. Guard still emits
+`allowed`, `blocked`, or `escalated` as execution state; lifecycle state explains
+why a once-valid execution may no longer be continuously valid.
+
+## Invalidation Chronology
+
+Guard chronology can show continuation invalidation without implying hosted live
+infrastructure:
+
+- runtime dependency linked
+- runtime dependency expired or invalidated
+- continuation invalidated
+- execution blocked
+
+Example operator story:
+
+Transfer initially admissible. Approval expired before execution. Continuation
+invalidated. Execution blocked at runtime.
 
 ## Outcome Binding
 

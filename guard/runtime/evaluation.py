@@ -20,10 +20,11 @@ from .builders import (
 from .continuation import (
     continuation_requirements,
     evaluate_continuation,
-    evaluate_runtime_dependencies,
     invalidation_reasons,
+    runtime_lifecycle_state,
     runtime_condition_checks,
 )
+from .dependencies import evaluate_runtime_dependencies
 from .evidence import build_runtime_evidence_model, validate_runtime_evidence_model
 
 
@@ -86,10 +87,18 @@ def evaluate_runtime(
             "continuation_status": continuation_status,
         },
     )
+    runtime_lifecycle_state_ = runtime_lifecycle_state(
+        evaluation_status=assessment["status"],
+        continuation_status=continuation_status,
+    )
     chronology = build_chronology(
         authority_ref=authority_ref,
         timestamp=evaluation_time,
-        assessment=assessment,
+        assessment={
+            **assessment,
+            "runtime_dependency_posture": dependency_posture,
+            "runtime_lifecycle_state": runtime_lifecycle_state_,
+        },
         start_sequence=start_sequence,
     )
     trace = build_guard_evaluation_trace(
@@ -140,6 +149,8 @@ def evaluate_runtime(
         continuation_requirements=continuation_requirements_,
         invalidation_reasons=invalidation_reasons_,
         runtime_condition_checks=runtime_condition_checks_,
+        runtime_dependency_posture=dependency_posture,
+        runtime_lifecycle_state=runtime_lifecycle_state_,
     )
     runtime_posture = build_execution_runtime_posture(
         admissibility_projection=projection,
@@ -151,6 +162,7 @@ def evaluate_runtime(
     return {
         "status": assessment["status"],
         "execution_state": execution_state_for_status(assessment["status"]),
+        "runtime_lifecycle_state": runtime_lifecycle_state_,
         "admissible": assessment["status"] == "admissible",
         "blocked": assessment["status"] == "blocked",
         "escalated": assessment["status"] == "escalated",
@@ -163,6 +175,7 @@ def evaluate_runtime(
         "continuation_requirements": continuation_requirements_,
         "invalidation_reasons": invalidation_reasons_,
         "runtime_condition_checks": runtime_condition_checks_,
+        "runtime_dependency_posture": dependency_posture,
         "enforcement_consequences": assessment["enforcement_consequences"],
         "admissibility_projection": projection,
         "runtime_posture": runtime_posture,

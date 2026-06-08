@@ -851,10 +851,14 @@ function renderTelemetry(events) {
 }
 
 function relativeDelta(event, index) {
-  return `+${relativeDeltaMs(event, index)}ms`;
+  const ms = relativeDeltaMs(event, index);
+  if (ms >= 60000) return `+${Math.round(ms / 60000)}m`;
+  return `+${ms}ms`;
 }
 
 function relativeDeltaMs(event, index) {
+  const explicit = event?.details?.relative_delta_ms;
+  if (Number.isFinite(Number(explicit))) return Number(explicit);
   const offsets = [0, 1, 3, 5, 7, 11, 14];
   const sequenceIndex = Number.isFinite(Number(event?.sequence)) ? Number(event.sequence) - 1 : index;
   return offsets[sequenceIndex] ?? Math.max(0, sequenceIndex * 2);
@@ -994,8 +998,10 @@ function eventTitle(event) {
     runtime_evidence_loaded: "Runtime evidence loaded",
     continuity_checked: "Continuity checked",
     replay_validated: "Replay checked",
+    runtime_dependency_linked: "Runtime dependency linked",
     runtime_dependency_expired: "Runtime dependency expired",
     runtime_dependency_invalidated: "Runtime dependency invalidated",
+    continuation_invalidated: "Continuation invalidated",
     continuation_evaluated: "Continuation evaluated",
     admissibility_evaluated: "Admissibility evaluated",
     enforcement_outcome_recorded: "Enforcement outcome emitted"
@@ -1026,6 +1032,10 @@ function eventSummary(event) {
       ? replaySummary(details.replay_obligations[0])
       : "Replay evidence is linked.";
   }
+  if (event.event_type === "runtime_dependency_linked") {
+    const dependency = details.dependency || {};
+    return `${humanize(dependency.dependency_type || "dependency")} ${dependency.dependency_id || "dependency"} linked.`;
+  }
   if (event.event_type === "runtime_dependency_expired") {
     const failure = details.dependency_failures?.[0] || {};
     return `${humanize(failure.dependency_type || "dependency")} ${failure.dependency_id || "dependency"} expired.`;
@@ -1033,6 +1043,9 @@ function eventSummary(event) {
   if (event.event_type === "runtime_dependency_invalidated") {
     const failure = details.dependency_failures?.[0] || {};
     return `${humanize(failure.dependency_type || "dependency")} ${failure.dependency_id || "dependency"} drift detected.`;
+  }
+  if (event.event_type === "continuation_invalidated") {
+    return "Continuation invalidated before execution; Guard blocks the runtime boundary.";
   }
   if (event.event_type === "continuation_evaluated") {
     return continuationSummary(details.continuation_status || {});

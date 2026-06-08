@@ -108,10 +108,13 @@ Runtime dependencies are represented as evidence:
 {
   "runtime_dependencies": [
     {
-      "type": "approval",
-      "id": "director-approval-1",
-      "hash": "sha256:...",
-      "valid_until": "2026-06-03T23:30:00+00:00"
+      "schema_version": "guard_runtime_dependency.v1",
+      "dependency_type": "approval",
+      "dependency_id": "director-approval-1",
+      "dependency_hash": "sha256:...",
+      "current_hash": "sha256:...",
+      "valid_until": "2026-06-03T23:30:00Z",
+      "status": "valid"
     }
   ]
 }
@@ -121,13 +124,46 @@ Dependency hash drift, invalidation, or expiration can invalidate continuation.
 The Guard Receipt binds runtime dependency hashes into replay basis and lineage
 continuity.
 
+Guard normalizes legacy dependency keys at intake, but runtime dependency
+governance evaluates only canonical `guard_runtime_dependency.v1` objects.
+
+## Runtime dependency governance
+
+Runtime dependency governance bridges a single evaluation to continuously valid
+execution. It is still Guard runtime state, not governance meaning.
+
+Deterministic invalidation classes are:
+
+- `dependency_drift`
+- `dependency_expired`
+- `dependency_invalidated`
+
+The continuation lifecycle state machine is:
+
+- `pending`
+- `admissible`
+- `continuation_required`
+- `revalidation_required`
+- `invalidated`
+- `expired`
+- `escalated`
+- `blocked`
+- `released`
+- `executed`
+
+Allowed, blocked, and escalated remain the enforcement outcome states.
+Lifecycle state explains where the runtime continuation is inside the execution
+path.
+
 ## Expiration-aware chronology
 
 Guard chronology may include continuation events when dependencies expire or
 drift:
 
+- `runtime_dependency_linked`
 - `runtime_dependency_expired`
 - `runtime_dependency_invalidated`
+- `continuation_invalidated`
 - `continuation_evaluated`
 
 The Guard Inspector presents these with both audit time and relative execution

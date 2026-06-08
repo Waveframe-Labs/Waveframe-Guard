@@ -12,9 +12,14 @@ from .evidence import build_runtime_evidence_model, validate_runtime_evidence_mo
 from .continuation import (
     continuation_requirements,
     evaluate_continuation,
-    evaluate_runtime_dependencies,
     invalidation_reasons,
+    runtime_lifecycle_state,
     runtime_condition_checks,
+)
+from .dependencies import (
+    RUNTIME_DEPENDENCY_V1,
+    evaluate_runtime_dependencies,
+    normalize_runtime_dependencies,
 )
 
 __all__ = [
@@ -30,7 +35,10 @@ __all__ = [
     "validate_runtime_evidence_model",
     "evaluate_continuation",
     "evaluate_runtime_dependencies",
+    "normalize_runtime_dependencies",
+    "RUNTIME_DEPENDENCY_V1",
     "continuation_requirements",
     "invalidation_reasons",
+    "runtime_lifecycle_state",
     "runtime_condition_checks",
 ]

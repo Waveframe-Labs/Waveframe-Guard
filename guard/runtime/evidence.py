@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from .dependencies import normalize_runtime_dependencies
+
 
 GUARD_RUNTIME_EVIDENCE_MODEL_V1 = "guard_runtime_evidence_model.v1"
 
@@ -38,7 +40,7 @@ def build_runtime_evidence_model(
         "continuity_snapshot": dict(continuity_snapshot or {}),
         "timestamp_source": dict(timestamp_source or {}),
         "execution_context": dict(execution_context or {}),
-        "runtime_dependencies": list(runtime_dependencies or []),
+        "runtime_dependencies": normalize_runtime_dependencies(runtime_dependencies),
     }
     validate_runtime_evidence_model(payload)
     return payload

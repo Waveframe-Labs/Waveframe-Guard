@@ -13,6 +13,7 @@ from guard.runtime.builders import (
 )
 from guard.runtime.evidence import GUARD_RUNTIME_EVIDENCE_MODEL_V1
 from guard.runtime.continuation import evaluate_continuation
+from guard.runtime.dependencies import RUNTIME_DEPENDENCY_V1, normalize_runtime_dependencies
 
 
 EVALUATION_TIME = "2026-06-03T22:30:00+00:00"
@@ -188,6 +189,38 @@ def test_continuation_validity_engine_returns_canonical_statuses():
         continuity_valid=True,
         expired=True,
     )["status"] == "expired"
+    assert evaluate_continuation(
+        evidence_valid=True,
+        replay_valid=False,
+        dependency_valid=True,
+        continuity_valid=True,
+    )["lifecycle_state"] == "continuation_required"
+
+
+def test_runtime_dependencies_normalize_to_canonical_contract():
+    dependencies = normalize_runtime_dependencies(
+        [
+            {
+                "type": "approval",
+                "id": "director-approval-1",
+                "hash": "sha256:approval",
+                "observed_hash": "sha256:approval",
+                "valid_until": "2026-06-03T22:31:00Z",
+            }
+        ]
+    )
+
+    assert dependencies == [
+        {
+            "schema_version": RUNTIME_DEPENDENCY_V1,
+            "dependency_type": "approval",
+            "dependency_id": "director-approval-1",
+            "dependency_hash": "sha256:approval",
+            "current_hash": "sha256:approval",
+            "valid_until": "2026-06-03T22:31:00Z",
+            "status": "valid",
+        }
+    ]
 
 
 def test_runtime_blocks_when_dependency_expiration_invalidates_continuation():
@@ -202,6 +235,7 @@ def test_runtime_blocks_when_dependency_expiration_invalidates_continuation():
                     "type": "approval",
                     "id": "director-approval-1",
                     "hash": "sha256:approval",
+                    "linked_at": "2026-06-03T22:00:00+00:00",
                     "valid_until": "2026-06-03T22:29:00+00:00",
                 }
             ],
@@ -210,15 +244,24 @@ def test_runtime_blocks_when_dependency_expiration_invalidates_continuation():
     )
 
     assert result["status"] == "blocked"
+    assert result["runtime_lifecycle_state"] == "expired"
+    assert result["enforcement_outcome"]["runtime_lifecycle_state"] == "expired"
     assert result["continuation_status"]["status"] == "expired"
+    assert result["continuation_status"]["lifecycle_state"] == "expired"
+    assert result["runtime_dependency_posture"]["dependencies"][0]["schema_version"] == RUNTIME_DEPENDENCY_V1
     assert result["continuation_requirements"][0]["requirement"] == "refresh_runtime_dependencies"
     assert result["invalidation_reasons"][0]["reason"] == "dependency_expired"
     assert result["runtime_condition_checks"][-1]["valid"] is False
     assert result["enforcement_outcome"]["invalidation_reasons"] == result["invalidation_reasons"]
     assert result["violated_constraints"][0]["constraint"] == "continuation_validity"
-    assert result["runtime_evidence"]["runtime_dependencies"][0]["id"] == "director-approval-1"
-    assert "runtime_dependency_expired" in [event["event_type"] for event in result["telemetry_events"]]
-    assert "continuation_evaluated" in [event["event_type"] for event in result["telemetry_events"]]
+    assert result["runtime_evidence"]["runtime_dependencies"][0]["dependency_id"] == "director-approval-1"
+    event_types = [event["event_type"] for event in result["telemetry_events"]]
+    assert "runtime_dependency_linked" in event_types
+    assert "runtime_dependency_expired" in event_types
+    assert "continuation_invalidated" in event_types
+    assert "continuation_evaluated" in event_types
+    expired_event = next(event for event in result["telemetry_events"] if event["event_type"] == "runtime_dependency_expired")
+    assert expired_event["details"]["relative_delta_ms"] == 1_740_000
 
 
 def test_runtime_blocks_when_dependency_drift_invalidates_continuation():
@@ -242,6 +285,7 @@ def test_runtime_blocks_when_dependency_drift_invalidates_continuation():
     )
 
     assert result["status"] == "blocked"
+    assert result["runtime_lifecycle_state"] == "invalidated"
     assert result["continuation_status"]["status"] == "invalidated"
     assert result["continuation_status"]["dependency_failures"][0]["reason"] == "dependency_drift"
     assert result["continuation_requirements"][0]["requirement"] == "rebuild_replay_basis"
