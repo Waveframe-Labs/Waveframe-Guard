@@ -773,17 +773,20 @@ h3 {
 }
 
 .comparison-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
 }
 
 .comparison-tools {
   display: grid;
-  grid-template-columns: minmax(150px, 1fr) minmax(150px, 1fr) auto;
+  grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) auto;
   gap: 8px;
-  min-width: min(100%, 560px);
+  width: min(100%, 680px);
+}
+
+.comparison-tools button {
+  min-width: 112px;
 }
 
 .comparison-output {
@@ -1039,6 +1042,20 @@ h3 {
   border-top: 1px solid var(--line);
 }
 
+.chronology-list li.stage-in {
+  opacity: 0;
+  transform: translateY(6px);
+  animation: stage-in 180ms ease-out forwards;
+  animation-delay: calc(var(--stage-index) * 55ms);
+}
+
+@keyframes stage-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .sequence {
   color: var(--orange-dark);
   font-size: 20px;
@@ -1059,15 +1076,27 @@ h3 {
   font-weight: 650;
 }
 
+.audit-time {
+  margin-top: 4px;
+  color: #8c8176;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 12px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
 .event-link {
   justify-self: end;
+  min-width: 76px;
   padding: 8px 10px;
-  color: var(--muted);
+  color: var(--orange-dark);
+  background: var(--orange-soft);
   border: 1px solid var(--line);
   border-radius: 8px;
-  font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 13px;
   font-weight: 900;
-  text-transform: uppercase;
+  text-align: center;
 }
 
 .technical-detail {
@@ -1448,7 +1477,6 @@ details textarea {
     grid-template-columns: 1fr;
   }
 
-  .comparison-head,
   .replay-diagnostics-head,
   .comparison-tools {
     display: grid;

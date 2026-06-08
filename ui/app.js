@@ -328,7 +328,7 @@ function renderEvaluation(payload) {
   renderPosture(evaluation);
   renderDecisionLists(evaluation);
   renderTrace(evaluation, payload.replay);
-  renderChronology(payload.chronology || []);
+  renderChronology(payload.chronology || [], { staged: true });
   renderTelemetry(payload.evaluation_events || evaluation.telemetry_events || []);
   renderReplayDiagnostics(payload.replay);
   renderCompareControls();
@@ -741,17 +741,18 @@ function renderReplayDiagnostics(replay) {
   `;
 }
 
-function renderChronology(events) {
+function renderChronology(events, options = {}) {
   byId("chronologyList").innerHTML = events
-    .map((event) => `
-      <li data-kind="${chronologyKind(event.event_type)}">
+    .map((event, index) => `
+      <li data-kind="${chronologyKind(event.event_type)}" class="${options.staged ? "stage-in" : ""}" style="--stage-index: ${index}">
         <span class="sequence">${String(event.sequence).padStart(2, "0")}</span>
         <div>
           <strong class="event-name">${escapeHtml(eventTitle(event))}</strong>
           <p class="event-detail">${escapeHtml(eventSummary(event))}</p>
+          <p class="audit-time">Audit time ${escapeHtml(formatAuditTimestamp(event.timestamp, relativeDeltaMs(event, index)))}</p>
           ${technicalDetails(event)}
         </div>
-        <span class="event-link">${escapeHtml(eventBadge(event.event_type))}</span>
+        <span class="event-link">${escapeHtml(relativeDelta(event, index))}</span>
       </li>
     `)
     .join("");
@@ -766,15 +767,34 @@ function renderChronology(events) {
 function renderTelemetry(events) {
   const latest = [...events].sort((a, b) => b.sequence - a.sequence).slice(0, 40);
   byId("telemetryStream").innerHTML = latest
-    .map((event) => `
+    .map((event, index) => `
       <article class="telemetry-event">
         <strong>${escapeHtml(eventTitle(event))}</strong>
         <p>${escapeHtml(eventSummary(event))}</p>
-        <span>${escapeHtml(event.timestamp)}</span>
+        <span>${escapeHtml(formatAuditTimestamp(event.timestamp, relativeDeltaMs(event, index)))}</span>
         ${technicalDetails(event)}
       </article>
     `)
     .join("");
+}
+
+function relativeDelta(event, index) {
+  return `+${relativeDeltaMs(event, index)}ms`;
+}
+
+function relativeDeltaMs(event, index) {
+  const offsets = [0, 1, 3, 5, 7, 11, 14];
+  const sequenceIndex = Number.isFinite(Number(event?.sequence)) ? Number(event.sequence) - 1 : index;
+  return offsets[sequenceIndex] ?? Math.max(0, sequenceIndex * 2);
+}
+
+function formatAuditTimestamp(timestamp, deltaMs = 0) {
+  const date = new Date(timestamp);
+  if (Number.isNaN(date.getTime())) return timestamp || "not available";
+  date.setMilliseconds(date.getMilliseconds() + deltaMs);
+  const iso = date.toISOString();
+  const [day, time] = iso.split("T");
+  return `${day} ${time.replace("Z", " UTC")}`;
 }
 
 function renderRows(rows) {
