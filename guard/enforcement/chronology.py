@@ -75,6 +75,47 @@ def build_chronology(
     ]
 
 
+def build_release_chronology(
+    *,
+    authority_ref: str,
+    timestamp: str,
+    continuation_lease: dict[str, Any],
+    release_validation: dict[str, Any],
+    start_sequence: int = 1,
+) -> list[dict[str, Any]]:
+    event_specs = [
+        (
+            "evaluation_admissible",
+            {
+                "execution_id": continuation_lease["execution_id"],
+                "continuation_id": continuation_lease["continuation_id"],
+                "relative_delta_ms": 0,
+            },
+        ),
+        (
+            "continuation_lease_issued",
+            {
+                "continuation_id": continuation_lease["continuation_id"],
+                "admissible_until": continuation_lease["admissible_until"],
+                "runtime_dependencies": continuation_lease.get("runtime_dependencies", []),
+                "relative_delta_ms": 5,
+            },
+        ),
+        *_release_dependency_event_specs(release_validation),
+        *_release_outcome_event_specs(release_validation),
+    ]
+    return [
+        build_guard_runtime_event(
+            sequence=start_sequence + index,
+            event_type=event_type,
+            timestamp=timestamp,
+            authority_ref=authority_ref,
+            details=details,
+        )
+        for index, (event_type, details) in enumerate(event_specs)
+    ]
+
+
 def _dependency_link_event_specs(dependency_posture: dict[str, Any]) -> list[tuple[str, dict[str, Any]]]:
     specs: list[tuple[str, dict[str, Any]]] = []
     for index, dependency in enumerate(dependency_posture.get("dependencies") or []):
@@ -92,6 +133,75 @@ def _dependency_link_event_specs(dependency_posture: dict[str, Any]) -> list[tup
             )
         )
     return specs
+
+
+def _release_dependency_event_specs(release_validation: dict[str, Any]) -> list[tuple[str, dict[str, Any]]]:
+    specs: list[tuple[str, dict[str, Any]]] = []
+    dependencies = {
+        dependency.get("dependency_id"): dependency
+        for dependency in release_validation.get("runtime_dependency_posture", {}).get("dependencies", [])
+    }
+    for index, failure in enumerate(release_validation.get("runtime_dependency_posture", {}).get("failures", [])):
+        dependency = dependencies.get(failure.get("dependency_id"), {})
+        event_type = "runtime_dependency_expired" if failure.get("reason") == "dependency_expired" else "runtime_dependency_invalidated"
+        specs.append(
+            (
+                event_type,
+                {
+                    "dependency_failures": [failure],
+                    "relative_delta_ms": dependency_relative_delta_ms(
+                        dependency,
+                        event="expired" if event_type == "runtime_dependency_expired" else "invalidated",
+                        default_ms=1_800_000 + (index * 60_000),
+                    ),
+                },
+            )
+        )
+    return specs
+
+
+def _release_outcome_event_specs(release_validation: dict[str, Any]) -> list[tuple[str, dict[str, Any]]]:
+    if release_validation["outcome"] == "release_allowed":
+        return [
+            (
+                "release_allowed",
+                {
+                    "continuation_status": release_validation["continuation_status"],
+                    "runtime_lifecycle_state": "released",
+                    "relative_delta_ms": 1_920_000,
+                },
+            )
+        ]
+    if release_validation["outcome"] == "revalidation_required":
+        return [
+            (
+                "release_revalidation_required",
+                {
+                    "continuation_status": release_validation["continuation_status"],
+                    "runtime_lifecycle_state": release_validation["runtime_lifecycle_state"],
+                    "relative_delta_ms": 1_860_000,
+                },
+            )
+        ]
+    return [
+        (
+            "continuation_invalidated",
+            {
+                "continuation_status": release_validation["continuation_status"],
+                "runtime_lifecycle_state": release_validation["runtime_lifecycle_state"],
+                "relative_delta_ms": 1_860_000,
+            },
+        ),
+        (
+            "release_blocked",
+            {
+                "outcome": release_validation["outcome"],
+                "invalidation_reasons": release_validation.get("invalidation_reasons", []),
+                "runtime_lifecycle_state": release_validation["runtime_lifecycle_state"],
+                "relative_delta_ms": 1_920_000,
+            },
+        ),
+    ]
 
 
 def _continuation_event_specs(

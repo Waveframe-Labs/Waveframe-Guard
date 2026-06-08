@@ -155,16 +155,52 @@ Allowed, blocked, and escalated remain the enforcement outcome states.
 Lifecycle state explains where the runtime continuation is inside the execution
 path.
 
+## Deferred release enforcement
+
+Guard separates admissibility, release, and execution:
+
+- `admissible`: evaluation succeeded at T1
+- `released`: continuation validated at T2
+- `executed`: protected mutation ran at T3
+
+The gap between `admissible` and `released` is the continuation governance
+category. Phase 1 is local and deterministic only. Guard does not add a
+scheduler, queue service, distributed orchestrator, Cloud agent, or repo split.
+
+The first release artifact is `guard_continuation_lease.v1`. It binds:
+
+- continuation id
+- execution id
+- authority ref
+- issued time
+- admissible-until time
+- runtime dependencies
+- continuation status
+- lease hash
+
+Release validation emits `guard_release_validation.v1` with one outcome:
+
+- `release_allowed`
+- `release_blocked`
+- `revalidation_required`
+- `continuation_invalidated`
+- `dependency_expired`
+
 ## Expiration-aware chronology
 
 Guard chronology may include continuation events when dependencies expire or
 drift:
 
+- `evaluation_admissible`
+- `continuation_lease_issued`
 - `runtime_dependency_linked`
 - `runtime_dependency_expired`
 - `runtime_dependency_invalidated`
 - `continuation_invalidated`
 - `continuation_evaluated`
+- `release_allowed`
+- `release_blocked`
+- `release_revalidation_required`
 
 The Guard Inspector presents these with both audit time and relative execution
 delta so operators can distinguish durable audit evidence from execution

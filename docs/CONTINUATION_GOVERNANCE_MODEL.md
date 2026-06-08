@@ -103,20 +103,65 @@ This lifecycle is distinct from the enforcement outcome states. Guard still emit
 `allowed`, `blocked`, or `escalated` as execution state; lifecycle state explains
 why a once-valid execution may no longer be continuously valid.
 
+## Deferred Release Enforcement
+
+Deferred release enforcement is Phase 1 of continuous execution validity. It is
+local and deterministic. It is not a scheduler, not a queue service, not a Cloud
+agent, and not distributed orchestration.
+
+The release model separates:
+
+- `admissible`: execution satisfied Guard evaluation at T1
+- `released`: continuation remained valid at release time T2
+- `executed`: the protected mutation actually ran at T3
+
+These states are not interchangeable. Continuation governance exists in the gap
+between `admissible` and `released`.
+
+The first release artifact is `guard_continuation_lease.v1`:
+
+```json
+{
+  "schema_version": "guard_continuation_lease.v1",
+  "continuation_id": "cont_...",
+  "execution_id": "exec_1",
+  "authority_ref": "finance-policy@1.0.0",
+  "issued_at": "2026-06-03T22:00:00Z",
+  "admissible_until": "2026-06-03T22:35:00Z",
+  "runtime_dependencies": [],
+  "continuation_status": {
+    "schema_version": "guard_continuation_status.v1",
+    "status": "admissible"
+  },
+  "revalidation_required": false
+}
+```
+
+Before deferred execution is released, Guard validates the lease with
+`guard_release_validation.v1`. Outcomes are:
+
+- `release_allowed`
+- `release_blocked`
+- `revalidation_required`
+- `continuation_invalidated`
+- `dependency_expired`
+
 ## Invalidation Chronology
 
 Guard chronology can show continuation invalidation without implying hosted live
 infrastructure:
 
+- evaluation admissible
+- continuation lease issued
 - runtime dependency linked
 - runtime dependency expired or invalidated
 - continuation invalidated
-- execution blocked
+- release blocked
 
 Example operator story:
 
 Transfer initially admissible. Approval expired before execution. Continuation
-invalidated. Execution blocked at runtime.
+invalidated. Release blocked at runtime.
 
 ## Outcome Binding
 

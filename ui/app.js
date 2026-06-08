@@ -995,7 +995,9 @@ function eventTitle(event) {
   const labels = {
     authority_context_resolved: "Compiled authority loaded",
     evaluation_pipeline_started: "Evaluation started",
+    evaluation_admissible: "Evaluation admissible",
     runtime_evidence_loaded: "Runtime evidence loaded",
+    continuation_lease_issued: "Continuation lease issued",
     continuity_checked: "Continuity checked",
     replay_validated: "Replay checked",
     runtime_dependency_linked: "Runtime dependency linked",
@@ -1003,6 +1005,9 @@ function eventTitle(event) {
     runtime_dependency_invalidated: "Runtime dependency invalidated",
     continuation_invalidated: "Continuation invalidated",
     continuation_evaluated: "Continuation evaluated",
+    release_allowed: "Release allowed",
+    release_blocked: "Release blocked",
+    release_revalidation_required: "Release revalidation required",
     admissibility_evaluated: "Admissibility evaluated",
     enforcement_outcome_recorded: "Enforcement outcome emitted"
   };
@@ -1016,6 +1021,12 @@ function eventSummary(event) {
   }
   if (event.event_type === "evaluation_pipeline_started") {
     return "Guard began evaluating this execution request.";
+  }
+  if (event.event_type === "evaluation_admissible") {
+    return "Execution was admissible when the continuation lease was issued.";
+  }
+  if (event.event_type === "continuation_lease_issued") {
+    return "Continuation lease issued for deferred release validation.";
   }
   if (event.event_type === "runtime_evidence_loaded") {
     return details.required_evidence?.length
@@ -1046,6 +1057,15 @@ function eventSummary(event) {
   }
   if (event.event_type === "continuation_invalidated") {
     return "Continuation invalidated before execution; Guard blocks the runtime boundary.";
+  }
+  if (event.event_type === "release_allowed") {
+    return "Continuation remained valid; release may proceed.";
+  }
+  if (event.event_type === "release_blocked") {
+    return "Release blocked because continuation no longer validates.";
+  }
+  if (event.event_type === "release_revalidation_required") {
+    return "Release requires continuation revalidation before execution.";
   }
   if (event.event_type === "continuation_evaluated") {
     return continuationSummary(details.continuation_status || {});

@@ -10,11 +10,15 @@ from .builders import (
 )
 from .evidence import build_runtime_evidence_model, validate_runtime_evidence_model
 from .continuation import (
+    GUARD_CONTINUATION_LEASE_V1,
+    GUARD_RELEASE_VALIDATION_V1,
+    build_continuation_lease,
     continuation_requirements,
     evaluate_continuation,
     invalidation_reasons,
     runtime_lifecycle_state,
     runtime_condition_checks,
+    validate_continuation,
 )
 from .dependencies import (
     RUNTIME_DEPENDENCY_V1,
@@ -34,6 +38,10 @@ __all__ = [
     "build_runtime_evidence_model",
     "validate_runtime_evidence_model",
     "evaluate_continuation",
+    "build_continuation_lease",
+    "validate_continuation",
+    "GUARD_CONTINUATION_LEASE_V1",
+    "GUARD_RELEASE_VALIDATION_V1",
     "evaluate_runtime_dependencies",
     "normalize_runtime_dependencies",
     "RUNTIME_DEPENDENCY_V1",

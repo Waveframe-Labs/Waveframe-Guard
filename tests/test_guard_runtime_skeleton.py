@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from guard import evaluate_runtime
+from guard import build_continuation_lease, evaluate_runtime, validate_continuation
 from guard.adapters import COMPILED_AUTHORITY_CONTRACT_V1, NORMALIZED_EXECUTION_REQUEST_V1
+from guard.enforcement import build_release_chronology
 from guard.runtime.builders import (
     EXECUTION_ADMISSIBILITY_PROJECTION_V1,
     EXECUTION_RUNTIME_POSTURE_V1,
@@ -12,7 +13,11 @@ from guard.runtime.builders import (
     validate_guard_enforcement_outcome,
 )
 from guard.runtime.evidence import GUARD_RUNTIME_EVIDENCE_MODEL_V1
-from guard.runtime.continuation import evaluate_continuation
+from guard.runtime.continuation import (
+    GUARD_CONTINUATION_LEASE_V1,
+    GUARD_RELEASE_VALIDATION_V1,
+    evaluate_continuation,
+)
 from guard.runtime.dependencies import RUNTIME_DEPENDENCY_V1, normalize_runtime_dependencies
 
 
@@ -290,6 +295,105 @@ def test_runtime_blocks_when_dependency_drift_invalidates_continuation():
     assert result["continuation_status"]["dependency_failures"][0]["reason"] == "dependency_drift"
     assert result["continuation_requirements"][0]["requirement"] == "rebuild_replay_basis"
     assert result["invalidation_reasons"][0]["reason"] == "dependency_drift"
+
+
+def test_deferred_release_blocks_when_approval_expires_after_admissibility():
+    evaluation = evaluate_runtime(
+        compiled_authority=_authority(),
+        execution_request=_request(amount=500),
+        actor_identity={"id": "manager-1", "type": "human", "role": "manager"},
+        evidence_posture={
+            "approvals": [{"role": "manager", "approved_by": "approver-1"}],
+            "runtime_dependencies": [
+                {
+                    "dependency_type": "approval",
+                    "dependency_id": "director-approval-1",
+                    "dependency_hash": "sha256:approval",
+                    "current_hash": "sha256:approval",
+                    "linked_at": "2026-06-03T22:00:00+00:00",
+                    "valid_until": "2026-06-03T22:30:00+00:00",
+                    "status": "valid",
+                }
+            ],
+        },
+        evaluation_time="2026-06-03T22:00:00+00:00",
+    )
+    assert evaluation["status"] == "admissible"
+    assert evaluation["runtime_lifecycle_state"] == "admissible"
+
+    lease = build_continuation_lease(
+        execution_id="exec-1",
+        authority_ref="finance-policy@1.0.0",
+        issued_at="2026-06-03T22:00:00+00:00",
+        admissible_until="2026-06-03T22:35:00+00:00",
+        runtime_dependencies=evaluation["runtime_dependency_posture"]["dependencies"],
+        continuation_status=evaluation["continuation_status"],
+    )
+    assert lease["schema_version"] == GUARD_CONTINUATION_LEASE_V1
+    assert lease["runtime_lifecycle_state"] == "admissible"
+    assert lease["revalidation_required"] is False
+
+    release_validation = validate_continuation(
+        lease,
+        release_time="2026-06-03T22:32:00+00:00",
+    )
+    assert release_validation["schema_version"] == GUARD_RELEASE_VALIDATION_V1
+    assert release_validation["outcome"] == "dependency_expired"
+    assert release_validation["release_allowed"] is False
+    assert release_validation["release_blocked"] is True
+    assert release_validation["runtime_lifecycle_state"] == "expired"
+    assert release_validation["continuation_status"]["status"] == "expired"
+    assert release_validation["invalidation_reasons"][0]["reason"] == "dependency_expired"
+
+    chronology = build_release_chronology(
+        authority_ref="finance-policy@1.0.0",
+        timestamp="2026-06-03T22:00:00+00:00",
+        continuation_lease=lease,
+        release_validation=release_validation,
+    )
+    assert [event["event_type"] for event in chronology] == [
+        "evaluation_admissible",
+        "continuation_lease_issued",
+        "runtime_dependency_expired",
+        "continuation_invalidated",
+        "release_blocked",
+    ]
+    assert chronology[1]["details"]["relative_delta_ms"] == 5
+    assert chronology[2]["details"]["relative_delta_ms"] == 1_800_000
+    assert chronology[3]["details"]["relative_delta_ms"] == 1_860_000
+    assert chronology[4]["details"]["relative_delta_ms"] == 1_920_000
+
+
+def test_deferred_release_allows_when_continuation_remains_valid():
+    lease = build_continuation_lease(
+        execution_id="exec-1",
+        authority_ref="finance-policy@1.0.0",
+        issued_at="2026-06-03T22:00:00+00:00",
+        admissible_until="2026-06-03T22:35:00+00:00",
+        runtime_dependencies=[
+            {
+                "dependency_type": "approval",
+                "dependency_id": "director-approval-1",
+                "dependency_hash": "sha256:approval",
+                "current_hash": "sha256:approval",
+                "linked_at": "2026-06-03T22:00:00+00:00",
+                "valid_until": "2026-06-03T22:35:00+00:00",
+                "status": "valid",
+            }
+        ],
+        continuation_status=evaluate_continuation(),
+    )
+
+    release_validation = validate_continuation(
+        lease,
+        release_time="2026-06-03T22:10:00+00:00",
+    )
+
+    assert release_validation["outcome"] == "release_allowed"
+    assert release_validation["release_allowed"] is True
+    assert release_validation["release_blocked"] is False
+    assert release_validation["runtime_lifecycle_state"] == "released"
+    assert release_validation["continuation_status"]["status"] == "admissible"
 
 
 def test_runtime_evaluation_is_deterministic_for_identical_inputs():
