@@ -8,7 +8,8 @@ const state = {
   compareA: "",
   compareB: "",
   receiptPanel: "receipt",
-  currentReceipt: null
+  currentReceipt: null,
+  orgDashboard: null
 };
 
 const inputConfig = [
@@ -79,7 +80,8 @@ async function evaluateCurrentInputs() {
   }
   setStatus("Evaluating execution");
   const payload = readInputDrawers();
-  const response = await fetch("/api/runtime/evaluate", {
+  const isDeferredRelease = byId("sampleSelect").value === "deferred-release-expired-approval";
+  const response = await fetch(isDeferredRelease ? "/api/runtime/deferred_release_demo" : "/api/runtime/evaluate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
@@ -87,8 +89,14 @@ async function evaluateCurrentInputs() {
   const body = await response.json();
   if (!response.ok) throw new Error(body.message || body.error || "Evaluation failed");
   state.latest = body;
+  if (body.deferred_release?.saved_run?.run_id) {
+    state.savedRunId = body.deferred_release.saved_run.run_id;
+    byId("runRef").textContent = state.savedRunId;
+    renderReceipt(body.deferred_release.saved_run.receipt);
+    await refreshHistory();
+  }
   renderEvaluation(body);
-  setStatus(`Rendered ${body.guard_enforcement_outcome.schema_version || outcomeContractSchema}`);
+  setStatus(isDeferredRelease ? "Rendered deferred release validation" : `Rendered ${body.guard_enforcement_outcome.schema_version || outcomeContractSchema}`);
 }
 
 async function saveCurrentRun() {
@@ -146,6 +154,14 @@ async function refreshHistory() {
   state.history = body.evaluations || [];
   renderHistory(state.history);
   renderWorkspaceErrors(body.artifact_errors || []);
+  await refreshRuntimeDashboard();
+}
+
+async function refreshRuntimeDashboard() {
+  const response = await fetch("/api/runtime/org_dashboard", { cache: "no-store" });
+  if (!response.ok) return;
+  state.orgDashboard = await response.json();
+  renderRuntimeDashboard(state.orgDashboard);
 }
 
 async function loadMostRecentRun() {
@@ -214,7 +230,9 @@ function renderEmptyWorkspace() {
   byId("chronologyList").innerHTML = "";
   byId("telemetryStream").innerHTML = "";
   renderReplayDiagnostics(null);
+  renderDeferredRelease(null);
   renderReceipt(null);
+  renderRuntimeDashboard(state.orgDashboard);
   byId("exampleLabel").textContent = "Artifact Intake";
 }
 
@@ -333,6 +351,7 @@ function renderEvaluation(payload) {
   renderChronology(payload.chronology || [], { staged: true });
   renderTelemetry(payload.evaluation_events || evaluation.telemetry_events || []);
   renderReplayDiagnostics(payload.replay);
+  renderDeferredRelease(payload.deferred_release);
   renderCompareControls();
 }
 
@@ -371,6 +390,38 @@ function renderHistory(evaluations) {
   renderCompareControls();
 }
 
+function renderRuntimeDashboard(dashboard) {
+  const panel = byId("runtimeDashboard");
+  if (!panel) return;
+  const expectedSchema = "guard_persistent_runtime_dashboard.v1";
+  const schemaVersion = dashboard?.schema_version || expectedSchema;
+  panel.dataset.schemaVersion = schemaVersion;
+  const context = dashboard?.organization_context || {
+    organization_id: "org-finance",
+    workspace_id: "workspace-local",
+    environment: "local"
+  };
+  byId("orgContextRef").textContent = `${context.organization_id} / ${context.workspace_id}`;
+  const summary = dashboard?.summary || {};
+  const metrics = [
+    ["Active continuation leases", summary.active_continuation_leases || 0, "continuation lease"],
+    ["Expiring dependencies", summary.expiring_dependencies || 0, "runtime dependencies"],
+    ["Blocked releases", summary.blocked_releases || 0, "release blocked"],
+    ["Escalation queue", summary.escalation_queue || 0, "release queue"],
+    ["Replay failures", summary.replay_failures || 0, "replay failures"],
+    ["Invalidated continuations", summary.invalidated_continuations || 0, "continuation invalidated"],
+    ["Runtime drift alerts", summary.runtime_drift_alerts || 0, "runtime drift alerts"],
+    ["Runs", summary.runs || 0, "saved runs"]
+  ];
+  panel.innerHTML = metrics.map(([label, value, note]) => `
+    <article class="runtime-dashboard-card ${Number(value) > 0 && label !== "Runs" ? "attention" : ""}">
+      <span>${escapeHtml(label)}</span>
+      <strong>${escapeHtml(String(value))}</strong>
+      <small>${escapeHtml(note)}</small>
+    </article>
+  `).join("");
+}
+
 function renderWorkspaceErrors(errors) {
   if (!errors.length) return;
   renderOperationalError("Local workspace artifact error", errors[0].message, errors[0].error_class);
@@ -386,6 +437,79 @@ function renderOperationalError(title, message, errorClass = "artifact_error") {
       <p>${escapeHtml(message)}</p>
     </article>
   `;
+}
+
+function renderDeferredRelease(deferredRelease) {
+  const panel = byId("continuationLeasePanel");
+  if (!panel) return;
+  if (!deferredRelease) {
+    panel.hidden = true;
+    panel.innerHTML = "";
+    return;
+  }
+  const lease = deferredRelease.continuation_lease || {};
+  const release = deferredRelease.release_validation || {};
+  const chronology = deferredRelease.release_chronology || [];
+  panel.hidden = false;
+  panel.innerHTML = `
+    <div class="panel-title compact-title">
+      <div>
+        <p class="section-kicker">Deferred Release Enforcement</p>
+        <h2>Continuation lease</h2>
+      </div>
+      <span class="status-pill ${release.release_allowed ? "ok" : "blocked"}">${escapeHtml(release.release_allowed ? "RELEASED" : "RELEASE BLOCKED")}</span>
+    </div>
+    <div class="release-state-grid">
+      <article>
+        <span>Admissible at T1</span>
+        <strong>${escapeHtml(formatAuditTimestamp(deferredRelease.admissible_at || lease.issued_at))}</strong>
+        <small>execution remained admissible</small>
+      </article>
+      <article>
+        <span>Release attempted at T2</span>
+        <strong>${escapeHtml(formatAuditTimestamp(deferredRelease.release_attempted_at || release.release_time))}</strong>
+        <small>release validation</small>
+      </article>
+      <article class="${release.release_allowed ? "ok" : "blocked"}">
+        <span>Release result</span>
+        <strong>${escapeHtml(releaseOutcomeLabel(release.outcome))}</strong>
+        <small>${escapeHtml(release.release_allowed ? "release allowed" : "release blocked")}</small>
+      </article>
+    </div>
+    <dl class="receipt-fields lineage-fields lease-fields">
+      <div><dt>Lease schema</dt><dd>${escapeHtml(lease.schema_version || "guard_continuation_lease.v1")}</dd></div>
+      <div><dt>Validation schema</dt><dd>${escapeHtml(release.schema_version || "guard_release_validation.v1")}</dd></div>
+      <div><dt>Continuation</dt><dd>${escapeHtml(lease.continuation_id || "not issued")}</dd></div>
+      <div><dt>Admissible until</dt><dd>${escapeHtml(lease.admissible_until || "not available")}</dd></div>
+      ${hashField("Lease hash", lease.lease_hash)}
+      ${hashField("Validation hash", release.release_validation_hash)}
+    </dl>
+    <ol class="chronology-list release-chronology">
+      ${chronology.map((event, index) => `
+        <li data-kind="${chronologyKind(event.event_type)}">
+          <span class="sequence">${String(event.sequence).padStart(2, "0")}</span>
+          <div>
+            <strong class="event-name">${escapeHtml(eventTitle(event))}</strong>
+            <p class="event-detail">${escapeHtml(eventSummary(event))}</p>
+            <p class="audit-time">Audit time ${escapeHtml(formatAuditTimestamp(event.timestamp, relativeDeltaMs(event, index)))}</p>
+            ${technicalDetails(event)}
+          </div>
+          <span class="event-link">${escapeHtml(relativeDelta(event, index))}</span>
+        </li>
+      `).join("")}
+    </ol>
+  `;
+}
+
+function releaseOutcomeLabel(outcome) {
+  const labels = {
+    release_allowed: "Released",
+    release_blocked: "Release blocked",
+    revalidation_required: "Revalidation required",
+    continuation_invalidated: "Continuation invalidated",
+    dependency_expired: "Release blocked"
+  };
+  return labels[outcome] || humanize(outcome || "release blocked");
 }
 
 function filterHistory(evaluations) {

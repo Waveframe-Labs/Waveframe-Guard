@@ -411,6 +411,8 @@ h3 {
 .execution-record,
 .history-panel,
 .receipt-panel,
+.continuation-lease-panel,
+.persistent-runtime-panel,
 .trace-panel,
 .chronology-panel,
 .telemetry-panel,
@@ -471,13 +473,116 @@ h3 {
 }
 
 .history-panel,
-.receipt-panel {
+.receipt-panel,
+.continuation-lease-panel {
   min-width: 0;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 10px;
   box-shadow: var(--shadow);
   overflow: hidden;
+}
+
+.continuation-lease-panel {
+  margin-bottom: 14px;
+}
+
+.release-state-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  padding: 0 16px 14px;
+}
+
+.release-state-grid article {
+  min-width: 0;
+  padding: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.release-state-grid article.blocked {
+  background: var(--red-soft);
+  border-color: #e6b8b8;
+}
+
+.release-state-grid article.ok {
+  background: #edf8f0;
+  border-color: #badbc4;
+}
+
+.release-state-grid span,
+.release-state-grid small {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.release-state-grid strong {
+  display: block;
+  min-width: 0;
+  margin: 6px 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 950;
+}
+
+.lease-fields {
+  margin: 0 16px 14px;
+}
+
+.release-chronology {
+  margin: 0;
+  padding: 0 16px 16px;
+}
+
+.persistent-runtime-panel {
+  margin-top: 14px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.runtime-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  padding: 0 16px 16px;
+}
+
+.runtime-dashboard-card {
+  min-width: 0;
+  padding: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.runtime-dashboard-card.attention {
+  background: var(--orange-soft);
+  border-color: rgba(255, 95, 5, 0.32);
+}
+
+.runtime-dashboard-card span,
+.runtime-dashboard-card small {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.runtime-dashboard-card strong {
+  display: block;
+  margin: 5px 0;
+  color: var(--ink);
+  font-size: 22px;
+  font-weight: 950;
 }
 
 #receiptTitle {

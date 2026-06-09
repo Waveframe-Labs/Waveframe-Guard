@@ -212,11 +212,13 @@ Guard local owns:
 
 - Guard SDK interception
 - before-mutation enforcement
+- local organization and workspace context
 - local evaluation artifacts
 - local Guard Receipts
 - local Artifact manifests
 - local replay basis and replay records
 - local `.guard-local/` workspace
+- local SQLite persistent organizational runtime
 - Guard Inspector inspection over local artifacts
 
 Cloud owns:
@@ -232,5 +234,10 @@ Cloud owns:
 - compliance exports
 
 Guard local may emit artifacts Cloud later imports or manages. Guard local does
-not implement Cloud persistence, organization tenancy, policy publishing, or
-fleet-wide analytics.
+not implement Cloud persistence, managed organization tenancy, policy
+publishing, or fleet-wide analytics.
+
+Persistent organizational runtime is transitional local infrastructure. It may
+persist organizations, workspaces, runs, actors, compiled authority references,
+continuation leases, release validations, runtime dependencies, and release
+queue rows in `.guard-local/guard-runtime.sqlite3`. It is not Cloud.

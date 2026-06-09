@@ -19,9 +19,11 @@ INPUT_ROOT = Path(__file__).resolve().parent / "runtime_inputs"
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from guard import evaluate_runtime
+from guard import build_continuation_lease, evaluate_runtime, validate_continuation
+from guard.enforcement import build_release_chronology
 from guard.sdk.local_persistence import GuardArtifactError, LocalEvaluationStore, build_enforcement_receipt
 from guard.runtime.evidence import validate_runtime_evidence_model
+from guard.runtime.organization import PersistentOrganizationalRuntime, default_organization_context
 
 LOCAL_WORKSPACE_ROOT = REPO_ROOT / ".guard-local"
 
@@ -78,10 +80,16 @@ def evaluate_runtime_request(payload: dict[str, Any] | None = None) -> dict[str,
 
 def save_runtime_evaluation(payload: dict[str, Any], *, store_root: Path | None = None) -> dict[str, Any]:
     evaluated = _coerce_evaluated_payload(payload)
-    store = LocalEvaluationStore(store_root or LOCAL_WORKSPACE_ROOT)
+    root = store_root or LOCAL_WORKSPACE_ROOT
+    store = LocalEvaluationStore(root)
     record = store.save_evaluation(
         inputs=evaluated["inputs"],
         evaluation=evaluated["evaluation"],
+    )
+    PersistentOrganizationalRuntime(root).record_evaluation(
+        evaluated,
+        receipt=record["receipt"],
+        context=_organization_context(evaluated.get("inputs", {})),
     )
     return {
         "saved_run": {
@@ -90,6 +98,77 @@ def save_runtime_evaluation(payload: dict[str, Any], *, store_root: Path | None 
             "receipt": record["receipt"],
             "artifact_manifest": record["artifact_manifest"],
         }
+    }
+
+
+def run_deferred_release_demo(
+    payload: dict[str, Any] | None = None,
+    *,
+    store_root: Path | None = None,
+) -> dict[str, Any]:
+    inputs = payload or load_runtime_inputs("deferred-release-expired-approval")
+    evaluated = evaluate_runtime_request(inputs)
+    store_root = store_root or LOCAL_WORKSPACE_ROOT
+    saved = save_runtime_evaluation(evaluated, store_root=store_root)
+    evaluation = evaluated["evaluation"]
+    request = evaluated["inputs"]["execution_request"]
+    evidence = evaluated["inputs"]["runtime_evidence"]
+    authority_ref = evaluation["enforcement_outcome"]["authority_ref"]
+    issued_at = evidence["timestamp_source"]["timestamp"]
+    release_plan = inputs.get("deferred_release", {})
+    release_time = release_plan.get("release_time") or "2026-06-03T22:32:00+00:00"
+    lease = build_continuation_lease(
+        execution_id=request["request_id"],
+        authority_ref=authority_ref,
+        issued_at=issued_at,
+        admissible_until=release_plan.get("admissible_until") or "2026-06-03T22:35:00+00:00",
+        runtime_dependencies=evaluation["runtime_dependency_posture"]["dependencies"],
+        continuation_status=evaluation["continuation_status"],
+    )
+    release_validation = validate_continuation(
+        lease,
+        release_time=release_time,
+    )
+    release_chronology = build_release_chronology(
+        authority_ref=authority_ref,
+        timestamp=issued_at,
+        continuation_lease=lease,
+        release_validation=release_validation,
+    )
+    _write_local_artifact(store_root, "continuation-leases", f"{lease['continuation_id']}.json", lease)
+    _write_local_artifact(
+        store_root,
+        "release-validations",
+        f"{release_validation['release_validation_id']}.json",
+        {
+            "release_validation": release_validation,
+            "release_chronology": release_chronology,
+        },
+    )
+    org_runtime = PersistentOrganizationalRuntime(store_root)
+    context = _organization_context(inputs)
+    org_runtime.record_deferred_release(
+        {
+            "continuation_lease": lease,
+            "release_validation": release_validation,
+            "saved_run": saved["saved_run"],
+        },
+        context=context,
+    )
+    return {
+        **evaluated,
+        "sample_label": "Expired approval release block",
+        "deferred_release": {
+            "schema_version": "guard_deferred_release_demo.v1",
+            "admissible_at": issued_at,
+            "release_attempted_at": release_time,
+            "continuation_lease": lease,
+            "release_validation": release_validation,
+            "release_chronology": release_chronology,
+            "saved_run": saved["saved_run"],
+            "receipt": saved["saved_run"]["receipt"],
+            "persistent_runtime_dashboard": org_runtime.dashboard(context),
+        },
     }
 
 
@@ -155,6 +234,15 @@ def runtime_history(*, store_root: Path | None = None, limit: int = 20) -> dict[
     }
 
 
+def persistent_runtime_dashboard(
+    *,
+    store_root: Path | None = None,
+    context: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    root = store_root or LOCAL_WORKSPACE_ROOT
+    return PersistentOrganizationalRuntime(root).dashboard(context or default_organization_context())
+
+
 def export_runtime_receipt(payload: dict[str, Any]) -> dict[str, Any]:
     evaluated = _coerce_evaluated_payload(payload)
     return {
@@ -197,6 +285,7 @@ class GuardLocalRequestHandler(BaseHTTPRequestHandler):
             "/api/runtime/replay",
             "/api/runtime/load_run",
             "/api/runtime/export_receipt",
+            "/api/runtime/deferred_release_demo",
         }:
             self._send_json({"error": "not found"}, status=HTTPStatus.NOT_FOUND)
             return
@@ -212,6 +301,8 @@ class GuardLocalRequestHandler(BaseHTTPRequestHandler):
                 self._send_json(load_saved_runtime_evaluation(body["run_id"]))
             elif path == "/api/runtime/export_receipt":
                 self._send_json(export_runtime_receipt(body))
+            elif path == "/api/runtime/deferred_release_demo":
+                self._send_json(run_deferred_release_demo(body or None))
         except Exception as exc:
             self._send_error(exc)
 
@@ -257,6 +348,8 @@ class GuardLocalRequestHandler(BaseHTTPRequestHandler):
             return evaluate_runtime_request()
         if path == "/api/runtime/history":
             return runtime_history()
+        if path == "/api/runtime/org_dashboard":
+            return persistent_runtime_dashboard()
         if path.startswith("/api"):
             return {"error": "unknown api route", "path": path}
         return None
@@ -387,7 +480,77 @@ def _sample_inputs(base: dict[str, Any], sample: str) -> dict[str, Any]:
         payload["continuity_posture"] = {}
         payload["sample_label"] = "Escalated queued job example"
         return payload
+    if sample == "deferred-release-expired-approval":
+        payload["execution_request"] = {
+            **payload["execution_request"],
+            "request_id": "exec-deferred-release-transfer",
+            "arguments": {"amount": 500},
+        }
+        payload["runtime_evidence"] = {
+            **payload["runtime_evidence"],
+            "actor_identity": {
+                "id": "manager-2",
+                "type": "human",
+                "role": "manager",
+            },
+            "approvals": [
+                {
+                    "role": "manager",
+                    "approved_by": "manager-1",
+                }
+            ],
+            "replay_evidence": {},
+            "continuity_snapshot": {},
+            "timestamp_source": {
+                "source": "caller_supplied",
+                "timestamp": "2026-06-03T22:00:00+00:00",
+            },
+            "execution_context": {
+                "surface": "sdk",
+                "environment": "local",
+                "latency_ms": 10,
+            },
+            "runtime_dependencies": [
+                {
+                    "schema_version": "guard_runtime_dependency.v1",
+                    "dependency_type": "approval",
+                    "dependency_id": "director-approval-1",
+                    "dependency_hash": "sha256:director-approval",
+                    "current_hash": "sha256:director-approval",
+                    "linked_at": "2026-06-03T22:00:00+00:00",
+                    "valid_until": "2026-06-03T22:30:00+00:00",
+                    "status": "valid",
+                }
+            ],
+        }
+        payload["continuity_posture"] = {}
+        payload["deferred_release"] = {
+            "schema_version": "guard_deferred_release_plan.v1",
+            "admissible_until": "2026-06-03T22:35:00+00:00",
+            "release_time": "2026-06-03T22:32:00+00:00",
+            "expected_outcome": "dependency_expired",
+        }
+        payload["sample_label"] = "Expired approval release block"
+        return payload
     return payload
+
+
+def _organization_context(payload: dict[str, Any] | None) -> dict[str, str]:
+    context = default_organization_context()
+    if payload:
+        context.update(payload.get("organization_context") or {})
+        runtime_evidence = payload.get("runtime_evidence") or {}
+        execution_context = runtime_evidence.get("execution_context") or {}
+        if execution_context.get("environment"):
+            context["environment"] = execution_context["environment"]
+    return context
+
+
+def _write_local_artifact(root: Path, folder: str, filename: str, payload: dict[str, Any]) -> Path:
+    path = root / folder / filename
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return path
 
 
 def _is_relative_to(path: Path, root: Path) -> bool:

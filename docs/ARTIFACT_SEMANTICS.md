@@ -28,6 +28,8 @@ The saved evaluation contains:
   - enforcement outcome
 - `guard_enforcement_outcome`
 - `guard_enforcement_receipt.v1`
+- `guard_continuation_lease.v1`
+- `guard_release_validation.v1`
 - `guard_artifact_manifest.v1`
 
 The local store appends saved evaluations to:
@@ -52,6 +54,18 @@ Replay records are exported to:
 
 ```text
 .guard-local/replays/<run_id>.json
+```
+
+Continuation leases are exported to:
+
+```text
+.guard-local/continuation-leases/<continuation_id>.json
+```
+
+Release validations are exported to:
+
+```text
+.guard-local/release-validations/<release_validation_id>.json
 ```
 
 The Guard Inspector observes this local workspace. The normal operational loop
@@ -101,6 +115,37 @@ The receipt also carries hashes for:
 - timestamp source
 - runtime dependencies
 - chronology
+
+## Deferred release artifacts
+
+Deferred release enforcement introduces two local deterministic artifacts:
+
+- `guard_continuation_lease.v1`
+- `guard_release_validation.v1`
+
+A continuation lease proves that execution remained admissible after evaluation
+and before release validation. It binds:
+
+- continuation id
+- execution id
+- authority ref
+- issued time
+- admissible-until time
+- runtime dependencies
+- continuation status
+- lease hash
+
+Release validation decides whether release is allowed before execution. It can
+emit:
+
+- `release_allowed`
+- `release_blocked`
+- `revalidation_required`
+- `continuation_invalidated`
+- `dependency_expired`
+
+`release blocked` means the original evaluation may have been admissible, but
+the continuation lease no longer validates at release time.
 
 ## Replay basis
 

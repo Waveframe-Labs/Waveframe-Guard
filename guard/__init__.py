@@ -10,6 +10,7 @@ from .runtime.builders import (
 )
 from .runtime.evidence import build_runtime_evidence_model, validate_runtime_evidence_model
 from .runtime.continuation import build_continuation_lease, validate_continuation
+from .runtime.organization import PersistentOrganizationalRuntime, default_organization_context
 
 __all__ = [
     "evaluate_runtime",
@@ -24,4 +25,6 @@ __all__ = [
     "validate_runtime_evidence_model",
     "build_continuation_lease",
     "validate_continuation",
+    "PersistentOrganizationalRuntime",
+    "default_organization_context",
 ]

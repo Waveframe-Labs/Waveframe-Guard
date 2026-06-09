@@ -19,6 +19,8 @@ Guard owns runtime behavior at the execution edge:
 - runtime chronology
 - runtime enforcement cognition
 - execution posture rendering
+- local persistent runtime state for runs, leases, dependencies, and release
+  validations
 
 Guard answers one question:
 
@@ -114,3 +116,15 @@ unless they have already been compiled into that contract form upstream.
 Execution requests must also arrive through a normalization boundary. Guard may
 call a Proposal Normalizer adapter when available, but Guard must not duplicate
 proposal normalization rules locally.
+
+## Persistent organizational runtime
+
+Guard may persist local organizational runtime state in
+`.guard-local/guard-runtime.sqlite3` so continuation governance can survive
+process restarts. This transitional local layer may contain organization and
+workspace context, actors, compiled authority references, runs, continuation
+leases, release validations, runtime dependencies, and release queue rows.
+
+This is not Cloud. It does not own managed tenancy, fleet-wide audit,
+organization administration, policy publishing, semantic interpretation, or
+centralized governance history.

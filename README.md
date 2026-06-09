@@ -132,6 +132,35 @@ print(decision.continuity_signals)
 
 Continuity signals are not admissibility decisions. Guard evaluates continuity locally; Cloud may display continuity evidence, but Cloud does not decide admissibility.
 
+## Deferred Release Enforcement
+
+Guard separates admissibility from release. An execution can be admissible at T1,
+queued or delayed, and then blocked at T2 if its continuation lease no longer
+validates.
+
+The first local model emits:
+
+- `guard_continuation_lease.v1` as the continuation lease
+- `guard_release_validation.v1` as the release validation
+- `release blocked` when execution remained admissible at evaluation time but a
+  runtime dependency expired before release
+
+Example: a transfer is admissible, the director approval expires before release,
+and Guard blocks the release before the mutation executes.
+
+## Persistent Organizational Runtime
+
+Guard can keep local longitudinal runtime state in `.guard-local/guard-runtime.sqlite3`.
+This is a transitional local runtime layer, not Cloud.
+
+It persists organizations, workspaces, runs, actors, compiled authority
+references, continuation leases, release validations, runtime dependencies, and
+release queue rows so deferred release enforcement can survive process restart.
+
+Guard Inspector reads this local state to show active continuation leases,
+expiring dependencies, blocked releases, escalation queue items, replay failures,
+invalidated continuations, and runtime drift alerts.
+
 ## Cloud-Connected Runtime
 
 For application code, `GuardRuntime.from_cloud(...)` is the ergonomic local-first path:

@@ -98,6 +98,17 @@ def wire_transfer(request):
             </aside>
           </section>
 
+          <section class="persistent-runtime-panel">
+            <div class="panel-title compact-title">
+              <div>
+                <p class="section-kicker">Persistent Organizational Runtime</p>
+                <h2>Local runtime control plane</h2>
+              </div>
+              <span id="orgContextRef" class="hash-chip">org-finance / workspace-local</span>
+            </div>
+            <div id="runtimeDashboard" class="runtime-dashboard-grid"></div>
+          </section>
+
           <section class="payload-drawer">
             <div class="panel-title workspace-head">
               <div>
@@ -130,6 +141,7 @@ def wire_transfer(request):
                 <option value="blocked-transfer">Blocked transfer example</option>
                 <option value="allowed-transfer">Allowed transfer example</option>
                 <option value="escalated-queued-job">Escalated queued job example</option>
+                <option value="deferred-release-expired-approval">Expired approval release block</option>
                 <option value="empty">Empty input set</option>
               </select>
               <input id="artifactInput" type="file" accept="application/json,.json">
@@ -235,6 +247,7 @@ def wire_transfer(request):
 
         <section id="artifacts" class="tab-panel" aria-label="Replay and artifacts">
           <section id="replayDiagnostics" class="replay-diagnostics" hidden></section>
+          <section id="continuationLeasePanel" class="continuation-lease-panel" hidden></section>
 
           <section class="artifact-grid">
             <article class="receipt-panel">

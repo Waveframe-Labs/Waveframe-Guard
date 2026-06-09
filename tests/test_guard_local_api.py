@@ -48,11 +48,14 @@ def test_local_api_exposes_named_sample_input_sets():
     blocked = local_api.load_runtime_inputs("blocked-transfer")
     allowed = local_api.load_runtime_inputs("allowed-transfer")
     escalated = local_api.load_runtime_inputs("escalated-queued-job")
+    deferred = local_api.load_runtime_inputs("deferred-release-expired-approval")
     empty = local_api.load_runtime_inputs("empty")
 
     assert blocked["sample_label"] == "Blocked transfer example"
     assert allowed["sample_label"] == "Allowed transfer example"
     assert escalated["sample_label"] == "Escalated queued job example"
+    assert deferred["sample_label"] == "Expired approval release block"
+    assert deferred["deferred_release"]["schema_version"] == "guard_deferred_release_plan.v1"
     assert empty["sample_label"] == "Empty input set"
     assert empty["compiled_authority"] == {}
     assert empty["execution_request"] == {}
@@ -61,6 +64,40 @@ def test_local_api_exposes_named_sample_input_sets():
     assert local_api.evaluate_runtime_request(blocked)["evaluation"]["status"] == "blocked"
     assert local_api.evaluate_runtime_request(allowed)["evaluation"]["status"] == "admissible"
     assert local_api.evaluate_runtime_request(escalated)["evaluation"]["status"] == "escalated"
+    assert local_api.evaluate_runtime_request(deferred)["evaluation"]["status"] == "admissible"
+
+
+def test_local_api_runs_deferred_release_expired_approval_demo(tmp_path):
+    demo = local_api.run_deferred_release_demo(
+        local_api.load_runtime_inputs("deferred-release-expired-approval"),
+        store_root=tmp_path,
+    )
+
+    deferred = demo["deferred_release"]
+    lease = deferred["continuation_lease"]
+    release = deferred["release_validation"]
+
+    assert demo["evaluation"]["status"] == "admissible"
+    assert demo["guard_enforcement_outcome"]["status"] == "admissible"
+    assert deferred["schema_version"] == "guard_deferred_release_demo.v1"
+    assert lease["schema_version"] == "guard_continuation_lease.v1"
+    assert release["schema_version"] == "guard_release_validation.v1"
+    assert release["outcome"] == "dependency_expired"
+    assert release["release_blocked"] is True
+    assert deferred["receipt"]["schema_version"] == "guard_enforcement_receipt.v1"
+    assert [event["event_type"] for event in deferred["release_chronology"]] == [
+        "evaluation_admissible",
+        "continuation_lease_issued",
+        "runtime_dependency_expired",
+        "continuation_invalidated",
+        "release_blocked",
+    ]
+    assert (tmp_path / "receipts" / f"{deferred['saved_run']['run_id']}.json").exists()
+    assert (tmp_path / "continuation-leases" / f"{lease['continuation_id']}.json").exists()
+    assert (tmp_path / "release-validations" / f"{release['release_validation_id']}.json").exists()
+    dashboard = local_api.persistent_runtime_dashboard(store_root=tmp_path)
+    assert dashboard["schema_version"] == "guard_persistent_runtime_dashboard.v1"
+    assert dashboard["summary"]["blocked_releases"] == 1
 
 
 def test_local_api_saves_replays_and_exports_local_receipts(tmp_path):
