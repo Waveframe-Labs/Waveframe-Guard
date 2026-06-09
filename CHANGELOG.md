@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased - Guard Runtime Checkpoint
+## [0.9.0] - Guard Runtime Checkpoint
 
 ### Added
 - Added Guard SDK primary-path documentation for local `.guard-local` evaluation and receipt emission.
@@ -19,7 +19,7 @@
 - Moved benchmark tooling under `tools/benchmarks/`.
 
 ### Verified
-- Checkpoint scan runs `python -m pytest`.
+- Full Guard suite passes: `104 passed`.
 - Checkpoint scan compiles Guard SDK, local API, and persistent runtime modules with `python -m py_compile`.
 
 ## [0.8.0] - Admissibility Continuity Semantics

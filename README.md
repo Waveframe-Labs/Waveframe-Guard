@@ -8,7 +8,7 @@ Stop unsafe AI and automated actions **before they execute**.
 
 Waveframe Guard enforces governance at the execution boundary. If an action violates policy, it never runs.
 
-Current release: `0.8.0`.
+Current release: `0.9.0`.
 
 ## Guard SDK Primary Path
 
