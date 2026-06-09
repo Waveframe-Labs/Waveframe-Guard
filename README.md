@@ -10,6 +10,39 @@ Waveframe Guard enforces governance at the execution boundary. If an action viol
 
 Current release: `0.8.0`.
 
+## Guard SDK Primary Path
+
+Guard is SDK-first. The primary product path is:
+
+```python
+from guard.sdk import Guard
+
+guard = Guard.local(workspace=".guard-local")
+
+@guard.protect(authority="finance-policy@1.0.0")
+def wire_transfer(request):
+    return execute_transfer(request)
+```
+
+The SDK sits before the mutation boundary. It loads compiled authority,
+normalizes the execution artifact boundary, evaluates through CRI-CORE, emits a
+Guard enforcement outcome, and writes local receipts/replay artifacts for later
+inspection.
+
+## Guard Inspector
+
+Guard Inspector is not a policy authoring surface. It is the local inspection UI
+for SDK-emitted evaluations and receipts.
+
+Use it when an execution is allowed, blocked, escalated, or release-blocked and
+you need to inspect:
+
+- what entered Guard
+- why CRI-CORE produced the outcome
+- what receipt/artifact was emitted
+- whether replay and lineage remain trustworthy
+- which continuation lease or release validation governed delayed execution
+
 ## Example
 
 This example assumes a published contract artifact exists at `contracts/finance-policy-1.0.0.contract.json`. In your application, point `contract_path` at the contract published by your governance workflow.
@@ -295,10 +328,13 @@ runtime = GovernedRuntime(
 
 | Mode | Behavior |
 | --- | --- |
-| Local | Fast, local enforcement |
-| Cloud | Policy sync, audit, and attestation |
+| Local Guard | SDK interception, runtime evaluation, Guard Receipts, replay basis, continuation leases, release validations, local `.guard-local/` state |
+| Cloud | Managed organization tenancy, remote authority distribution, centralized lineage, fleet-wide audit, policy publishing, managed replay, compliance exports |
 
-Guard enforces locally. Cloud provides authority, audit, and verification.
+Guard enforces locally against compiled authority. Cloud may publish authority,
+aggregate artifacts, and provide organization-wide audit, but Cloud does not
+decide runtime admissibility and Guard does not derive governance meaning from
+raw policy text.
 
 ## Fail Modes
 

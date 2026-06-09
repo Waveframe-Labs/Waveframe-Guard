@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased - Guard Runtime Checkpoint
+
+### Added
+- Added Guard SDK primary-path documentation for local `.guard-local` evaluation and receipt emission.
+- Added Guard Inspector positioning as a local evaluation/receipt inspection surface, not policy authoring.
+- Added deferred release enforcement documentation covering continuation leases, release validations, and release-blocked outcomes.
+- Added persistent organizational runtime checkpoint documentation for local SQLite state, export/import, corruption recovery, and cleanup.
+- Added local-to-Cloud lifecycle boundary documentation.
+
+### Changed
+- Clarified that Guard evaluates runtime admissibility locally against compiled authority.
+- Clarified that Cloud owns managed organization lifecycle, centralized lineage, fleet-wide audit, policy publishing, and compliance exports.
+- Kept Cloud outside Guard runtime admissibility and governance meaning derivation.
+
+### Verified
+- Checkpoint scan runs `python -m pytest`.
+- Checkpoint scan compiles Guard SDK, local API, and persistent runtime modules with `python -m py_compile`.
+
 ## [0.8.0] - Admissibility Continuity Semantics
 
 ### Added
