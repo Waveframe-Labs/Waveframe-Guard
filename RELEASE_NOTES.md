@@ -6,7 +6,7 @@ v0.8.0 introduces admissibility continuity semantics for Guard. Decisions can no
 
 ## Highlights
 
-- Added `CONTINUITY_SEMANTICS.md` as the scope boundary for admissibility continuity.
+- Added `docs/runtime/CONTINUITY_SEMANTICS.md` as the scope boundary for admissibility continuity.
 - Added `valid_until`, `revalidation_required_after`, and `continuity_signals` result metadata.
 - Added deterministic signals for authority revocation, authority supersession, expired admissibility windows, and actor continuity breaks.
 - Added tests covering stale admissibility and continuity signal emission.

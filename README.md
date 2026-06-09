@@ -43,6 +43,16 @@ you need to inspect:
 - whether replay and lineage remain trustworthy
 - which continuation lease or release validation governed delayed execution
 
+## Repository Surface
+
+The public Guard surface is the SDK, local runtime, deterministic evaluation
+model, continuation governance, replay artifacts, deferred release model,
+Inspector demo UI, examples, docs, tests, and sample compiled contracts.
+
+Non-production or split-bound work is quarantined under `temp/`. In particular,
+`temp/labs/cloud_runtime/` is a lab preview for future Cloud product work, not
+production Guard Cloud and not required for local enforcement.
+
 ## Example
 
 This example assumes a published contract artifact exists at `contracts/finance-policy-1.0.0.contract.json`. In your application, point `contract_path` at the contract published by your governance workflow.
@@ -353,7 +363,7 @@ pip install waveframe-guard cricore-contract-compiler cricore-proposal-normalize
 ## Live Demo
 
 ```bash
-python examples/live_enforcement_demo.py
+python examples/runtime/live_enforcement_demo.py
 ```
 
 The demo shows:
@@ -397,4 +407,4 @@ Waveframe Guard is the layer that can **stop execution**.
 
 The Waveframe Guard SDK operates independently and does not require Cloud components to enforce governance locally.
 
-The cloud directory contains experimental Cloud control plane components and is not required for SDK operation.
+Non-production Cloud control plane experiments are quarantined under `temp/labs/cloud_runtime/` and are not required for SDK operation.

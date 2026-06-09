@@ -1,21 +1,18 @@
 import time
 from pathlib import Path
 
-from waveframe_guard import install_guard, guard, GovernanceError
+from waveframe_guard import GovernanceError, guard, install_guard
 
-# -------------------------
-# Setup
-# -------------------------
 
 CONTRACT_PATH = (
-    Path(__file__).resolve().parents[1]
+    Path(__file__).resolve().parents[2]
     / "contracts"
     / "finance-policy-1.0.0.contract.json"
 )
 
 install_guard(
     actor={"id": "user-1", "type": "human", "role": "manager"},
-    contract_path=CONTRACT_PATH
+    contract_path=CONTRACT_PATH,
 )
 
 
@@ -23,10 +20,6 @@ install_guard(
 def test_action():
     return True
 
-
-# -------------------------
-# Benchmark
-# -------------------------
 
 N = 1000
 
@@ -42,7 +35,7 @@ print(f"Avg per call: {(end - start) / N * 1000:.3f} ms")
 
 install_guard(
     actor={"id": "user-1", "type": "human", "role": "intern"},
-    contract_path=CONTRACT_PATH
+    contract_path=CONTRACT_PATH,
 )
 
 blocked = 0

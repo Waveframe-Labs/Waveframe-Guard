@@ -14,7 +14,7 @@ from waveframe_guard import install_guard, guard, GovernanceError
 # Execution blocked
 
 CONTRACT_PATH = (
-    Path(__file__).resolve().parents[1]
+    Path(__file__).resolve().parents[2]
     / "contracts"
     / "finance-policy-1.0.0.contract.json"
 )

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from examples.e2e_agent_execution_boundary import run_demo as run_agent_demo
-from examples.e2e_fastapi_runtime_protection import run_demo as run_fastapi_demo
-from examples.e2e_queue_worker_protection import run_demo as run_queue_demo
+from examples.integrations.e2e_agent_execution_boundary import run_demo as run_agent_demo
+from examples.integrations.e2e_fastapi_runtime_protection import run_demo as run_fastapi_demo
+from examples.integrations.e2e_queue_worker_protection import run_demo as run_queue_demo
 
 
 def test_fastapi_runtime_protection_blocks_before_mutation(tmp_path):

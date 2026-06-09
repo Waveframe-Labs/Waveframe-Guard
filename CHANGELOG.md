@@ -13,6 +13,10 @@
 - Clarified that Guard evaluates runtime admissibility locally against compiled authority.
 - Clarified that Cloud owns managed organization lifecycle, centralized lineage, fleet-wide audit, policy publishing, and compliance exports.
 - Kept Cloud outside Guard runtime admissibility and governance meaning derivation.
+- Tiered docs into getting-started, architecture, runtime, and governance folders.
+- Split examples into SDK, integration, and runtime folders.
+- Quarantined non-production Cloud lab code under `temp/labs/cloud_runtime/`.
+- Moved benchmark tooling under `tools/benchmarks/`.
 
 ### Verified
 - Checkpoint scan runs `python -m pytest`.
@@ -21,7 +25,7 @@
 ## [0.8.0] - Admissibility Continuity Semantics
 
 ### Added
-- Added `CONTINUITY_SEMANTICS.md` to define admissibility windows, deterministic revalidation, continuity drift signals, and explicit non-goals.
+- Added `docs/runtime/CONTINUITY_SEMANTICS.md` to define admissibility windows, deterministic revalidation, continuity drift signals, and explicit non-goals.
 - Added runtime continuity metadata: `valid_until`, `revalidation_required_after`, and `continuity_signals`.
 - Added minimal runtime evaluation and deterministic continuity revalidation support for delayed or resumed execution checks.
 - Added deterministic continuity signals for expired admissibility windows, revoked authorities after decision, superseded authorities during resumed execution, and actor continuity breaks.

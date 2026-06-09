@@ -165,7 +165,7 @@ def test_guard_does_not_define_cloud_persistence_behavior():
 
 
 def test_continuation_governance_is_guard_subsystem_not_repo_split():
-    doc = (REPO_ROOT / "docs" / "CONTINUATION_GOVERNANCE_MODEL.md").read_text(encoding="utf-8").lower()
+    doc = (REPO_ROOT / "docs" / "runtime" / "CONTINUATION_GOVERNANCE_MODEL.md").read_text(encoding="utf-8").lower()
 
     assert "status: emerging subsystem" in doc
     assert "not a separate repository" in doc
