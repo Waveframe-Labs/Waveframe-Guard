@@ -403,6 +403,7 @@ function renderRuntimeDashboard(dashboard) {
   };
   byId("orgContextRef").textContent = `${context.organization_id} / ${context.workspace_id}`;
   const summary = dashboard?.summary || {};
+  renderRuntimeSummary(summary);
   const metrics = [
     ["Active continuation leases", summary.active_continuation_leases || 0, "continuation lease"],
     ["Expiring dependencies", summary.expiring_dependencies || 0, "runtime dependencies"],
@@ -419,6 +420,23 @@ function renderRuntimeDashboard(dashboard) {
       <strong>${escapeHtml(String(value))}</strong>
       <small>${escapeHtml(note)}</small>
     </article>
+  `).join("");
+}
+
+function renderRuntimeSummary(summary = {}) {
+  const panel = byId("runtimeSummaryStrip");
+  if (!panel) return;
+  const items = [
+    ["Runs", summary.runs || 0],
+    ["Active leases", summary.active_continuation_leases || 0],
+    ["Blocked releases", summary.blocked_releases || 0],
+    ["Drift alerts", summary.runtime_drift_alerts || 0]
+  ];
+  panel.innerHTML = items.map(([label, value]) => `
+    <span class="runtime-summary-item ${Number(value) > 0 && label !== "Runs" ? "attention" : ""}">
+      <strong>${escapeHtml(String(value))}</strong>
+      ${escapeHtml(label)}
+    </span>
   `).join("");
 }
 

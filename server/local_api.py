@@ -243,6 +243,34 @@ def persistent_runtime_dashboard(
     return PersistentOrganizationalRuntime(root).dashboard(context or default_organization_context())
 
 
+def export_persistent_runtime_state(
+    *,
+    store_root: Path | None = None,
+    context: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    root = store_root or LOCAL_WORKSPACE_ROOT
+    return PersistentOrganizationalRuntime(root).export_state(context or default_organization_context())
+
+
+def import_persistent_runtime_state(
+    payload: dict[str, Any],
+    *,
+    store_root: Path | None = None,
+) -> dict[str, Any]:
+    root = store_root or LOCAL_WORKSPACE_ROOT
+    return PersistentOrganizationalRuntime(root).import_state(payload)
+
+
+def recover_persistent_runtime_state(*, store_root: Path | None = None) -> dict[str, Any]:
+    root = store_root or LOCAL_WORKSPACE_ROOT
+    return PersistentOrganizationalRuntime(root).recover_if_corrupt()
+
+
+def cleanup_local_runtime_state(*, store_root: Path | None = None) -> dict[str, Any]:
+    root = store_root or LOCAL_WORKSPACE_ROOT
+    return PersistentOrganizationalRuntime(root, initialize=False).cleanup_dev_state()
+
+
 def export_runtime_receipt(payload: dict[str, Any]) -> dict[str, Any]:
     evaluated = _coerce_evaluated_payload(payload)
     return {
@@ -286,6 +314,9 @@ class GuardLocalRequestHandler(BaseHTTPRequestHandler):
             "/api/runtime/load_run",
             "/api/runtime/export_receipt",
             "/api/runtime/deferred_release_demo",
+            "/api/runtime/import_org_state",
+            "/api/runtime/recover_org_state",
+            "/api/runtime/cleanup_local_state",
         }:
             self._send_json({"error": "not found"}, status=HTTPStatus.NOT_FOUND)
             return
@@ -303,6 +334,12 @@ class GuardLocalRequestHandler(BaseHTTPRequestHandler):
                 self._send_json(export_runtime_receipt(body))
             elif path == "/api/runtime/deferred_release_demo":
                 self._send_json(run_deferred_release_demo(body or None))
+            elif path == "/api/runtime/import_org_state":
+                self._send_json(import_persistent_runtime_state(body))
+            elif path == "/api/runtime/recover_org_state":
+                self._send_json(recover_persistent_runtime_state())
+            elif path == "/api/runtime/cleanup_local_state":
+                self._send_json(cleanup_local_runtime_state())
         except Exception as exc:
             self._send_error(exc)
 
@@ -350,6 +387,8 @@ class GuardLocalRequestHandler(BaseHTTPRequestHandler):
             return runtime_history()
         if path == "/api/runtime/org_dashboard":
             return persistent_runtime_dashboard()
+        if path == "/api/runtime/export_org_state":
+            return export_persistent_runtime_state()
         if path.startswith("/api"):
             return {"error": "unknown api route", "path": path}
         return None

@@ -38,6 +38,10 @@ It persists:
 - compiled authority references
 - release queue rows
 
+Each row carries a `schema_version` field. The database is a local operational
+store, but exported rows must still be versioned so replay, import, recovery,
+and later Cloud handoff can reason about artifact shape deterministically.
+
 ## Organization Context
 
 The local context fields are:
@@ -104,3 +108,37 @@ Guard Inspector can read local dashboard signals:
 
 These are local operational signals over `.guard-local/guard-runtime.sqlite3`.
 Cloud may later aggregate them, but Cloud does not exist in this layer.
+
+## Export and Import
+
+Guard local may export persistent runtime state as:
+
+```text
+guard_persistent_runtime_export.v1
+```
+
+The export contains organization context, store schema version, and versioned
+table rows. Import is local-only and intended for deterministic inspection,
+workspace transfer, and recovery testing.
+
+## Corruption Recovery
+
+If the SQLite file fails integrity validation, Guard may quarantine it as:
+
+```text
+guard-runtime.corrupt.<timestamp>.sqlite3
+```
+
+and initialize a fresh empty local runtime database. This is development
+recovery, not managed Cloud durability.
+
+## Cleanup Command
+
+For local development, Guard provides a cleanup command:
+
+```powershell
+python -m guard.sdk.cleanup_local --workspace .guard-local
+```
+
+The command removes Guard local runtime artifacts and reinitializes an empty
+`guard-runtime.sqlite3`. It is scoped to Guard local development state.

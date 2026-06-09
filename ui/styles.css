@@ -409,6 +409,7 @@ h3 {
 .posture-strip,
 .execution-facts,
 .execution-record,
+.runtime-summary-strip,
 .history-panel,
 .receipt-panel,
 .continuation-lease-panel,
@@ -540,6 +541,53 @@ h3 {
 .release-chronology {
   margin: 0;
   padding: 0 16px 16px;
+}
+
+.runtime-summary-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 14px;
+  padding: 12px 14px;
+}
+
+.runtime-summary-strip h2 {
+  margin: 2px 0 0;
+  font-size: 18px;
+}
+
+.runtime-summary-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.runtime-summary-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  min-height: 34px;
+  padding: 7px 9px;
+  color: var(--muted);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.runtime-summary-item.attention {
+  color: var(--orange-dark);
+  background: var(--orange-soft);
+  border-color: rgba(255, 95, 5, 0.32);
+}
+
+.runtime-summary-item strong {
+  color: var(--ink);
+  font-size: 16px;
 }
 
 .persistent-runtime-panel {

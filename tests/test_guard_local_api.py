@@ -98,6 +98,9 @@ def test_local_api_runs_deferred_release_expired_approval_demo(tmp_path):
     dashboard = local_api.persistent_runtime_dashboard(store_root=tmp_path)
     assert dashboard["schema_version"] == "guard_persistent_runtime_dashboard.v1"
     assert dashboard["summary"]["blocked_releases"] == 1
+    exported = local_api.export_persistent_runtime_state(store_root=tmp_path)
+    assert exported["schema_version"] == "guard_persistent_runtime_export.v1"
+    assert exported["tables"]["release_queue"][0]["state"] == "release_blocked"
 
 
 def test_local_api_saves_replays_and_exports_local_receipts(tmp_path):

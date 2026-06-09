@@ -161,6 +161,14 @@ Guard Inspector reads this local state to show active continuation leases,
 expiring dependencies, blocked releases, escalation queue items, replay failures,
 invalidated continuations, and runtime drift alerts.
 
+The local runtime can export/import `guard_persistent_runtime_export.v1`
+artifacts for deterministic inspection or handoff testing. For development
+cleanup, run:
+
+```powershell
+python -m guard.sdk.cleanup_local --workspace .guard-local
+```
+
 ## Cloud-Connected Runtime
 
 For application code, `GuardRuntime.from_cloud(...)` is the ergonomic local-first path:

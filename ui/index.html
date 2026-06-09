@@ -98,15 +98,12 @@ def wire_transfer(request):
             </aside>
           </section>
 
-          <section class="persistent-runtime-panel">
-            <div class="panel-title compact-title">
-              <div>
-                <p class="section-kicker">Persistent Organizational Runtime</p>
-                <h2>Local runtime control plane</h2>
-              </div>
-              <span id="orgContextRef" class="hash-chip">org-finance / workspace-local</span>
+          <section class="runtime-summary-strip">
+            <div>
+              <p class="section-kicker">Local runtime state</p>
+              <h2>Execution workspace summary</h2>
             </div>
-            <div id="runtimeDashboard" class="runtime-dashboard-grid"></div>
+            <div id="runtimeSummaryStrip" class="runtime-summary-items"></div>
           </section>
 
           <section class="payload-drawer">
@@ -248,6 +245,17 @@ def wire_transfer(request):
         <section id="artifacts" class="tab-panel" aria-label="Replay and artifacts">
           <section id="replayDiagnostics" class="replay-diagnostics" hidden></section>
           <section id="continuationLeasePanel" class="continuation-lease-panel" hidden></section>
+
+          <section class="persistent-runtime-panel">
+            <div class="panel-title compact-title">
+              <div>
+                <p class="section-kicker">Persistent Organizational Runtime</p>
+                <h2>Local runtime control plane</h2>
+              </div>
+              <span id="orgContextRef" class="hash-chip">org-finance / workspace-local</span>
+            </div>
+            <div id="runtimeDashboard" class="runtime-dashboard-grid"></div>
+          </section>
 
           <section class="artifact-grid">
             <article class="receipt-panel">
