@@ -59,14 +59,14 @@ def wire_transfer(execution_request):
 
 result = wire_transfer(request)
 print(result["executed"])
-print(result["outcome"]["decision"])
+print(result["outcome"]["execution_state"])
 ```
 
 Expected result:
 
 ```text
 False
-BLOCKED
+blocked
 ```
 
 The wrapped function does not run because the actor does not satisfy the compiled authority requirement.
