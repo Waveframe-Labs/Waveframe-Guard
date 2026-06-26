@@ -1,3 +1,5 @@
+from guard.sdk import Guard
+
 from .guard import guard
 from .context import install_guard, resolve_actor
 from .execute import GovernanceError, execute
@@ -10,9 +12,10 @@ from .schemas import (
     GOVERNED_EXECUTION_STATE_V1,
 )
 
-__version__ = "0.9.0"
+__version__ = "0.10.0"
 
 __all__ = [
+    "Guard",
     "guard",
     "install_guard",
     "resolve_actor",
