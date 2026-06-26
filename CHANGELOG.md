@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.10.0] - Developer Path Freeze
+
+### Added
+- Added `Guard` as a top-level public export from `waveframe_guard` so the canonical SDK path is `from waveframe_guard import Guard`.
+- Added a focused 30-second README example showing local allow/block behavior with a compiled authority and normalized execution request.
+- Added explicit release-discipline documentation for code, docs, changelog, package metadata, tests, build artifacts, tags, and PyPI release readiness.
+
+### Changed
+- Reframed the README around the single adoption path: install Guard, wrap the action, and receive an allowed or blocked outcome before execution.
+- Clarified the product boundary between Guard, Cloud, Ledger / Workspace, and CRI-CORE.
+- Bumped package metadata, citation metadata, security support line, and public version exports to `0.10.0`.
+- Updated package description and keywords around execution-boundary enforcement and agent safety.
+
+### Compatibility
+- Existing `install_guard`, `guard`, `GovernedRuntime`, `GuardRuntime`, and `evaluate_admissibility` exports remain available.
+- `from guard.sdk import Guard` remains available; `from waveframe_guard import Guard` is now the preferred public import.
+
+### Release Verification Pending
+- Run the full test suite before tagging: `python -m pytest`.
+- Build package artifacts before publishing: `python -m build`.
+- Confirm wheel metadata reports `Version: 0.10.0`.
+
 ## [0.9.0] - Guard Runtime Checkpoint
 
 ### Added
