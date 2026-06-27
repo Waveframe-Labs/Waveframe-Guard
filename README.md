@@ -23,12 +23,26 @@ Guard decides whether this action may run now.
 pip install waveframe-guard==0.10.0
 ```
 
+Run the local quickstart example from a repository checkout:
+
+```powershell
+python examples/quickstart_guard.py
+```
+
+Expected output:
+
+```text
+executed=False
+decision=blocked
+```
+
 ## 30-second example
 
 ```python
 from waveframe_guard import Guard
 
 compiled_authority = {
+    "schema_version": "compiled_authority_contract.v1",
     "contract_id": "finance-policy",
     "contract_version": "1.0.0",
     "authority_requirements": {"required_roles": ["manager"]},
