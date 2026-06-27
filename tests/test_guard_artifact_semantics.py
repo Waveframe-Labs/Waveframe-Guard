@@ -10,7 +10,7 @@ from guard.sdk.local_persistence import (
     SAVED_EVALUATION_V1,
     LocalEvaluationStore,
 )
-from server import local_api
+from waveframe_guard.server import local_api
 
 
 def test_saved_evaluation_defines_persisted_artifact_semantics(tmp_path):

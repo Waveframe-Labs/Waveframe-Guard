@@ -100,6 +100,21 @@ def test_guard_does_not_import_local_raw_policy_compilers():
     assert violations == []
 
 
+def test_guard_does_not_import_bare_server_package():
+    violations = []
+    for python_file in _repo_python_files():
+        tree = ast.parse(python_file.read_text(encoding="utf-8"), filename=str(python_file))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ImportFrom) and node.module == "server":
+                violations.append(f"{_rel(python_file)}:{node.lineno} imports from bare server package")
+            elif isinstance(node, ast.Import):
+                for alias in node.names:
+                    if alias.name == "server" or alias.name.startswith("server."):
+                        violations.append(f"{_rel(python_file)}:{node.lineno} imports bare server package")
+
+    assert violations == []
+
+
 def test_guard_has_upstream_semantics_adapter_boundary():
     adapter_path = REPO_ROOT / "guard" / "adapters" / "upstream_semantics.py"
     source = adapter_path.read_text(encoding="utf-8")
@@ -181,6 +196,13 @@ def test_continuation_governance_is_guard_subsystem_not_repo_split():
 def _guard_python_files():
     for root in GUARD_ROOTS:
         yield from root.rglob("*.py")
+
+
+def _repo_python_files():
+    for python_file in REPO_ROOT.rglob("*.py"):
+        if any(part.startswith(".") for part in python_file.relative_to(REPO_ROOT).parts):
+            continue
+        yield python_file
 
 
 def _rel(path: Path) -> str:

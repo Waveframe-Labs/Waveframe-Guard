@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from server import local_api
+from waveframe_guard.server import local_api
 
 
 def test_local_api_loads_runtime_inputs_and_evaluates_real_guard_output():

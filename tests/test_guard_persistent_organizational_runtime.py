@@ -7,7 +7,7 @@ from guard.runtime.organization import (
     PersistentOrganizationalRuntime,
     default_organization_context,
 )
-from server import local_api
+from waveframe_guard.server import local_api
 
 
 def test_persistent_organizational_runtime_survives_restart(tmp_path):
