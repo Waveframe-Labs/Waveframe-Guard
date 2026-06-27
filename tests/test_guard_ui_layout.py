@@ -43,5 +43,6 @@ def test_guard_public_docs_point_to_sdk_not_bundled_ui():
     readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
 
     assert "from waveframe_guard import Guard" in readme
-    assert "Guard Inspector is the local inspection UI" in readme
-    assert "Inspector is not a policy authoring surface" in readme
+    assert "Guard Inspector" in readme
+    assert "public Guard SDK package" in readme
+    assert "enforcement semantics" in readme
