@@ -1,3 +1,16 @@
+# ---
+# title: "Guard Public Export Regression Test"
+# filetype: "python"
+# type: "test"
+# domain: "guard-sdk"
+# version: "0.10.0"
+# status: "Active"
+# author:
+#   name: "Waveframe Labs"
+# license: "Proprietary"
+# ai_assisted: "partial"
+# ---
+
 from waveframe_guard import Guard, __version__
 
 
