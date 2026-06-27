@@ -1,35 +1,36 @@
-# Waveframe Guard v0.9.0 Release Notes
+# Waveframe Guard v0.10.0 Release Notes
 
 ## Summary
 
-v0.9.0 stabilizes Guard as a local execution governance product surface:
-Guard SDK, deterministic runtime evaluation, Guard Inspector, replay artifacts,
-continuation governance, and deferred release enforcement.
+v0.10.0 freezes the public developer path for Guard as a local execution-boundary SDK:
+install the package, import `Guard` from `waveframe_guard`, wrap the action, and get an
+allowed or blocked decision before execution.
 
-This release also prepares the repository for a future product split by making
-public and non-production surfaces explicit.
+This release also tightens package boundaries so Guard no longer relies on an ambiguous
+bare `server` import when local runtime inspection helpers are needed.
 
 ## Highlights
 
-- Added Guard SDK primary-path documentation for `.guard-local` evaluation and receipt emission.
-- Positioned Guard Inspector as a local evaluation and receipt inspection surface, not a policy authoring UI.
-- Added deferred release enforcement docs for continuation leases, release validations, and release-blocked outcomes.
-- Added persistent organizational runtime docs for local SQLite state, export/import, corruption recovery, and cleanup.
-- Tiered docs into getting-started, architecture, runtime, and governance folders.
-- Split examples into SDK, integration, and runtime folders.
-- Moved benchmark tooling under `tools/benchmarks/`.
-- Quarantined non-production Cloud lab code under `temp/labs/cloud_runtime/`.
+- Added `Guard` as a top-level public export from `waveframe_guard`.
+- Added `examples/quickstart_guard.py` as a runnable SDK quickstart.
+- Reframed the README around the canonical SDK path and local allow/block behavior.
+- Added `waveframe_guard.server.local_api` as the stable package-qualified local API boundary.
+- Updated local API tests to import `from waveframe_guard.server import local_api`.
+- Added a dependency-boundary regression test that rejects bare `server` imports.
+- Clarified that Guard Inspector is a private operational visualization layer, not part of the public Guard SDK package and not the owner of enforcement semantics.
+- Updated package metadata, citation metadata, security support, and public version exports to `0.10.0`.
 
 ## Scope Boundary
 
 Guard evaluates runtime admissibility locally against compiled authority.
 Guard never derives governance meaning from raw policy text.
 
-Cloud remains a future production surface. Local Guard does not implement
-managed tenancy, fleet-wide audit, policy publishing, hosted orchestration, or
-centralized compliance exports.
+Guard Inspector consumes Guard outcomes and artifacts for private operational inspection.
+It is not shipped as part of the public Guard SDK package, does not author policy, and
+does not own enforcement semantics.
 
 ## Verification
 
-- `python -m pytest`: `104 passed`
-- `python -m py_compile guard\sdk\execution.py guard\sdk\local_persistence.py guard\sdk\adapters.py guard\sdk\cleanup_local.py server\local_api.py guard\runtime\organization.py`: passed
+- `python -m pytest -q`: `108 passed`
+- `python examples/quickstart_guard.py`: `executed=False`, `decision=blocked`
+- `python -c "import waveframe_guard, importlib.metadata as m; print(waveframe_guard.__version__); print(m.version('waveframe-guard'))"`: `0.10.0`, `0.10.0`
