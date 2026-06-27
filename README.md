@@ -99,7 +99,7 @@ Guard owns the developer-side enforcement boundary:
 - local receipts, replay artifacts, and runtime diagnostics
 - evidence spooling for later Cloud submission
 
-Guard does **not** author governance, publish authority, host organization workflows, or operate the long-term evidence system.
+Guard does **not** author governance, publish authority, host organization workflows, operate the long-term evidence system, or ship the proprietary Guard Inspector UI.
 
 ## Guard, Cloud, and Ledger
 
@@ -195,17 +195,9 @@ Continuity signals are not Cloud decisions. Guard evaluates continuity locally; 
 
 ## Guard Inspector
 
-Guard Inspector is the local inspection UI for SDK-emitted evaluations, receipts, replay artifacts, continuity signals, and release posture.
+Guard Inspector is the private operational visualization layer for SDK-emitted evaluations, receipts, replay artifacts, continuity signals, and release posture.
 
-Use Inspector when an execution is allowed, blocked, escalated, or release-blocked and you need to inspect:
-
-- what entered Guard
-- why the runtime produced the outcome
-- what receipt or artifact was emitted
-- whether replay and lineage remain trustworthy
-- which continuation lease or release validation governed delayed execution
-
-Inspector is not a policy authoring surface and does not own enforcement semantics.
+It consumes Guard outcomes and artifacts. It is not part of the public Guard SDK package, does not author policy, and does not own enforcement semantics.
 
 ## Repository surface
 
@@ -217,7 +209,6 @@ The public Guard surface includes:
 - continuation governance
 - replay artifacts
 - deferred release model
-- Inspector demo UI
 - examples
 - docs
 - tests
