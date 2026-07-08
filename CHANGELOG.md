@@ -27,10 +27,11 @@
 - Existing `install_guard`, `guard`, `GovernedRuntime`, `GuardRuntime`, and `evaluate_admissibility` exports remain available.
 - `from guard.sdk import Guard` remains available; `from waveframe_guard import Guard` is now the preferred public import.
 
-### Release Verification Pending
-- Run the full test suite before tagging: `python -m pytest`.
-- Build package artifacts before publishing: `python -m build`.
-- Confirm wheel metadata reports `Version: 0.10.0`.
+### Verified
+- Release verification completed before the v0.10.0 tag and PyPI publication.
+- Current compatibility/demo branch verification: `python -m pytest` passes with `113 passed`.
+- Current flagship local demo smoke: `python examples\\finance_policy_to_guard_demo\\run_demo.py` prints the expected blocked and allowed Guard decisions.
+- Quickstart behavior is regression-tested: `examples/quickstart_guard.py` prints `executed=False` and `decision=blocked`.
 
 ## [0.9.0] - Guard Runtime Checkpoint
 
@@ -94,7 +95,7 @@
 
 ### Added
 - Added `GuardRuntime.from_cloud(...)` as a developer-friendly alias for local-first Cloud-connected runtime setup.
-- Added durable local evidence spooling under `pending/`, `sent/`, and `failed/` with explicit `flush_evidence()`.
+- Added durable local evidence spooling under `pending/`, `sent/`, and `failed` with explicit `flush_evidence()`.
 - Added SDK-local runtime diagnostics for authority resolution, revoked authority rejection, lineage validation failures, and admissibility evaluation lifecycle.
 
 ### Changed
