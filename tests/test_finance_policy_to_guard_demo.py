@@ -6,10 +6,11 @@ from pathlib import Path
 from examples.finance_policy_to_guard_demo import run_demo
 
 
-def test_finance_policy_to_guard_demo_runs_complete_local_loop(tmp_path):
+def test_finance_policy_to_guard_demo_runs_complete_public_sdk_loop(tmp_path):
     result = run_demo(output_dir=tmp_path / "demo", emit_output=False)
 
     compiled_authority = result["compiled_authority"]
+    assert compiled_authority["schema_version"] == "compiled_authority_contract.v1"
     assert compiled_authority["approval_requirements"]["thresholds"] == [
         {
             "field": "amount",
@@ -32,7 +33,7 @@ def test_finance_policy_to_guard_demo_runs_complete_local_loop(tmp_path):
     assert result["blocked"]["function_executions_after_decision"] == 0
 
     assert result["allowed"]["allowed"] is True
-    assert result["allowed"]["reason"] == "execution allowed"
+    assert result["allowed"]["reason"] == "approval evidence satisfied"
     assert result["allowed"]["function_executions_after_decision"] == 1
     assert result["allowed"]["value"] == {
         "amount": 2000000,
@@ -42,33 +43,45 @@ def test_finance_policy_to_guard_demo_runs_complete_local_loop(tmp_path):
         {"amount": 2000000, "function": "protected_transfer"}
     ]
 
-    blocked_receipt = _read_json(result["blocked"]["receipt_path"])
-    blocked_evidence = _read_json(result["blocked"]["evidence_path"])
-    allowed_receipt = _read_json(result["allowed"]["receipt_path"])
-    allowed_evidence = _read_json(result["allowed"]["evidence_path"])
+    guard_workspace = Path(result["guard_workspace"])
+    assert (guard_workspace / "evaluation-history.jsonl").exists()
+    assert Path(result["blocked"]["receipt_path"]).exists()
+    assert Path(result["blocked"]["manifest_path"]).exists()
+    assert Path(result["blocked"]["replay_path"]).exists()
+    assert Path(result["allowed"]["receipt_path"]).exists()
+    assert Path(result["allowed"]["manifest_path"]).exists()
+    assert Path(result["allowed"]["replay_path"]).exists()
 
-    assert blocked_receipt["decision"] == "BLOCKED"
-    assert blocked_receipt["event_id"] == result["blocked"]["event_id"]
-    assert blocked_evidence["decision"] == "BLOCKED"
-    assert blocked_evidence["event_id"] == result["blocked"]["event_id"]
-    assert blocked_evidence["missing_approvals"] == [
+    history = [
+        json.loads(line)
+        for line in Path(result["history_path"]).read_text(encoding="utf-8").splitlines()
+    ]
+    assert [record["guard_enforcement_outcome"]["status"] for record in history] == [
+        "blocked",
+        "admissible",
+    ]
+    assert history[0]["run_id"] == result["blocked"]["run_id"]
+    assert history[0]["evaluation"]["required_evidence"] == [
         {
-            "condition": {"field": "amount", "operator": ">", "value": 1000000},
+            "evidence": "approval",
             "role": "cfo",
+            "condition": {"field": "amount", "operator": ">", "value": 1000000},
+            "rationale": "required approval evidence is missing",
         }
     ]
-
-    assert allowed_receipt["decision"] == "ALLOWED"
-    assert allowed_receipt["event_id"] == result["allowed"]["event_id"]
-    assert allowed_evidence["decision"] == "ALLOWED"
-    assert allowed_evidence["event_id"] == result["allowed"]["event_id"]
-    assert allowed_evidence["approvals"] == [{"approved_by": "cfo-1", "role": "cfo"}]
-
-    audit_events = [
-        json.loads(line)
-        for line in Path(result["audit_path"]).read_text(encoding="utf-8").splitlines()
+    assert history[1]["run_id"] == result["allowed"]["run_id"]
+    assert history[1]["inputs"]["runtime_evidence"]["approvals"] == [
+        {"approved_by": "cfo-1", "role": "cfo"}
     ]
-    assert [event["decision"] for event in audit_events] == ["BLOCKED", "ALLOWED"]
+
+    blocked_receipt = _read_json(result["blocked"]["receipt_path"])
+    allowed_receipt = _read_json(result["allowed"]["receipt_path"])
+    assert blocked_receipt["schema_version"] == "guard_enforcement_receipt.v1"
+    assert blocked_receipt["outcome_status"] == "blocked"
+    assert blocked_receipt["run_id"] == result["blocked"]["run_id"]
+    assert allowed_receipt["schema_version"] == "guard_enforcement_receipt.v1"
+    assert allowed_receipt["outcome_status"] == "admissible"
+    assert allowed_receipt["run_id"] == result["allowed"]["run_id"]
 
 
 def _read_json(path: str) -> dict:

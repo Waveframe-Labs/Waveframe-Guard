@@ -14,7 +14,7 @@ from compiler.compile_policy import compile_policy
 from governance_ledger.publish import approve_review_file
 from governance_ledger.runner import run_policy_file
 
-from waveframe_guard import GovernedRuntime
+from waveframe_guard import Guard
 
 
 POLICY_PATH = Path(__file__).with_name("policy.txt")
@@ -45,40 +45,50 @@ def run_demo(
         _phase("3", "Published compiled authority", publication["contract_path"])
 
     execution_log: list[dict[str, Any]] = []
-    runtime = GovernedRuntime(
-        registry_path=publication["registry_path"],
-        audit_path=output_root / "guard" / "audit-events.jsonl",
-        evidence_dir=output_root / "guard" / "evidence",
-        runtime_log_path=output_root / "guard" / "runtime-log.jsonl",
-        offline=True,
+    guard = Guard.local(
+        workspace=output_root / ".guard-local",
+        authorities={AUTHORITY_REF: compiled_authority},
+        actor_identity={"id": "ai-agent-1", "type": "ai_agent", "role": "requester"},
+        execution_context={"surface": "finance_policy_to_guard_demo", "boundary": "before_transfer"},
+        evaluation_time_source=lambda: DEMO_TIME,
     )
-    runtime.bind_contract(AUTHORITY_REF)
-    runtime.install_actor({"id": "ai-agent-1", "type": "ai_agent", "role": "requester"})
 
-    if emit_output:
-        _phase("4", "AI attempts $2,000,000 transfer without CFO approval", "expect BLOCKED")
-    blocked = runtime.execute(
-        fn=lambda amount: _protected_transfer(amount, execution_log),
-        args=(2_000_000,),
-        approvals=[],
-        raise_on_block=False,
-    )
-    blocked_artifacts = _persist_decision(output_root, "blocked", blocked)
-    if emit_output:
-        _decision("BLOCKED", blocked.reason, executed=len(execution_log))
+    def transfer_impl(execution_request: dict[str, Any]) -> dict[str, Any]:
+        amount = execution_request["arguments"]["amount"]
+        execution_log.append({"function": "protected_transfer", "amount": amount})
+        return {"transfer_executed": True, "amount": amount}
 
-    if emit_output:
-        _phase("5", "AI retries with valid CFO approval and separation of duties", "expect ALLOWED")
-    allowed = runtime.execute(
-        fn=lambda amount: _protected_transfer(amount, execution_log),
-        args=(2_000_000,),
+    @guard.protect(authority=AUTHORITY_REF, raise_on_block=False)
+    def blocked_transfer(execution_request: dict[str, Any]) -> dict[str, Any]:
+        return transfer_impl(execution_request)
+
+    @guard.protect(
+        authority=AUTHORITY_REF,
         approvals=[{"role": "cfo", "approved_by": "cfo-1"}],
         raise_on_block=False,
     )
-    allowed_artifacts = _persist_decision(output_root, "allowed", allowed)
+    def approved_transfer(execution_request: dict[str, Any]) -> dict[str, Any]:
+        return transfer_impl(execution_request)
+
+    request = _normalized_transfer_request(amount=2_000_000)
+
     if emit_output:
-        _decision("ALLOWED", allowed.reason, executed=len(execution_log))
-        _phase("6", "Inspector opens local case", str(output_root / "guard"))
+        _phase("4", "AI attempts $2,000,000 transfer without CFO approval", "expect BLOCKED")
+    blocked = blocked_transfer(request)
+    blocked_record = guard.store.history()[-1]
+    guard.store.replay(blocked_record["run_id"])
+    blocked_reason = _blocked_reason(blocked_record["evaluation"])
+    if emit_output:
+        _decision("BLOCKED", blocked_reason, executed=len(execution_log))
+
+    if emit_output:
+        _phase("5", "AI retries with valid CFO approval and separation of duties", "expect ALLOWED")
+    allowed = approved_transfer(request)
+    allowed_record = guard.store.history()[-1]
+    guard.store.replay(allowed_record["run_id"])
+    if emit_output:
+        _decision("ALLOWED", "approval evidence satisfied", executed=len(execution_log))
+        _phase("6", "Inspector opens local case", str(output_root / ".guard-local"))
 
     result = {
         "demo": "finance_policy_to_guard",
@@ -88,26 +98,30 @@ def run_demo(
         "compiled_authority": compiled_authority,
         "publication": publication,
         "blocked": {
-            "allowed": blocked.allowed,
-            "reason": blocked.reason,
-            "event_id": blocked.event["event_id"],
+            "allowed": blocked["outcome"]["status"] == "admissible",
+            "reason": blocked_reason,
+            "run_id": blocked_record["run_id"],
+            "outcome_id": blocked["outcome"]["outcome_id"],
             "function_executions_after_decision": 0,
-            "receipt_path": blocked_artifacts["receipt_path"],
-            "evidence_path": blocked_artifacts["evidence_path"],
+            "receipt_path": _store_path(output_root, "receipts", blocked_record["run_id"]),
+            "manifest_path": _store_path(output_root, "manifests", blocked_record["run_id"]),
+            "replay_path": _store_path(output_root, "replays", blocked_record["run_id"]),
         },
         "allowed": {
-            "allowed": allowed.allowed,
-            "reason": allowed.reason,
-            "event_id": allowed.event["event_id"],
+            "allowed": allowed_record["evaluation"]["status"] == "admissible",
+            "reason": "approval evidence satisfied",
+            "run_id": allowed_record["run_id"],
+            "outcome_id": allowed_record["guard_enforcement_outcome"]["outcome_id"],
             "function_executions_after_decision": len(execution_log),
-            "value": allowed.value,
-            "receipt_path": allowed_artifacts["receipt_path"],
-            "evidence_path": allowed_artifacts["evidence_path"],
+            "value": allowed,
+            "receipt_path": _store_path(output_root, "receipts", allowed_record["run_id"]),
+            "manifest_path": _store_path(output_root, "manifests", allowed_record["run_id"]),
+            "replay_path": _store_path(output_root, "replays", allowed_record["run_id"]),
         },
         "transfer_execution_log": execution_log,
-        "audit_path": str(output_root / "guard" / "audit-events.jsonl"),
-        "evidence_dir": str(output_root / "guard" / "evidence"),
-        "inspector_case_path": str(output_root / "guard"),
+        "guard_workspace": str(output_root / ".guard-local"),
+        "history_path": str(output_root / ".guard-local" / "evaluation-history.jsonl"),
+        "inspector_case_path": str(output_root / ".guard-local"),
     }
     (output_root / "demo-result.json").write_text(
         json.dumps(result, indent=2, sort_keys=True) + "\n",
@@ -142,7 +156,7 @@ def _publish_authority_from_policy(policy_path: Path, output_root: Path) -> dict
     compiler_input_path = generated_dir / f"{policy_path.stem}.compiler-input.json"
     _write_json(compiler_input_path, compiler_input)
 
-    compiled_authority = compile_policy(compiler_input)
+    compiled_authority = _guard_sdk_authority(compile_policy(compiler_input))
     contract_path = contracts_dir / (
         f"{compiled_authority['contract_id']}-{compiled_authority['contract_version']}.contract.json"
     )
@@ -213,28 +227,31 @@ def _compiler_input_from_ledger_policy(ledger_policy: dict[str, Any]) -> dict[st
     return compiler_input
 
 
-def _protected_transfer(amount: int, execution_log: list[dict[str, Any]]) -> dict[str, Any]:
-    execution_log.append({"function": "protected_transfer", "amount": amount})
-    return {"transfer_executed": True, "amount": amount}
+def _guard_sdk_authority(compiled_authority: dict[str, Any]) -> dict[str, Any]:
+    return {"schema_version": "compiled_authority_contract.v1", **compiled_authority}
 
 
-def _persist_decision(output_root: Path, label: str, decision: Any) -> dict[str, str]:
-    receipt_dir = output_root / "guard" / "receipts"
-    evidence_dir = output_root / "guard" / "decision-evidence"
-    receipt_dir.mkdir(parents=True, exist_ok=True)
-    evidence_dir.mkdir(parents=True, exist_ok=True)
+def _normalized_transfer_request(*, amount: int) -> dict[str, Any]:
+    return {
+        "schema_version": "normalized_execution_request.v1",
+        "request_id": f"finance-transfer-{amount}",
+        "action": "transfer",
+        "target": "treasury_wire",
+        "arguments": {"amount": amount},
+        "artifacts": [],
+    }
 
-    receipt_path = receipt_dir / f"{label}-decision.json"
-    evidence_path = evidence_dir / f"{label}-event.json"
-    receipt_path.write_text(
-        json.dumps(decision.to_dict(), indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
-    evidence_path.write_text(
-        json.dumps(decision.event, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
-    return {"receipt_path": str(receipt_path), "evidence_path": str(evidence_path)}
+
+def _store_path(output_root: Path, artifact_type: str, run_id: str) -> str:
+    return str(output_root / ".guard-local" / artifact_type / f"{run_id}.json")
+
+
+def _blocked_reason(evaluation: dict[str, Any]) -> str:
+    missing = evaluation.get("required_evidence") or []
+    roles = ", ".join(item["role"] for item in missing if item.get("role"))
+    if roles:
+        return f"required approval missing: {roles}"
+    return evaluation["rationale"]
 
 
 def _phase(number: str, title: str, detail: str) -> None:
@@ -243,8 +260,8 @@ def _phase(number: str, title: str, detail: str) -> None:
 
 
 def _decision(decision: str, reason: str, *, executed: int) -> None:
-    print(f"    Guard decision: {decision} ({reason})")
-    print(f"    Protected transfer executions so far: {executed}")
+    print(f"    Guard decision: {decision} - {reason}")
+    print(f"    Protected transfer executions: {executed}")
 
 
 def _read_json(path: str | Path) -> dict[str, Any]:
