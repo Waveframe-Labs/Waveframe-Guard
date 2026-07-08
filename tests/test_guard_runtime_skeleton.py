@@ -111,6 +111,63 @@ def test_runtime_evaluation_blocks_on_compiled_authority_constraints():
     assert "runtime_condition_checks" in result["enforcement_outcome"]
 
 
+def test_runtime_evaluation_blocks_on_approval_thresholds():
+    authority = _authority()
+    authority["approval_requirements"] = {
+        "thresholds": [
+            {
+                "field": "amount",
+                "operator": ">",
+                "value": 1000,
+                "requires_role": "approver",
+            }
+        ]
+    }
+
+    result = evaluate_runtime(
+        compiled_authority=authority,
+        execution_request=_request(amount=1_500),
+        actor_identity={"id": "manager-1", "type": "human", "role": "manager"},
+        evidence_posture={"approvals": []},
+        evaluation_time=EVALUATION_TIME,
+    )
+
+    assert result["status"] == "blocked"
+    assert result["required_evidence"] == [
+        {
+            "evidence": "approval",
+            "role": "approver",
+            "condition": {"field": "amount", "operator": ">", "value": 1000},
+            "rationale": "required approval evidence is missing",
+        }
+    ]
+
+
+def test_runtime_evaluation_enforces_list_shaped_separation_of_duties():
+    authority = _authority()
+    authority["invariants"] = {
+        "separation_of_duties": [["requester", "approver"]],
+    }
+
+    result = evaluate_runtime(
+        compiled_authority=authority,
+        execution_request=_request(amount=500),
+        actor_identity={"id": "manager-1", "type": "human", "role": "manager"},
+        evidence_posture={"approvals": [{"role": "manager", "approved_by": "manager-1"}]},
+        evaluation_time=EVALUATION_TIME,
+    )
+
+    assert result["status"] == "blocked"
+    assert result["violated_constraints"] == [
+        {
+            "constraint": "separation_of_duties",
+            "actor_id": "manager-1",
+            "approval_role": "manager",
+            "rationale": "actor cannot approve their own execution request",
+        }
+    ]
+
+
 def test_runtime_evaluation_escalates_for_continuity_and_replay_requirements():
     result = evaluate_runtime(
         compiled_authority=_authority(),

@@ -97,7 +97,7 @@ def _approval_evidence_requirements(
     execution_request: dict[str, Any],
     evidence_posture: dict[str, Any],
 ) -> list[dict[str, Any]]:
-    requirements = compiled_authority.get("approval_requirements", {}).get("required") or []
+    requirements = _approval_requirements(compiled_authority)
     approvals = evidence_posture.get("approvals") or []
     missing = []
     amount = _execution_amount(execution_request)
@@ -123,7 +123,7 @@ def _separation_of_duties_constraints(
     actor_identity: dict[str, Any],
     evidence_posture: dict[str, Any],
 ) -> list[dict[str, Any]]:
-    if compiled_authority.get("invariants", {}).get("separation_of_duties") is not True:
+    if not _separation_of_duties_enabled(compiled_authority):
         return []
     actor_id = actor_identity.get("id")
     approvals = evidence_posture.get("approvals") or []
@@ -138,6 +138,38 @@ def _separation_of_duties_constraints(
                 }
             ]
     return []
+
+
+def _approval_requirements(authority: dict[str, Any]) -> list[dict[str, Any]]:
+    approval_requirements = authority.get("approval_requirements", {})
+    required = approval_requirements.get("required") or []
+    thresholds = approval_requirements.get("thresholds") or []
+    normalized_thresholds = []
+    for threshold in thresholds:
+        if not isinstance(threshold, dict):
+            continue
+        role = threshold.get("role") or threshold.get("requires_role")
+        normalized_thresholds.append(
+            {
+                "role": role,
+                "condition": {
+                    "field": threshold.get("field"),
+                    "operator": threshold.get("operator"),
+                    "value": threshold.get("value"),
+                },
+            }
+        )
+    return [*required, *normalized_thresholds]
+
+
+def _separation_of_duties_enabled(authority: dict[str, Any]) -> bool:
+    invariants = authority.get("invariants", {})
+    if isinstance(invariants, dict):
+        separation_of_duties = invariants.get("separation_of_duties")
+        return separation_of_duties is True or (
+            isinstance(separation_of_duties, list) and bool(separation_of_duties)
+        )
+    return False
 
 
 def _continuity_requirements(continuity_state: dict[str, Any]) -> list[dict[str, Any]]:

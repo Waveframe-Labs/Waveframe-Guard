@@ -19,6 +19,7 @@
 - Updated Guard local API tests to import `from waveframe_guard.server import local_api` instead of relying on an ambiguous bare `server` package.
 
 ### Fixed
+- Fixed Guard compatibility with compiler-produced contracts by enforcing `approval_requirements.thresholds` as conditional approval evidence and accepting list-shaped `invariants.separation_of_duties`.
 - Fixed a cross-repository import collision where local Guard tests could import `server` from `waveframe-ledger-workspace` when multiple Waveframe repositories were checked out side by side.
 
 ### Compatibility

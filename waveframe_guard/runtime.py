@@ -1003,7 +1003,7 @@ def _actor_identity(actor):
 
 
 def _has_approval_requirements(contract):
-    return bool(contract.get("approval_requirements", {}).get("required"))
+    return bool(_approval_requirements(contract))
 
 
 def _build_execution_state(*, actor, contract, fn, args, kwargs, approvals, target=None):
@@ -1043,7 +1043,7 @@ def evaluate_admissibility(contract, execution_state):
 
 
 def _evaluate_approval_admissibility(*, contract, execution_state):
-    required = contract.get("approval_requirements", {}).get("required") or []
+    required = _approval_requirements(contract)
     if not required:
         return {
             "allowed": True,
@@ -1088,7 +1088,7 @@ def _evaluate_approval_admissibility(*, contract, execution_state):
             "trace": _approval_trace(applicable, satisfied, missing, f"required approval missing: {roles}"),
         }
 
-    if contract.get("invariants", {}).get("separation_of_duties") is True:
+    if _separation_of_duties_enabled(contract):
         actor_id = actor.get("id")
         for approval in approvals:
             if approval.get("approved_by") == actor_id:
@@ -1119,6 +1119,34 @@ def _evaluate_approval_admissibility(*, contract, execution_state):
         "missing_approvals": [],
         "trace": _approval_trace(applicable, satisfied, [], "approval evidence satisfied"),
     }
+
+
+def _approval_requirements(contract):
+    approval_requirements = contract.get("approval_requirements", {})
+    required = approval_requirements.get("required") or []
+    thresholds = approval_requirements.get("thresholds") or []
+    normalized_thresholds = []
+    for threshold in thresholds:
+        if not isinstance(threshold, dict):
+            continue
+        role = threshold.get("role") or threshold.get("requires_role")
+        condition = {
+            "field": threshold.get("field"),
+            "operator": threshold.get("operator"),
+            "value": threshold.get("value"),
+        }
+        normalized_thresholds.append({"role": role, "condition": condition})
+    return [*required, *normalized_thresholds]
+
+
+def _separation_of_duties_enabled(contract):
+    invariants = contract.get("invariants", {})
+    if isinstance(invariants, dict):
+        separation_of_duties = invariants.get("separation_of_duties")
+        return separation_of_duties is True or (
+            isinstance(separation_of_duties, list) and bool(separation_of_duties)
+        )
+    return False
 
 
 def _approval_trace(required, satisfied, missing, reason):

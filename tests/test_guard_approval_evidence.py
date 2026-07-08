@@ -122,6 +122,73 @@ def test_guard_enforces_approval_separation_of_duties(tmp_path):
     ]
 
 
+def test_guard_enforces_list_shaped_separation_of_duties(tmp_path):
+    contract = _compiled_contract()
+    contract["invariants"] = {
+        "separation_of_duties": [["requester", "approver"]],
+    }
+    contract["contract_hash"] = _compute_contract_hash(contract)
+    registry_path = _write_registry(tmp_path, contract)
+    runtime = GovernedRuntime(registry_path=registry_path)
+    runtime.bind_contract("finance-policy@1.0.0")
+    runtime.install_actor({"id": "requester-1", "type": "human", "role": "employee"})
+
+    blocked = runtime.execute(
+        fn=transfer,
+        args=(500,),
+        approvals=[{"role": "manager", "approved_by": "requester-1"}],
+        raise_on_block=False,
+    )
+
+    assert blocked.allowed is False
+    assert blocked.reason == "separation of duties violated: requester approved own transfer"
+
+
+def test_guard_enforces_approval_thresholds_as_required_evidence(tmp_path):
+    contract = _compiled_contract()
+    contract["approval_requirements"] = {
+        "thresholds": [
+            {
+                "field": "amount",
+                "operator": ">",
+                "value": 1000,
+                "requires_role": "approver",
+            }
+        ]
+    }
+    contract["contract_hash"] = _compute_contract_hash(contract)
+    registry_path = _write_registry(tmp_path, contract)
+    runtime = GovernedRuntime(registry_path=registry_path)
+    runtime.bind_contract("finance-policy@1.0.0")
+    runtime.install_actor({"id": "requester-1", "type": "human", "role": "employee"})
+
+    blocked = runtime.execute(
+        fn=transfer,
+        args=(1_500,),
+        approvals=[],
+        raise_on_block=False,
+    )
+
+    assert blocked.allowed is False
+    assert blocked.reason == "required approval missing: approver"
+    assert blocked.missing_approvals == [
+        {
+            "role": "approver",
+            "condition": {"field": "amount", "operator": ">", "value": 1000},
+        }
+    ]
+
+    allowed = runtime.execute(
+        fn=transfer,
+        args=(1_500,),
+        approvals=[{"role": "approver", "approved_by": "approver-1"}],
+        raise_on_block=False,
+    )
+
+    assert allowed.allowed is True
+    assert allowed.value == "Transferred $1500"
+
+
 def test_guard_rejects_same_approver_for_distinct_required_roles(tmp_path):
     contract = _compiled_contract()
     registry_path = _write_registry(tmp_path, contract)
