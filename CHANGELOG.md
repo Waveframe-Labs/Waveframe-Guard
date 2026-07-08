@@ -3,6 +3,7 @@
 ## [0.10.0] - Developer Path Freeze
 
 ### Added
+- Added the canonical Finance Policy to Guard demo showing local policy review, compiled authority publication, a blocked $2M transfer, an allowed CFO-approved retry, and persisted Guard evidence.
 - Added `Guard` as a top-level public export from `waveframe_guard` so the canonical SDK path is `from waveframe_guard import Guard`.
 - Added a focused 30-second README example showing local allow/block behavior with a compiled authority and normalized execution request.
 - Added `examples/quickstart_guard.py` as a runnable SDK quickstart that prints the local Guard execution decision.
