@@ -1,9 +1,24 @@
 # Changelog
 
+## [0.11.0] - Compiler Compatibility and Flagship Demo
+
+### Added
+- Added the canonical Finance Policy to Guard demo showing local policy review, compiled authority publication, a blocked $2M transfer, an allowed CFO-approved retry, and persisted Guard SDK evidence under `.guard-local`.
+
+### Changed
+- Bumped package metadata, citation metadata, security support line, README install guidance, quickstart metadata, and public version exports to `0.11.0`.
+
+### Fixed
+- Fixed Guard compatibility with compiler-produced contracts by enforcing `approval_requirements.thresholds` as conditional approval evidence and accepting list-shaped `invariants.separation_of_duties`.
+
+### Verified
+- `python -m pytest`: `114 passed`.
+- `python -m build`: built `waveframe_guard-0.11.0.tar.gz` and `waveframe_guard-0.11.0-py3-none-any.whl`.
+- Wheel metadata reports `Version: 0.11.0`.
+
 ## [0.10.0] - Developer Path Freeze
 
 ### Added
-- Added the canonical Finance Policy to Guard demo showing local policy review, compiled authority publication, a blocked $2M transfer, an allowed CFO-approved retry, and persisted Guard evidence.
 - Added `Guard` as a top-level public export from `waveframe_guard` so the canonical SDK path is `from waveframe_guard import Guard`.
 - Added a focused 30-second README example showing local allow/block behavior with a compiled authority and normalized execution request.
 - Added `examples/quickstart_guard.py` as a runnable SDK quickstart that prints the local Guard execution decision.
@@ -20,7 +35,6 @@
 - Updated Guard local API tests to import `from waveframe_guard.server import local_api` instead of relying on an ambiguous bare `server` package.
 
 ### Fixed
-- Fixed Guard compatibility with compiler-produced contracts by enforcing `approval_requirements.thresholds` as conditional approval evidence and accepting list-shaped `invariants.separation_of_duties`.
 - Fixed a cross-repository import collision where local Guard tests could import `server` from `waveframe-ledger-workspace` when multiple Waveframe repositories were checked out side by side.
 
 ### Compatibility
@@ -28,10 +42,9 @@
 - `from guard.sdk import Guard` remains available; `from waveframe_guard import Guard` is now the preferred public import.
 
 ### Verified
-- Release verification completed before the v0.10.0 tag and PyPI publication.
-- Current compatibility/demo branch verification: `python -m pytest` passes with `113 passed`.
-- Current flagship local demo smoke: `python examples\\finance_policy_to_guard_demo\\run_demo.py` prints the expected blocked and allowed Guard decisions.
-- Quickstart behavior is regression-tested: `examples/quickstart_guard.py` prints `executed=False` and `decision=blocked`.
+- `python -m pytest -q`: `108 passed`.
+- `python examples/quickstart_guard.py`: `executed=False`, `decision=blocked`.
+- `python -c "import waveframe_guard, importlib.metadata as m; print(waveframe_guard.__version__); print(m.version('waveframe-guard'))"`: `0.10.0`, `0.10.0`.
 
 ## [0.9.0] - Guard Runtime Checkpoint
 

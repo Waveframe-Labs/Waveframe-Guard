@@ -1,36 +1,27 @@
-# Waveframe Guard v0.10.0 Release Notes
+# Waveframe Guard v0.11.0 Release Notes
 
 ## Summary
 
-v0.10.0 freezes the public developer path for Guard as a local execution-boundary SDK:
-install the package, import `Guard` from `waveframe_guard`, wrap the action, and get an
-allowed or blocked decision before execution.
+v0.11.0 makes Guard compatible with the current compiler-produced authority shape and adds the canonical local Finance Policy to Guard demo.
 
-This release also tightens package boundaries so Guard no longer relies on an ambiguous
-bare `server` import when local runtime inspection helpers are needed.
+The demo proves the core product sentence: a company writes a policy, an AI attempts a prohibited transfer, and Guard stops the protected function before it runs.
 
 ## Highlights
 
-- Added `Guard` as a top-level public export from `waveframe_guard`.
-- Added `examples/quickstart_guard.py` as a runnable SDK quickstart.
-- Reframed the README around the canonical SDK path and local allow/block behavior.
-- Added `waveframe_guard.server.local_api` as the stable package-qualified local API boundary.
-- Updated local API tests to import `from waveframe_guard.server import local_api`.
-- Added a dependency-boundary regression test that rejects bare `server` imports.
-- Clarified that Guard Inspector is a private operational visualization layer, not part of the public Guard SDK package and not the owner of enforcement semantics.
-- Updated package metadata, citation metadata, security support, and public version exports to `0.10.0`.
+- Guard now enforces `approval_requirements.thresholds` as conditional approval evidence.
+- Guard now accepts list-shaped `invariants.separation_of_duties`, matching compiler output.
+- Added `examples/finance_policy_to_guard_demo/` as the five-minute local product demo.
+- The demo uses the public SDK path: `from waveframe_guard import Guard`, `Guard.local(...)`, and `@guard.protect(...)`.
+- The demo persists SDK-local Inspector-ready artifacts under `.guard-local/`: evaluation history, receipts, manifests, and replay records.
 
 ## Scope Boundary
 
-Guard evaluates runtime admissibility locally against compiled authority.
-Guard never derives governance meaning from raw policy text.
+This release stays in Waveframe Guard. It does not expand Cloud, Ledger Workspace, or Inspector architecture.
 
-Guard Inspector consumes Guard outcomes and artifacts for private operational inspection.
-It is not shipped as part of the public Guard SDK package, does not author policy, and
-does not own enforcement semantics.
+The demo uses Governance-Ledger extraction/review plus the installed compiler locally, then hands compiled authority to Guard for enforcement. Cloud remains outside this release.
 
 ## Verification
 
-- `python -m pytest -q`: `108 passed`
-- `python examples/quickstart_guard.py`: `executed=False`, `decision=blocked`
-- `python -c "import waveframe_guard, importlib.metadata as m; print(waveframe_guard.__version__); print(m.version('waveframe-guard'))"`: `0.10.0`, `0.10.0`
+- `python -m pytest`: `114 passed`.
+- `python -m build`: built `waveframe_guard-0.11.0.tar.gz` and `waveframe_guard-0.11.0-py3-none-any.whl`.
+- Wheel metadata reports `Version: 0.11.0`.

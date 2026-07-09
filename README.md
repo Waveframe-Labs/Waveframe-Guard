@@ -8,7 +8,7 @@ Stop unsafe AI and automated actions **before they execute**.
 
 Waveframe Guard is an execution-boundary SDK. It wraps sensitive actions, resolves compiled authority, evaluates through CRI-CORE, and only runs the action when the outcome is allowed.
 
-Current release: `0.10.0`.
+Current release: `0.11.0`.
 
 ```text
 Guard does not generate actions.
@@ -20,7 +20,7 @@ Guard decides whether this action may run now.
 ## Install
 
 ```powershell
-pip install waveframe-guard==0.10.0
+pip install waveframe-guard==0.11.0
 ```
 
 Run the local quickstart example from a repository checkout:
