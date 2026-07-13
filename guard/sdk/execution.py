@@ -103,6 +103,7 @@ class GuardRuntimeBoundary:
                     updated_record = self.store.append_cloud_preservation(
                         saved_record["run_id"],
                         _cloud_preservation_metadata(result["cloud_preservation"]),
+                        record_hash=saved_record["record_hash"],
                     )
                     saved_record["cloud_preservation"] = updated_record["cloud_preservation"]
         return result

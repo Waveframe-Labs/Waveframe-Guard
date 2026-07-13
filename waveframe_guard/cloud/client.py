@@ -94,12 +94,32 @@ class CloudPreservationClient:
             )
 
         package_id = _extract_package_id(parsed, receipt)
+        required_fields = {
+            "package_id": package_id,
+            "receipt_id": _extract_string("receipt_id", parsed, receipt),
+            "sha256": _extract_string("sha256", parsed, receipt),
+            "timestamp": _extract_string("timestamp", parsed, receipt),
+        }
+        missing_fields = [
+            key
+            for key, value in required_fields.items()
+            if not isinstance(value, str) or not value
+        ]
+        if missing_fields:
+            return CloudPreservationResult(
+                ok=False,
+                response=parsed,
+                status_code=response.status_code,
+                error=f"Cloud preservation response missing required fields: {', '.join(missing_fields)}",
+                error_type="invalid_response",
+            )
+
         return CloudPreservationResult(
             ok=True,
-            package_id=package_id,
-            receipt_id=_extract_string("receipt_id", parsed, receipt),
-            sha256=_extract_string("sha256", parsed, receipt),
-            timestamp=_extract_string("timestamp", parsed, receipt),
+            package_id=required_fields["package_id"],
+            receipt_id=required_fields["receipt_id"],
+            sha256=required_fields["sha256"],
+            timestamp=required_fields["timestamp"],
             receipt=receipt,
             response=parsed,
             status_code=response.status_code,

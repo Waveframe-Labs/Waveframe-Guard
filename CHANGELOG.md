@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.12.0] - Cloud Preservation Runtime
+
+### Added
+- Added a transport-only Cloud preservation client for `POST /v1/preserve` with timeout handling and graceful failure results.
+- Added optional `Guard.local(preserve_to=...)` runtime configuration that preserves local Guard decision packages after local evidence artifacts are written.
+- Added `guard_cloud_preservation_package.v1` payloads containing the saved evaluation, Guard Receipt, artifact manifest, and replay result.
+- Added `guard_cloud_preservation_metadata.v1` annotations on saved local evaluations so Inspector can display Cloud package, receipt, hash, and timestamp metadata.
+
+### Changed
+- Bumped package metadata, citation metadata, security support line, README install guidance, quickstart metadata, and public version exports to `0.12.0`.
+- Documented Cloud preservation metadata as a post-decision durability annotation, not part of the original immutable Guard Receipt or artifact manifest.
+
+### Hardened
+- Cloud preservation success now requires `package_id`, `receipt_id`, `sha256`, and `timestamp`; malformed 2xx responses return `ok=False` with `invalid_response`.
+- Preservation runs only after local evaluation history, receipt, manifest, and replay artifacts exist.
+- Cloud failures are isolated to `result["cloud_preservation"]` and cannot change enforcement status, outcome, execution behavior, value, rationale, or outcome hash.
+- Local history enrichment recalculates the enriched record hash, preserves unrelated records and ordering, and rejects conflicting Cloud metadata instead of silently replacing evidence lineage.
+
+### Verified
+- `python -m pytest -q`: `138 passed`.
+- `python -m build`: built `waveframe_guard-0.12.0.tar.gz` and `waveframe_guard-0.12.0-py3-none-any.whl`.
+- Wheel metadata reports `Version: 0.12.0`.
+
 ## [0.11.0] - Compiler Compatibility and Flagship Demo
 
 ### Added

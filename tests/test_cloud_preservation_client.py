@@ -137,3 +137,43 @@ def test_cloud_preservation_client_returns_invalid_json_failure_result():
     assert result.ok is False
     assert result.status_code == 200
     assert result.error_type == "invalid_json"
+
+
+def test_cloud_preservation_client_rejects_missing_required_receipt_fields():
+    state = {
+        "status": "200 OK",
+        "body": b'{"package_id":"pkg_123"}',
+    }
+    server, base_url = serve_preservation_app(state)
+
+    try:
+        result = CloudPreservationClient(base_url).preserve({"event_id": "evt_123"})
+    finally:
+        server.shutdown()
+        server.server_close()
+
+    assert result.ok is False
+    assert result.status_code == 200
+    assert result.error_type == "invalid_response"
+    assert "receipt_id" in result.error
+    assert "sha256" in result.error
+    assert "timestamp" in result.error
+
+
+def test_cloud_preservation_client_rejects_wrongly_typed_required_receipt_fields():
+    state = {
+        "status": "200 OK",
+        "body": b'{"package_id":"pkg_123","receipt_id":42,"sha256":"sha256:preserved","timestamp":"2026-07-13T00:00:00+00:00"}',
+    }
+    server, base_url = serve_preservation_app(state)
+
+    try:
+        result = CloudPreservationClient(base_url).preserve({"event_id": "evt_123"})
+    finally:
+        server.shutdown()
+        server.server_close()
+
+    assert result.ok is False
+    assert result.status_code == 200
+    assert result.error_type == "invalid_response"
+    assert "receipt_id" in result.error

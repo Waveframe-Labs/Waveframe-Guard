@@ -38,6 +38,10 @@ class UnreadableReceiptError(GuardArtifactError):
     error_class = "unreadable_receipt"
 
 
+class ConflictingCloudPreservationError(GuardArtifactError):
+    error_class = "conflicting_cloud_preservation"
+
+
 class LocalEvaluationStore:
     def __init__(self, root: str | Path):
         self.root = Path(root)
@@ -89,16 +93,26 @@ class LocalEvaluationStore:
         self,
         run_id: str,
         metadata: dict[str, Any],
+        *,
+        record_hash: str | None = None,
     ) -> dict[str, Any]:
         records = self.history()
         updated_record = None
-        for record in records:
+        for record in reversed(records):
             if record["run_id"] != run_id:
                 continue
-            record["cloud_preservation"] = {
+            if record_hash is not None and record.get("record_hash") != record_hash:
+                continue
+            incoming = {
                 "schema_version": CLOUD_PRESERVATION_METADATA_V1,
                 **metadata,
             }
+            if "cloud_preservation" in record:
+                _validate_cloud_preservation_update(
+                    existing=record.get("cloud_preservation"),
+                    incoming=incoming,
+                )
+            record["cloud_preservation"] = incoming
             record.pop("record_hash", None)
             record["record_hash"] = stable_hash(record)
             updated_record = record
@@ -434,6 +448,21 @@ def _dedupe_reasons(reasons: list[dict[str, Any]]) -> list[dict[str, Any]]:
         seen.add(key)
         deduped.append(reason)
     return deduped
+
+
+def _validate_cloud_preservation_update(
+    *,
+    existing: dict[str, Any] | None,
+    incoming: dict[str, Any],
+) -> None:
+    if existing is None:
+        return
+    identity_fields = ["package_id", "receipt_id", "sha256", "timestamp"]
+    for field in identity_fields:
+        if existing.get(field) != incoming.get(field):
+            raise ConflictingCloudPreservationError(
+                f"conflicting Cloud preservation metadata for {field}"
+            )
 
 
 def _without_hash(payload: dict[str, Any], hash_key: str) -> dict[str, Any]:
