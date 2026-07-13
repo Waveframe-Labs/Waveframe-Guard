@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import json
+import threading
+from wsgiref.simple_server import make_server
+
 import pytest
 
 from guard.adapters import COMPILED_AUTHORITY_CONTRACT_V1, NORMALIZED_EXECUTION_REQUEST_V1
@@ -119,6 +123,96 @@ def test_guard_local_protect_requires_normalized_request_boundary(tmp_path):
         wire_transfer({"amount": 500})
 
 
+def test_guard_local_can_preserve_saved_evaluation_after_local_decision(tmp_path):
+    state = {}
+    server, preserve_to = _serve_preservation_app(state)
+    guard = Guard.local(
+        workspace=tmp_path / ".guard-local",
+        preserve_to=preserve_to,
+        authorities={"finance-policy@1.0.0": _authority()},
+        actor_identity={"id": "manager-1", "type": "human", "role": "manager"},
+        approvals=[{"role": "manager", "approved_by": "manager-approval"}],
+        evaluation_time_source=lambda: EVALUATION_TIME,
+    )
+
+    try:
+        result = guard.boundary_for("finance-policy@1.0.0").execute(
+            lambda amount: amount + 1,
+            execution_request=_request(amount=500),
+            args=(500,),
+        )
+    finally:
+        server.shutdown()
+        server.server_close()
+
+    history = guard.store.history()
+    run_id = history[0]["run_id"]
+
+    assert result["executed"] is True
+    assert result["cloud_preservation"]["ok"] is True
+    assert result["cloud_preservation"]["package_id"] == "pkg_guard_123"
+    assert state["path"] == "/v1/preserve"
+    assert state["payload"]["schema_version"] == SAVED_EVALUATION_V1
+    assert state["payload"]["run_id"] == run_id
+    assert (tmp_path / ".guard-local" / "receipts" / f"{run_id}.json").exists()
+
+
+def test_guard_local_omits_cloud_preservation_when_not_configured(tmp_path, monkeypatch):
+    def fail_if_called(*args, **kwargs):
+        raise AssertionError("Cloud preservation should not run without preserve_to")
+
+    monkeypatch.setattr("waveframe_guard.cloud.client.requests.post", fail_if_called)
+    guard = Guard.local(
+        workspace=tmp_path / ".guard-local",
+        authorities={"finance-policy@1.0.0": _authority()},
+        actor_identity={"id": "manager-1", "type": "human", "role": "manager"},
+        approvals=[{"role": "manager", "approved_by": "manager-approval"}],
+        evaluation_time_source=lambda: EVALUATION_TIME,
+    )
+
+    result = guard.boundary_for("finance-policy@1.0.0").execute(
+        lambda amount: amount + 1,
+        execution_request=_request(amount=500),
+        args=(500,),
+    )
+
+    assert result["executed"] is True
+    assert "cloud_preservation" not in result["evaluation"]
+    assert guard.store.history()[0]["schema_version"] == SAVED_EVALUATION_V1
+
+
+def test_guard_local_cloud_preservation_failure_does_not_change_enforcement(tmp_path):
+    state = {
+        "status": "503 Service Unavailable",
+        "body": b'{"error":"cloud offline"}',
+    }
+    server, preserve_to = _serve_preservation_app(state)
+    guard = Guard.local(
+        workspace=tmp_path / ".guard-local",
+        preserve_to=preserve_to,
+        authorities={"finance-policy@1.0.0": _authority()},
+        actor_identity={"id": "manager-1", "type": "human", "role": "manager"},
+        approvals=[{"role": "manager", "approved_by": "manager-approval"}],
+        evaluation_time_source=lambda: EVALUATION_TIME,
+    )
+
+    try:
+        result = guard.boundary_for("finance-policy@1.0.0").execute(
+            lambda amount: amount + 1,
+            execution_request=_request(amount=500),
+            args=(500,),
+        )
+    finally:
+        server.shutdown()
+        server.server_close()
+
+    assert result["executed"] is True
+    assert result["outcome"]["status"] == "admissible"
+    assert result["cloud_preservation"]["ok"] is False
+    assert result["cloud_preservation"]["error_type"] == "http_error"
+    assert guard.store.history()[0]["schema_version"] == SAVED_EVALUATION_V1
+
+
 def test_local_persistence_saves_receipt_and_replays_deterministically(tmp_path):
     store = LocalEvaluationStore(tmp_path / "guard-runs")
     boundary = GuardRuntimeBoundary(
@@ -211,3 +305,39 @@ def _request(*, amount):
         "arguments": {"amount": amount},
         "artifacts": [],
     }
+
+
+def _serve_preservation_app(state):
+    server = make_server("127.0.0.1", 0, _preservation_app(state))
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    return server, f"http://127.0.0.1:{server.server_port}"
+
+
+def _preservation_app(state):
+    def app(environ, start_response):
+        state["method"] = environ["REQUEST_METHOD"]
+        state["path"] = environ["PATH_INFO"]
+
+        if state.get("status"):
+            start_response(state["status"], [("Content-Type", "application/json")])
+            return [state.get("body", b'{"error":"unavailable"}')]
+
+        length = int(environ.get("CONTENT_LENGTH") or "0")
+        body = environ["wsgi.input"].read(length)
+        state["payload"] = json.loads(body.decode("utf-8"))
+        start_response("200 OK", [("Content-Type", "application/json")])
+        return [
+            json.dumps(
+                {
+                    "package_id": "pkg_guard_123",
+                    "receipt": {
+                        "package_id": "pkg_guard_123",
+                        "status": "preserved",
+                    },
+                },
+                sort_keys=True,
+            ).encode("utf-8")
+        ]
+
+    return app

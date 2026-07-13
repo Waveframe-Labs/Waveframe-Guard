@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from dataclasses import asdict
 from functools import wraps
 from typing import Any, Callable
 
 from guard.runtime import evaluate_runtime
 from guard.runtime.builders import validate_guard_enforcement_outcome
+from waveframe_guard.cloud import CloudPreservationClient
 
 
 class GuardExecutionError(RuntimeError):
@@ -37,6 +39,7 @@ class GuardRuntimeBoundary:
         execution_context: dict[str, Any] | None = None,
         evaluation_time_source: Callable[[], str] | None = None,
         store: Any | None = None,
+        cloud_preservation_client: CloudPreservationClient | None = None,
     ):
         self.compiled_authority = compiled_authority
         self.actor_identity = actor_identity
@@ -46,6 +49,7 @@ class GuardRuntimeBoundary:
         self.execution_context = execution_context or {"surface": "sdk"}
         self.evaluation_time_source = evaluation_time_source or _utc_now
         self.store = store
+        self.cloud_preservation_client = cloud_preservation_client
 
     def evaluate(
         self,
@@ -75,7 +79,7 @@ class GuardRuntimeBoundary:
         )
         validate_guard_enforcement_outcome(result["enforcement_outcome"])
         if save and self.store is not None:
-            self.store.save_evaluation(
+            saved_record = self.store.save_evaluation(
                 inputs={
                     "compiled_authority": self.compiled_authority,
                     "execution_request": execution_request,
@@ -83,6 +87,10 @@ class GuardRuntimeBoundary:
                 },
                 evaluation=result,
             )
+            if self.cloud_preservation_client is not None:
+                result["cloud_preservation"] = asdict(
+                    self.cloud_preservation_client.preserve(saved_record)
+                )
         return result
 
     def enforce(self, execution_request: dict[str, Any], **kwargs: Any) -> dict[str, Any]:
@@ -114,6 +122,7 @@ class GuardRuntimeBoundary:
                 "value": None,
                 "evaluation": exc.evaluation,
                 "outcome": exc.outcome,
+                "cloud_preservation": exc.evaluation.get("cloud_preservation"),
             }
 
         value = fn(*(args or ()), **(kwargs or {}))
@@ -122,6 +131,7 @@ class GuardRuntimeBoundary:
             "value": value,
             "evaluation": evaluation,
             "outcome": evaluation["enforcement_outcome"],
+            "cloud_preservation": evaluation.get("cloud_preservation"),
         }
 
     def decorator(

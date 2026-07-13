@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from guard.adapters import NORMALIZED_EXECUTION_REQUEST_V1
+from waveframe_guard.cloud import CloudPreservationClient
 
 from .execution import GuardRuntimeBoundary
 from .local_persistence import LocalEvaluationStore
@@ -25,6 +26,7 @@ class Guard:
         replay_posture: dict[str, Any] | None = None,
         execution_context: dict[str, Any] | None = None,
         evaluation_time_source: Callable[[], str] | None = None,
+        preserve_to: str | None = None,
     ):
         self.workspace = Path(workspace)
         self.store = LocalEvaluationStore(self.workspace)
@@ -36,6 +38,12 @@ class Guard:
         self.replay_posture = replay_posture or {}
         self.execution_context = execution_context or {"surface": "guard_sdk"}
         self.evaluation_time_source = evaluation_time_source
+        self.preserve_to = preserve_to
+        self.cloud_preservation_client = (
+            CloudPreservationClient(preserve_to)
+            if preserve_to is not None
+            else None
+        )
 
     @classmethod
     def local(
@@ -50,6 +58,7 @@ class Guard:
         replay_posture: dict[str, Any] | None = None,
         execution_context: dict[str, Any] | None = None,
         evaluation_time_source: Callable[[], str] | None = None,
+        preserve_to: str | None = None,
     ) -> "Guard":
         return cls(
             workspace=workspace,
@@ -61,6 +70,7 @@ class Guard:
             replay_posture=replay_posture,
             execution_context=execution_context,
             evaluation_time_source=evaluation_time_source,
+            preserve_to=preserve_to,
         )
 
     def protect(
@@ -124,6 +134,7 @@ class Guard:
             execution_context=execution_context if execution_context is not None else self.execution_context,
             evaluation_time_source=self.evaluation_time_source,
             store=self.store,
+            cloud_preservation_client=self.cloud_preservation_client,
         )
 
     def resolve_authority(self, authority: str) -> dict[str, Any]:
