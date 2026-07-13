@@ -14,6 +14,7 @@ ENFORCEMENT_RECEIPT_V1 = "guard_enforcement_receipt.v1"
 GUARD_ARTIFACT_MANIFEST_V1 = "guard_artifact_manifest.v1"
 GUARD_REPLAY_RECORD_V1 = "guard_replay_record.v1"
 GUARD_REPLAY_RESULT_V1 = "guard_replay_result.v1"
+CLOUD_PRESERVATION_METADATA_V1 = "guard_cloud_preservation_metadata.v1"
 
 REPLAY_MISMATCH_CLASSES = {
     "contract_drift",
@@ -35,6 +36,10 @@ class UnsupportedArtifactSchemaError(GuardArtifactError):
 
 class UnreadableReceiptError(GuardArtifactError):
     error_class = "unreadable_receipt"
+
+
+class ConflictingCloudPreservationError(GuardArtifactError):
+    error_class = "conflicting_cloud_preservation"
 
 
 class LocalEvaluationStore:
@@ -83,6 +88,44 @@ class LocalEvaluationStore:
         self.export_receipt(receipt)
         self.export_manifest(artifact_manifest)
         return record
+
+    def append_cloud_preservation(
+        self,
+        run_id: str,
+        metadata: dict[str, Any],
+        *,
+        record_hash: str | None = None,
+    ) -> dict[str, Any]:
+        records = self.history()
+        updated_record = None
+        for record in reversed(records):
+            if record["run_id"] != run_id:
+                continue
+            if record_hash is not None and record.get("record_hash") != record_hash:
+                continue
+            incoming = {
+                "schema_version": CLOUD_PRESERVATION_METADATA_V1,
+                **metadata,
+            }
+            if "cloud_preservation" in record:
+                _validate_cloud_preservation_update(
+                    existing=record.get("cloud_preservation"),
+                    incoming=incoming,
+                )
+            record["cloud_preservation"] = incoming
+            record.pop("record_hash", None)
+            record["record_hash"] = stable_hash(record)
+            updated_record = record
+            break
+
+        if updated_record is None:
+            raise FileNotFoundError(f"saved Guard evaluation not found: {run_id}")
+
+        self.root.mkdir(parents=True, exist_ok=True)
+        with self.history_path.open("w", encoding="utf-8") as history:
+            for record in records:
+                history.write(json.dumps(record, sort_keys=True) + "\n")
+        return updated_record
 
     def history(self) -> list[dict[str, Any]]:
         return self.history_with_errors()["records"]
@@ -405,6 +448,21 @@ def _dedupe_reasons(reasons: list[dict[str, Any]]) -> list[dict[str, Any]]:
         seen.add(key)
         deduped.append(reason)
     return deduped
+
+
+def _validate_cloud_preservation_update(
+    *,
+    existing: dict[str, Any] | None,
+    incoming: dict[str, Any],
+) -> None:
+    if existing is None:
+        return
+    identity_fields = ["package_id", "receipt_id", "sha256", "timestamp"]
+    for field in identity_fields:
+        if existing.get(field) != incoming.get(field):
+            raise ConflictingCloudPreservationError(
+                f"conflicting Cloud preservation metadata for {field}"
+            )
 
 
 def _without_hash(payload: dict[str, Any], hash_key: str) -> dict[str, Any]:

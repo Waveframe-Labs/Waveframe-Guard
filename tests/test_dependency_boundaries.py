@@ -50,6 +50,11 @@ FORBIDDEN_CLOUD_PERSISTENCE_MODULE_NAMES = {
     "store",
 }
 
+ALLOWED_CLOUD_PRESERVATION_CLIENT_FILES = {
+    "waveframe_guard/cloud/__init__.py",
+    "waveframe_guard/cloud/client.py",
+}
+
 
 def test_guard_has_no_local_governance_meaning_definitions():
     violations = []
@@ -164,10 +169,13 @@ def test_guard_does_not_duplicate_proposal_normalization_logic():
 def test_guard_does_not_define_cloud_persistence_behavior():
     violations = []
     for python_file in _guard_python_files():
+        rel_path = _rel(python_file)
+        if rel_path in ALLOWED_CLOUD_PRESERVATION_CLIENT_FILES:
+            continue
         parts = {part.lower() for part in python_file.relative_to(REPO_ROOT).parts}
         stem = python_file.stem.lower()
         if stem in FORBIDDEN_CLOUD_PERSISTENCE_MODULE_NAMES or parts & FORBIDDEN_CLOUD_PERSISTENCE_MODULE_NAMES:
-            violations.append(_rel(python_file))
+            violations.append(rel_path)
             continue
         tree = ast.parse(python_file.read_text(encoding="utf-8"), filename=str(python_file))
         for node in ast.walk(tree):
@@ -175,6 +183,27 @@ def test_guard_does_not_define_cloud_persistence_behavior():
                 lowered = node.name.lower()
                 if "cloud" in lowered and any(word in lowered for word in ["persist", "save", "store", "write"]):
                     violations.append(f"{_rel(python_file)}:{node.lineno} defines {node.name}")
+
+    assert violations == []
+
+
+def test_cloud_preservation_client_has_no_enforcement_coupling():
+    violations = []
+    for rel_path in ALLOWED_CLOUD_PRESERVATION_CLIENT_FILES:
+        python_file = REPO_ROOT / rel_path
+        tree = ast.parse(python_file.read_text(encoding="utf-8"), filename=str(python_file))
+        for node in ast.walk(tree):
+            imported_module = None
+            if isinstance(node, ast.ImportFrom):
+                imported_module = node.module
+            elif isinstance(node, ast.Import):
+                for alias in node.names:
+                    if _is_enforcement_module(alias.name):
+                        violations.append(f"{rel_path}:{node.lineno} imports {alias.name}")
+                continue
+
+            if _is_enforcement_module(imported_module):
+                violations.append(f"{rel_path}:{node.lineno} imports {imported_module}")
 
     assert violations == []
 
@@ -207,3 +236,14 @@ def _repo_python_files():
 
 def _rel(path: Path) -> str:
     return str(path.relative_to(REPO_ROOT)).replace("\\", "/")
+
+
+def _is_enforcement_module(module_name):
+    if module_name is None:
+        return False
+    return module_name in {
+        "guard.enforcement",
+        "waveframe_guard.execute",
+        "waveframe_guard.guard",
+        "waveframe_guard.runtime",
+    } or module_name.startswith("guard.enforcement.")

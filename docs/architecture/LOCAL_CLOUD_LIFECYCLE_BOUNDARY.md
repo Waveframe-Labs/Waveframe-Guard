@@ -53,6 +53,30 @@ Guard evaluates admissibility against compiled authority.
 Guard never derives governance meaning from raw policy text.
 ```
 
+## Preservation Annotation Rule
+
+Cloud preservation is post-decision evidence durability. Guard must complete
+the local decision record before Cloud is contacted:
+
+- evaluation history
+- Guard Receipt
+- artifact manifest
+- replay record
+
+The Guard Receipt and artifact manifest are immutable local decision evidence.
+Cloud preservation metadata is a later durability annotation on the saved
+evaluation container. It records Cloud identifiers such as package id, receipt
+id, content hash, and timestamp so inspection tools can show preservation
+status without manual import.
+
+Cloud metadata must not retroactively claim to be covered by the original Guard
+Receipt or artifact manifest unless those artifacts are explicitly regenerated
+as a new evidence set. v0.12.0 does not regenerate them.
+
+For an allowed decision, the preserved package means Guard evaluated the request
+and declared it admissible. It is not proof that the protected business
+mutation completed.
+
 ## Handoff Rule
 
 Local Guard may export:

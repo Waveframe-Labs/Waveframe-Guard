@@ -15,6 +15,8 @@ from .execution import (
 )
 from .guard import Guard
 from .local_persistence import (
+    CLOUD_PRESERVATION_METADATA_V1,
+    ConflictingCloudPreservationError,
     ENFORCEMENT_RECEIPT_V1,
     GUARD_ARTIFACT_MANIFEST_V1,
     SAVED_EVALUATION_V1,
@@ -36,6 +38,8 @@ __all__ = [
     "SAVED_EVALUATION_V1",
     "ENFORCEMENT_RECEIPT_V1",
     "GUARD_ARTIFACT_MANIFEST_V1",
+    "CLOUD_PRESERVATION_METADATA_V1",
+    "ConflictingCloudPreservationError",
     "python_callable_adapter",
     "http_middleware_adapter",
     "webhook_enforcement_adapter",
