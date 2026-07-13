@@ -34,9 +34,14 @@ def _preservation_app(state):
             json.dumps(
                 {
                     "package_id": "pkg_123",
+                    "receipt_id": "rcpt_123",
+                    "sha256": "sha256:preserved",
+                    "timestamp": "2026-07-13T00:00:00+00:00",
                     "receipt": {
                         "receipt_id": "rcpt_123",
                         "package_id": "pkg_123",
+                        "sha256": "sha256:preserved",
+                        "timestamp": "2026-07-13T00:00:00+00:00",
                         "status": "preserved",
                     },
                 },
@@ -64,9 +69,14 @@ def test_cloud_preservation_client_posts_to_preserve_and_parses_receipt():
 
     assert result.ok is True
     assert result.package_id == "pkg_123"
+    assert result.receipt_id == "rcpt_123"
+    assert result.sha256 == "sha256:preserved"
+    assert result.timestamp == "2026-07-13T00:00:00+00:00"
     assert result.receipt == {
         "receipt_id": "rcpt_123",
         "package_id": "pkg_123",
+        "sha256": "sha256:preserved",
+        "timestamp": "2026-07-13T00:00:00+00:00",
         "status": "preserved",
     }
     assert result.status_code == 200

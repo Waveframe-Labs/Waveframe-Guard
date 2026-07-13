@@ -8,6 +8,7 @@ import pytest
 
 from guard.adapters import COMPILED_AUTHORITY_CONTRACT_V1, NORMALIZED_EXECUTION_REQUEST_V1
 from guard.sdk import (
+    CLOUD_PRESERVATION_METADATA_V1,
     ENFORCEMENT_RECEIPT_V1,
     SAVED_EVALUATION_V1,
     Guard,
@@ -148,10 +149,29 @@ def test_guard_local_can_preserve_saved_evaluation_after_local_decision(tmp_path
 
     history = guard.store.history()
     run_id = history[0]["run_id"]
+    cloud_metadata = history[0]["cloud_preservation"]
 
     assert result["executed"] is True
     assert result["cloud_preservation"]["ok"] is True
     assert result["cloud_preservation"]["package_id"] == "pkg_guard_123"
+    assert result["cloud_preservation"]["receipt_id"] == "rcpt_guard_123"
+    assert result["cloud_preservation"]["sha256"] == "sha256:guard-package"
+    assert result["cloud_preservation"]["timestamp"] == "2026-07-13T00:00:00+00:00"
+    assert cloud_metadata == {
+        "schema_version": CLOUD_PRESERVATION_METADATA_V1,
+        "status": "preserved",
+        "package_id": "pkg_guard_123",
+        "receipt_id": "rcpt_guard_123",
+        "sha256": "sha256:guard-package",
+        "timestamp": "2026-07-13T00:00:00+00:00",
+        "receipt": {
+            "package_id": "pkg_guard_123",
+            "receipt_id": "rcpt_guard_123",
+            "sha256": "sha256:guard-package",
+            "timestamp": "2026-07-13T00:00:00+00:00",
+            "status": "preserved",
+        },
+    }
     assert state["path"] == "/v1/preserve"
     assert state["payload"]["schema_version"] == "guard_cloud_preservation_package.v1"
     assert state["payload"]["run_id"] == run_id
@@ -225,6 +245,7 @@ def test_guard_local_cloud_preservation_failure_does_not_change_enforcement(tmp_
     assert result["cloud_preservation"]["ok"] is False
     assert result["cloud_preservation"]["error_type"] == "http_error"
     assert guard.store.history()[0]["schema_version"] == SAVED_EVALUATION_V1
+    assert "cloud_preservation" not in guard.store.history()[0]
 
 
 def test_local_persistence_saves_receipt_and_replays_deterministically(tmp_path):
@@ -354,8 +375,14 @@ def _preservation_app(state):
             json.dumps(
                 {
                     "package_id": "pkg_guard_123",
+                    "receipt_id": "rcpt_guard_123",
+                    "sha256": "sha256:guard-package",
+                    "timestamp": "2026-07-13T00:00:00+00:00",
                     "receipt": {
                         "package_id": "pkg_guard_123",
+                        "receipt_id": "rcpt_guard_123",
+                        "sha256": "sha256:guard-package",
+                        "timestamp": "2026-07-13T00:00:00+00:00",
                         "status": "preserved",
                     },
                 },

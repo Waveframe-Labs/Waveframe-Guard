@@ -14,6 +14,9 @@ DEFAULT_PRESERVATION_TIMEOUT_SECONDS = 2.0
 class CloudPreservationResult:
     ok: bool
     package_id: Optional[str] = None
+    receipt_id: Optional[str] = None
+    sha256: Optional[str] = None
+    timestamp: Optional[str] = None
     receipt: Optional[Mapping[str, Any]] = None
     response: Optional[Mapping[str, Any]] = None
     status_code: Optional[int] = None
@@ -94,6 +97,9 @@ class CloudPreservationClient:
         return CloudPreservationResult(
             ok=True,
             package_id=package_id,
+            receipt_id=_extract_string("receipt_id", parsed, receipt),
+            sha256=_extract_string("sha256", parsed, receipt),
+            timestamp=_extract_string("timestamp", parsed, receipt),
             receipt=receipt,
             response=parsed,
             status_code=response.status_code,
@@ -115,4 +121,17 @@ def _extract_package_id(
     if receipt is not None and isinstance(receipt.get("package_id"), str):
         return receipt["package_id"]
 
+    return None
+
+
+def _extract_string(
+    key: str,
+    parsed: Mapping[str, Any],
+    receipt: Optional[Mapping[str, Any]],
+) -> Optional[str]:
+    value = parsed.get(key)
+    if isinstance(value, str):
+        return value
+    if receipt is not None and isinstance(receipt.get(key), str):
+        return receipt[key]
     return None

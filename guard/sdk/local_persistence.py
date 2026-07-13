@@ -14,6 +14,7 @@ ENFORCEMENT_RECEIPT_V1 = "guard_enforcement_receipt.v1"
 GUARD_ARTIFACT_MANIFEST_V1 = "guard_artifact_manifest.v1"
 GUARD_REPLAY_RECORD_V1 = "guard_replay_record.v1"
 GUARD_REPLAY_RESULT_V1 = "guard_replay_result.v1"
+CLOUD_PRESERVATION_METADATA_V1 = "guard_cloud_preservation_metadata.v1"
 
 REPLAY_MISMATCH_CLASSES = {
     "contract_drift",
@@ -83,6 +84,34 @@ class LocalEvaluationStore:
         self.export_receipt(receipt)
         self.export_manifest(artifact_manifest)
         return record
+
+    def append_cloud_preservation(
+        self,
+        run_id: str,
+        metadata: dict[str, Any],
+    ) -> dict[str, Any]:
+        records = self.history()
+        updated_record = None
+        for record in records:
+            if record["run_id"] != run_id:
+                continue
+            record["cloud_preservation"] = {
+                "schema_version": CLOUD_PRESERVATION_METADATA_V1,
+                **metadata,
+            }
+            record.pop("record_hash", None)
+            record["record_hash"] = stable_hash(record)
+            updated_record = record
+            break
+
+        if updated_record is None:
+            raise FileNotFoundError(f"saved Guard evaluation not found: {run_id}")
+
+        self.root.mkdir(parents=True, exist_ok=True)
+        with self.history_path.open("w", encoding="utf-8") as history:
+            for record in records:
+                history.write(json.dumps(record, sort_keys=True) + "\n")
+        return updated_record
 
     def history(self) -> list[dict[str, Any]]:
         return self.history_with_errors()["records"]

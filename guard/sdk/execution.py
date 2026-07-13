@@ -92,14 +92,19 @@ class GuardRuntimeBoundary:
             )
             if self.cloud_preservation_client is not None:
                 replay_result = self.store.replay(saved_record["run_id"])
-                result["cloud_preservation"] = asdict(
-                    self.cloud_preservation_client.preserve(
-                        _build_cloud_preservation_package(
-                            saved_record=saved_record,
-                            replay_result=replay_result,
-                        )
+                preservation_result = self.cloud_preservation_client.preserve(
+                    _build_cloud_preservation_package(
+                        saved_record=saved_record,
+                        replay_result=replay_result,
                     )
                 )
+                result["cloud_preservation"] = asdict(preservation_result)
+                if preservation_result.ok:
+                    updated_record = self.store.append_cloud_preservation(
+                        saved_record["run_id"],
+                        _cloud_preservation_metadata(result["cloud_preservation"]),
+                    )
+                    saved_record["cloud_preservation"] = updated_record["cloud_preservation"]
         return result
 
     def enforce(self, execution_request: dict[str, Any], **kwargs: Any) -> dict[str, Any]:
@@ -186,4 +191,15 @@ def _build_cloud_preservation_package(
         "receipt": saved_record["receipt"],
         "artifact_manifest": saved_record["artifact_manifest"],
         "replay_result": replay_result,
+    }
+
+
+def _cloud_preservation_metadata(result: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "status": "preserved",
+        "package_id": result.get("package_id"),
+        "receipt_id": result.get("receipt_id"),
+        "sha256": result.get("sha256"),
+        "timestamp": result.get("timestamp"),
+        "receipt": result.get("receipt"),
     }
