@@ -10,6 +10,9 @@ from guard.runtime.builders import validate_guard_enforcement_outcome
 from waveframe_guard.cloud import CloudPreservationClient
 
 
+GUARD_CLOUD_PRESERVATION_PACKAGE_V1 = "guard_cloud_preservation_package.v1"
+
+
 class GuardExecutionError(RuntimeError):
     def __init__(self, message: str, *, evaluation: dict[str, Any]):
         super().__init__(message)
@@ -88,8 +91,14 @@ class GuardRuntimeBoundary:
                 evaluation=result,
             )
             if self.cloud_preservation_client is not None:
+                replay_result = self.store.replay(saved_record["run_id"])
                 result["cloud_preservation"] = asdict(
-                    self.cloud_preservation_client.preserve(saved_record)
+                    self.cloud_preservation_client.preserve(
+                        _build_cloud_preservation_package(
+                            saved_record=saved_record,
+                            replay_result=replay_result,
+                        )
+                    )
                 )
         return result
 
@@ -163,3 +172,18 @@ def _enforcement_message(evaluation: dict[str, Any]) -> str:
 
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _build_cloud_preservation_package(
+    *,
+    saved_record: dict[str, Any],
+    replay_result: dict[str, Any],
+) -> dict[str, Any]:
+    return {
+        "schema_version": GUARD_CLOUD_PRESERVATION_PACKAGE_V1,
+        "run_id": saved_record["run_id"],
+        "saved_evaluation": saved_record,
+        "receipt": saved_record["receipt"],
+        "artifact_manifest": saved_record["artifact_manifest"],
+        "replay_result": replay_result,
+    }

@@ -124,10 +124,11 @@ def test_guard_local_protect_requires_normalized_request_boundary(tmp_path):
 
 
 def test_guard_local_can_preserve_saved_evaluation_after_local_decision(tmp_path):
-    state = {}
+    workspace = tmp_path / ".guard-local"
+    state = {"workspace": workspace}
     server, preserve_to = _serve_preservation_app(state)
     guard = Guard.local(
-        workspace=tmp_path / ".guard-local",
+        workspace=workspace,
         preserve_to=preserve_to,
         authorities={"finance-policy@1.0.0": _authority()},
         actor_identity={"id": "manager-1", "type": "human", "role": "manager"},
@@ -152,9 +153,22 @@ def test_guard_local_can_preserve_saved_evaluation_after_local_decision(tmp_path
     assert result["cloud_preservation"]["ok"] is True
     assert result["cloud_preservation"]["package_id"] == "pkg_guard_123"
     assert state["path"] == "/v1/preserve"
-    assert state["payload"]["schema_version"] == SAVED_EVALUATION_V1
+    assert state["payload"]["schema_version"] == "guard_cloud_preservation_package.v1"
     assert state["payload"]["run_id"] == run_id
-    assert (tmp_path / ".guard-local" / "receipts" / f"{run_id}.json").exists()
+    assert state["payload"]["saved_evaluation"]["schema_version"] == SAVED_EVALUATION_V1
+    assert state["payload"]["saved_evaluation"]["run_id"] == run_id
+    assert state["payload"]["receipt"] == history[0]["receipt"]
+    assert state["payload"]["artifact_manifest"] == history[0]["artifact_manifest"]
+    assert state["payload"]["replay_result"]["matches"] is True
+    assert state["local_artifacts_existed_before_preserve"] == {
+        "history": True,
+        "receipt": True,
+        "manifest": True,
+        "replay": True,
+    }
+    assert (workspace / "receipts" / f"{run_id}.json").exists()
+    assert (workspace / "manifests" / f"{run_id}.json").exists()
+    assert (workspace / "replays" / f"{run_id}.json").exists()
 
 
 def test_guard_local_omits_cloud_preservation_when_not_configured(tmp_path, monkeypatch):
@@ -326,6 +340,15 @@ def _preservation_app(state):
         length = int(environ.get("CONTENT_LENGTH") or "0")
         body = environ["wsgi.input"].read(length)
         state["payload"] = json.loads(body.decode("utf-8"))
+        workspace = state.get("workspace")
+        if workspace is not None:
+            run_id = state["payload"]["run_id"]
+            state["local_artifacts_existed_before_preserve"] = {
+                "history": (workspace / "evaluation-history.jsonl").exists(),
+                "receipt": (workspace / "receipts" / f"{run_id}.json").exists(),
+                "manifest": (workspace / "manifests" / f"{run_id}.json").exists(),
+                "replay": (workspace / "replays" / f"{run_id}.json").exists(),
+            }
         start_response("200 OK", [("Content-Type", "application/json")])
         return [
             json.dumps(
