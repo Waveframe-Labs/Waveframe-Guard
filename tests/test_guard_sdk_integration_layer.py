@@ -200,6 +200,51 @@ def test_guard_local_legacy_contract_input_normalizes_to_default_authority(tmp_p
     assert result["outcome"]["authority_ref"] == "finance-policy@1.0.0"
 
 
+def test_guard_local_rejects_authority_and_contract_together(tmp_path):
+    with pytest.raises(ValueError, match="mutually exclusive"):
+        Guard.local(
+            workspace=tmp_path / ".guard-local",
+            authority="finance-policy@1.0.0",
+            contract=_authority(),
+        )
+
+
+def test_guard_local_rejects_authority_resolver_without_authority(tmp_path):
+    registry_entry = _memory_registry_entry(tmp_path)
+
+    with pytest.raises(ValueError, match="authority_resolver requires authority"):
+        Guard.local(
+            workspace=tmp_path / ".guard-local",
+            authority_resolver=MemoryAuthorityResolver([registry_entry]),
+        )
+
+
+def test_guard_local_deduplicates_identical_authority_source_content(tmp_path):
+    contract = _authority()
+    guard = Guard.local(
+        workspace=tmp_path / ".guard-local",
+        contract=contract,
+        authorities={"finance-policy@1.0.0": dict(contract)},
+    )
+
+    assert guard.resolve_authority("finance-policy@1.0.0") == contract
+
+
+def test_guard_local_rejects_same_ref_different_authority_source_content(tmp_path):
+    contract = _authority()
+    conflicting = {
+        **contract,
+        "authority_requirements": {"required_roles": ["director"]},
+    }
+
+    with pytest.raises(ValueError, match="conflicting authority source"):
+        Guard.local(
+            workspace=tmp_path / ".guard-local",
+            contract=contract,
+            authorities={"finance-policy@1.0.0": conflicting},
+        )
+
+
 def test_guard_local_can_preserve_saved_evaluation_after_local_decision(tmp_path):
     workspace = tmp_path / ".guard-local"
     state = {"workspace": workspace}
