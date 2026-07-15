@@ -5,8 +5,10 @@ from pathlib import Path
 from typing import Any, Callable
 
 from guard.adapters import NORMALIZED_EXECUTION_REQUEST_V1
+from waveframe_guard.authority import AuthorityResolver
 from waveframe_guard.cloud import CloudPreservationClient
 
+from .authority_source import AuthoritySource
 from .execution import GuardRuntimeBoundary
 from .local_persistence import LocalEvaluationStore
 
@@ -18,6 +20,9 @@ class Guard:
         self,
         *,
         workspace: str | Path,
+        authority: str | None = None,
+        authority_resolver: AuthorityResolver | None = None,
+        contract: dict[str, Any] | None = None,
         authorities: dict[str, dict[str, Any]] | None = None,
         authority_loader: Callable[[str], dict[str, Any]] | None = None,
         actor_identity: dict[str, Any] | None = None,
@@ -30,8 +35,16 @@ class Guard:
     ):
         self.workspace = Path(workspace)
         self.store = LocalEvaluationStore(self.workspace)
-        self.authorities = authorities or {}
-        self.authority_loader = authority_loader
+        authority_source = AuthoritySource.from_inputs(
+            authority=authority,
+            authority_resolver=authority_resolver,
+            contract=contract,
+            authorities=authorities,
+            authority_loader=authority_loader,
+        )
+        self.authorities = authority_source.authorities
+        self.authority_loader = authority_source.authority_loader
+        self.default_authority_ref = authority_source.default_authority_ref
         self.actor_identity = actor_identity or {"id": "unknown", "type": "unknown", "role": "unknown"}
         self.approvals = approvals or []
         self.continuity_state = continuity_state or {}
@@ -50,6 +63,9 @@ class Guard:
         cls,
         *,
         workspace: str | Path = ".guard-local",
+        authority: str | None = None,
+        authority_resolver: AuthorityResolver | None = None,
+        contract: dict[str, Any] | None = None,
         authorities: dict[str, dict[str, Any]] | None = None,
         authority_loader: Callable[[str], dict[str, Any]] | None = None,
         actor_identity: dict[str, Any] | None = None,
@@ -62,6 +78,9 @@ class Guard:
     ) -> "Guard":
         return cls(
             workspace=workspace,
+            authority=authority,
+            authority_resolver=authority_resolver,
+            contract=contract,
             authorities=authorities,
             authority_loader=authority_loader,
             actor_identity=actor_identity,
@@ -76,7 +95,7 @@ class Guard:
     def protect(
         self,
         *,
-        authority: str,
+        authority: str | None = None,
         request_builder: Callable[..., dict[str, Any]] | None = None,
         actor_identity: dict[str, Any] | None = None,
         approvals: list[dict[str, Any]] | None = None,
@@ -86,7 +105,7 @@ class Guard:
         raise_on_block: bool = True,
     ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
         boundary = self.boundary_for(
-            authority,
+            self._resolve_authority_ref(authority),
             actor_identity=actor_identity,
             approvals=approvals,
             continuity_state=continuity_state,
@@ -117,7 +136,7 @@ class Guard:
 
     def boundary_for(
         self,
-        authority: str,
+        authority: str | None = None,
         *,
         actor_identity: dict[str, Any] | None = None,
         approvals: list[dict[str, Any]] | None = None,
@@ -126,7 +145,7 @@ class Guard:
         execution_context: dict[str, Any] | None = None,
     ) -> GuardRuntimeBoundary:
         return GuardRuntimeBoundary(
-            compiled_authority=self.resolve_authority(authority),
+            compiled_authority=self.resolve_authority(self._resolve_authority_ref(authority)),
             actor_identity=actor_identity or self.actor_identity,
             approvals=approvals if approvals is not None else self.approvals,
             continuity_state=continuity_state if continuity_state is not None else self.continuity_state,
@@ -143,6 +162,12 @@ class Guard:
         if self.authority_loader is not None:
             return self.authority_loader(authority)
         raise KeyError(f"compiled authority not available for Guard SDK authority reference: {authority}")
+
+    def _resolve_authority_ref(self, authority: str | None) -> str:
+        resolved = authority or self.default_authority_ref
+        if resolved is None:
+            raise ValueError("Missing authority; pass authority=... to Guard.local(), protect(), or boundary_for()")
+        return resolved
 
 
 def _normalized_request_from_call(args: tuple[Any, ...], kwargs: dict[str, Any]) -> dict[str, Any]:

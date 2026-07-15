@@ -30,7 +30,7 @@ def test_load_authority_returns_first_class_authority_object():
     assert authority.authority_ref == "finance-policy@1.0.0"
     assert authority.contract["contract_id"] == "finance-policy"
     assert authority.contract["contract_version"] == "1.0.0"
-    assert authority.contract_hash == "sha256:e4fd822ae1ac5f0228c9042dfd81c7c96b2774bf7e1e5516d9db95880b1aab70"
+    assert authority.contract_hash == "sha256:1371af2512ebb9638882f1af5a36a74cc7d81ca1ed9f4e138663133b5414adc7"
     assert authority.bundle_hash.startswith("sha256:")
     assert authority.bundle_path.name == "finance-policy-1.0.0.authority-bundle.json"
     assert authority.lifecycle_state == "active"
@@ -292,6 +292,8 @@ def test_authority_loading_invariant_is_documented():
     assert "The pipeline shape is fixed" in source
     assert "MemoryAuthorityResolver" in source
     assert "Resolvers must not return bundles" in source
+    assert '`Guard.local(authority="name@x.y.z")`' in source
+    assert "`LoadedAuthority.contract`" in source
 
 
 def _write_authority_fixture(

@@ -51,6 +51,17 @@ Future resolver adapters may include Cloud or Enterprise sources, but they must
 still return `RegistryEntry`. Resolvers must not return bundles, load bundle
 payloads, verify bundle contents, alter lifecycle state, or select `latest`.
 
+## Guard SDK Normalization
+
+`Guard.local(authority="name@x.y.z")` resolves and verifies the published
+authority before constructing runtime boundaries. After that point, Guard uses
+`LoadedAuthority.contract` as the compiled authority passed to the existing
+enforcement pipeline.
+
+The enforcement pipeline does not know whether the compiled authority came from
+a published authority reference, an injected resolver, or a legacy compiled
+contract input.
+
 Each stage has one responsibility:
 
 - `AuthorityResolver` maps an explicit authority ref to a registry entry.

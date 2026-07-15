@@ -50,7 +50,7 @@ compiled_authority = {
     "artifact_requirements": {},
     "stage_requirements": {},
     "invariants": {},
-    "contract_hash": "e4fd822ae1ac5f0228c9042dfd81c7c96b2774bf7e1e5516d9db95880b1aab70",
+    "contract_hash": "1371af2512ebb9638882f1af5a36a74cc7d81ca1ed9f4e138663133b5414adc7",
 }
 
 request = {

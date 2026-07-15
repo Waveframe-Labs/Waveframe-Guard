@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import threading
+from pathlib import Path
 from wsgiref.simple_server import make_server
 
 import pytest
@@ -21,6 +23,8 @@ from guard.sdk import (
     queue_job_adapter,
     webhook_enforcement_adapter,
 )
+from waveframe_guard.authority.adapters import MemoryAuthorityResolver
+from waveframe_guard.authority.types import RegistryEntry
 
 
 EVALUATION_TIME = "2026-06-03T22:30:00+00:00"
@@ -43,6 +47,15 @@ def test_python_callable_adapter_blocks_before_execution():
     assert calls == []
     assert exc.value.outcome["schema_version"] == "guard_enforcement_outcome.v1"
     assert exc.value.outcome["status"] == "blocked"
+
+
+def test_guard_sdk_import_path_can_construct_authority_backed_guard():
+    from guard.sdk import Guard as SdkGuard
+
+    guard = SdkGuard.local(authority="finance-policy@1.0.0")
+
+    assert guard.default_authority_ref == "finance-policy@1.0.0"
+    assert guard.resolve_authority("finance-policy@1.0.0")["schema_version"] == COMPILED_AUTHORITY_CONTRACT_V1
 
 
 def test_runtime_boundary_executes_callable_when_admissible():
@@ -122,6 +135,69 @@ def test_guard_local_protect_requires_normalized_request_boundary(tmp_path):
 
     with pytest.raises(ValueError, match="normalized_execution_request.v1"):
         wire_transfer({"amount": 500})
+
+
+def test_guard_local_accepts_published_authority_ref_without_repeating_authority(tmp_path):
+    calls = []
+    guard = Guard.local(
+        workspace=tmp_path / ".guard-local",
+        authority="finance-policy@1.0.0",
+        actor_identity={"id": "manager-1", "type": "human", "role": "manager"},
+        approvals=[{"role": "manager", "approved_by": "manager-approval"}],
+        evaluation_time_source=lambda: EVALUATION_TIME,
+    )
+
+    @guard.protect()
+    def wire_transfer(execution_request):
+        calls.append(execution_request["arguments"]["amount"])
+        return {"wire_sent": execution_request["arguments"]["amount"]}
+
+    result = wire_transfer(_request(amount=500))
+
+    assert result == {"wire_sent": 500}
+    assert calls == [500]
+
+
+def test_guard_local_accepts_injected_authority_resolver(tmp_path):
+    registry_entry = _memory_registry_entry(tmp_path)
+    resolver = MemoryAuthorityResolver({"finance-policy@1.2.0": registry_entry})
+    guard = Guard.local(
+        workspace=tmp_path / ".guard-local",
+        authority="finance-policy@1.2.0",
+        authority_resolver=resolver,
+        actor_identity={"id": "manager-1", "type": "human", "role": "manager"},
+        approvals=[{"role": "manager", "approved_by": "manager-approval"}],
+        evaluation_time_source=lambda: EVALUATION_TIME,
+    )
+
+    result = guard.boundary_for().execute(
+        lambda amount: amount + 1,
+        execution_request=_request(amount=500),
+        args=(500,),
+    )
+
+    assert result["executed"] is True
+    assert result["value"] == 501
+    assert result["outcome"]["authority_ref"] == "finance-policy@1.2.0"
+
+
+def test_guard_local_legacy_contract_input_normalizes_to_default_authority(tmp_path):
+    guard = Guard.local(
+        workspace=tmp_path / ".guard-local",
+        contract=_authority(),
+        actor_identity={"id": "manager-1", "type": "human", "role": "manager"},
+        approvals=[{"role": "manager", "approved_by": "manager-approval"}],
+        evaluation_time_source=lambda: EVALUATION_TIME,
+    )
+
+    result = guard.boundary_for().execute(
+        lambda amount: amount + 1,
+        execution_request=_request(amount=500),
+        args=(500,),
+    )
+
+    assert result["executed"] is True
+    assert result["outcome"]["authority_ref"] == "finance-policy@1.0.0"
 
 
 def test_guard_local_can_preserve_saved_evaluation_after_local_decision(tmp_path):
@@ -340,6 +416,42 @@ def _request(*, amount):
         "arguments": {"amount": amount},
         "artifacts": [],
     }
+
+
+def _memory_registry_entry(tmp_path: Path) -> RegistryEntry:
+    contract = _authority()
+    contract["contract_version"] = "1.2.0"
+    contract["contract_hash"] = _contract_hash(contract)
+    bundle = {
+        "authority_ref": "finance-policy@1.2.0",
+        "bundle_schema_version": "published_authority_bundle.v1",
+        "contract": contract,
+    }
+    bundle_path = tmp_path / "finance-policy-1.2.0.authority-bundle.json"
+    bundle_path.write_text(json.dumps(bundle, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return RegistryEntry(
+        authority_ref="finance-policy@1.2.0",
+        contract_id="finance-policy",
+        contract_version="1.2.0",
+        contract_hash=f"sha256:{contract['contract_hash']}",
+        bundle_path=bundle_path,
+        bundle_hash=f"sha256:{_canonical_hash(bundle)}",
+        lifecycle_state="active",
+    )
+
+
+def _contract_hash(contract):
+    canonical_contract = {
+        key: value
+        for key, value in contract.items()
+        if key != "contract_hash"
+    }
+    return _canonical_hash(canonical_contract)
+
+
+def _canonical_hash(payload):
+    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
 def _serve_preservation_app(state):
