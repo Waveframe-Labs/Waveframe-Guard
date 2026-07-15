@@ -21,6 +21,14 @@ class RegistryEntry:
 
 
 @dataclass(frozen=True)
+class Bundle:
+    registry_entry: RegistryEntry
+    contract: Mapping[str, Any]
+    bundle_hash: str
+    bundle_path: Path
+
+
+@dataclass(frozen=True)
 class LoadedAuthority:
     authority_ref: str
     publication_id: Optional[str]
