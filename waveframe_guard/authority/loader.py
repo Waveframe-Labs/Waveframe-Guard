@@ -6,19 +6,33 @@ from pathlib import Path
 import re
 from typing import Any
 
+from .cache import AuthorityCache
 from .exceptions import AuthorityVerificationError, InvalidAuthorityRef
 from .resolver import AuthorityResolver
 from .types import Bundle, LoadedAuthority, RegistryEntry
 from .verifier import AuthorityVerifier
 
 
-def load_authority(authority_ref: str, *, resolver: AuthorityResolver | None = None) -> LoadedAuthority:
+def load_authority(
+    authority_ref: str,
+    *,
+    resolver: AuthorityResolver | None = None,
+    cache: AuthorityCache | None = None,
+) -> LoadedAuthority:
     from .adapters import LocalRegistryResolver
 
     active_resolver = resolver or LocalRegistryResolver()
     loader = BundleLoader()
     verifier = AuthorityVerifier()
-    return verifier.verify(loader.load(active_resolver.resolve(authority_ref)))
+    registry_entry = active_resolver.resolve(authority_ref)
+    cached = cache.get(registry_entry.authority_ref, registry_entry.bundle_hash or "") if cache else None
+    if cached is not None:
+        return verifier.verify_registry_entry(registry_entry, cached)
+
+    authority = verifier.verify(loader.load(registry_entry))
+    if cache is not None:
+        cache.put(authority)
+    return authority
 
 
 class BundleLoader:

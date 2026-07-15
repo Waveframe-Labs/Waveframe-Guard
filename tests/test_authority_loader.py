@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import hashlib
 import json
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
 
-from waveframe_guard.authority import LoadedAuthority, load_authority
+from waveframe_guard.authority import LoadedAuthority, MemoryAuthorityCache, load_authority
 from waveframe_guard.authority.adapters import LocalRegistryResolver, MemoryAuthorityResolver
 from waveframe_guard.authority.exceptions import (
     AuthorityLifecycleError,
@@ -92,6 +93,156 @@ def test_load_authority_accepts_injected_memory_resolver(tmp_path):
 
     assert authority.authority_ref == "finance-policy@1.2.0"
     assert authority.contract["contract_id"] == "finance-policy"
+
+
+def test_authority_cache_first_load_caches_and_second_load_skips_bundle_load(tmp_path, monkeypatch):
+    registry_path = _write_authority_fixture(tmp_path)
+    entry = LocalRegistryResolver(registry_path, workspace_root=tmp_path).resolve("finance-policy@1.2.0")
+    resolver = _CountingResolver(entry)
+    cache = MemoryAuthorityCache()
+    load_calls = []
+    original_load = BundleLoader.load
+
+    def counted_load(self, registry_entry):
+        load_calls.append(registry_entry.authority_ref)
+        return original_load(self, registry_entry)
+
+    monkeypatch.setattr(BundleLoader, "load", counted_load)
+
+    first = load_authority("finance-policy@1.2.0", resolver=resolver, cache=cache)
+    second = load_authority("finance-policy@1.2.0", resolver=resolver, cache=cache)
+
+    assert first.authority_ref == second.authority_ref == "finance-policy@1.2.0"
+    assert resolver.calls == 2
+    assert load_calls == ["finance-policy@1.2.0"]
+    assert len(cache) == 1
+
+
+def test_authority_cache_changed_bundle_hash_causes_cache_miss(tmp_path, monkeypatch):
+    registry_path = _write_authority_fixture(tmp_path)
+    resolver = LocalRegistryResolver(registry_path, workspace_root=tmp_path)
+    cache = MemoryAuthorityCache()
+    load_calls = []
+    original_load = BundleLoader.load
+
+    def counted_load(self, registry_entry):
+        load_calls.append(registry_entry.bundle_hash)
+        return original_load(self, registry_entry)
+
+    monkeypatch.setattr(BundleLoader, "load", counted_load)
+
+    first = load_authority("finance-policy@1.2.0", resolver=resolver, cache=cache)
+    _rewrite_bundle_publication(registry_path, published_by="ledger-2")
+    second = load_authority("finance-policy@1.2.0", resolver=resolver, cache=cache)
+
+    assert first.bundle_hash != second.bundle_hash
+    assert second.published_by == "ledger-2"
+    assert len(load_calls) == 2
+    assert len(cache) == 2
+
+
+@pytest.mark.parametrize("lifecycle_state", ["revoked", "superseded"])
+def test_authority_cache_reapplies_registry_lifecycle_on_cache_hit(tmp_path, lifecycle_state, monkeypatch):
+    registry_path = _write_authority_fixture(tmp_path)
+    active_entry = LocalRegistryResolver(registry_path, workspace_root=tmp_path).resolve("finance-policy@1.2.0")
+    cache = MemoryAuthorityCache()
+    load_authority("finance-policy@1.2.0", resolver=MemoryAuthorityResolver([active_entry]), cache=cache)
+    invalidated_entry = replace(active_entry, lifecycle_state=lifecycle_state)
+
+    def fail_load(*args, **kwargs):
+        raise AssertionError("cache hit should not reopen the bundle")
+
+    monkeypatch.setattr(BundleLoader, "load", fail_load)
+
+    with pytest.raises(AuthorityLifecycleError, match=lifecycle_state):
+        load_authority(
+            "finance-policy@1.2.0",
+            resolver=MemoryAuthorityResolver([invalidated_entry]),
+            cache=cache,
+        )
+
+
+def test_authority_cache_same_immutable_identity_with_changed_publication_metadata_is_deterministic(tmp_path, monkeypatch):
+    registry_path = _write_authority_fixture(tmp_path)
+    active_entry = LocalRegistryResolver(registry_path, workspace_root=tmp_path).resolve("finance-policy@1.2.0")
+    cache = MemoryAuthorityCache()
+    first = load_authority("finance-policy@1.2.0", resolver=MemoryAuthorityResolver([active_entry]), cache=cache)
+    changed_metadata_entry = replace(active_entry, publication_id="pub_456", published_by="ledger-2")
+
+    def fail_load(*args, **kwargs):
+        raise AssertionError("unchanged immutable identity should hit the cache")
+
+    monkeypatch.setattr(BundleLoader, "load", fail_load)
+
+    second = load_authority(
+        "finance-policy@1.2.0",
+        resolver=MemoryAuthorityResolver([changed_metadata_entry]),
+        cache=cache,
+    )
+
+    assert second.bundle_hash == first.bundle_hash
+    assert second.publication_id == "pub_123"
+    assert second.published_by == "ledger"
+
+
+def test_authority_cache_can_be_shared_by_different_resolvers_without_identity_collision(tmp_path, monkeypatch):
+    registry_path = _write_authority_fixture(tmp_path)
+    local_resolver = LocalRegistryResolver(registry_path, workspace_root=tmp_path)
+    entry = local_resolver.resolve("finance-policy@1.2.0")
+    cache = MemoryAuthorityCache()
+    load_calls = []
+    original_load = BundleLoader.load
+
+    def counted_load(self, registry_entry):
+        load_calls.append(registry_entry.authority_ref)
+        return original_load(self, registry_entry)
+
+    monkeypatch.setattr(BundleLoader, "load", counted_load)
+
+    local_authority = load_authority("finance-policy@1.2.0", resolver=local_resolver, cache=cache)
+    memory_authority = load_authority(
+        "finance-policy@1.2.0",
+        resolver=MemoryAuthorityResolver([entry]),
+        cache=cache,
+    )
+
+    assert local_authority.bundle_hash == memory_authority.bundle_hash
+    assert load_calls == ["finance-policy@1.2.0"]
+
+
+def test_failed_authority_verification_is_never_cached(tmp_path):
+    registry_path = _write_authority_fixture(
+        tmp_path,
+        registry_overrides={"contract_hash": "sha256:bad"},
+    )
+    registry_path = _rewrite_registry_hash(registry_path)
+    cache = MemoryAuthorityCache()
+
+    with pytest.raises(AuthorityVerificationError, match="contract hash mismatch"):
+        load_authority(
+            "finance-policy@1.2.0",
+            resolver=LocalRegistryResolver(registry_path, workspace_root=tmp_path),
+            cache=cache,
+        )
+
+    assert len(cache) == 0
+
+
+def test_authority_cache_entries_are_immutable_from_callers_perspective(tmp_path):
+    registry_path = _write_authority_fixture(tmp_path)
+    authority = load_authority(
+        "finance-policy@1.2.0",
+        resolver=LocalRegistryResolver(registry_path, workspace_root=tmp_path),
+    )
+    cache = MemoryAuthorityCache()
+    cache.put(authority)
+
+    cached = cache.get(authority.authority_ref, authority.bundle_hash)
+    cached.contract["contract_id"] = "mutated"
+
+    fresh = cache.get(authority.authority_ref, authority.bundle_hash)
+
+    assert fresh.contract["contract_id"] == "finance-policy"
 
 
 def test_memory_resolver_rejects_duplicate_authority_references(tmp_path):
@@ -292,6 +443,9 @@ def test_authority_loading_invariant_is_documented():
     assert "The pipeline shape is fixed" in source
     assert "MemoryAuthorityResolver" in source
     assert "Resolvers must not return bundles" in source
+    assert "authority_ref + bundle_hash" in source
+    assert "resolver still runs before every cache lookup" in source
+    assert "MemoryAuthorityCache" in source
     assert '`Guard.local(authority="name@x.y.z")`' in source
     assert "`LoadedAuthority.contract`" in source
 
@@ -380,3 +534,26 @@ def _rewrite_registry_hash(registry_path: Path) -> Path:
     registry = json.loads(registry_path.read_text(encoding="utf-8"))
     registry_path.write_text(json.dumps(_with_registry_hash(registry), indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return registry_path
+
+
+def _rewrite_bundle_publication(registry_path: Path, *, published_by: str) -> None:
+    registry = json.loads(registry_path.read_text(encoding="utf-8"))
+    entry = registry["contracts"][0]
+    bundle_path = registry_path.parent / entry["bundle_path"]
+    bundle = json.loads(bundle_path.read_text(encoding="utf-8"))
+    bundle["publication"]["published_by"] = published_by
+    bundle_path.write_text(json.dumps(bundle, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    entry["bundle_hash"] = f"sha256:{_canonical_hash(bundle)}"
+    entry["published_by"] = published_by
+    registry_path.write_text(json.dumps(_with_registry_hash(registry), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+class _CountingResolver:
+    def __init__(self, entry):
+        self.entry = entry
+        self.calls = 0
+
+    def resolve(self, authority_ref):
+        self.calls += 1
+        assert authority_ref == self.entry.authority_ref
+        return self.entry

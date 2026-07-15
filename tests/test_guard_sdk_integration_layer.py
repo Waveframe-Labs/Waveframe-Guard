@@ -24,6 +24,8 @@ from guard.sdk import (
     webhook_enforcement_adapter,
 )
 from waveframe_guard.authority.adapters import MemoryAuthorityResolver
+from waveframe_guard.authority.cache import MemoryAuthorityCache
+from waveframe_guard.authority.loader import BundleLoader
 from waveframe_guard.authority.types import RegistryEntry
 
 
@@ -179,6 +181,50 @@ def test_guard_local_accepts_injected_authority_resolver(tmp_path):
     assert result["executed"] is True
     assert result["value"] == 501
     assert result["outcome"]["authority_ref"] == "finance-policy@1.2.0"
+
+
+def test_guard_local_accepts_authority_cache_without_changing_enforcement(tmp_path, monkeypatch):
+    registry_entry = _memory_registry_entry(tmp_path)
+    resolver = MemoryAuthorityResolver({"finance-policy@1.2.0": registry_entry})
+    cache = MemoryAuthorityCache()
+    load_calls = []
+    original_load = BundleLoader.load
+
+    def counted_load(self, entry):
+        load_calls.append(entry.authority_ref)
+        return original_load(self, entry)
+
+    monkeypatch.setattr(BundleLoader, "load", counted_load)
+
+    first = Guard.local(
+        workspace=tmp_path / "first" / ".guard-local",
+        authority="finance-policy@1.2.0",
+        authority_resolver=resolver,
+        authority_cache=cache,
+        actor_identity={"id": "manager-1", "type": "human", "role": "manager"},
+        approvals=[{"role": "manager", "approved_by": "manager-approval"}],
+        evaluation_time_source=lambda: EVALUATION_TIME,
+    )
+    second = Guard.local(
+        workspace=tmp_path / "second" / ".guard-local",
+        authority="finance-policy@1.2.0",
+        authority_resolver=resolver,
+        authority_cache=cache,
+        actor_identity={"id": "manager-1", "type": "human", "role": "manager"},
+        approvals=[{"role": "manager", "approved_by": "manager-approval"}],
+        evaluation_time_source=lambda: EVALUATION_TIME,
+    )
+
+    result = second.boundary_for().execute(
+        lambda amount: amount + 1,
+        execution_request=_request(amount=500),
+        args=(500,),
+    )
+
+    assert first.default_authority_ref == second.default_authority_ref == "finance-policy@1.2.0"
+    assert load_calls == ["finance-policy@1.2.0"]
+    assert result["executed"] is True
+    assert result["value"] == 501
 
 
 def test_guard_local_legacy_contract_input_normalizes_to_default_authority(tmp_path):

@@ -4,7 +4,7 @@ import json
 from dataclasses import dataclass
 from typing import Any, Callable
 
-from waveframe_guard.authority import AuthorityResolver, load_authority
+from waveframe_guard.authority import AuthorityCache, AuthorityResolver, load_authority
 
 
 @dataclass(frozen=True)
@@ -19,6 +19,7 @@ class AuthoritySource:
         *,
         authority: str | None = None,
         authority_resolver: AuthorityResolver | None = None,
+        authority_cache: AuthorityCache | None = None,
         contract: dict[str, Any] | None = None,
         authorities: dict[str, dict[str, Any]] | None = None,
         authority_loader: Callable[[str], dict[str, Any]] | None = None,
@@ -37,7 +38,7 @@ class AuthoritySource:
             default_authority_ref = contract_ref
 
         if authority is not None:
-            loaded_authority = load_authority(authority, resolver=authority_resolver)
+            loaded_authority = load_authority(authority, resolver=authority_resolver, cache=authority_cache)
             _install_authority(
                 normalized_authorities,
                 loaded_authority.authority_ref,

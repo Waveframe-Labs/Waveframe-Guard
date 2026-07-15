@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from guard.adapters import NORMALIZED_EXECUTION_REQUEST_V1
-from waveframe_guard.authority import AuthorityResolver
+from waveframe_guard.authority import AuthorityCache, AuthorityResolver
 from waveframe_guard.cloud import CloudPreservationClient
 
 from .authority_source import AuthoritySource
@@ -22,6 +22,7 @@ class Guard:
         workspace: str | Path,
         authority: str | None = None,
         authority_resolver: AuthorityResolver | None = None,
+        authority_cache: AuthorityCache | None = None,
         contract: dict[str, Any] | None = None,
         authorities: dict[str, dict[str, Any]] | None = None,
         authority_loader: Callable[[str], dict[str, Any]] | None = None,
@@ -38,6 +39,7 @@ class Guard:
         authority_source = AuthoritySource.from_inputs(
             authority=authority,
             authority_resolver=authority_resolver,
+            authority_cache=authority_cache,
             contract=contract,
             authorities=authorities,
             authority_loader=authority_loader,
@@ -65,6 +67,7 @@ class Guard:
         workspace: str | Path = ".guard-local",
         authority: str | None = None,
         authority_resolver: AuthorityResolver | None = None,
+        authority_cache: AuthorityCache | None = None,
         contract: dict[str, Any] | None = None,
         authorities: dict[str, dict[str, Any]] | None = None,
         authority_loader: Callable[[str], dict[str, Any]] | None = None,
@@ -80,6 +83,7 @@ class Guard:
             workspace=workspace,
             authority=authority,
             authority_resolver=authority_resolver,
+            authority_cache=authority_cache,
             contract=contract,
             authorities=authorities,
             authority_loader=authority_loader,

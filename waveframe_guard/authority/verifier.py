@@ -5,7 +5,7 @@ import json
 from typing import Mapping
 
 from .exceptions import AuthorityLifecycleError, AuthorityVerificationError
-from .types import Bundle, LoadedAuthority
+from .types import Bundle, LoadedAuthority, RegistryEntry
 
 
 class AuthorityVerifier:
@@ -15,7 +15,7 @@ class AuthorityVerifier:
         _verify_authority_ref(bundle)
         contract_hash = _verify_contract_hash(bundle, contract)
         _verify_bundle_hash(bundle)
-        _verify_lifecycle_state(bundle)
+        _verify_registry_lifecycle_state(registry_entry)
         return LoadedAuthority(
             authority_ref=registry_entry.authority_ref,
             publication_id=registry_entry.publication_id,
@@ -27,6 +27,24 @@ class AuthorityVerifier:
             published_at=registry_entry.published_at,
             published_by=registry_entry.published_by,
         )
+
+    def verify_registry_entry(
+        self,
+        registry_entry: RegistryEntry,
+        authority: LoadedAuthority,
+    ) -> LoadedAuthority:
+        _verify_registry_lifecycle_state(registry_entry)
+        if registry_entry.authority_ref != authority.authority_ref:
+            raise AuthorityVerificationError(f"cached authority_ref mismatch for {registry_entry.authority_ref}")
+        if _normalize_hash(registry_entry.bundle_hash or "") != _normalize_hash(authority.bundle_hash):
+            raise AuthorityVerificationError(f"cached bundle hash mismatch for {registry_entry.authority_ref}")
+        if _normalize_hash(registry_entry.contract_hash) != _normalize_hash(authority.contract_hash):
+            raise AuthorityVerificationError(f"cached contract hash mismatch for {registry_entry.authority_ref}")
+        if authority.contract.get("contract_id") != registry_entry.contract_id:
+            raise AuthorityVerificationError(f"cached contract identity mismatch for {registry_entry.authority_ref}")
+        if authority.contract.get("contract_version") != registry_entry.contract_version:
+            raise AuthorityVerificationError(f"cached contract version mismatch for {registry_entry.authority_ref}")
+        return authority
 
 
 def _verify_authority_ref(bundle: Bundle) -> None:
@@ -59,8 +77,7 @@ def _verify_bundle_hash(bundle: Bundle) -> None:
         raise AuthorityVerificationError(f"bundle hash mismatch for {registry_entry.authority_ref}")
 
 
-def _verify_lifecycle_state(bundle: Bundle) -> None:
-    registry_entry = bundle.registry_entry
+def _verify_registry_lifecycle_state(registry_entry: RegistryEntry) -> None:
     if registry_entry.lifecycle_state != "active":
         raise AuthorityLifecycleError(
             f"authority lifecycle invalidated: {registry_entry.authority_ref} is {registry_entry.lifecycle_state}"

@@ -51,6 +51,30 @@ Future resolver adapters may include Cloud or Enterprise sources, but they must
 still return `RegistryEntry`. Resolvers must not return bundles, load bundle
 payloads, verify bundle contents, alter lifecycle state, or select `latest`.
 
+## Authority Cache
+
+Authority caching is optional and must not change the public loading API.
+
+The cache key is immutable identity:
+
+```text
+authority_ref + bundle_hash
+```
+
+The cache is never keyed by authority reference alone.
+
+The resolver still runs before every cache lookup. Guard must obtain the current
+registry entry, including the current lifecycle state and expected bundle hash,
+before deciding whether a verified authority can be reused.
+
+Cache hits may skip bundle loading and cryptographic re-verification, but they
+must not skip lifecycle enforcement. A cached authority is loadable only when
+the freshly resolved registry entry still permits it.
+
+The initial cache adapter is `MemoryAuthorityCache`. It stores verified
+`LoadedAuthority` objects only after successful verification and returns
+defensive copies so caller mutation cannot alter cached authority contents.
+
 ## Guard SDK Normalization
 
 `Guard.local(authority="name@x.y.z")` resolves and verifies the published
