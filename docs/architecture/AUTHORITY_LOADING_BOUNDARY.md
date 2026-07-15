@@ -10,10 +10,10 @@ from waveframe_guard.authority import load_authority
 authority = load_authority("finance-policy@1.2.0")
 ```
 
-The public identifier is always `name@version`.
+The public identifier is always `name@x.y.z`.
 
-No paths, filenames, `latest`, or implicit resolution are accepted by the
-public loader API.
+No paths, filenames, `latest`, non-semver labels, or implicit resolution are
+accepted by the public loader API.
 
 ## Pipeline
 
@@ -42,9 +42,36 @@ LoadedAuthority
 Each stage has one responsibility:
 
 - `AuthorityResolver` maps an explicit authority ref to a registry entry.
+- `AuthorityResolver` verifies `registry_hash` before trusting registry entries.
+- Local registry artifact paths are workspace-root-relative, not
+  registry-file-relative.
 - `BundleLoader` opens the published authority bundle and returns it unchanged.
 - `AuthorityVerifier` owns all trust decisions.
 - `LoadedAuthority` is the verified authority object Guard can consume.
+
+Canonical published-authority registry entries must provide:
+
+- `authority_ref`
+- `contract_id`
+- `contract_version`
+- `contract_hash`
+- `bundle_path`
+- `bundle_hash`
+- `lifecycle_state`
+
+For canonical published authority, lifecycle handling is fail-closed:
+
+- `active` is loadable
+- `superseded` is blocked by default
+- `revoked` is blocked
+- missing lifecycle state is malformed
+- unknown lifecycle state is malformed
+
+The canonical bundle hash is the SHA-256 of the canonical JSON payload:
+
+```python
+json.dumps(payload, sort_keys=True, separators=(",", ":"))
+```
 
 ## Loader Invariant
 

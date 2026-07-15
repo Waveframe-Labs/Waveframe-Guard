@@ -10,6 +10,10 @@ class AuthorityNotFound(AuthorityLoadError, KeyError):
     pass
 
 
+class MalformedAuthorityRegistry(AuthorityLoadError, ValueError):
+    pass
+
+
 class AuthorityVerificationError(AuthorityLoadError, ValueError):
     pass
 

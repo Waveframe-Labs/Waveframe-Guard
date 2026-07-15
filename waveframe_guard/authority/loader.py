@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
+import re
 from typing import Any
 
 from .exceptions import AuthorityVerificationError, InvalidAuthorityRef
@@ -21,12 +22,12 @@ def load_authority(authority_ref: str) -> LoadedAuthority:
 
 class BundleLoader:
     def load(self, registry_entry: RegistryEntry) -> Bundle:
-        contract = _read_json(registry_entry.bundle_path)
+        payload = _read_json(registry_entry.bundle_path)
         return Bundle(
             registry_entry=registry_entry,
-            contract=contract,
+            payload=payload,
             bundle_path=registry_entry.bundle_path,
-            bundle_hash=f"sha256:{_file_hash(registry_entry.bundle_path)}",
+            bundle_hash=f"sha256:{_canonical_hash(payload)}",
         )
 
 
@@ -40,8 +41,8 @@ def parse_authority_ref(authority_ref: str) -> tuple[str, str]:
     name, version = authority_ref.split("@", 1)
     if not name or not version:
         raise InvalidAuthorityRef("authority_ref must include both name and version")
-    if version == "latest":
-        raise InvalidAuthorityRef("authority_ref must not use implicit versions such as latest")
+    if not re.fullmatch(r"(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)", version):
+        raise InvalidAuthorityRef("authority_ref version must use explicit numeric x.y.z form")
     return name, version
 
 
@@ -53,9 +54,6 @@ def _read_json(path: Path) -> dict[str, Any]:
     return payload
 
 
-def _file_hash(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as f:
-        for chunk in iter(lambda: f.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
+def _canonical_hash(payload: Any) -> str:
+    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()

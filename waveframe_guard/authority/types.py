@@ -23,7 +23,7 @@ class RegistryEntry:
 @dataclass(frozen=True)
 class Bundle:
     registry_entry: RegistryEntry
-    contract: Mapping[str, Any]
+    payload: Mapping[str, Any]
     bundle_hash: str
     bundle_path: Path
 
