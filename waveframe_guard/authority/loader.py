@@ -7,17 +7,18 @@ import re
 from typing import Any
 
 from .exceptions import AuthorityVerificationError, InvalidAuthorityRef
+from .resolver import AuthorityResolver
 from .types import Bundle, LoadedAuthority, RegistryEntry
 from .verifier import AuthorityVerifier
 
 
-def load_authority(authority_ref: str) -> LoadedAuthority:
-    from .resolver import LocalRegistryResolver
+def load_authority(authority_ref: str, *, resolver: AuthorityResolver | None = None) -> LoadedAuthority:
+    from .adapters import LocalRegistryResolver
 
-    resolver = LocalRegistryResolver()
+    active_resolver = resolver or LocalRegistryResolver()
     loader = BundleLoader()
     verifier = AuthorityVerifier()
-    return verifier.verify(loader.load(resolver.resolve(authority_ref)))
+    return verifier.verify(loader.load(active_resolver.resolve(authority_ref)))
 
 
 class BundleLoader:

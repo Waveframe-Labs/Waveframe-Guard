@@ -39,6 +39,18 @@ AuthorityVerifier
 LoadedAuthority
 ```
 
+The pipeline shape is fixed. Only the implementation behind
+`AuthorityResolver` should vary.
+
+Current resolver adapters:
+
+- `LocalRegistryResolver`
+- `MemoryAuthorityResolver`
+
+Future resolver adapters may include Cloud or Enterprise sources, but they must
+still return `RegistryEntry`. Resolvers must not return bundles, load bundle
+payloads, verify bundle contents, alter lifecycle state, or select `latest`.
+
 Each stage has one responsibility:
 
 - `AuthorityResolver` maps an explicit authority ref to a registry entry.

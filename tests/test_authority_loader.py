@@ -7,14 +7,15 @@ from pathlib import Path
 import pytest
 
 from waveframe_guard.authority import LoadedAuthority, load_authority
+from waveframe_guard.authority.adapters import LocalRegistryResolver, MemoryAuthorityResolver
 from waveframe_guard.authority.exceptions import (
     AuthorityLifecycleError,
+    AuthorityNotFound,
     AuthorityVerificationError,
     InvalidAuthorityRef,
     MalformedAuthorityRegistry,
 )
 from waveframe_guard.authority.loader import BundleLoader
-from waveframe_guard.authority.resolver import LocalRegistryResolver
 from waveframe_guard.authority.types import Bundle
 from waveframe_guard.authority.verifier import AuthorityVerifier
 
@@ -64,6 +65,103 @@ def test_local_registry_resolver_returns_registry_entry_for_explicit_ref(tmp_pat
     assert entry.publication_id == "pub_123"
     assert entry.lifecycle_state == "active"
     assert entry.bundle_path == tmp_path / "contracts" / "finance-policy-1.2.0.authority-bundle.json"
+
+
+@pytest.mark.parametrize("resolver_factory", ["local", "memory"])
+def test_resolver_contract_is_shared_by_local_and_memory_adapters(tmp_path, resolver_factory):
+    registry_path = _write_authority_fixture(tmp_path)
+    local_resolver = LocalRegistryResolver(registry_path, workspace_root=tmp_path)
+    local_entry = local_resolver.resolve("finance-policy@1.2.0")
+    resolver = local_resolver if resolver_factory == "local" else MemoryAuthorityResolver([local_entry])
+
+    entry = resolver.resolve("finance-policy@1.2.0")
+
+    assert entry.authority_ref == "finance-policy@1.2.0"
+    assert entry.contract_id == "finance-policy"
+    assert entry.contract_version == "1.2.0"
+    assert entry.bundle_path == local_entry.bundle_path
+    assert entry.lifecycle_state == local_entry.lifecycle_state
+
+
+def test_load_authority_accepts_injected_memory_resolver(tmp_path):
+    registry_path = _write_authority_fixture(tmp_path)
+    entry = LocalRegistryResolver(registry_path, workspace_root=tmp_path).resolve("finance-policy@1.2.0")
+    resolver = MemoryAuthorityResolver({"finance-policy@1.2.0": entry})
+
+    authority = load_authority("finance-policy@1.2.0", resolver=resolver)
+
+    assert authority.authority_ref == "finance-policy@1.2.0"
+    assert authority.contract["contract_id"] == "finance-policy"
+
+
+def test_memory_resolver_rejects_duplicate_authority_references(tmp_path):
+    registry_path = _write_authority_fixture(tmp_path)
+    entry = LocalRegistryResolver(registry_path, workspace_root=tmp_path).resolve("finance-policy@1.2.0")
+
+    with pytest.raises(MalformedAuthorityRegistry, match="duplicate"):
+        MemoryAuthorityResolver([entry, entry])
+
+
+def test_memory_resolver_missing_reference_raises_authority_not_found(tmp_path):
+    registry_path = _write_authority_fixture(tmp_path)
+    entry = LocalRegistryResolver(registry_path, workspace_root=tmp_path).resolve("finance-policy@1.2.0")
+    resolver = MemoryAuthorityResolver([entry])
+
+    with pytest.raises(AuthorityNotFound):
+        resolver.resolve("finance-policy@1.2.1")
+
+
+@pytest.mark.parametrize("resolver_factory", ["local", "memory"])
+def test_invalid_explicit_refs_fail_consistently_across_adapters(tmp_path, resolver_factory):
+    registry_path = _write_authority_fixture(tmp_path)
+    entry = LocalRegistryResolver(registry_path, workspace_root=tmp_path).resolve("finance-policy@1.2.0")
+    resolver = (
+        LocalRegistryResolver(registry_path, workspace_root=tmp_path)
+        if resolver_factory == "local"
+        else MemoryAuthorityResolver([entry])
+    )
+
+    with pytest.raises(InvalidAuthorityRef):
+        resolver.resolve("finance-policy@latest")
+
+
+def test_resolvers_do_not_open_bundle_files(tmp_path, monkeypatch):
+    registry_path = _write_authority_fixture(tmp_path)
+    local_resolver = LocalRegistryResolver(registry_path, workspace_root=tmp_path)
+    entry = local_resolver.resolve("finance-policy@1.2.0")
+    entry.bundle_path.unlink()
+    memory_resolver = MemoryAuthorityResolver([entry])
+
+    assert local_resolver.resolve("finance-policy@1.2.0").bundle_path == entry.bundle_path
+    assert memory_resolver.resolve("finance-policy@1.2.0").bundle_path == entry.bundle_path
+
+
+def test_resolver_supplied_lifecycle_state_is_preserved_unchanged(tmp_path):
+    registry_path = _write_authority_fixture(
+        tmp_path,
+        registry_overrides={"lifecycle_state": "superseded"},
+    )
+    registry_path = _rewrite_registry_hash(registry_path)
+
+    local_entry = LocalRegistryResolver(registry_path, workspace_root=tmp_path).resolve("finance-policy@1.2.0")
+    memory_entry = MemoryAuthorityResolver([local_entry]).resolve("finance-policy@1.2.0")
+
+    assert local_entry.lifecycle_state == "superseded"
+    assert memory_entry.lifecycle_state == "superseded"
+
+
+def test_custom_resolver_can_be_injected_without_changing_loader_code(tmp_path):
+    registry_path = _write_authority_fixture(tmp_path)
+    entry = LocalRegistryResolver(registry_path, workspace_root=tmp_path).resolve("finance-policy@1.2.0")
+
+    class CustomResolver:
+        def resolve(self, authority_ref):
+            assert authority_ref == "finance-policy@1.2.0"
+            return entry
+
+    authority = load_authority("finance-policy@1.2.0", resolver=CustomResolver())
+
+    assert authority.authority_ref == "finance-policy@1.2.0"
 
 
 def test_bundle_loader_only_loads_bundle_without_verifying_authority(tmp_path):
@@ -191,6 +289,9 @@ def test_authority_loading_invariant_is_documented():
     assert "workspace-root-relative" in source
     assert "`active` is loadable" in source
     assert "missing lifecycle state is malformed" in source
+    assert "The pipeline shape is fixed" in source
+    assert "MemoryAuthorityResolver" in source
+    assert "Resolvers must not return bundles" in source
 
 
 def _write_authority_fixture(
