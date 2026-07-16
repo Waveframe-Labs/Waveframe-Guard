@@ -323,7 +323,8 @@ def test_bundle_loader_only_loads_bundle_without_verifying_authority(tmp_path):
 
     assert isinstance(bundle, Bundle)
     assert bundle.registry_entry == entry
-    assert bundle.payload["contract"]["contract_id"] == "finance-policy"
+    assert bundle.payload["schema_version"] == "authority_bundle.v1"
+    assert bundle.payload["authority_contract"]["contract_id"] == "finance-policy"
     assert bundle.bundle_hash.startswith("sha256:")
 
 
@@ -351,6 +352,18 @@ def test_bundle_loader_rejects_contract_hash_mismatch(tmp_path):
     bundle = BundleLoader().load(entry)
 
     with pytest.raises(AuthorityVerificationError, match="contract hash mismatch"):
+        AuthorityVerifier().verify(bundle)
+
+
+def test_bundle_loader_rejects_bundle_level_contract_hash_mismatch(tmp_path):
+    registry_path = _write_authority_fixture(tmp_path)
+    entry = LocalRegistryResolver(registry_path, workspace_root=tmp_path).resolve("finance-policy@1.2.0")
+    payload = json.loads(entry.bundle_path.read_text(encoding="utf-8"))
+    payload["contract_hash"] = "sha256:bad"
+    entry.bundle_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    bundle = BundleLoader().load(entry)
+
+    with pytest.raises(AuthorityVerificationError, match="bundle contract hash mismatch"):
         AuthorityVerifier().verify(bundle)
 
 
@@ -422,8 +435,18 @@ def test_bundle_loader_rejects_raw_contract_files_as_authority_bundles(tmp_path)
     entry = LocalRegistryResolver(registry_path, workspace_root=tmp_path).resolve("finance-policy@1.2.0")
     bundle = BundleLoader().load(entry)
 
-    with pytest.raises(AuthorityVerificationError, match="missing contract"):
+    with pytest.raises(AuthorityVerificationError, match="schema_version"):
         AuthorityVerifier().verify(bundle)
+
+
+def test_local_registry_resolver_rejects_duplicate_authority_identities(tmp_path):
+    registry_path = _write_authority_fixture(tmp_path)
+    registry = json.loads(registry_path.read_text(encoding="utf-8"))
+    registry["contracts"].append(dict(registry["contracts"][0]))
+    registry_path.write_text(json.dumps(_with_registry_hash(registry), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+    with pytest.raises(MalformedAuthorityRegistry, match="duplicate authority_ref"):
+        LocalRegistryResolver(registry_path, workspace_root=tmp_path).resolve("finance-policy@1.2.0")
 
 
 def test_authority_loading_invariant_is_documented():
@@ -440,6 +463,8 @@ def test_authority_loading_invariant_is_documented():
     assert "workspace-root-relative" in source
     assert "`active` is loadable" in source
     assert "missing lifecycle state is malformed" in source
+    assert "`authority_contract`" in source
+    assert "`published_authority_bundle.v1` / `contract`" in source
     assert "The pipeline shape is fixed" in source
     assert "MemoryAuthorityResolver" in source
     assert "Resolvers must not return bundles" in source
@@ -473,14 +498,29 @@ def _write_authority_fixture(
     if write_raw_contract:
         raw_contract_path.write_text(json.dumps(contract, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     bundle = {
+        "schema_version": "authority_bundle.v1",
+        "publication_id": "pub_123",
         "authority_ref": "finance-policy@1.2.0",
-        "bundle_schema_version": "published_authority_bundle.v1",
-        "contract": contract,
-        "publication": {
-            "publication_id": "pub_123",
-            "published_at": "2026-07-14T00:00:00+00:00",
-            "published_by": "ledger",
-        },
+        "contract_hash": f"sha256:{contract['contract_hash']}",
+        "semantic_commit_hash": None,
+        "compiled_contract_hash": None,
+        "authority_contract": contract,
+        "semantic_commit_bundle": None,
+        "compiled_authority_contract": None,
+        "publication_manifest": {"publication_id": "pub_123"},
+        "governance_impact_preview": {},
+        "authority_diff_impact": None,
+        "governance_review_packets": [],
+        "semantic_artifacts": [],
+        "review_packets": [],
+        "lineage": {},
+        "provenance": {"published_by": "ledger", "published_at": "2026-07-14T00:00:00+00:00"},
+        "schema_compatibility": {},
+        "publication_meaning": "Published finance-policy@1.2.0.",
+        "operational_implications": [],
+        "continuity_implications": [],
+        "immutable_inputs": {"authority_hash": f"sha256:{contract['contract_hash']}"},
+        "non_goals": [],
     }
     bundle_path = contracts_dir / "finance-policy-1.2.0.authority-bundle.json"
     bundle_path.write_text(json.dumps(bundle, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -541,7 +581,7 @@ def _rewrite_bundle_publication(registry_path: Path, *, published_by: str) -> No
     entry = registry["contracts"][0]
     bundle_path = registry_path.parent / entry["bundle_path"]
     bundle = json.loads(bundle_path.read_text(encoding="utf-8"))
-    bundle["publication"]["published_by"] = published_by
+    bundle["provenance"]["published_by"] = published_by
     bundle_path.write_text(json.dumps(bundle, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     entry["bundle_hash"] = f"sha256:{_canonical_hash(bundle)}"
     entry["published_by"] = published_by

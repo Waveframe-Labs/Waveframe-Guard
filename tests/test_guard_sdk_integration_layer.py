@@ -514,9 +514,29 @@ def _memory_registry_entry(tmp_path: Path) -> RegistryEntry:
     contract["contract_version"] = "1.2.0"
     contract["contract_hash"] = _contract_hash(contract)
     bundle = {
+        "schema_version": "authority_bundle.v1",
+        "publication_id": "pub_memory",
         "authority_ref": "finance-policy@1.2.0",
-        "bundle_schema_version": "published_authority_bundle.v1",
-        "contract": contract,
+        "contract_hash": f"sha256:{contract['contract_hash']}",
+        "semantic_commit_hash": None,
+        "compiled_contract_hash": None,
+        "authority_contract": contract,
+        "semantic_commit_bundle": None,
+        "compiled_authority_contract": None,
+        "publication_manifest": {"publication_id": "pub_memory"},
+        "governance_impact_preview": {},
+        "authority_diff_impact": None,
+        "governance_review_packets": [],
+        "semantic_artifacts": [],
+        "review_packets": [],
+        "lineage": {},
+        "provenance": {},
+        "schema_compatibility": {},
+        "publication_meaning": "Published finance-policy@1.2.0.",
+        "operational_implications": [],
+        "continuity_implications": [],
+        "immutable_inputs": {"authority_hash": f"sha256:{contract['contract_hash']}"},
+        "non_goals": [],
     }
     bundle_path = tmp_path / "finance-policy-1.2.0.authority-bundle.json"
     bundle_path.write_text(json.dumps(bundle, indent=2, sort_keys=True) + "\n", encoding="utf-8")

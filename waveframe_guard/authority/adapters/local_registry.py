@@ -22,17 +22,23 @@ class LocalRegistryResolver:
         contract_id, contract_version = parse_authority_ref(authority_ref)
         registry = _read_json(self.registry_path)
         _verify_registry_hash(registry)
+        matches = []
         for entry in _registry_entries(registry):
             entry_contract_id = entry.get("contract_id") or _entry_contract_id_from_ref(entry)
             entry_version = entry.get("contract_version") or entry.get("version") or _entry_version_from_ref(entry)
             if entry_contract_id != contract_id or entry_version != contract_version:
                 continue
+            matches.append(entry)
+
+        if len(matches) > 1:
+            raise MalformedAuthorityRegistry(f"duplicate authority_ref in registry: {authority_ref}")
+        if len(matches) == 1:
             return validate_registry_entry(
                 _registry_entry_from_mapping(
                     authority_ref=authority_ref,
                     contract_id=contract_id,
                     contract_version=contract_version,
-                    entry=entry,
+                    entry=matches[0],
                     workspace_root=self.workspace_root,
                 )
             )

@@ -120,6 +120,11 @@ The canonical bundle hash is the SHA-256 of the canonical JSON payload:
 json.dumps(payload, sort_keys=True, separators=(",", ":"))
 ```
 
+Guard consumes Ledger `authority_bundle.v1` objects. A loadable bundle must use
+`schema_version: authority_bundle.v1` and expose the runtime contract at
+`authority_contract`. Guard does not accept the former Guard-local
+`published_authority_bundle.v1` / `contract` fixture shape at this boundary.
+
 ## Loader Invariant
 
 Authority loading is not authority transformation.

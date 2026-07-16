@@ -61,8 +61,11 @@ def _verify_authority_ref(bundle: Bundle) -> None:
 def _verify_contract_hash(bundle: Bundle, contract: Mapping) -> str:
     registry_entry = bundle.registry_entry
     expected_hash = _normalize_hash(registry_entry.contract_hash)
+    bundle_hash = _normalize_hash(str(bundle.payload.get("contract_hash") or ""))
     embedded_hash = _normalize_hash(str(contract.get("contract_hash") or ""))
     actual_hash = _normalize_hash(_compute_contract_hash(contract))
+    if bundle_hash and bundle_hash != actual_hash:
+        raise AuthorityVerificationError(f"bundle contract hash mismatch for {registry_entry.authority_ref}")
     if embedded_hash and embedded_hash != actual_hash:
         raise AuthorityVerificationError(f"embedded contract hash mismatch for {registry_entry.authority_ref}")
     if expected_hash and expected_hash != actual_hash:
@@ -85,9 +88,15 @@ def _verify_registry_lifecycle_state(registry_entry: RegistryEntry) -> None:
 
 
 def _bundle_contract(bundle: Bundle) -> Mapping:
-    contract = bundle.payload.get("contract")
+    if bundle.payload.get("schema_version") != "authority_bundle.v1":
+        raise AuthorityVerificationError(
+            f"authority bundle schema_version must be authority_bundle.v1: {bundle.registry_entry.authority_ref}"
+        )
+    contract = bundle.payload.get("authority_contract")
     if not isinstance(contract, Mapping):
-        raise AuthorityVerificationError(f"authority bundle is missing contract: {bundle.registry_entry.authority_ref}")
+        raise AuthorityVerificationError(
+            f"authority bundle is missing authority_contract: {bundle.registry_entry.authority_ref}"
+        )
     return contract
 
 
