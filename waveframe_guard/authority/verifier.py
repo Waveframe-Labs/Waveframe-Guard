@@ -50,7 +50,10 @@ class AuthorityVerifier:
 def _verify_authority_ref(bundle: Bundle) -> None:
     registry_entry = bundle.registry_entry
     contract = _bundle_contract(bundle)
-    if bundle.payload.get("authority_ref") not in {None, registry_entry.authority_ref}:
+    authority_ref = bundle.payload.get("authority_ref")
+    if not isinstance(authority_ref, str) or not authority_ref:
+        raise AuthorityVerificationError(f"authority bundle is missing authority_ref: {registry_entry.authority_ref}")
+    if authority_ref != registry_entry.authority_ref:
         raise AuthorityVerificationError(f"bundle authority_ref mismatch for {registry_entry.authority_ref}")
     if contract.get("contract_id") != registry_entry.contract_id:
         raise AuthorityVerificationError(f"contract identity mismatch for {registry_entry.authority_ref}")
@@ -61,10 +64,13 @@ def _verify_authority_ref(bundle: Bundle) -> None:
 def _verify_contract_hash(bundle: Bundle, contract: Mapping) -> str:
     registry_entry = bundle.registry_entry
     expected_hash = _normalize_hash(registry_entry.contract_hash)
-    bundle_hash = _normalize_hash(str(bundle.payload.get("contract_hash") or ""))
+    bundle_contract_hash = bundle.payload.get("contract_hash")
+    if not isinstance(bundle_contract_hash, str) or not bundle_contract_hash:
+        raise AuthorityVerificationError(f"authority bundle is missing contract_hash: {registry_entry.authority_ref}")
+    bundle_hash = _normalize_hash(bundle_contract_hash)
     embedded_hash = _normalize_hash(str(contract.get("contract_hash") or ""))
     actual_hash = _normalize_hash(_compute_contract_hash(contract))
-    if bundle_hash and bundle_hash != actual_hash:
+    if bundle_hash != actual_hash:
         raise AuthorityVerificationError(f"bundle contract hash mismatch for {registry_entry.authority_ref}")
     if embedded_hash and embedded_hash != actual_hash:
         raise AuthorityVerificationError(f"embedded contract hash mismatch for {registry_entry.authority_ref}")
