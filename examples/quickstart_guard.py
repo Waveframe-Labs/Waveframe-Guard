@@ -3,7 +3,7 @@
 # filetype: "python"
 # type: "example"
 # domain: "guard-sdk"
-# version: "0.12.0"
+# version: "0.13.0"
 # status: "Active"
 # author:
 #   name: "Waveframe Labs"
@@ -13,18 +13,6 @@
 
 from waveframe_guard import Guard
 
-
-compiled_authority = {
-    "schema_version": "compiled_authority_contract.v1",
-    "contract_id": "finance-policy",
-    "contract_version": "1.0.0",
-    "authority_requirements": {"required_roles": ["manager"]},
-    "approval_requirements": {},
-    "artifact_requirements": {},
-    "stage_requirements": {},
-    "invariants": {},
-    "contract_hash": "1371af2512ebb9638882f1af5a36a74cc7d81ca1ed9f4e138663133b5414adc7",
-}
 
 execution_request = {
     "schema_version": "normalized_execution_request.v1",
@@ -38,11 +26,11 @@ execution_request = {
 
 def main() -> None:
     guard = Guard.local(
-        authorities={"finance-policy@1.0.0": compiled_authority},
+        authority="finance-policy@1.0.0",
         actor_identity={"id": "user-1", "type": "human", "role": "intern"},
     )
 
-    @guard.protect(authority="finance-policy@1.0.0", raise_on_block=False)
+    @guard.protect(raise_on_block=False)
     def wire_transfer(request):
         return "transfer executed"
 

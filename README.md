@@ -8,7 +8,7 @@ Stop unsafe AI and automated actions **before they execute**.
 
 Waveframe Guard is an execution-boundary SDK. It wraps sensitive actions, resolves compiled authority, evaluates through CRI-CORE, and only runs the action when the outcome is allowed.
 
-Current release: `0.12.0`.
+Current release: `0.13.0`.
 
 ```text
 Guard does not generate actions.
@@ -20,7 +20,7 @@ Guard decides whether this action may run now.
 ## Install
 
 ```powershell
-pip install waveframe-guard==0.12.0
+pip install waveframe-guard==0.13.0
 ```
 
 Run the local quickstart example from a repository checkout:
@@ -41,18 +41,6 @@ decision=blocked
 ```python
 from waveframe_guard import Guard
 
-compiled_authority = {
-    "schema_version": "compiled_authority_contract.v1",
-    "contract_id": "finance-policy",
-    "contract_version": "1.0.0",
-    "authority_requirements": {"required_roles": ["manager"]},
-    "approval_requirements": {},
-    "artifact_requirements": {},
-    "stage_requirements": {},
-    "invariants": {},
-    "contract_hash": "1371af2512ebb9638882f1af5a36a74cc7d81ca1ed9f4e138663133b5414adc7",
-}
-
 request = {
     "schema_version": "normalized_execution_request.v1",
     "request_id": "transfer-001",
@@ -63,11 +51,11 @@ request = {
 }
 
 guard = Guard.local(
-    authorities={"finance-policy@1.0.0": compiled_authority},
+    authority="finance-policy@1.0.0",
     actor_identity={"id": "user-1", "type": "human", "role": "intern"},
 )
 
-@guard.protect(authority="finance-policy@1.0.0", raise_on_block=False)
+@guard.protect(raise_on_block=False)
 def wire_transfer(execution_request):
     return "transfer executed"
 
@@ -84,6 +72,7 @@ blocked
 ```
 
 The wrapped function does not run because the actor does not satisfy the compiled authority requirement.
+`Guard.local(authority=...)` loads a verified Ledger `authority_bundle.v1` from the local authority registry before enforcement. Legacy direct `contract=...`, `authorities={...}`, and `authority_loader=...` inputs remain available for compatibility.
 
 ## Primary developer path
 
@@ -99,7 +88,7 @@ def protected_action(execution_request):
     return perform_sensitive_action(execution_request)
 ```
 
-Guard sits before the mutation boundary. It loads compiled authority, validates the normalized execution request, evaluates the action through CRI-CORE-backed runtime logic, emits an enforcement outcome, and writes local receipt/replay artifacts for inspection.
+Guard sits before the mutation boundary. It loads published authority, validates the normalized execution request, evaluates the action through CRI-CORE-backed runtime logic, emits an enforcement outcome, and writes local receipt/replay artifacts for inspection.
 
 ## What Guard owns
 

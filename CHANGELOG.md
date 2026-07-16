@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.13.0] - Published Authority Consumption
+
+### Added
+- Added canonical Published Authority loading through `load_authority("name@x.y.z")`.
+- Added local and memory authority resolvers behind the shared `AuthorityResolver` boundary.
+- Added resolver dependency injection for authority loading and Guard SDK construction.
+- Added `Guard.local(authority="name@x.y.z")` so applications can consume a published authority reference directly.
+- Added `MemoryAuthorityCache` keyed by immutable authority identity: `authority_ref + bundle_hash`.
+
+### Hardened
+- Added local registry `registry_hash` verification before registry entries are trusted.
+- Added canonical Ledger `authority_bundle.v1` verification with required `authority_ref`, `contract_hash`, and `authority_contract` fields.
+- Added contract and bundle hash verification across registry entries, authority bundles, nested authority contracts, and computed canonical hashes.
+- Added current lifecycle revalidation on cache hits so revoked or superseded authority cannot remain loadable through cache reuse.
+- Added duplicate local registry identity rejection.
+- Added ambiguous authority-source rejection for conflicting `authority`, `contract`, resolver, and authority map inputs.
+- Added strict explicit authority references requiring deterministic `name@x.y.z` identifiers.
+
+### Compatibility
+- Legacy `contract=...`, `authorities={...}`, and `authority_loader=...` Guard SDK paths remain available.
+- CRI-CORE and the existing enforcement pipeline remain unchanged.
+
+### Verified
+- `python -m pytest`: `194 passed`.
+- `python -m build`: built `waveframe_guard-0.13.0.tar.gz` and `waveframe_guard-0.13.0-py3-none-any.whl`.
+- Wheel metadata reports `Version: 0.13.0`.
+- Fresh-environment installation and import smoke test reports `waveframe_guard.__version__ == 0.13.0`, package metadata `0.13.0`, and `Guard` import availability.
+
 ## [0.12.0] - Cloud Preservation Runtime
 
 ### Added
