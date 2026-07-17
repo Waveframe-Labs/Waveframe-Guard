@@ -3,7 +3,7 @@
 # filetype: "python"
 # type: "test"
 # domain: "guard-sdk"
-# version: "0.12.0"
+# version: "0.13.0"
 # status: "Active"
 # author:
 #   name: "Waveframe Labs"
@@ -19,4 +19,4 @@ def test_public_guard_export_is_sdk_facade():
 
 
 def test_public_version_matches_release():
-    assert __version__ == "0.12.0"
+    assert __version__ == "0.13.0"

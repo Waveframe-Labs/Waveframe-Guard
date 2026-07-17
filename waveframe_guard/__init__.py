@@ -1,5 +1,3 @@
-from guard.sdk import Guard
-
 from .guard import guard
 from .context import install_guard, resolve_actor
 from .execute import GovernanceError, execute
@@ -12,7 +10,16 @@ from .schemas import (
     GOVERNED_EXECUTION_STATE_V1,
 )
 
-__version__ = "0.12.0"
+__version__ = "0.13.0"
+
+
+def __getattr__(name):
+    if name == "Guard":
+        from guard.sdk import Guard
+
+        return Guard
+    raise AttributeError(f"module 'waveframe_guard' has no attribute {name!r}")
+
 
 __all__ = [
     "Guard",
