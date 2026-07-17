@@ -1,110 +1,122 @@
 # Getting Started with Waveframe Guard
 
-Waveframe Guard enforces governance rules at execution time. It blocks actions that violate defined policy before they happen.
+Waveframe Guard enforces governance rules at execution time. It blocks actions that violate published authority before they happen.
 
 ---
 
 ## Installation
 
+For application use:
+
 ```bash
-pip install waveframe-guard cricore-contract-compiler cricore-proposal-normalizer
+pip install waveframe-guard
+```
+
+For local development and clean-checkout test runs:
+
+```bash
+pip install -e ".[test]"
 ```
 
 ## Basic Usage
 
-This example assumes a published contract artifact exists at `contracts/finance-policy-1.0.0.contract.json`. In your application, point `contract_path` at the contract published by your governance workflow.
+The primary SDK path starts from a Ledger-published authority reference:
 
 ```python
-from pathlib import Path
+from waveframe_guard import Guard
 
-from waveframe_guard import install_guard, guard
-
-# 1. Install Guard context from a published contract
-install_guard(
-    actor={"id": "user-1", "type": "human", "role": "intern"},
-    contract_path=Path("contracts") / "finance-policy-1.0.0.contract.json"
+guard = Guard.local(
+    authority="finance-policy@1.0.0",
+    actor_identity={"id": "user-1", "type": "human", "role": "intern"},
 )
 
-# 2. Protect a function
-@guard
-def transfer(amount):
-    print(f"Transferred ${amount}")
+request = {
+    "schema_version": "normalized_execution_request.v1",
+    "request_id": "transfer-001",
+    "action": "wire_transfer",
+    "target": "treasury-account",
+    "arguments": {"amount": 1250000},
+    "artifacts": [],
+}
 
-# 3. Execute
-transfer(100)
+@guard.protect(raise_on_block=False)
+def transfer(execution_request):
+    return "transfer executed"
+
+result = transfer(request)
+print(result["executed"])
+print(result["outcome"]["execution_state"])
 ```
+
+## Registry Requirement
+
+`Guard.local(authority="finance-policy@1.0.0")` expects a local Ledger-style registry at `contracts/index.json` by default.
+
+That registry must point to a Ledger `authority_bundle.v1` artifact, for example:
+
+```text
+contracts/
+  index.json
+  finance-policy-1.0.0.authority-bundle.json
+```
+
+Guard verifies the registry hash, resolves the exact authority reference, loads the authority bundle, validates the bundle and contract hashes, checks lifecycle state, and then passes the verified compiled authority into the existing enforcement pipeline.
+
+The accepted public authority identifier is always explicit and versioned:
+
+```text
+finance-policy@1.0.0
+```
+
+Unversioned identifiers such as `finance-policy`, implicit `latest`, and filesystem paths are rejected at the published-authority boundary.
 
 ## Expected Behavior
 
 ```text
-Execution blocked: required role not satisfied: manager
+False
+blocked
 ```
+
+The wrapped function does not run because the actor does not satisfy the authority requirement.
 
 ## Elevating Privileges
 
 ```python
-from pathlib import Path
-
-install_guard(
-    actor={"id": "user-1", "type": "human", "role": "manager"},
-    contract_path=Path("contracts") / "finance-policy-1.0.0.contract.json"
+guard = Guard.local(
+    authority="finance-policy@1.0.0",
+    actor_identity={"id": "user-1", "type": "human", "role": "manager"},
 )
-
-transfer(100)
 ```
 
-```text
-Transferred $100
-```
+With the required role, the same protected function may execute if the rest of the authority requirements are satisfied.
 
-## Cloud Mode (Optional)
+## Compatibility Paths
+
+Legacy direct-contract inputs remain available for embedded and compatibility use:
 
 ```python
-install_guard(
-    api_key="your_api_key_here",
-    mode="cloud",
-    fail_mode="cache"
+guard = Guard.local(
+    authorities={"finance-policy@1.0.0": compiled_authority},
+    actor_identity={"id": "user-1", "type": "human", "role": "manager"},
 )
 ```
 
-If no cached contract is available, Cloud mode fetches a published contract before enforcement.
+Prefer published authority references for new integrations.
 
-## Governed Runtime
+## Cloud Preservation (Optional)
 
 ```python
-from waveframe_guard import GovernedRuntime
-
-runtime = GovernedRuntime(registry_path="contracts/index.json")
-runtime.install_actor({"id": "user-1", "type": "human", "role": "manager"})
-runtime.bind_contract("finance-policy@1.0.0")
-
-result = runtime.execute(
-    fn=transfer,
-    args=(100,),
-    raise_on_block=False,
+guard = Guard.local(
+    authority="finance-policy@1.0.0",
+    preserve_to="https://cloud.example",
 )
 ```
 
-Explicit authority refs are canonical for runtime execution. Bind or pass `finance-policy@1.0.0`, not an unversioned `finance-policy`.
-
-In cloud mode:
-
-- Policies are fetched and cached locally
-- Enforcement still happens locally
-- Decisions are asynchronously logged to Waveframe Cloud
-
-## Fail Modes
-
-| Mode | Behavior |
-| --- | --- |
-| `cache` (default) | Use cached policy if Cloud unavailable |
-| `open` | Allow execution if policy unavailable |
-| `closed` | Block execution if policy unavailable |
+Cloud preservation runs only after Guard has completed local evaluation and written local evidence. Cloud availability does not influence the local enforcement decision.
 
 ## Notes
 
-- Guard enforces locally, even if Cloud is unavailable
-- Runtime enforcement uses published compiled contract artifacts
-- Contract metadata is available in runtime context for audit and telemetry
-- Decisions may be marked as unverified when Cloud cannot be reached
-- Cloud integration provides audit, attestation, and policy management
+- Guard enforces locally, even if Cloud is unavailable.
+- Ledger publishes authority; Guard consumes verified Published Authority bundles.
+- CRI-CORE and the existing enforcement pipeline remain unchanged.
+- Cloud preservation metadata is post-decision durability evidence, not runtime admissibility.
