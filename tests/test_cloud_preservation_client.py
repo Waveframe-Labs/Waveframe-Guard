@@ -21,6 +21,8 @@ def _preservation_app(state):
         state["method"] = environ["REQUEST_METHOD"]
         state["path"] = environ["PATH_INFO"]
         state["authorization"] = environ.get("HTTP_AUTHORIZATION")
+        state["organization_id"] = environ.get("HTTP_X_ORGANIZATION_ID")
+        state["api_key"] = environ.get("HTTP_X_API_KEY")
 
         if state.get("status"):
             start_response(state["status"], [("Content-Type", "application/json")])
@@ -87,6 +89,42 @@ def test_cloud_preservation_client_posts_to_preserve_and_parses_receipt():
         "decision": "ALLOWED",
     }
     assert state["authorization"] is None
+    assert state["organization_id"] is None
+    assert state["api_key"] is None
+
+
+def test_cloud_preservation_client_sends_organization_credentials_as_headers():
+    state = {}
+    server, base_url = serve_preservation_app(state)
+
+    try:
+        result = CloudPreservationClient(
+            base_url,
+            organization_id="org-finance",
+            api_key="wf_cloud_secret",
+        ).preserve({"event_id": "evt_123"})
+    finally:
+        server.shutdown()
+        server.server_close()
+
+    assert result.ok is True
+    assert state["organization_id"] == "org-finance"
+    assert state["api_key"] == "wf_cloud_secret"
+    assert "wf_cloud_secret" not in json.dumps(state["payload"], sort_keys=True)
+
+
+def test_cloud_preservation_client_requires_complete_credentials():
+    for options in (
+        {"organization_id": "org-finance"},
+        {"api_key": "wf_cloud_secret"},
+    ):
+        try:
+            CloudPreservationClient("http://cloud.example", **options)
+        except ValueError as exc:
+            assert str(exc) == "organization_id and api_key must be configured together"
+            assert "wf_cloud_secret" not in str(exc)
+        else:
+            raise AssertionError("incomplete Cloud credentials must be rejected")
 
 
 def test_cloud_preservation_client_returns_http_failure_result():
@@ -119,6 +157,24 @@ def test_cloud_preservation_client_returns_timeout_failure_result(monkeypatch):
     assert result.ok is False
     assert result.error_type == "timeout"
     assert "timed out" in result.error
+
+
+def test_cloud_preservation_client_redacts_api_key_from_transport_errors(monkeypatch):
+    secret = "wf_cloud_secret"
+
+    def raise_failure(*args, **kwargs):
+        raise requests.RequestException(f"transport rejected {secret}")
+
+    monkeypatch.setattr(requests, "post", raise_failure)
+    result = CloudPreservationClient(
+        "http://cloud.example",
+        organization_id="org-finance",
+        api_key=secret,
+    ).preserve({"event_id": "evt_123"})
+
+    assert result.ok is False
+    assert result.error == "transport rejected [REDACTED]"
+    assert secret not in result.error
 
 
 def test_cloud_preservation_client_returns_invalid_json_failure_result():

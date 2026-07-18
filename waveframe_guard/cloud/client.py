@@ -30,30 +30,50 @@ class CloudPreservationClient:
         base_url: str = DEFAULT_CLOUD_BASE_URL,
         *,
         timeout_seconds: float = DEFAULT_PRESERVATION_TIMEOUT_SECONDS,
+        organization_id: str | None = None,
+        api_key: str | None = None,
     ):
         self.base_url = base_url.rstrip("/")
         self.timeout_seconds = timeout_seconds
+        self.organization_id = _optional_credential("organization_id", organization_id)
+        self._api_key = _optional_credential("api_key", api_key)
+        if (self.organization_id is None) != (self._api_key is None):
+            raise ValueError("organization_id and api_key must be configured together")
 
     def preserve(self, payload: Mapping[str, Any]) -> CloudPreservationResult:
         if not isinstance(payload, Mapping):
             raise TypeError("payload must be a mapping")
 
         try:
+            request_options: dict[str, Any] = {
+                "json": dict(payload),
+                "timeout": self.timeout_seconds,
+            }
+            if self.organization_id is not None and self._api_key is not None:
+                request_options["headers"] = {
+                    "X-Organization-ID": self.organization_id,
+                    "X-API-Key": self._api_key,
+                }
             response = requests.post(
                 f"{self.base_url}/v1/preserve",
-                json=dict(payload),
-                timeout=self.timeout_seconds,
+                **request_options,
             )
         except requests.Timeout as exc:
             return CloudPreservationResult(
                 ok=False,
-                error=str(exc) or "Cloud preservation request timed out",
+                error=_redact_secret(
+                    str(exc) or "Cloud preservation request timed out",
+                    self._api_key,
+                ),
                 error_type="timeout",
             )
         except requests.RequestException as exc:
             return CloudPreservationResult(
                 ok=False,
-                error=str(exc) or "Cloud preservation request failed",
+                error=_redact_secret(
+                    str(exc) or "Cloud preservation request failed",
+                    self._api_key,
+                ),
                 error_type="request_error",
             )
 
@@ -61,7 +81,7 @@ class CloudPreservationClient:
             return CloudPreservationResult(
                 ok=False,
                 status_code=response.status_code,
-                error=response.text,
+                error=_redact_secret(response.text, self._api_key),
                 error_type="http_error",
             )
 
@@ -155,3 +175,17 @@ def _extract_string(
     if receipt is not None and isinstance(receipt.get(key), str):
         return receipt[key]
     return None
+
+
+def _optional_credential(name: str, value: str | None) -> str | None:
+    if value is None:
+        return None
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{name} must be a non-empty string when configured")
+    return value
+
+
+def _redact_secret(message: str, secret: str | None) -> str:
+    if secret:
+        return message.replace(secret, "[REDACTED]")
+    return message

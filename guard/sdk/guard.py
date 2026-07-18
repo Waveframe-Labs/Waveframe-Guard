@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from functools import wraps
 from pathlib import Path
 from typing import Any, Callable
@@ -33,6 +34,8 @@ class Guard:
         execution_context: dict[str, Any] | None = None,
         evaluation_time_source: Callable[[], str] | None = None,
         preserve_to: str | None = None,
+        cloud_organization_id: str | None = None,
+        cloud_api_key: str | None = None,
     ):
         self.workspace = Path(workspace)
         self.store = LocalEvaluationStore(self.workspace)
@@ -55,7 +58,14 @@ class Guard:
         self.evaluation_time_source = evaluation_time_source
         self.preserve_to = preserve_to
         self.cloud_preservation_client = (
-            CloudPreservationClient(preserve_to)
+            CloudPreservationClient(
+                preserve_to,
+                organization_id=_cloud_setting(
+                    cloud_organization_id,
+                    "WAVEFRAME_CLOUD_ORGANIZATION_ID",
+                ),
+                api_key=_cloud_setting(cloud_api_key, "WAVEFRAME_CLOUD_API_KEY"),
+            )
             if preserve_to is not None
             else None
         )
@@ -78,6 +88,8 @@ class Guard:
         execution_context: dict[str, Any] | None = None,
         evaluation_time_source: Callable[[], str] | None = None,
         preserve_to: str | None = None,
+        cloud_organization_id: str | None = None,
+        cloud_api_key: str | None = None,
     ) -> "Guard":
         return cls(
             workspace=workspace,
@@ -94,6 +106,8 @@ class Guard:
             execution_context=execution_context,
             evaluation_time_source=evaluation_time_source,
             preserve_to=preserve_to,
+            cloud_organization_id=cloud_organization_id,
+            cloud_api_key=cloud_api_key,
         )
 
     def protect(
@@ -172,6 +186,10 @@ class Guard:
         if resolved is None:
             raise ValueError("Missing authority; pass authority=... to Guard.local(), protect(), or boundary_for()")
         return resolved
+
+
+def _cloud_setting(explicit: str | None, environment_name: str) -> str | None:
+    return explicit if explicit is not None else os.environ.get(environment_name)
 
 
 def _normalized_request_from_call(args: tuple[Any, ...], kwargs: dict[str, Any]) -> dict[str, Any]:
