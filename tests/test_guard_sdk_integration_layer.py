@@ -293,11 +293,14 @@ def test_guard_local_rejects_same_ref_different_authority_source_content(tmp_pat
 
 def test_guard_local_can_preserve_saved_evaluation_after_local_decision(tmp_path):
     workspace = tmp_path / ".guard-local"
+    cloud_api_key = "wf_cloud_secret_not_evidence"
     state = {"workspace": workspace}
     server, preserve_to = _serve_preservation_app(state)
     guard = Guard.local(
         workspace=workspace,
         preserve_to=preserve_to,
+        cloud_organization_id="org-finance",
+        cloud_api_key=cloud_api_key,
         authorities={"finance-policy@1.0.0": _authority()},
         actor_identity={"id": "manager-1", "type": "human", "role": "manager"},
         approvals=[{"role": "manager", "approved_by": "manager-approval"}],
@@ -340,6 +343,8 @@ def test_guard_local_can_preserve_saved_evaluation_after_local_decision(tmp_path
         },
     }
     assert state["path"] == "/v1/preserve"
+    assert state["organization_id"] == "org-finance"
+    assert state["api_key"] == cloud_api_key
     assert state["payload"]["schema_version"] == "guard_cloud_preservation_package.v1"
     assert state["payload"]["run_id"] == run_id
     assert state["payload"]["saved_evaluation"]["schema_version"] == SAVED_EVALUATION_V1
@@ -356,6 +361,40 @@ def test_guard_local_can_preserve_saved_evaluation_after_local_decision(tmp_path
     assert (workspace / "receipts" / f"{run_id}.json").exists()
     assert (workspace / "manifests" / f"{run_id}.json").exists()
     assert (workspace / "replays" / f"{run_id}.json").exists()
+    assert cloud_api_key not in json.dumps(state["payload"], sort_keys=True)
+    for artifact_path in workspace.rglob("*"):
+        if artifact_path.is_file():
+            assert cloud_api_key not in artifact_path.read_text(encoding="utf-8")
+
+
+def test_guard_local_reads_cloud_credentials_from_environment(tmp_path, monkeypatch):
+    state = {}
+    server, preserve_to = _serve_preservation_app(state)
+    monkeypatch.setenv("WAVEFRAME_CLOUD_ORGANIZATION_ID", "org-environment")
+    monkeypatch.setenv("WAVEFRAME_CLOUD_API_KEY", "wf_environment_secret")
+    guard = Guard.local(
+        workspace=tmp_path / ".guard-local",
+        preserve_to=preserve_to,
+        authorities={"finance-policy@1.0.0": _authority()},
+        actor_identity={"id": "manager-1", "type": "human", "role": "manager"},
+        approvals=[{"role": "manager", "approved_by": "manager-approval"}],
+        evaluation_time_source=lambda: EVALUATION_TIME,
+    )
+
+    try:
+        result = guard.boundary_for("finance-policy@1.0.0").execute(
+            lambda amount: amount + 1,
+            execution_request=_request(amount=500),
+            args=(500,),
+        )
+    finally:
+        server.shutdown()
+        server.server_close()
+
+    assert result["cloud_preservation"]["ok"] is True
+    assert state["organization_id"] == "org-environment"
+    assert state["api_key"] == "wf_environment_secret"
+    assert "wf_environment_secret" not in json.dumps(state["payload"], sort_keys=True)
 
 
 def test_guard_local_omits_cloud_preservation_when_not_configured(tmp_path, monkeypatch):
@@ -576,6 +615,8 @@ def _preservation_app(state):
     def app(environ, start_response):
         state["method"] = environ["REQUEST_METHOD"]
         state["path"] = environ["PATH_INFO"]
+        state["organization_id"] = environ.get("HTTP_X_ORGANIZATION_ID")
+        state["api_key"] = environ.get("HTTP_X_API_KEY")
 
         if state.get("status"):
             start_response(state["status"], [("Content-Type", "application/json")])

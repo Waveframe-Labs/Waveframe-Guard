@@ -1,5 +1,14 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- Added organization-scoped Cloud preservation credentials through explicit `Guard.local()` configuration or `WAVEFRAME_CLOUD_ORGANIZATION_ID` and `WAVEFRAME_CLOUD_API_KEY`.
+
+### Hardened
+- Cloud organization and API-key credentials are transmitted only as request headers and are excluded from preservation packages and saved local evidence.
+- Partial Cloud credential configuration now fails before an HTTP request is attempted.
+
 ## [0.13.0] - Published Authority Consumption
 
 ### Added

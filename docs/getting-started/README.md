@@ -106,11 +106,17 @@ Prefer published authority references for new integrations.
 ## Cloud Preservation (Optional)
 
 ```python
+import os
+
 guard = Guard.local(
     authority="finance-policy@1.0.0",
     preserve_to="https://cloud.example",
+    cloud_organization_id="org-finance",
+    cloud_api_key=os.environ["WAVEFRAME_CLOUD_API_KEY"],
 )
 ```
+
+The same credentials may be supplied through `WAVEFRAME_CLOUD_ORGANIZATION_ID` and `WAVEFRAME_CLOUD_API_KEY`. Guard sends them only as `X-Organization-ID` and `X-API-Key` request headers. The API-key secret is not included in the preservation package or local evidence.
 
 Cloud preservation runs only after Guard has completed local evaluation and written local evidence. Cloud availability does not influence the local enforcement decision.
 

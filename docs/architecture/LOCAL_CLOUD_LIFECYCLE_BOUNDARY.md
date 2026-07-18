@@ -69,6 +69,11 @@ evaluation container. It records Cloud identifiers such as package id, receipt
 id, content hash, and timestamp so inspection tools can show preservation
 status without manual import.
 
+Authenticated preservation credentials are transport configuration. The Cloud
+organization and API-key secret are sent as request headers and must never be
+written into the preservation package, local evidence, receipt, manifest,
+replay record, history annotation, logs, or error messages.
+
 Cloud metadata must not retroactively claim to be covered by the original Guard
 Receipt or artifact manifest unless those artifacts are explicitly regenerated
 as a new evidence set. v0.12.0 does not regenerate them.
