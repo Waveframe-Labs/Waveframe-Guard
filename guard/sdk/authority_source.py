@@ -38,13 +38,27 @@ class AuthoritySource:
             default_authority_ref = contract_ref
 
         if authority is not None:
-            loaded_authority = load_authority(authority, resolver=authority_resolver, cache=authority_cache)
-            _install_authority(
-                normalized_authorities,
-                loaded_authority.authority_ref,
-                dict(loaded_authority.contract),
-            )
-            default_authority_ref = loaded_authority.authority_ref
+            if authority_loader is not None:
+                loaded_contract = authority_loader(authority)
+                loaded_ref = _contract_authority_ref(loaded_contract)
+                if loaded_ref != authority:
+                    raise ValueError(
+                        f"authority loader returned {loaded_ref} for requested {authority}"
+                    )
+                _install_authority(normalized_authorities, authority, loaded_contract)
+                default_authority_ref = authority
+            else:
+                loaded_authority = load_authority(
+                    authority,
+                    resolver=authority_resolver,
+                    cache=authority_cache,
+                )
+                _install_authority(
+                    normalized_authorities,
+                    loaded_authority.authority_ref,
+                    dict(loaded_authority.contract),
+                )
+                default_authority_ref = loaded_authority.authority_ref
 
         return cls(
             authorities=normalized_authorities,
