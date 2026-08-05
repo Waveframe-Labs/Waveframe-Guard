@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import os
 from functools import wraps
+from inspect import BoundArguments, signature
 from pathlib import Path
 from typing import Any, Callable
+from uuid import uuid4
 
 from guard.adapters import NORMALIZED_EXECUTION_REQUEST_V1
 from waveframe_guard.authority import AuthorityCache, AuthorityResolver
-from waveframe_guard.cloud import CloudPreservationClient
+from waveframe_guard.cloud import CloudAuthorityClient, CloudPreservationClient
 
 from .authority_source import AuthoritySource
 from .execution import GuardRuntimeBoundary
@@ -110,6 +112,58 @@ class Guard:
             cloud_api_key=cloud_api_key,
         )
 
+    @classmethod
+    def cloud(
+        cls,
+        *,
+        authority: str,
+        workspace: str | Path = ".guard-local",
+        cloud_url: str | None = None,
+        cloud_organization_id: str | None = None,
+        cloud_api_key: str | None = None,
+        actor_identity: dict[str, Any] | None = None,
+        approvals: list[dict[str, Any]] | None = None,
+        continuity_state: dict[str, Any] | None = None,
+        replay_posture: dict[str, Any] | None = None,
+        execution_context: dict[str, Any] | None = None,
+        evaluation_time_source: Callable[[], str] | None = None,
+    ) -> "Guard":
+        """Connect Guard to hosted Cloud without a repository checkout.
+
+        Cloud supplies the published compiled authority and preserves evidence.
+        Guard still evaluates locally and executes the protected callable only
+        after an admissible decision.
+        """
+
+        resolved_url = _required_cloud_setting(cloud_url, "WAVEFRAME_CLOUD_URL")
+        resolved_organization_id = _required_cloud_setting(
+            cloud_organization_id,
+            "WAVEFRAME_CLOUD_ORGANIZATION_ID",
+        )
+        resolved_api_key = _required_cloud_setting(
+            cloud_api_key,
+            "WAVEFRAME_CLOUD_API_KEY",
+        )
+        authority_client = CloudAuthorityClient(
+            resolved_url,
+            organization_id=resolved_organization_id,
+            api_key=resolved_api_key,
+        )
+        return cls(
+            workspace=workspace,
+            authority=authority,
+            authority_loader=authority_client.fetch,
+            actor_identity=actor_identity,
+            approvals=approvals,
+            continuity_state=continuity_state,
+            replay_posture=replay_posture,
+            execution_context=execution_context,
+            evaluation_time_source=evaluation_time_source,
+            preserve_to=resolved_url,
+            cloud_organization_id=resolved_organization_id,
+            cloud_api_key=resolved_api_key,
+        )
+
     def protect(
         self,
         *,
@@ -138,6 +192,73 @@ class Guard:
                     request_builder(*args, **kwargs)
                     if request_builder is not None
                     else _normalized_request_from_call(args, kwargs)
+                )
+                result = boundary.execute(
+                    fn,
+                    execution_request=execution_request,
+                    args=args,
+                    kwargs=kwargs,
+                    raise_on_block=raise_on_block,
+                )
+                return result["value"] if result["executed"] else result
+
+            return wrapped
+
+        return decorate
+
+    def tool(
+        self,
+        *,
+        authority: str | None = None,
+        action: str | None = None,
+        target: str | Callable[..., Any] | None = None,
+        include_arguments: tuple[str, ...] | list[str] | None = None,
+        artifacts: Callable[..., list[dict[str, Any]]] | None = None,
+        request_id: Callable[..., str] | None = None,
+        agent: dict[str, Any] | None = None,
+        actor_identity: dict[str, Any] | None = None,
+        approvals: list[dict[str, Any]] | None = None,
+        continuity_state: dict[str, Any] | None = None,
+        replay_posture: dict[str, Any] | None = None,
+        execution_context: dict[str, Any] | None = None,
+        raise_on_block: bool = True,
+    ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+        """Protect an existing agent tool without requiring Guard-shaped arguments.
+
+        ``target`` may name one function argument or be a callable receiving the
+        original tool arguments. Function arguments are excluded from preserved
+        evidence unless explicitly named by ``include_arguments``.
+        """
+
+        def decorate(fn: Callable[..., Any]) -> Callable[..., Any]:
+            fn_signature = signature(fn)
+            boundary = self.boundary_for(
+                self._resolve_authority_ref(authority),
+                actor_identity=actor_identity,
+                approvals=approvals,
+                continuity_state=continuity_state,
+                replay_posture=replay_posture,
+                execution_context=_agent_tool_context(
+                    self.execution_context,
+                    execution_context,
+                    agent,
+                ),
+            )
+
+            @wraps(fn)
+            def wrapped(*args: Any, **kwargs: Any) -> Any:
+                bound = fn_signature.bind(*args, **kwargs)
+                bound.apply_defaults()
+                execution_request = _tool_execution_request(
+                    fn_name=fn.__name__,
+                    bound=bound,
+                    args=args,
+                    kwargs=kwargs,
+                    action=action,
+                    target=target,
+                    include_arguments=include_arguments,
+                    artifacts=artifacts,
+                    request_id=request_id,
                 )
                 result = boundary.execute(
                     fn,
@@ -192,6 +313,13 @@ def _cloud_setting(explicit: str | None, environment_name: str) -> str | None:
     return explicit if explicit is not None else os.environ.get(environment_name)
 
 
+def _required_cloud_setting(explicit: str | None, environment_name: str) -> str:
+    value = _cloud_setting(explicit, environment_name)
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"Missing Cloud setting; pass it explicitly or set {environment_name}")
+    return value
+
+
 def _normalized_request_from_call(args: tuple[Any, ...], kwargs: dict[str, Any]) -> dict[str, Any]:
     candidate = kwargs.get("execution_request")
     if candidate is None and args:
@@ -202,3 +330,55 @@ def _normalized_request_from_call(args: tuple[Any, ...], kwargs: dict[str, Any])
             "or an explicit request_builder adapter"
         )
     return candidate
+
+
+def _agent_tool_context(
+    default_context: dict[str, Any],
+    explicit_context: dict[str, Any] | None,
+    agent: dict[str, Any] | None,
+) -> dict[str, Any]:
+    context = dict(default_context)
+    if explicit_context is not None:
+        context.update(explicit_context)
+    context["surface"] = "agent_tool"
+    if agent is not None:
+        context["agent"] = dict(agent)
+    return context
+
+
+def _tool_execution_request(
+    *,
+    fn_name: str,
+    bound: BoundArguments,
+    args: tuple[Any, ...],
+    kwargs: dict[str, Any],
+    action: str | None,
+    target: str | Callable[..., Any] | None,
+    include_arguments: tuple[str, ...] | list[str] | None,
+    artifacts: Callable[..., list[dict[str, Any]]] | None,
+    request_id: Callable[..., str] | None,
+) -> dict[str, Any]:
+    selected_arguments: dict[str, Any] = {}
+    for name in include_arguments or ():
+        if name not in bound.arguments:
+            raise ValueError(f"Guard tool include_arguments names unknown argument: {name}")
+        selected_arguments[name] = bound.arguments[name]
+
+    resolved_target: Any = fn_name
+    if isinstance(target, str):
+        if target not in bound.arguments:
+            raise ValueError(f"Guard tool target names unknown argument: {target}")
+        resolved_target = bound.arguments[target]
+    elif target is not None:
+        resolved_target = target(*args, **kwargs)
+
+    resolved_artifacts = artifacts(*args, **kwargs) if artifacts is not None else []
+    resolved_request_id = request_id(*args, **kwargs) if request_id is not None else f"tool_{uuid4().hex}"
+    return {
+        "schema_version": NORMALIZED_EXECUTION_REQUEST_V1,
+        "request_id": resolved_request_id,
+        "action": action or fn_name,
+        "target": str(resolved_target),
+        "arguments": selected_arguments,
+        "artifacts": resolved_artifacts,
+    }
