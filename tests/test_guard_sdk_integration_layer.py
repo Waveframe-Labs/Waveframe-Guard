@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import json
 import hashlib
+import json
 import threading
 from pathlib import Path
 from wsgiref.simple_server import make_server
@@ -137,6 +137,138 @@ def test_guard_local_protect_requires_normalized_request_boundary(tmp_path):
 
     with pytest.raises(ValueError, match="normalized_execution_request.v1"):
         wire_transfer({"amount": 500})
+
+
+def test_guard_tool_wraps_existing_agent_function_and_records_agent_metadata(tmp_path):
+    calls = []
+    guard = Guard.local(
+        workspace=tmp_path / ".guard-local",
+        authorities={"finance-policy@1.0.0": _authority()},
+        actor_identity={"id": "repo-agent", "type": "agent", "role": "manager"},
+        approvals=[{"role": "manager", "approved_by": "manager-approval"}],
+        evaluation_time_source=lambda: EVALUATION_TIME,
+    )
+
+    @guard.tool(
+        authority="finance-policy@1.0.0",
+        action="write_file",
+        target="path",
+        include_arguments=("mode",),
+        agent={
+            "framework": "langgraph",
+            "model_provider": "openai",
+            "model": "gpt-5",
+        },
+    )
+    def write_file(path, content, mode="replace"):
+        calls.append((path, content, mode))
+        return {"path": path, "status": "written"}
+
+    result = write_file("AGENT_NOTES.md", "private prompt output", mode="append")
+
+    assert result == {"path": "AGENT_NOTES.md", "status": "written"}
+    assert calls == [("AGENT_NOTES.md", "private prompt output", "append")]
+    saved = guard.store.history()[0]
+    request = saved["inputs"]["execution_request"]
+    context = saved["inputs"]["runtime_evidence"]["execution_context"]
+    assert request["action"] == "write_file"
+    assert request["target"] == "AGENT_NOTES.md"
+    assert request["arguments"] == {"mode": "append"}
+    assert "private prompt output" not in json.dumps(saved)
+    assert context == {
+        "surface": "agent_tool",
+        "agent": {
+            "framework": "langgraph",
+            "model_provider": "openai",
+            "model": "gpt-5",
+        },
+    }
+
+
+def test_guard_tool_blocks_before_existing_agent_function_runs(tmp_path):
+    calls = []
+    guard = Guard.local(
+        workspace=tmp_path / ".guard-local",
+        authorities={"finance-policy@1.0.0": _authority()},
+        actor_identity={"id": "repo-agent", "type": "agent", "role": "employee"},
+        evaluation_time_source=lambda: EVALUATION_TIME,
+    )
+
+    @guard.tool(authority="finance-policy@1.0.0", target="path")
+    def delete_file(path):
+        calls.append(path)
+
+    with pytest.raises(GuardExecutionBlocked):
+        delete_file("production.env")
+
+    assert calls == []
+    saved = guard.store.history()[0]
+    assert saved["inputs"]["execution_request"]["action"] == "delete_file"
+    assert saved["inputs"]["execution_request"]["target"] == "production.env"
+    assert saved["guard_enforcement_outcome"]["status"] == "blocked"
+
+
+def test_guard_cloud_fetches_authority_from_environment_without_repository_checkout(
+    tmp_path,
+    monkeypatch,
+):
+    fetched = []
+    authority = _authority()
+    authority["contract_hash"] = _contract_hash(authority)
+
+    def fetch(self, authority_ref):
+        fetched.append(
+            {
+                "authority_ref": authority_ref,
+                "base_url": self.base_url,
+                "organization_id": self.organization_id,
+                "api_key": self._api_key,
+            }
+        )
+        return authority
+
+    monkeypatch.setattr("guard.sdk.guard.CloudAuthorityClient.fetch", fetch)
+    monkeypatch.setenv("WAVEFRAME_CLOUD_URL", "https://cloud.waveframelabs.com")
+    monkeypatch.setenv("WAVEFRAME_CLOUD_ORGANIZATION_ID", "acme")
+    monkeypatch.setenv("WAVEFRAME_CLOUD_API_KEY", "wf_runtime_secret")
+
+    guard = Guard.cloud(
+        workspace=tmp_path / ".guard-local",
+        authority="finance-policy@1.0.0",
+        actor_identity={"id": "repo-agent", "type": "agent", "role": "manager"},
+    )
+
+    assert guard.default_authority_ref == "finance-policy@1.0.0"
+    assert guard.resolve_authority("finance-policy@1.0.0") == authority
+    assert fetched == [
+        {
+            "authority_ref": "finance-policy@1.0.0",
+            "base_url": "https://cloud.waveframelabs.com",
+            "organization_id": "acme",
+            "api_key": "wf_runtime_secret",
+        }
+    ]
+    assert guard.preserve_to == "https://cloud.waveframelabs.com"
+    assert guard.cloud_preservation_client.organization_id == "acme"
+
+
+def test_guard_cloud_fails_before_execution_when_authority_cannot_be_fetched(
+    tmp_path,
+    monkeypatch,
+):
+    def fail_fetch(self, authority_ref):
+        raise RuntimeError(f"authority unavailable: {authority_ref}")
+
+    monkeypatch.setattr("guard.sdk.guard.CloudAuthorityClient.fetch", fail_fetch)
+
+    with pytest.raises(RuntimeError, match="authority unavailable"):
+        Guard.cloud(
+            workspace=tmp_path / ".guard-local",
+            authority="finance-policy@1.0.0",
+            cloud_url="https://cloud.waveframelabs.com",
+            cloud_organization_id="acme",
+            cloud_api_key="wf_runtime_secret",
+        )
 
 
 def test_guard_local_accepts_published_authority_ref_without_repeating_authority(tmp_path):
