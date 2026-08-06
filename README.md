@@ -20,75 +20,101 @@ Guard decides whether this action may run now.
 ## Install
 
 ```powershell
-pip install waveframe-guard==0.13.0
+pip install waveframe-guard
 ```
 
-Run the local quickstart example from a repository checkout:
+No Ollama installation or Waveframe repository checkout is required. Keep the
+customer's existing model, agent framework, and tool functions; Guard wraps the
+tool that can cause a real-world change.
+
+## Hosted quickstart
+
+Configure the runtime credential created in Waveframe Console:
 
 ```powershell
-python examples/quickstart_guard.py
+$env:WAVEFRAME_CLOUD_URL="https://cloud.waveframelabs.com"
+$env:WAVEFRAME_CLOUD_ORGANIZATION_ID="acme"
+$env:WAVEFRAME_CLOUD_API_KEY="<runtime credential>"
 ```
 
-Expected output:
-
-```text
-executed=False
-decision=blocked
-```
-
-## 30-second example
+Then wrap an existing agent tool:
 
 ```python
 from waveframe_guard import Guard
 
-request = {
-    "schema_version": "normalized_execution_request.v1",
-    "request_id": "transfer-001",
-    "action": "wire_transfer",
-    "target": "treasury-account",
-    "arguments": {"amount": 1250000},
-    "artifacts": [],
-}
-
-guard = Guard.local(
-    authority="finance-policy@1.0.0",
-    actor_identity={"id": "user-1", "type": "human", "role": "intern"},
+guard = Guard.cloud(
+    authority="repository-change-policy@1.0.0",
+    actor_identity={
+        "id": "release-agent",
+        "type": "agent",
+        "role": "repository-maintainer",
+    },
 )
 
-@guard.protect(raise_on_block=False)
-def wire_transfer(execution_request):
-    return "transfer executed"
-
-result = wire_transfer(request)
-print(result["executed"])
-print(result["outcome"]["execution_state"])
+@guard.tool(
+    action="write_file",
+    target="path",
+    include_arguments=("mode",),
+    agent={
+        "framework": "langgraph",       # or custom, crewai, etc.
+        "model_provider": "openai",     # or anthropic, ollama, etc.
+        "model": "gpt-5",
+    },
+)
+def write_file(path: str, content: str, mode: str = "replace"):
+    return your_existing_write_file(path, content, mode=mode)
 ```
 
-Expected result:
+The three choices are intentionally independent:
 
-```text
-False
-blocked
-```
+- `actor_identity` identifies the agent or human attempting the action.
+- `authority` selects the explicit, versioned policy Guard will enforce.
+- `agent` records optional framework and model metadata for Console and audit evidence.
 
-The wrapped function does not run because the actor does not satisfy the compiled authority requirement.
-`Guard.local(authority=...)` loads a verified Ledger `authority_bundle.v1` from the local authority registry before enforcement. Legacy direct `contract=...`, `authorities={...}`, and `authority_loader=...` inputs remain available for compatibility.
+`Guard.cloud(...)` fetches the published compiled authority from Cloud, verifies
+its identity and hash, and fails closed if it cannot obtain a trustworthy
+contract. Guard still evaluates locally before calling the wrapped function.
+Afterward, it submits the decision and execution evidence to Cloud.
 
-## Primary developer path
+Tool arguments are excluded from preserved evidence by default. Add only safe,
+decision-relevant names to `include_arguments`; prompts, tokens, file contents,
+and other sensitive values should remain excluded.
 
-Use one object first:
+## Works with existing agents
+
+`@guard.tool(...)` is framework-neutral. It wraps an ordinary Python callable,
+so the model may be hosted or local and the orchestration layer may be a custom
+agent, LangGraph, CrewAI, an OpenAI tool loop, or another framework. Guard does
+not generate the tool call and does not require the model to emit Guard-specific
+JSON.
+
+The wrapper derives a normalized proposal from the real function call, asks
+Guard to evaluate it against the selected authority, and invokes the original
+function only when admissible. A blocked call never reaches the original
+function.
+
+## Local development path
+
+For offline development, a local authority registry is still supported:
 
 ```python
 from waveframe_guard import Guard
 
-guard = Guard.local(workspace=".guard-local")
+guard = Guard.local(
+    workspace=".guard-local",
+    authority="finance-policy@1.0.0",
+    actor_identity={"id": "agent-1", "type": "agent", "role": "analyst"},
+)
 
-@guard.protect(authority="finance-policy@1.0.0")
-def protected_action(execution_request):
-    return perform_sensitive_action(execution_request)
+@guard.tool(action="wire_transfer", target="account_id")
+def wire_transfer(account_id, amount):
+    return perform_transfer(account_id, amount)
 ```
 
-Guard sits before the mutation boundary. It loads published authority, validates the normalized execution request, evaluates the action through CRI-CORE-backed runtime logic, emits an enforcement outcome, and writes local receipt/replay artifacts for inspection.
+`Guard.local(authority=...)` loads a verified Ledger `authority_bundle.v1` from
+the local authority registry. Direct `contract=...`, `authorities={...}`, and
+`authority_loader=...` inputs remain available for advanced integrations and
+compatibility.
 
 ## What Guard owns
 

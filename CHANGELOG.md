@@ -4,10 +4,19 @@
 
 ### Added
 - Added organization-scoped Cloud preservation credentials through explicit `Guard.local()` configuration or `WAVEFRAME_CLOUD_ORGANIZATION_ID` and `WAVEFRAME_CLOUD_API_KEY`.
+- Added provider-neutral `Guard.tool(...)` wrappers for protecting existing agent tool functions without requiring Guard-shaped model output or an Ollama dependency.
+- Added `Guard.cloud(authority=...)` for fetching a published, versioned authority from hosted Cloud and preserving evidence without a Waveframe repository checkout.
+- Added optional agent framework, model provider, and model metadata to protected tool evidence while keeping agent identity and authority selection independent.
 
 ### Hardened
 - Cloud organization and API-key credentials are transmitted only as request headers and are excluded from preservation packages and saved local evidence.
 - Partial Cloud credential configuration now fails before an HTTP request is attempted.
+- Cloud authority responses are validated as compiled authority, matched to the requested identity, and cryptographically rehashed before Guard accepts them.
+- Agent tool arguments are excluded from evidence by default and must be explicitly selected for preservation.
+
+### Verified
+- `python -m pytest -q`: `205 passed`.
+- `python -m build`: built the source distribution and wheel successfully.
 
 ## [0.13.0] - Published Authority Consumption
 

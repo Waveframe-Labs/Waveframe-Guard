@@ -1,12 +1,18 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import threading
 from wsgiref.simple_server import make_server
 
+import pytest
 import requests
 
-from waveframe_guard.cloud import CloudPreservationClient
+from waveframe_guard.cloud import (
+    CloudAuthorityClient,
+    CloudAuthorityFetchError,
+    CloudPreservationClient,
+)
 
 
 def serve_preservation_app(state):
@@ -52,6 +58,41 @@ def _preservation_app(state):
         ]
 
     return app
+
+
+def serve_authority_app(state):
+    server = make_server("127.0.0.1", 0, _authority_app(state))
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    return server, f"http://127.0.0.1:{server.server_port}"
+
+
+def _authority_app(state):
+    def app(environ, start_response):
+        state["method"] = environ["REQUEST_METHOD"]
+        state["path"] = environ["PATH_INFO"]
+        state["organization_id"] = environ.get("HTTP_X_ORGANIZATION_ID")
+        state["api_key"] = environ.get("HTTP_X_API_KEY")
+        start_response(state.get("status", "200 OK"), [("Content-Type", "application/json")])
+        return [state.get("body", json.dumps(_compiled_authority()).encode("utf-8"))]
+
+    return app
+
+
+def _compiled_authority():
+    contract = {
+        "schema_version": "compiled_authority_contract.v1",
+        "contract_id": "repository-change-policy",
+        "contract_version": "1.0.0",
+        "authority_requirements": {"required_roles": ["repository-maintainer"]},
+        "approval_requirements": {},
+        "artifact_requirements": {},
+        "stage_requirements": {},
+        "invariants": {},
+    }
+    canonical = json.dumps(contract, sort_keys=True, separators=(",", ":"))
+    contract["contract_hash"] = f"sha256:{hashlib.sha256(canonical.encode('utf-8')).hexdigest()}"
+    return contract
 
 
 def test_cloud_preservation_client_posts_to_preserve_and_parses_receipt():
@@ -233,3 +274,67 @@ def test_cloud_preservation_client_rejects_wrongly_typed_required_receipt_fields
     assert result.status_code == 200
     assert result.error_type == "invalid_response"
     assert "receipt_id" in result.error
+
+
+def test_cloud_authority_client_fetches_exact_published_contract_with_runtime_headers():
+    state = {}
+    server, base_url = serve_authority_app(state)
+
+    try:
+        contract = CloudAuthorityClient(
+            base_url,
+            organization_id="waveframe-labs",
+            api_key="wf_runtime_secret",
+        ).fetch("repository-change-policy@1.0.0")
+    finally:
+        server.shutdown()
+        server.server_close()
+
+    assert contract == _compiled_authority()
+    assert state == {
+        "method": "GET",
+        "path": "/v1/contracts/repository-change-policy/1.0.0",
+        "organization_id": "waveframe-labs",
+        "api_key": "wf_runtime_secret",
+    }
+
+
+def test_cloud_authority_client_fails_closed_on_contract_hash_mismatch():
+    contract = _compiled_authority()
+    contract["authority_requirements"] = {"required_roles": ["attacker"]}
+    state = {"body": json.dumps(contract).encode("utf-8")}
+    server, base_url = serve_authority_app(state)
+
+    try:
+        with pytest.raises(CloudAuthorityFetchError, match="integrity check"):
+            CloudAuthorityClient(
+                base_url,
+                organization_id="waveframe-labs",
+                api_key="wf_runtime_secret",
+            ).fetch("repository-change-policy@1.0.0")
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
+def test_cloud_authority_client_redacts_runtime_secret_from_http_failures():
+    secret = "wf_runtime_secret"
+    state = {
+        "status": "403 Forbidden",
+        "body": f'{{"error":"rejected {secret}"}}'.encode("utf-8"),
+    }
+    server, base_url = serve_authority_app(state)
+
+    try:
+        with pytest.raises(CloudAuthorityFetchError) as exc_info:
+            CloudAuthorityClient(
+                base_url,
+                organization_id="waveframe-labs",
+                api_key=secret,
+            ).fetch("repository-change-policy@1.0.0")
+    finally:
+        server.shutdown()
+        server.server_close()
+
+    assert secret not in str(exc_info.value)
+    assert "[REDACTED]" in str(exc_info.value)

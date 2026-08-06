@@ -1,13 +1,99 @@
 from __future__ import annotations
 
+import hashlib
+import json
 from dataclasses import dataclass
 from typing import Any, Mapping, Optional
+from urllib.parse import quote
 
 import requests
+
+from guard.adapters.compiled_authority import (
+    CompiledAuthorityIntakeError,
+    intake_compiled_authority,
+)
+from waveframe_guard.authority.loader import parse_authority_ref
 
 
 DEFAULT_CLOUD_BASE_URL = "http://localhost:8000"
 DEFAULT_PRESERVATION_TIMEOUT_SECONDS = 2.0
+DEFAULT_AUTHORITY_TIMEOUT_SECONDS = 5.0
+
+
+class CloudAuthorityFetchError(RuntimeError):
+    """Raised when Guard cannot obtain a trustworthy authority from Cloud."""
+
+
+class CloudAuthorityClient:
+    """Fetch published authority contracts for local Guard enforcement."""
+
+    def __init__(
+        self,
+        base_url: str = DEFAULT_CLOUD_BASE_URL,
+        *,
+        organization_id: str,
+        api_key: str,
+        timeout_seconds: float = DEFAULT_AUTHORITY_TIMEOUT_SECONDS,
+    ):
+        self.base_url = base_url.rstrip("/")
+        self.organization_id = _required_credential("organization_id", organization_id)
+        self._api_key = _required_credential("api_key", api_key)
+        self.timeout_seconds = timeout_seconds
+
+    def fetch(self, authority_ref: str) -> dict[str, Any]:
+        contract_id, contract_version = parse_authority_ref(authority_ref)
+        url = (
+            f"{self.base_url}/v1/contracts/"
+            f"{quote(contract_id, safe='')}/{quote(contract_version, safe='')}"
+        )
+        try:
+            response = requests.get(
+                url,
+                headers={
+                    "X-Organization-ID": self.organization_id,
+                    "X-API-Key": self._api_key,
+                },
+                timeout=self.timeout_seconds,
+            )
+        except requests.Timeout as exc:
+            raise CloudAuthorityFetchError("Cloud authority request timed out") from exc
+        except requests.RequestException as exc:
+            message = _redact_secret(str(exc) or "Cloud authority request failed", self._api_key)
+            raise CloudAuthorityFetchError(message) from exc
+
+        if not 200 <= response.status_code < 300:
+            detail = _redact_secret(response.text, self._api_key)
+            raise CloudAuthorityFetchError(
+                f"Cloud authority request failed with HTTP {response.status_code}: {detail}"
+            )
+
+        try:
+            contract = response.json()
+        except ValueError as exc:
+            raise CloudAuthorityFetchError("Cloud authority response was not valid JSON") from exc
+        if not isinstance(contract, dict):
+            raise CloudAuthorityFetchError("Cloud authority response must be a JSON object")
+        try:
+            contract = intake_compiled_authority(contract)
+        except CompiledAuthorityIntakeError as exc:
+            raise CloudAuthorityFetchError(
+                f"Cloud authority response is not enforceable: {exc}"
+            ) from exc
+        if contract.get("contract_id") != contract_id:
+            raise CloudAuthorityFetchError(
+                "Cloud authority contract_id does not match the requested authority"
+            )
+        if contract.get("contract_version") != contract_version:
+            raise CloudAuthorityFetchError(
+                "Cloud authority contract_version does not match the requested authority"
+            )
+        expected_hash = _normalize_hash(contract["contract_hash"])
+        actual_hash = _normalize_hash(_contract_hash(contract))
+        if expected_hash != actual_hash:
+            raise CloudAuthorityFetchError(
+                "Cloud authority response failed its contract_hash integrity check"
+            )
+        return contract
 
 
 @dataclass(frozen=True)
@@ -183,6 +269,27 @@ def _optional_credential(name: str, value: str | None) -> str | None:
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"{name} must be a non-empty string when configured")
     return value
+
+
+def _required_credential(name: str, value: str) -> str:
+    normalized = _optional_credential(name, value)
+    if normalized is None:
+        raise ValueError(f"{name} is required")
+    return normalized
+
+
+def _contract_hash(contract: Mapping[str, Any]) -> str:
+    canonical_contract = {
+        key: value
+        for key, value in contract.items()
+        if key != "contract_hash"
+    }
+    canonical = json.dumps(canonical_contract, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def _normalize_hash(value: str) -> str:
+    return value if value.startswith("sha256:") else f"sha256:{value}"
 
 
 def _redact_secret(message: str, secret: str | None) -> str:
