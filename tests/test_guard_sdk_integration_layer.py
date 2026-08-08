@@ -27,6 +27,10 @@ from waveframe_guard.authority.adapters import MemoryAuthorityResolver
 from waveframe_guard.authority.cache import MemoryAuthorityCache
 from waveframe_guard.authority.loader import BundleLoader
 from waveframe_guard.authority.types import RegistryEntry
+from waveframe_guard.cloud import (
+    CloudRuntimeConnectionResult,
+    CloudRuntimeOperationResult,
+)
 
 
 EVALUATION_TIME = "2026-06-03T22:30:00+00:00"
@@ -77,6 +81,131 @@ def test_runtime_boundary_executes_callable_when_admissible():
     assert result["executed"] is True
     assert result["value"] == 501
     assert result["outcome"]["status"] == "admissible"
+
+
+def test_runtime_boundary_attests_success_after_callback_executes(tmp_path):
+    runtime_client = _RecordingRuntimeClient()
+    boundary = GuardRuntimeBoundary(
+        compiled_authority=_authority(),
+        actor_identity={"id": "manager-1", "type": "human", "role": "manager"},
+        approvals=[{"role": "manager", "approved_by": "manager-approval"}],
+        evaluation_time_source=lambda: EVALUATION_TIME,
+        store=LocalEvaluationStore(tmp_path / "guard-runs"),
+        cloud_runtime_client=runtime_client,
+    )
+
+    result = boundary.execute(
+        lambda amount: amount + 1,
+        execution_request=_request(amount=500),
+        args=(500,),
+    )
+
+    assert result["value"] == 501
+    assert result["cloud_runtime_attestation"]["ok"] is True
+    assert runtime_client.attestations == [
+        {
+            "event_id": result["evaluation"]["run_id"],
+            "compiled_contract_hash": "sha256:contract",
+            "runtime_decision": "ALLOWED",
+            "execution_status": "succeeded",
+            "execution_result_summary": "transfer callback completed exactly once.",
+            "mutation_executed": True,
+        }
+    ]
+
+
+def test_runtime_boundary_attests_block_without_executing_callback(tmp_path):
+    runtime_client = _RecordingRuntimeClient()
+    boundary = GuardRuntimeBoundary(
+        compiled_authority=_authority(),
+        actor_identity={"id": "employee-1", "type": "human", "role": "employee"},
+        evaluation_time_source=lambda: EVALUATION_TIME,
+        store=LocalEvaluationStore(tmp_path / "guard-runs"),
+        cloud_runtime_client=runtime_client,
+    )
+    calls = []
+
+    with pytest.raises(GuardExecutionBlocked) as exc:
+        boundary.execute(
+            lambda: calls.append("executed"),
+            execution_request=_request(amount=12500),
+        )
+
+    assert calls == []
+    assert exc.value.evaluation["cloud_runtime_attestation"]["ok"] is True
+    assert runtime_client.attestations[0]["runtime_decision"] == "BLOCKED"
+    assert runtime_client.attestations[0]["execution_status"] == "blocked"
+    assert runtime_client.attestations[0]["mutation_executed"] is False
+
+
+def test_runtime_boundary_attests_callback_failure_without_masking_exception(tmp_path):
+    runtime_client = _RecordingRuntimeClient()
+    boundary = GuardRuntimeBoundary(
+        compiled_authority=_authority(),
+        actor_identity={"id": "manager-1", "type": "human", "role": "manager"},
+        approvals=[{"role": "manager", "approved_by": "manager-approval"}],
+        evaluation_time_source=lambda: EVALUATION_TIME,
+        store=LocalEvaluationStore(tmp_path / "guard-runs"),
+        cloud_runtime_client=runtime_client,
+    )
+
+    def fail():
+        raise RuntimeError("private application detail")
+
+    with pytest.raises(RuntimeError, match="private application detail"):
+        boundary.execute(fail, execution_request=_request(amount=500))
+
+    assert runtime_client.attestations[0]["execution_status"] == "failed"
+    assert runtime_client.attestations[0]["mutation_executed"] is None
+    assert runtime_client.attestations[0]["execution_result_summary"] == (
+        "transfer callback raised RuntimeError."
+    )
+    assert "private application detail" not in json.dumps(runtime_client.attestations)
+
+
+def test_runtime_reporting_exception_does_not_change_allowed_execution(tmp_path):
+    calls = []
+    boundary = GuardRuntimeBoundary(
+        compiled_authority=_authority(),
+        actor_identity={"id": "manager-1", "type": "human", "role": "manager"},
+        approvals=[{"role": "manager", "approved_by": "manager-approval"}],
+        evaluation_time_source=lambda: EVALUATION_TIME,
+        store=LocalEvaluationStore(tmp_path / "guard-runs"),
+        cloud_runtime_client=_FailingRuntimeClient(),
+    )
+
+    result = boundary.execute(
+        lambda: calls.append("executed") or "done",
+        execution_request=_request(amount=500),
+    )
+
+    assert calls == ["executed"]
+    assert result["executed"] is True
+    assert result["value"] == "done"
+    assert result["cloud_runtime_attestation"] == {
+        "ok": False,
+        "response": None,
+        "status_code": None,
+        "error": "Cloud runtime attestation failed",
+        "error_type": "client_error",
+    }
+
+
+def test_runtime_reporting_exception_does_not_mask_callback_failure(tmp_path):
+    boundary = GuardRuntimeBoundary(
+        compiled_authority=_authority(),
+        actor_identity={"id": "manager-1", "type": "human", "role": "manager"},
+        approvals=[{"role": "manager", "approved_by": "manager-approval"}],
+        evaluation_time_source=lambda: EVALUATION_TIME,
+        store=LocalEvaluationStore(tmp_path / "guard-runs"),
+        cloud_runtime_client=_FailingRuntimeClient(),
+    )
+
+    def fail():
+        raise RuntimeError("original application failure")
+
+    with pytest.raises(RuntimeError, match="original application failure"):
+        boundary.execute(fail, execution_request=_request(amount=500))
 
 
 def test_decorator_flow_uses_supplied_normalized_request_builder():
@@ -228,6 +357,14 @@ def test_guard_cloud_fetches_authority_from_environment_without_repository_check
         return authority
 
     monkeypatch.setattr("guard.sdk.guard.CloudAuthorityClient.fetch", fetch)
+    monkeypatch.setattr(
+        "guard.sdk.guard.CloudRuntimeClient.connect",
+        lambda self: CloudRuntimeConnectionResult(
+            ok=True,
+            registration=CloudRuntimeOperationResult(ok=True),
+            heartbeat=CloudRuntimeOperationResult(ok=True),
+        ),
+    )
     monkeypatch.setenv("WAVEFRAME_CLOUD_URL", "https://cloud.waveframelabs.com")
     monkeypatch.setenv("WAVEFRAME_CLOUD_ORGANIZATION_ID", "acme")
     monkeypatch.setenv("WAVEFRAME_CLOUD_API_KEY", "wf_runtime_secret")
@@ -250,6 +387,28 @@ def test_guard_cloud_fetches_authority_from_environment_without_repository_check
     ]
     assert guard.preserve_to == "https://cloud.waveframelabs.com"
     assert guard.cloud_preservation_client.organization_id == "acme"
+    assert guard.cloud_runtime_client.runtime_id == "repo-agent"
+    assert guard.cloud_runtime_client.environment == "development"
+    assert guard.runtime_connection.ok is True
+
+
+def test_guard_cloud_requires_a_runtime_identity(tmp_path, monkeypatch):
+    fetches = []
+    monkeypatch.setattr(
+        "guard.sdk.guard.CloudAuthorityClient.fetch",
+        lambda self, authority_ref: fetches.append(authority_ref),
+    )
+
+    with pytest.raises(ValueError, match="requires runtime_id or actor_identity.id"):
+        Guard.cloud(
+            workspace=tmp_path / ".guard-local",
+            authority="finance-policy@1.0.0",
+            cloud_url="https://cloud.waveframelabs.com",
+            cloud_organization_id="acme",
+            cloud_api_key="wf_runtime_secret",
+        )
+
+    assert fetches == []
 
 
 def test_guard_cloud_fails_before_execution_when_authority_cannot_be_fetched(
@@ -268,6 +427,7 @@ def test_guard_cloud_fails_before_execution_when_authority_cannot_be_fetched(
             cloud_url="https://cloud.waveframelabs.com",
             cloud_organization_id="acme",
             cloud_api_key="wf_runtime_secret",
+            runtime_id="repo-agent",
         )
 
 
@@ -667,6 +827,24 @@ def _authority():
         "stage_requirements": {},
         "invariants": {},
     }
+
+
+class _RecordingRuntimeClient:
+    def __init__(self):
+        self.attestations = []
+
+    def attest(self, **payload):
+        self.attestations.append(payload)
+        return CloudRuntimeOperationResult(
+            ok=True,
+            response={"attestation_id": "attest-123"},
+            status_code=200,
+        )
+
+
+class _FailingRuntimeClient:
+    def attest(self, **payload):
+        raise RuntimeError("reporting transport failed")
 
 
 def _request(*, amount):

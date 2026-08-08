@@ -7,7 +7,7 @@ from typing import Any, Callable
 
 from guard.runtime import evaluate_runtime
 from guard.runtime.builders import validate_guard_enforcement_outcome
-from waveframe_guard.cloud import CloudPreservationClient
+from waveframe_guard.cloud import CloudPreservationClient, CloudRuntimeClient
 
 
 GUARD_CLOUD_PRESERVATION_PACKAGE_V1 = "guard_cloud_preservation_package.v1"
@@ -43,6 +43,7 @@ class GuardRuntimeBoundary:
         evaluation_time_source: Callable[[], str] | None = None,
         store: Any | None = None,
         cloud_preservation_client: CloudPreservationClient | None = None,
+        cloud_runtime_client: CloudRuntimeClient | None = None,
     ):
         self.compiled_authority = compiled_authority
         self.actor_identity = actor_identity
@@ -53,6 +54,7 @@ class GuardRuntimeBoundary:
         self.evaluation_time_source = evaluation_time_source or _utc_now
         self.store = store
         self.cloud_preservation_client = cloud_preservation_client
+        self.cloud_runtime_client = cloud_runtime_client
 
     def evaluate(
         self,
@@ -90,6 +92,7 @@ class GuardRuntimeBoundary:
                 },
                 evaluation=result,
             )
+            result["run_id"] = saved_record["run_id"]
             if self.cloud_preservation_client is not None:
                 replay_result = self.store.replay(saved_record["run_id"])
                 preservation_result = self.cloud_preservation_client.preserve(
@@ -130,6 +133,13 @@ class GuardRuntimeBoundary:
         try:
             evaluation = self.enforce(execution_request, **evaluation_kwargs)
         except GuardExecutionError as exc:
+            attestation = self._attest_execution_result(
+                exc.evaluation,
+                execution_request=execution_request,
+                executed=False,
+            )
+            if attestation is not None:
+                exc.evaluation["cloud_runtime_attestation"] = attestation
             if raise_on_block:
                 raise
             return {
@@ -138,16 +148,87 @@ class GuardRuntimeBoundary:
                 "evaluation": exc.evaluation,
                 "outcome": exc.outcome,
                 "cloud_preservation": exc.evaluation.get("cloud_preservation"),
+                "cloud_runtime_attestation": attestation,
             }
 
-        value = fn(*(args or ()), **(kwargs or {}))
+        try:
+            value = fn(*(args or ()), **(kwargs or {}))
+        except Exception as exc:
+            attestation = self._attest_execution_result(
+                evaluation,
+                execution_request=execution_request,
+                executed=None,
+                error=exc,
+            )
+            if attestation is not None:
+                evaluation["cloud_runtime_attestation"] = attestation
+            raise
+        attestation = self._attest_execution_result(
+            evaluation,
+            execution_request=execution_request,
+            executed=True,
+        )
+        if attestation is not None:
+            evaluation["cloud_runtime_attestation"] = attestation
         return {
             "executed": True,
             "value": value,
             "evaluation": evaluation,
             "outcome": evaluation["enforcement_outcome"],
             "cloud_preservation": evaluation.get("cloud_preservation"),
+            "cloud_runtime_attestation": attestation,
         }
+
+    def _attest_execution_result(
+        self,
+        evaluation: dict[str, Any],
+        *,
+        execution_request: dict[str, Any],
+        executed: bool | None,
+        error: Exception | None = None,
+    ) -> dict[str, Any] | None:
+        if self.cloud_runtime_client is None:
+            return None
+        event_id = evaluation.get("run_id")
+        if not isinstance(event_id, str) or not event_id:
+            return None
+
+        action = str(execution_request.get("action") or "protected callback")
+        status = evaluation["status"]
+        if error is not None:
+            runtime_decision = "ALLOWED"
+            execution_status = "failed"
+            mutation_executed = None
+            summary = f"{action} callback raised {type(error).__name__}."
+        elif executed:
+            runtime_decision = "ALLOWED"
+            execution_status = "succeeded"
+            mutation_executed = True
+            summary = f"{action} callback completed exactly once."
+        else:
+            runtime_decision = "BLOCKED" if status == "blocked" else "ESCALATED"
+            execution_status = "blocked" if status == "blocked" else "not_executed"
+            mutation_executed = False
+            summary = f"{action} callback did not run."
+
+        try:
+            result = self.cloud_runtime_client.attest(
+                event_id=event_id,
+                compiled_contract_hash=self.compiled_authority["contract_hash"],
+                runtime_decision=runtime_decision,
+                execution_status=execution_status,
+                execution_result_summary=summary,
+                mutation_executed=mutation_executed,
+            )
+        except Exception:
+            return {
+                "ok": False,
+                "response": None,
+                "status_code": None,
+                "error": "Cloud runtime attestation failed",
+                "error_type": "client_error",
+            }
+        return asdict(result)
 
     def decorator(
         self,
