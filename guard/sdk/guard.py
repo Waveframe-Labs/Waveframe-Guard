@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 from functools import wraps
+from importlib.metadata import PackageNotFoundError, version
 from inspect import BoundArguments, signature
 from pathlib import Path
 from typing import Any, Callable
@@ -9,7 +10,11 @@ from uuid import uuid4
 
 from guard.adapters import NORMALIZED_EXECUTION_REQUEST_V1
 from waveframe_guard.authority import AuthorityCache, AuthorityResolver
-from waveframe_guard.cloud import CloudAuthorityClient, CloudPreservationClient
+from waveframe_guard.cloud import (
+    CloudAuthorityClient,
+    CloudPreservationClient,
+    CloudRuntimeClient,
+)
 
 from .authority_source import AuthoritySource
 from .execution import GuardRuntimeBoundary
@@ -38,6 +43,7 @@ class Guard:
         preserve_to: str | None = None,
         cloud_organization_id: str | None = None,
         cloud_api_key: str | None = None,
+        cloud_runtime_client: CloudRuntimeClient | None = None,
     ):
         self.workspace = Path(workspace)
         self.store = LocalEvaluationStore(self.workspace)
@@ -71,6 +77,8 @@ class Guard:
             if preserve_to is not None
             else None
         )
+        self.cloud_runtime_client = cloud_runtime_client
+        self.runtime_connection = None
 
     @classmethod
     def local(
@@ -127,6 +135,8 @@ class Guard:
         replay_posture: dict[str, Any] | None = None,
         execution_context: dict[str, Any] | None = None,
         evaluation_time_source: Callable[[], str] | None = None,
+        runtime_id: str | None = None,
+        environment: str | None = None,
     ) -> "Guard":
         """Connect Guard to hosted Cloud without a repository checkout.
 
@@ -144,15 +154,34 @@ class Guard:
             cloud_api_key,
             "WAVEFRAME_CLOUD_API_KEY",
         )
+        resolved_runtime_id = runtime_id or (actor_identity or {}).get("id")
+        if not isinstance(resolved_runtime_id, str) or not resolved_runtime_id.strip():
+            raise ValueError(
+                "Guard.cloud() requires runtime_id or actor_identity.id so Cloud can identify the runtime"
+            )
+        resolved_environment = _cloud_setting(
+            environment,
+            "WAVEFRAME_RUNTIME_ENVIRONMENT",
+        ) or "development"
         authority_client = CloudAuthorityClient(
             resolved_url,
             organization_id=resolved_organization_id,
             api_key=resolved_api_key,
         )
-        return cls(
+        compiled_authority = authority_client.fetch(authority)
+        runtime_client = CloudRuntimeClient(
+            resolved_url,
+            organization_id=resolved_organization_id,
+            api_key=resolved_api_key,
+            runtime_id=resolved_runtime_id,
+            environment=resolved_environment,
+            authority_ref=authority,
+            runtime_version=f"guard-{_guard_version()}",
+        )
+        guard = cls(
             workspace=workspace,
             authority=authority,
-            authority_loader=authority_client.fetch,
+            authority_loader=lambda requested_ref: compiled_authority,
             actor_identity=actor_identity,
             approvals=approvals,
             continuity_state=continuity_state,
@@ -162,7 +191,17 @@ class Guard:
             preserve_to=resolved_url,
             cloud_organization_id=resolved_organization_id,
             cloud_api_key=resolved_api_key,
+            cloud_runtime_client=runtime_client,
         )
+        guard.runtime_connection = runtime_client.connect()
+        return guard
+
+    def heartbeat(self):
+        """Report that this Guard runtime remains online without affecting enforcement."""
+
+        if self.cloud_runtime_client is None:
+            return None
+        return self.cloud_runtime_client.heartbeat()
 
     def protect(
         self,
@@ -293,6 +332,7 @@ class Guard:
             evaluation_time_source=self.evaluation_time_source,
             store=self.store,
             cloud_preservation_client=self.cloud_preservation_client,
+            cloud_runtime_client=self.cloud_runtime_client,
         )
 
     def resolve_authority(self, authority: str) -> dict[str, Any]:
@@ -318,6 +358,13 @@ def _required_cloud_setting(explicit: str | None, environment_name: str) -> str:
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"Missing Cloud setting; pass it explicitly or set {environment_name}")
     return value
+
+
+def _guard_version() -> str:
+    try:
+        return version("waveframe-guard")
+    except PackageNotFoundError:
+        return "0.13.0"
 
 
 def _normalized_request_from_call(args: tuple[Any, ...], kwargs: dict[str, Any]) -> dict[str, Any]:

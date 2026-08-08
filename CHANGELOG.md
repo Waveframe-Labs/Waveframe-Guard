@@ -7,16 +7,24 @@
 - Added provider-neutral `Guard.tool(...)` wrappers for protecting existing agent tool functions without requiring Guard-shaped model output or an Ollama dependency.
 - Added `Guard.cloud(authority=...)` for fetching a published, versioned authority from hosted Cloud and preserving evidence without a Waveframe repository checkout.
 - Added optional agent framework, model provider, and model metadata to protected tool evidence while keeping agent identity and authority selection independent.
+- Added hosted runtime registration, initial and on-demand heartbeats, and post-execution result attestations to the provider-neutral `Guard.cloud(...)` path.
 
 ### Hardened
 - Cloud organization and API-key credentials are transmitted only as request headers and are excluded from preservation packages and saved local evidence.
 - Partial Cloud credential configuration now fails before an HTTP request is attempted.
 - Cloud authority responses are validated as compiled authority, matched to the requested identity, and cryptographically rehashed before Guard accepts them.
 - Agent tool arguments are excluded from evidence by default and must be explicitly selected for preservation.
+- Runtime lifecycle and result reporting are observational: Cloud failures cannot alter local admissibility, execute a blocked callback, run an allowed callback twice, or mask an application exception.
+- Callback failure attestations record only the exception type and never transmit application exception text.
+
+### Compatibility
+- Hosted runtime credentials must be authorized to read the canonical `compiled_authority_contract.v1` selected by `authority`; Guard does not evaluate Cloud's separate governance-compatibility projection as policy.
+- Declared Python support now starts at 3.10, matching the pinned Ledger 0.5.0 compatibility dependency used by Guard's release test environment.
 
 ### Verified
-- `python -m pytest -q`: `205 passed`.
+- `python -m pytest -q`: `215 passed` in the dependency-complete Python 3.12 environment.
 - `python -m build`: built the source distribution and wheel successfully.
+- Wheel metadata reports `Requires-Python: >=3.10`.
 
 ## [0.13.0] - Published Authority Consumption
 

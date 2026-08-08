@@ -3,8 +3,10 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from typing import Any, Mapping, Optional
 from urllib.parse import quote
+from uuid import uuid4
 
 import requests
 
@@ -18,6 +20,7 @@ from waveframe_guard.authority.loader import parse_authority_ref
 DEFAULT_CLOUD_BASE_URL = "http://localhost:8000"
 DEFAULT_PRESERVATION_TIMEOUT_SECONDS = 2.0
 DEFAULT_AUTHORITY_TIMEOUT_SECONDS = 5.0
+DEFAULT_RUNTIME_TIMEOUT_SECONDS = 5.0
 
 
 class CloudAuthorityFetchError(RuntimeError):
@@ -227,6 +230,184 @@ class CloudPreservationClient:
             sha256=required_fields["sha256"],
             timestamp=required_fields["timestamp"],
             receipt=receipt,
+            response=parsed,
+            status_code=response.status_code,
+        )
+
+
+@dataclass(frozen=True)
+class CloudRuntimeOperationResult:
+    ok: bool
+    response: Optional[Mapping[str, Any]] = None
+    status_code: Optional[int] = None
+    error: Optional[str] = None
+    error_type: Optional[str] = None
+
+
+@dataclass(frozen=True)
+class CloudRuntimeConnectionResult:
+    ok: bool
+    registration: CloudRuntimeOperationResult
+    heartbeat: Optional[CloudRuntimeOperationResult] = None
+
+
+class CloudRuntimeClient:
+    """Report Guard runtime lifecycle and execution results to Cloud.
+
+    These calls are observational. A Cloud reporting failure must never change
+    Guard's local admissibility decision or whether a protected callback runs.
+    """
+
+    def __init__(
+        self,
+        base_url: str = DEFAULT_CLOUD_BASE_URL,
+        *,
+        organization_id: str,
+        api_key: str,
+        runtime_id: str,
+        environment: str,
+        authority_ref: str,
+        runtime_version: str,
+        timeout_seconds: float = DEFAULT_RUNTIME_TIMEOUT_SECONDS,
+    ):
+        self.base_url = base_url.rstrip("/")
+        self.organization_id = _required_credential("organization_id", organization_id)
+        self._api_key = _required_credential("api_key", api_key)
+        self.runtime_id = _required_credential("runtime_id", runtime_id)
+        self.environment = _required_credential("environment", environment)
+        self.authority_ref = _required_credential("authority_ref", authority_ref)
+        self.runtime_version = _required_credential("runtime_version", runtime_version)
+        self.timeout_seconds = timeout_seconds
+
+    def connect(self) -> CloudRuntimeConnectionResult:
+        registration = self.register()
+        if not registration.ok:
+            return CloudRuntimeConnectionResult(ok=False, registration=registration)
+        heartbeat = self.heartbeat()
+        return CloudRuntimeConnectionResult(
+            ok=heartbeat.ok,
+            registration=registration,
+            heartbeat=heartbeat,
+        )
+
+    def register(self) -> CloudRuntimeOperationResult:
+        return self._post(
+            "/v1/runtimes/register",
+            {
+                "runtime_id": self.runtime_id,
+                "runtime_version": self.runtime_version,
+                "status": "registered",
+                "environment": self.environment,
+                "environment_id": self.environment,
+                "capabilities": [
+                    "agent_tool_boundary",
+                    "local_admissibility",
+                    "cloud_evidence_preservation",
+                    "runtime_result_attestation",
+                ],
+                "authority_refs": [self.authority_ref],
+            },
+        )
+
+    def heartbeat(self) -> CloudRuntimeOperationResult:
+        return self._post(
+            f"/v1/runtimes/{quote(self.runtime_id, safe='')}/heartbeats",
+            {
+                "schema_version": "cloud_runtime_heartbeat.v1",
+                "heartbeat_id": f"heartbeat-{self.runtime_id}-{uuid4().hex}",
+                "runtime_id": self.runtime_id,
+                "observed_at": datetime.now(timezone.utc).isoformat(),
+                "status": "online",
+                "surface": "guard_sdk",
+                "environment": self.environment,
+                "environment_id": self.environment,
+                "authority_refs": [self.authority_ref],
+            },
+        )
+
+    def attest(
+        self,
+        *,
+        event_id: str,
+        compiled_contract_hash: str,
+        runtime_decision: str,
+        execution_status: str,
+        execution_result_summary: str,
+        mutation_executed: bool | None = None,
+    ) -> CloudRuntimeOperationResult:
+        payload: dict[str, Any] = {
+            "schema_version": "runtime_execution_attestation.v1",
+            "event_id": event_id,
+            "runtime_id": self.runtime_id,
+            "authority_ref": self.authority_ref,
+            "compiled_contract_hash": compiled_contract_hash,
+            "runtime_decision": runtime_decision,
+            "execution_status": execution_status,
+            "execution_result_summary": execution_result_summary[:500],
+        }
+        if mutation_executed is not None:
+            payload["mutation_executed"] = mutation_executed
+        return self._post("/v1/runtime/attestations", payload)
+
+    def _post(
+        self,
+        path: str,
+        payload: Mapping[str, Any],
+    ) -> CloudRuntimeOperationResult:
+        try:
+            response = requests.post(
+                f"{self.base_url}{path}",
+                json=dict(payload),
+                headers={
+                    "X-Organization-ID": self.organization_id,
+                    "X-API-Key": self._api_key,
+                },
+                timeout=self.timeout_seconds,
+            )
+        except requests.Timeout as exc:
+            return CloudRuntimeOperationResult(
+                ok=False,
+                error=_redact_secret(
+                    str(exc) or "Cloud runtime request timed out",
+                    self._api_key,
+                ),
+                error_type="timeout",
+            )
+        except requests.RequestException as exc:
+            return CloudRuntimeOperationResult(
+                ok=False,
+                error=_redact_secret(
+                    str(exc) or "Cloud runtime request failed",
+                    self._api_key,
+                ),
+                error_type="request_error",
+            )
+
+        if not 200 <= response.status_code < 300:
+            return CloudRuntimeOperationResult(
+                ok=False,
+                status_code=response.status_code,
+                error=_redact_secret(response.text, self._api_key),
+                error_type="http_error",
+            )
+        try:
+            parsed = response.json()
+        except ValueError as exc:
+            return CloudRuntimeOperationResult(
+                ok=False,
+                status_code=response.status_code,
+                error=str(exc) or "Cloud runtime response was not valid JSON",
+                error_type="invalid_json",
+            )
+        if not isinstance(parsed, Mapping):
+            return CloudRuntimeOperationResult(
+                ok=False,
+                status_code=response.status_code,
+                error="Cloud runtime response must be a JSON object",
+                error_type="invalid_response",
+            )
+        return CloudRuntimeOperationResult(
+            ok=True,
             response=parsed,
             status_code=response.status_code,
         )

@@ -3,6 +3,9 @@ from .client import (
     CloudAuthorityFetchError,
     CloudPreservationClient,
     CloudPreservationResult,
+    CloudRuntimeClient,
+    CloudRuntimeConnectionResult,
+    CloudRuntimeOperationResult,
 )
 
 __all__ = [
@@ -10,4 +13,7 @@ __all__ = [
     "CloudAuthorityFetchError",
     "CloudPreservationClient",
     "CloudPreservationResult",
+    "CloudRuntimeClient",
+    "CloudRuntimeConnectionResult",
+    "CloudRuntimeOperationResult",
 ]

@@ -44,6 +44,7 @@ from waveframe_guard import Guard
 
 guard = Guard.cloud(
     authority="repository-change-policy@1.0.0",
+    environment="production",
     actor_identity={
         "id": "release-agent",
         "type": "agent",
@@ -73,8 +74,16 @@ The three choices are intentionally independent:
 
 `Guard.cloud(...)` fetches the published compiled authority from Cloud, verifies
 its identity and hash, and fails closed if it cannot obtain a trustworthy
-contract. Guard still evaluates locally before calling the wrapped function.
-Afterward, it submits the decision and execution evidence to Cloud.
+contract. It uses `runtime_id=` when provided and otherwise uses
+`actor_identity["id"]` as the runtime identity. Guard registers that runtime,
+sends its first heartbeat, and exposes the observational result as
+`guard.runtime_connection`. Guard still evaluates locally before calling the
+wrapped function. Afterward, it preserves the decision and attests whether the
+wrapped callback executed, failed, or did not run.
+
+Long-running processes may call `guard.heartbeat()` from their existing health
+loop. Cloud reporting failures are returned as structured status and never
+change Guard's local decision or cause an allowed callback to run twice.
 
 Tool arguments are excluded from preserved evidence by default. Add only safe,
 decision-relevant names to `include_arguments`; prompts, tokens, file contents,
