@@ -29,15 +29,53 @@ tool that can cause a real-world change.
 
 ## Hosted quickstart
 
-Configure the runtime credential created in Waveframe Console:
+Start in an empty directory. No Ollama installation or Waveframe repository
+checkout is involved:
+
+```powershell
+mkdir guard-quickstart
+cd guard-quickstart
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install waveframe-guard
+Invoke-WebRequest https://raw.githubusercontent.com/Waveframe-Labs/Waveframe-Guard/main/examples/external_agent_quickstart.py -OutFile quickstart.py
+```
+
+The example expects an active published authority that allows a 500-unit
+`allocate_budget` action for the configured actor role and requires missing
+approval evidence at 10,000 units or above. Configure the runtime credential,
+runtime identity, actor identity, and exact authority reference:
 
 ```powershell
 $env:WAVEFRAME_CLOUD_URL="https://cloud.waveframelabs.com"
 $env:WAVEFRAME_CLOUD_ORGANIZATION_ID="acme"
 $env:WAVEFRAME_CLOUD_API_KEY="<runtime credential>"
+$env:WAVEFRAME_RUNTIME_ID="budget-agent-runtime"
+$env:WAVEFRAME_RUNTIME_ENVIRONMENT="development"
+$env:WAVEFRAME_ACTOR_ID="budget-agent"
+$env:WAVEFRAME_ACTOR_ROLE="allocator"
+$env:WAVEFRAME_AUTHORITY_REF="budget-quickstart@1.0.0"
+python quickstart.py
 ```
 
-Then wrap an existing agent tool:
+Expected terminal proof:
+
+```text
+runtime_id=budget-agent-runtime
+actor_id=budget-agent
+authority_ref=budget-quickstart@1.0.0
+allowed_decision=allowed
+blocked_decision=blocked
+mutation_count=1
+exactly_once=True
+```
+
+The allowed callback mutates once. The blocked callback never runs. Open
+Console Activity or Executions to verify both decisions under the same runtime,
+actor, and bound authority.
+
+The integration inside the quickstart is the same wrapper used around an
+existing agent tool:
 
 ```python
 from waveframe_guard import Guard
@@ -53,17 +91,13 @@ guard = Guard.cloud(
 )
 
 @guard.tool(
-    action="write_file",
-    target="path",
-    include_arguments=("mode",),
-    agent={
-        "framework": "langgraph",       # or custom, crewai, etc.
-        "model_provider": "openai",     # or anthropic, ollama, etc.
-        "model": "gpt-5",
-    },
+    action="allocate_budget",
+    target="account_id",
+    include_arguments=("amount",),
+    agent={"framework": "custom-python"},
 )
-def write_file(path: str, content: str, mode: str = "replace"):
-    return your_existing_write_file(path, content, mode=mode)
+def allocate_budget(account_id: str, amount: int):
+    return your_existing_mutation(account_id, amount)
 ```
 
 The three choices are intentionally independent:
@@ -88,6 +122,11 @@ change Guard's local decision or cause an allowed callback to run twice.
 Tool arguments are excluded from preserved evidence by default. Add only safe,
 decision-relevant names to `include_arguments`; prompts, tokens, file contents,
 and other sensitive values should remain excluded.
+
+By default, an allowed tool returns the wrapped function's original value and a
+blocked tool raises, which fits normal agent framework tool registration. Set
+`return_result=True` with `raise_on_block=False` when an integration needs the
+same structured Guard envelope for both decisions.
 
 ## Works with existing agents
 
