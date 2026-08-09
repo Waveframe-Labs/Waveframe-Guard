@@ -261,12 +261,16 @@ class Guard:
         replay_posture: dict[str, Any] | None = None,
         execution_context: dict[str, Any] | None = None,
         raise_on_block: bool = True,
+        return_result: bool = False,
     ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
         """Protect an existing agent tool without requiring Guard-shaped arguments.
 
         ``target`` may name one function argument or be a callable receiving the
         original tool arguments. Function arguments are excluded from preserved
-        evidence unless explicitly named by ``include_arguments``.
+        evidence unless explicitly named by ``include_arguments``. Set
+        ``return_result`` to receive Guard's structured execution envelope for
+        both allowed and blocked calls; the default preserves the wrapped tool's
+        original return value when execution is allowed.
         """
 
         def decorate(fn: Callable[..., Any]) -> Callable[..., Any]:
@@ -306,6 +310,8 @@ class Guard:
                     kwargs=kwargs,
                     raise_on_block=raise_on_block,
                 )
+                if return_result:
+                    return result
                 return result["value"] if result["executed"] else result
 
             return wrapped

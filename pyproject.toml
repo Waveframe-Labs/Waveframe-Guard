@@ -26,6 +26,9 @@ dependencies = [
     "requests",
 ]
 
+[project.scripts]
+waveframe-guard-external-agent = "waveframe_guard.quickstarts.external_agent:main"
+
 [project.optional-dependencies]
 test = [
     "build",
