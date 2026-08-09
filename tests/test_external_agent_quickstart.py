@@ -15,7 +15,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import subprocess
+import sys
 import threading
+from pathlib import Path
 from wsgiref.simple_server import make_server
 
 import pytest
@@ -26,6 +30,7 @@ from waveframe_guard.quickstarts.external_agent import (
     run_quickstart,
 )
 from guard.sdk import Guard
+from tools.acceptance.external_agent_clean_machine import _run
 
 
 def test_external_agent_quickstart_allows_blocks_and_mutates_exactly_once(tmp_path, capsys):
@@ -81,6 +86,118 @@ def test_external_agent_quickstart_requires_explicit_customer_configuration(monk
 
     with pytest.raises(RuntimeError, match="WAVEFRAME_CLOUD_URL"):
         QuickstartSettings.from_environment()
+
+
+def test_external_agent_quickstart_reports_actionable_incompatible_authority_diagnostics(
+    tmp_path,
+):
+    settings = QuickstartSettings(
+        cloud_url="https://cloud.waveframelabs.com",
+        organization_id="acme",
+        api_key="wf_runtime_secret",
+        runtime_id="budget-agent-runtime",
+        environment="development",
+        actor_id="budget-agent",
+        actor_role="allocator",
+        authority_ref="repository-change-policy@1.0.0",
+    )
+    guard = Guard.local(
+        workspace=tmp_path / ".guard-local",
+        authorities={settings.authority_ref: _repository_change_authority()},
+        actor_identity={
+            "id": settings.actor_id,
+            "type": "agent",
+            "role": settings.actor_role,
+        },
+    )
+
+    with pytest.raises(RuntimeError) as exc_info:
+        run_quickstart(guard, settings)
+
+    message = str(exc_info.value)
+    assert "expected decision: allowed" in message
+    assert "observed execution_state: blocked" in message
+    assert "Guard rationale: actor role is not authorized by compiled authority" in message
+    assert "violated constraints:" in message
+    assert "repository-maintainer" in message
+    assert "required evidence: []" in message
+
+
+def test_external_agent_module_invocation_has_no_runpy_warning():
+    environment = os.environ.copy()
+    for name in (
+        "WAVEFRAME_CLOUD_URL",
+        "WAVEFRAME_CLOUD_ORGANIZATION_ID",
+        "WAVEFRAME_CLOUD_API_KEY",
+        "WAVEFRAME_RUNTIME_ID",
+        "WAVEFRAME_ACTOR_ID",
+        "WAVEFRAME_ACTOR_ROLE",
+        "WAVEFRAME_AUTHORITY_REF",
+    ):
+        environment.pop(name, None)
+
+    completed = subprocess.run(
+        [sys.executable, "-m", "waveframe_guard.quickstarts.external_agent"],
+        cwd=Path(__file__).resolve().parents[1],
+        env=environment,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert completed.returncode != 0
+    assert "RuntimeWarning" not in completed.stderr
+    assert "Missing required environment variable: WAVEFRAME_CLOUD_URL" in completed.stderr
+
+
+def test_quickstart_package_exports_are_lazy_and_preserved():
+    code = """
+import sys
+import waveframe_guard.quickstarts as quickstarts
+
+assert "waveframe_guard.quickstarts.external_agent" not in sys.modules
+assert quickstarts.__all__ == [
+    "QuickstartSettings",
+    "build_guard",
+    "main",
+    "run_quickstart",
+]
+assert quickstarts.QuickstartSettings.__name__ == "QuickstartSettings"
+assert "waveframe_guard.quickstarts.external_agent" in sys.modules
+assert callable(quickstarts.build_guard)
+assert callable(quickstarts.main)
+assert callable(quickstarts.run_quickstart)
+"""
+    completed = subprocess.run(
+        [sys.executable, "-c", code],
+        cwd=Path(__file__).resolve().parents[1],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+
+
+def test_acceptance_runner_surfaces_captured_child_output(tmp_path, capsys):
+    command = [
+        sys.executable,
+        "-c",
+        (
+            "import sys; "
+            "print('captured child stdout'); "
+            "print('captured child stderr', file=sys.stderr); "
+            "raise SystemExit(7)"
+        ),
+    ]
+
+    with pytest.raises(SystemExit) as exc_info:
+        _run(command, cwd=tmp_path, capture_output=True)
+
+    captured = capsys.readouterr()
+    assert exc_info.value.code == 7
+    assert "captured child stdout" in captured.out
+    assert "captured child stderr" in captured.err
 
 
 def test_external_agent_quickstart_reports_both_decisions_and_identities_to_cloud(
@@ -168,6 +285,22 @@ def _threshold_authority():
                 }
             ]
         },
+        "artifact_requirements": {},
+        "stage_requirements": {},
+        "invariants": {},
+    }
+    canonical = json.dumps(authority, sort_keys=True, separators=(",", ":"))
+    authority["contract_hash"] = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+    return authority
+
+
+def _repository_change_authority():
+    authority = {
+        "schema_version": "compiled_authority_contract.v1",
+        "contract_id": "repository-change-policy",
+        "contract_version": "1.0.0",
+        "authority_requirements": {"required_roles": ["repository-maintainer"]},
+        "approval_requirements": {},
         "artifact_requirements": {},
         "stage_requirements": {},
         "invariants": {},
