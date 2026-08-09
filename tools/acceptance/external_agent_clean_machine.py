@@ -89,13 +89,19 @@ def _run(
     cwd: Path,
     capture_output: bool = False,
 ) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
+    completed = subprocess.run(
         command,
         cwd=cwd,
-        check=True,
+        check=False,
         text=True,
         capture_output=capture_output,
     )
+    if completed.returncode != 0:
+        if capture_output:
+            print(completed.stdout, end="")
+            print(completed.stderr, end="", file=sys.stderr)
+        raise SystemExit(completed.returncode)
+    return completed
 
 
 if __name__ == "__main__":

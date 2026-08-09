@@ -82,9 +82,21 @@ def run_quickstart(
     blocked = allocate_budget("quickstart-account", 12_500)
 
     if allowed["executed"] is not True:
-        raise RuntimeError("Quickstart authority did not allow the 500-unit action")
+        raise RuntimeError(
+            _unexpected_decision_message(
+                action="500-unit action",
+                expected="allowed",
+                result=allowed,
+            )
+        )
     if blocked["executed"] is not False:
-        raise RuntimeError("Quickstart authority did not block the 12,500-unit action")
+        raise RuntimeError(
+            _unexpected_decision_message(
+                action="12,500-unit action",
+                expected="blocked",
+                result=blocked,
+            )
+        )
     if mutations != [{"account_id": "quickstart-account", "amount": 500}]:
         raise RuntimeError("Exactly-once mutation assertion failed")
 
@@ -114,6 +126,23 @@ def _required_setting(name: str) -> str:
     if not isinstance(value, str) or not value.strip():
         raise RuntimeError(f"Missing required environment variable: {name}")
     return value
+
+
+def _unexpected_decision_message(
+    *,
+    action: str,
+    expected: str,
+    result: dict[str, Any],
+) -> str:
+    evaluation = result["evaluation"]
+    return (
+        f"Quickstart authority produced an unexpected decision for the {action}:\n"
+        f"expected decision: {expected}\n"
+        f"observed execution_state: {evaluation.get('execution_state')}\n"
+        f"Guard rationale: {evaluation.get('rationale')}\n"
+        f"violated constraints: {evaluation.get('violated_constraints')}\n"
+        f"required evidence: {evaluation.get('required_evidence')}"
+    )
 
 
 if __name__ == "__main__":
