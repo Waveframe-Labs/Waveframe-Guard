@@ -20,7 +20,7 @@ from wsgiref.simple_server import make_server
 
 import pytest
 
-from examples.external_agent_quickstart import (
+from waveframe_guard.quickstarts.external_agent import (
     QuickstartSettings,
     build_guard,
     run_quickstart,
