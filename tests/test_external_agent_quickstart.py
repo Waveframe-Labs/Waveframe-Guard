@@ -29,6 +29,11 @@ from waveframe_guard.quickstarts.external_agent import (
     build_guard,
     run_quickstart,
 )
+from waveframe_guard.cloud import (
+    CloudPreservationResult,
+    CloudRuntimeConnectionResult,
+    CloudRuntimeOperationResult,
+)
 from guard.sdk import Guard
 from tools.acceptance.external_agent_clean_machine import _run
 
@@ -53,6 +58,7 @@ def test_external_agent_quickstart_allows_blocks_and_mutates_exactly_once(tmp_pa
             "role": settings.actor_role,
         },
     )
+    preservation_client = _configure_successful_cloud_reporting(guard)
 
     summary = run_quickstart(guard, settings)
     output = capsys.readouterr().out
@@ -65,11 +71,106 @@ def test_external_agent_quickstart_allows_blocks_and_mutates_exactly_once(tmp_pa
         "blocked_decision": "blocked",
         "mutation_count": 1,
         "exactly_once": True,
+        "allowed_package_id": "pkg-1",
+        "allowed_receipt_id": "receipt-1",
+        "allowed_proof_sha256": "sha256:package-1",
+        "blocked_package_id": "pkg-2",
+        "blocked_receipt_id": "receipt-2",
+        "blocked_proof_sha256": "sha256:package-2",
     }
     assert "allowed_decision=allowed" in output
     assert "blocked_decision=blocked" in output
     assert "mutation_count=1" in output
+    assert "allowed_package_id=pkg-1" in output
+    assert "allowed_receipt_id=receipt-1" in output
+    assert "blocked_package_id=pkg-2" in output
+    assert "blocked_receipt_id=receipt-2" in output
     assert len(guard.store.history()) == 2
+    assert len(preservation_client.payloads) == 2
+
+
+def test_external_agent_quickstart_fails_on_allowed_preservation_and_redacts_secret(
+    tmp_path,
+):
+    settings, guard = _local_quickstart(tmp_path)
+    secret = settings.api_key
+    client = _configure_successful_cloud_reporting(
+        guard,
+        preservation_results=[
+            CloudPreservationResult(
+                ok=False,
+                status_code=400,
+                error=f'{{"error":"rejected {secret}"}}',
+                error_type="http_error",
+            ),
+            _preservation_success(2),
+        ],
+    )
+
+    with pytest.raises(RuntimeError) as exc_info:
+        run_quickstart(guard, settings)
+
+    message = str(exc_info.value)
+    assert "Cloud preservation failed for the allowed 500-unit action" in message
+    assert "HTTP status: 400" in message
+    assert "error_type: http_error" in message
+    assert 'Cloud error: {"error":"rejected [REDACTED]"}' in message
+    assert secret not in message
+    assert len(client.payloads) == 2
+    assert [record["evaluation"]["status"] for record in guard.store.history()] == [
+        "admissible",
+        "blocked",
+    ]
+
+
+def test_external_agent_quickstart_fails_on_blocked_preservation(tmp_path):
+    settings, guard = _local_quickstart(tmp_path)
+    client = _configure_successful_cloud_reporting(
+        guard,
+        preservation_results=[
+            _preservation_success(1),
+            CloudPreservationResult(
+                ok=False,
+                status_code=503,
+                error='{"error":"preservation unavailable"}',
+                error_type="http_error",
+            ),
+        ],
+    )
+
+    with pytest.raises(RuntimeError) as exc_info:
+        run_quickstart(guard, settings)
+
+    message = str(exc_info.value)
+    assert "Cloud preservation failed for the blocked 12,500-unit action" in message
+    assert "HTTP status: 503" in message
+    assert "error_type: http_error" in message
+    assert "preservation unavailable" in message
+    assert len(client.payloads) == 2
+
+
+def test_external_agent_quickstart_rejects_malformed_successful_preservation(tmp_path):
+    settings, guard = _local_quickstart(tmp_path)
+    _configure_successful_cloud_reporting(
+        guard,
+        preservation_results=[
+            CloudPreservationResult(
+                ok=True,
+                package_id="pkg-1",
+                status_code=201,
+                response={"package_id": "pkg-1"},
+            ),
+            _preservation_success(2),
+        ],
+    )
+
+    with pytest.raises(RuntimeError) as exc_info:
+        run_quickstart(guard, settings)
+
+    message = str(exc_info.value)
+    assert "HTTP status: 201" in message
+    assert "error_type: invalid_response" in message
+    assert "receipt_id, sha256, timestamp" in message
 
 
 def test_external_agent_quickstart_requires_explicit_customer_configuration(monkeypatch):
@@ -110,6 +211,7 @@ def test_external_agent_quickstart_reports_actionable_incompatible_authority_dia
             "role": settings.actor_role,
         },
     )
+    _configure_successful_cloud_reporting(guard)
 
     with pytest.raises(RuntimeError) as exc_info:
         run_quickstart(guard, settings)
@@ -227,12 +329,31 @@ def test_external_agent_quickstart_reports_both_decisions_and_identities_to_clou
 
     assert summary["allowed_decision"] == "allowed"
     assert summary["blocked_decision"] == "blocked"
+    assert summary["allowed_package_id"] == "pkg-1"
+    assert summary["allowed_receipt_id"] == "receipt-1"
+    assert summary["blocked_package_id"] == "pkg-2"
+    assert summary["blocked_receipt_id"] == "receipt-2"
     paths = [request["path"] for request in state["requests"]]
     assert paths.count("/v1/contracts/budget-quickstart/1.0.0") == 1
     assert paths.count("/v1/runtimes/register") == 1
     assert paths.count("/v1/runtimes/budget-agent-runtime/heartbeats") == 1
     assert paths.count("/v1/preserve") == 2
     assert paths.count("/v1/runtime/attestations") == 2
+
+    registration = next(
+        request["payload"]
+        for request in state["requests"]
+        if request["path"] == "/v1/runtimes/register"
+    )
+    heartbeat = next(
+        request["payload"]
+        for request in state["requests"]
+        if request["path"] == "/v1/runtimes/budget-agent-runtime/heartbeats"
+    )
+    assert registration["environment"] == "development"
+    assert registration["environment_id"] == "development"
+    assert heartbeat["environment"] == "development"
+    assert heartbeat["environment_id"] == "development"
 
     preserved = [
         request["payload"]
@@ -292,6 +413,82 @@ def _threshold_authority():
     canonical = json.dumps(authority, sort_keys=True, separators=(",", ":"))
     authority["contract_hash"] = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
     return authority
+
+
+def _local_quickstart(tmp_path):
+    settings = QuickstartSettings(
+        cloud_url="https://cloud.waveframelabs.com",
+        organization_id="acme",
+        api_key="wf_runtime_secret",
+        runtime_id="budget-agent-runtime",
+        environment="development",
+        actor_id="budget-agent",
+        actor_role="allocator",
+        authority_ref="budget-quickstart@1.0.0",
+    )
+    guard = Guard.local(
+        workspace=tmp_path / ".guard-local",
+        authorities={settings.authority_ref: _threshold_authority()},
+        actor_identity={
+            "id": settings.actor_id,
+            "type": "agent",
+            "role": settings.actor_role,
+        },
+    )
+    return settings, guard
+
+
+def _configure_successful_cloud_reporting(guard, preservation_results=None):
+    client = _SequencedPreservationClient(
+        preservation_results
+        or [_preservation_success(1), _preservation_success(2)]
+    )
+    guard.cloud_preservation_client = client
+    guard.cloud_runtime_client = _SuccessfulRuntimeClient()
+    registration = CloudRuntimeOperationResult(ok=True, response={"accepted": True}, status_code=201)
+    heartbeat = CloudRuntimeOperationResult(ok=True, response={"accepted": True}, status_code=202)
+    guard.runtime_connection = CloudRuntimeConnectionResult(
+        ok=True,
+        registration=registration,
+        heartbeat=heartbeat,
+    )
+    return client
+
+
+def _preservation_success(index):
+    return CloudPreservationResult(
+        ok=True,
+        package_id=f"pkg-{index}",
+        receipt_id=f"receipt-{index}",
+        sha256=f"sha256:package-{index}",
+        timestamp=f"2026-08-08T00:00:0{index}+00:00",
+        receipt={"receipt_id": f"receipt-{index}"},
+        response={"package_id": f"pkg-{index}"},
+        status_code=201,
+    )
+
+
+class _SequencedPreservationClient:
+    def __init__(self, results):
+        self.results = list(results)
+        self.payloads = []
+
+    def preserve(self, payload):
+        self.payloads.append(payload)
+        return self.results.pop(0)
+
+
+class _SuccessfulRuntimeClient:
+    def __init__(self):
+        self.attestations = []
+
+    def attest(self, **payload):
+        self.attestations.append(payload)
+        return CloudRuntimeOperationResult(
+            ok=True,
+            response={"attestation_id": f"attest-{len(self.attestations)}"},
+            status_code=201,
+        )
 
 
 def _repository_change_authority():

@@ -169,6 +169,7 @@ class CloudPreservationClient:
         if not 200 <= response.status_code < 300:
             return CloudPreservationResult(
                 ok=False,
+                response=_sanitized_response(response, self._api_key),
                 status_code=response.status_code,
                 error=_redact_secret(response.text, self._api_key),
                 error_type="http_error",
@@ -386,6 +387,7 @@ class CloudRuntimeClient:
         if not 200 <= response.status_code < 300:
             return CloudRuntimeOperationResult(
                 ok=False,
+                response=_sanitized_response(response, self._api_key),
                 status_code=response.status_code,
                 error=_redact_secret(response.text, self._api_key),
                 error_type="http_error",
@@ -477,3 +479,31 @@ def _redact_secret(message: str, secret: str | None) -> str:
     if secret:
         return message.replace(secret, "[REDACTED]")
     return message
+
+
+def _sanitized_response(response: Any, secret: str | None) -> Mapping[str, Any]:
+    try:
+        payload = response.json()
+    except ValueError:
+        return {"body": _redact_secret(response.text, secret)}
+    sanitized = _redact_response_value(payload, secret)
+    if isinstance(sanitized, Mapping):
+        return sanitized
+    return {"body": sanitized}
+
+
+def _redact_response_value(value: Any, secret: str | None) -> Any:
+    if isinstance(value, Mapping):
+        return {
+            str(key): (
+                "[REDACTED]"
+                if str(key).lower() in {"api_key", "secret", "token", "authorization"}
+                else _redact_response_value(item, secret)
+            )
+            for key, item in value.items()
+        }
+    if isinstance(value, (list, tuple)):
+        return [_redact_response_value(item, secret) for item in value]
+    if isinstance(value, str):
+        return _redact_secret(value, secret)
+    return value

@@ -115,5 +115,6 @@ def test_cloud_runtime_connect_does_not_heartbeat_after_registration_failure(mon
 
     assert result.ok is False
     assert result.registration.error_type == "http_error"
+    assert result.registration.response == {"status": "ok"}
     assert result.heartbeat is None
     assert len(calls) == 1

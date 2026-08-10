@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
@@ -76,11 +77,11 @@ class LocalEvaluationStore:
             "schema_version": SAVED_EVALUATION_V1,
             "run_id": receipt["run_id"],
             "recorded_at": receipt["recorded_at"],
-            "inputs": inputs,
-            "evaluation": evaluation,
-            "guard_enforcement_outcome": outcome,
-            "receipt": receipt,
-            "artifact_manifest": artifact_manifest,
+            "inputs": deepcopy(inputs),
+            "evaluation": deepcopy(evaluation),
+            "guard_enforcement_outcome": deepcopy(outcome),
+            "receipt": deepcopy(receipt),
+            "artifact_manifest": deepcopy(artifact_manifest),
         }
         record["record_hash"] = stable_hash(record)
         with self.history_path.open("a", encoding="utf-8") as history:
