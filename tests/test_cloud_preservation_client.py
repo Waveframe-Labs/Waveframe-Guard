@@ -185,6 +185,38 @@ def test_cloud_preservation_client_returns_http_failure_result():
     assert result.status_code == 503
     assert result.error_type == "http_error"
     assert "cloud offline" in result.error
+    assert result.response == {"error": "cloud offline"}
+
+
+def test_cloud_preservation_client_redacts_secret_from_http_failure_response():
+    secret = "wf_cloud_secret"
+    state = {
+        "status": "400 Bad Request",
+        "body": json.dumps(
+            {
+                "error": f"rejected {secret}",
+                "api_key": secret,
+            }
+        ).encode("utf-8"),
+    }
+    server, base_url = serve_preservation_app(state)
+
+    try:
+        result = CloudPreservationClient(
+            base_url,
+            organization_id="org-finance",
+            api_key=secret,
+        ).preserve({"event_id": "evt_123"})
+    finally:
+        server.shutdown()
+        server.server_close()
+
+    assert result.response == {
+        "error": "rejected [REDACTED]",
+        "api_key": "[REDACTED]",
+    }
+    assert secret not in result.error
+    assert secret not in json.dumps(result.response)
 
 
 def test_cloud_preservation_client_returns_timeout_failure_result(monkeypatch):

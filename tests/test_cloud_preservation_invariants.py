@@ -95,6 +95,9 @@ def test_successful_preservation_for_blocked_and_allowed_results(
         "replay_result",
     }
     assert state["payload"]["saved_evaluation"]["run_id"] == record["run_id"]
+    saved_evaluation = dict(state["payload"]["saved_evaluation"])
+    record_hash = saved_evaluation.pop("record_hash")
+    assert record_hash == stable_hash(saved_evaluation)
     assert state["payload"]["receipt"] == record["receipt"]
     assert state["payload"]["artifact_manifest"] == record["artifact_manifest"]
     assert state["payload"]["replay_result"]["matches"] is True
