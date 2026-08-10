@@ -3,7 +3,7 @@
 # filetype: "python"
 # type: "test"
 # domain: "guard-sdk"
-# version: "0.14.0-dev"
+# version: "0.14.0"
 # status: "Active"
 # author:
 #   name: "Waveframe Labs"
