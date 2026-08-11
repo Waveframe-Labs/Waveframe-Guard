@@ -1,50 +1,40 @@
-# Waveframe Guard v0.13.0 Release Notes
+# Waveframe Guard v0.14.0 Release Notes
 
-## Summary
+## External Agent Integration
 
-v0.13.0 teaches Guard to consume verified Published Authorities.
+Waveframe Guard v0.14.0 stabilizes the public, provider-neutral enforcement path for existing Python agent tools. Customers install the package, create `Guard.cloud(...)` with explicit runtime and actor identity plus a versioned authority reference, and wrap the function that can mutate real state with `Guard.tool(...)`.
 
-Applications can now start from a deterministic authority reference:
-
-```python
-guard = Guard.local(authority="finance-policy@1.0.0")
-```
-
-Guard resolves the current registry entry, verifies the Ledger `authority_bundle.v1`, extracts the compiled authority contract, and then passes that contract into the existing enforcement pipeline. CRI-CORE and Guard's local enforcement behavior remain unchanged.
+The integration does not require Ollama, a particular agent framework, or a Waveframe repository checkout. The customer's model and orchestration layer remain unchanged; Guard owns only the enforcement boundary immediately before execution.
 
 ## Highlights
 
-- Added canonical Published Authority loading through `load_authority("name@x.y.z")`.
-- Added `Guard.local(authority="name@x.y.z")` for SDK construction from a published authority reference.
-- Added local and memory authority resolvers behind a narrow `AuthorityResolver` boundary.
-- Added resolver dependency injection for tests and embedded applications.
-- Added `MemoryAuthorityCache`, keyed by immutable identity: `authority_ref + bundle_hash`.
-- Kept legacy `contract=...`, `authorities={...}`, and `authority_loader=...` paths available for compatibility.
+- Added the packaged external-agent quickstart and console entry point.
+- Added provider-neutral `Guard.tool(...)` wrappers for ordinary Python callables.
+- Added hosted authority resolution through `Guard.cloud(authority="name@x.y.z")`.
+- Added explicit Cloud URL, runtime credential, organization, runtime identity, environment, actor identity, and authority configuration.
+- Added runtime registration, heartbeat, and post-execution attestation.
+- Added preservation package, receipt, and proof identifiers to successful quickstart output.
+- Demonstrated one allowed action, one blocked action, and exactly one underlying mutation.
 
-## Trust Hardening
+## Acceptance Hardening
 
-- Verifies local registry `registry_hash` before trusting registry entries.
-- Requires explicit `name@x.y.z` authority references.
-- Requires canonical Ledger `authority_bundle.v1` structure.
-- Requires bundle-level `authority_ref`, `contract_hash`, and `authority_contract`.
-- Verifies registry, bundle, nested contract, and computed canonical contract hashes.
-- Rejects duplicate local registry identities.
-- Rejects ambiguous Guard authority-source inputs.
-- Revalidates current lifecycle state on authority-cache hits so revoked or superseded authority cannot stay loadable through cache reuse.
+The external-agent quickstart now treats Cloud integration as an acceptance contract. It succeeds only when runtime registration and heartbeat succeed, the allowed callback executes, the blocked callback does not execute, exactly one mutation occurs, both decisions are preserved with their required identifiers, and both execution attestations succeed.
 
-## Scope Boundary
+Failures report the affected action, sanitized HTTP status, error type, and Cloud error without exposing credentials. Guard's general Cloud behavior remains best effort; this strict contract applies only to the acceptance quickstart.
 
-This release does not change runtime admissibility semantics and does not move Cloud, Ledger, or registry layout concerns into the enforcement pipeline.
+Saved evaluations are detached from live result objects before hashing. This prevents later `run_id` decoration from mutating the preservation payload after its `record_hash` has been calculated.
 
-Resolver implementations decide where the authority is. The verifier decides whether the authority is trustworthy. The enforcement pipeline continues to consume a compiled authority contract.
+## Compatibility
+
+The authoritative release compatibility matrix is maintained in [`docs/getting-started/README.md`](docs/getting-started/README.md#release-compatibility-matrix). Waveframe Cloud 0.5.0 is the coordinated recommended release and remains marked as not yet published during this release-preparation phase.
 
 ## Verification
 
-- `python -m pytest`: `194 passed`.
-- `python -m build`: built `waveframe_guard-0.13.0.tar.gz` and `waveframe_guard-0.13.0-py3-none-any.whl`.
-- `twine check dist/waveframe_guard-0.13.0*`: source distribution and wheel pass.
-- Wheel metadata reports `Version: 0.13.0`.
-- Clean wheel-only installation succeeds.
-- Installed package reports `0.13.0`.
-- Published authority loads correctly from `authority_bundle.v1`.
-- Wheel smoke returns `executed=False`, `blocked`.
+- Focused external-agent and Cloud-client tests: `41 passed`.
+- Complete Guard suite: `226 passed`.
+- `python -m build`: built `waveframe_guard-0.14.0.tar.gz` and `waveframe_guard-0.14.0-py3-none-any.whl`.
+- `python -m twine check dist/*`: passed for both distributions.
+- Fresh wheel-only virtual environment outside the checkout: public and metadata versions `0.14.0`, imports resolved from the virtual environment, and no source-tree shadowing.
+- Clean-machine external-agent acceptance: all expected markers, two preservation requests, and two attestation requests.
+
+This is release preparation only. No tag, GitHub release, or PyPI publication is part of this change.

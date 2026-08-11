@@ -8,7 +8,7 @@ Stop unsafe AI and automated actions **before they execute**.
 
 Waveframe Guard is an execution-boundary SDK. It wraps sensitive actions, resolves compiled authority, evaluates through CRI-CORE, and only runs the action when the outcome is allowed.
 
-Current release: `0.13.0`.
+Current release: `0.14.0`.
 
 ```text
 Guard does not generate actions.
@@ -27,7 +27,38 @@ No Ollama installation or Waveframe repository checkout is required. Keep the
 customer's existing model, agent framework, and tool functions; Guard wraps the
 tool that can cause a real-world change.
 
-## Hosted quickstart
+## 30-second integration
+
+With the Cloud environment variables from the next section configured, wrap an
+existing Python function directly:
+
+```python
+import os
+from waveframe_guard import Guard
+
+guard = Guard.cloud(
+    authority=os.environ["WAVEFRAME_AUTHORITY_REF"],
+    runtime_id=os.environ["WAVEFRAME_RUNTIME_ID"],
+    environment=os.environ["WAVEFRAME_RUNTIME_ENVIRONMENT"],
+    actor_identity={
+        "id": os.environ["WAVEFRAME_ACTOR_ID"],
+        "type": "agent",
+        "role": os.environ["WAVEFRAME_ACTOR_ROLE"],
+    },
+)
+
+guarded_allocate = guard.tool(
+    action="allocate_budget",
+    target="account_id",
+    include_arguments=("amount",),
+)(your_existing_allocate_budget)
+```
+
+Call or register `guarded_allocate` wherever the original function was used.
+Guard evaluates immediately before the existing mutation and remains separate
+from model calls and agent orchestration.
+
+## Five-minute Cloud quickstart
 
 Start in an empty directory. No Ollama installation or Waveframe repository
 checkout is involved:
@@ -68,6 +99,12 @@ allowed_decision=allowed
 blocked_decision=blocked
 mutation_count=1
 exactly_once=True
+allowed_package_id=<Cloud package identifier>
+allowed_receipt_id=<Cloud receipt identifier>
+allowed_proof_sha256=<Cloud proof digest>
+blocked_package_id=<Cloud package identifier>
+blocked_receipt_id=<Cloud receipt identifier>
+blocked_proof_sha256=<Cloud proof digest>
 ```
 
 The allowed callback mutates once. The blocked callback never runs. Open
@@ -136,6 +173,17 @@ agent, LangGraph, CrewAI, an OpenAI tool loop, or another framework. Guard does
 not generate the tool call and does not require the model to emit Guard-specific
 JSON.
 
+A framework-neutral adapter only registers the already-guarded callable:
+
+```python
+guarded_tool = guard.tool(action="publish_release", target="repository")(publish_release)
+agent_tools.register(name="publish_release", callable=guarded_tool)
+```
+
+`agent_tools` represents the customer's existing registry. It may call the
+model and choose tools, but only `guarded_tool` can reach `publish_release`, so
+Guard remains the enforcement boundary rather than becoming the agent framework.
+
 The wrapper derives a normalized proposal from the real function call, asks
 Guard to evaluate it against the selected authority, and invokes the original
 function only when admissible. A blocked call never reaches the original
@@ -197,6 +245,8 @@ Ledger publishes authority
 ```
 
 Cloud can publish lifecycle metadata such as `active`, `superseded`, or `revoked`, but Cloud does not decide runtime admissibility. Guard evaluates locally against compiled authority.
+
+See the single authoritative [release compatibility matrix](docs/getting-started/README.md#release-compatibility-matrix) for minimum, recommended, and release-tested pairings.
 
 ## Local authority registry
 

@@ -2,12 +2,15 @@
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-08-09 - External Agent Integration
+
 ### Added
 - Added organization-scoped Cloud preservation credentials through explicit `Guard.local()` configuration or `WAVEFRAME_CLOUD_ORGANIZATION_ID` and `WAVEFRAME_CLOUD_API_KEY`.
 - Added provider-neutral `Guard.tool(...)` wrappers for protecting existing agent tool functions without requiring Guard-shaped model output or an Ollama dependency.
 - Added `Guard.cloud(authority=...)` for fetching a published, versioned authority from hosted Cloud and preserving evidence without a Waveframe repository checkout.
 - Added optional agent framework, model provider, and model metadata to protected tool evidence while keeping agent identity and authority selection independent.
 - Added hosted runtime registration, initial and on-demand heartbeats, and post-execution result attestations to the provider-neutral `Guard.cloud(...)` path.
+- Added a pip-installed external-agent quickstart that proves one allowed action, one blocked action, exactly one underlying mutation, two Cloud preservation receipts and proofs, and two runtime attestations without requiring Ollama, an agent framework, or a Waveframe checkout.
 
 ### Hardened
 - Cloud organization and API-key credentials are transmitted only as request headers and are excluded from preservation packages and saved local evidence.
@@ -16,15 +19,20 @@
 - Agent tool arguments are excluded from evidence by default and must be explicitly selected for preservation.
 - Runtime lifecycle and result reporting are observational: Cloud failures cannot alter local admissibility, execute a blocked callback, run an allowed callback twice, or mask an application exception.
 - Callback failure attestations record only the exception type and never transmit application exception text.
+- External-agent acceptance now fails with sanitized, action-specific HTTP status, error type, and Cloud response diagnostics unless runtime reporting, both preservation receipts/proofs, and both execution attestations succeed.
+- Saved evaluation records now deep-copy live inputs and evaluation data before hashing so later result decoration cannot invalidate the preservation package's `record_hash`.
 
 ### Compatibility
 - Hosted runtime credentials must be authorized to read the canonical `compiled_authority_contract.v1` selected by `authority`; Guard does not evaluate Cloud's separate governance-compatibility projection as policy.
 - Declared Python support now starts at 3.10, matching the pinned Ledger 0.5.0 compatibility dependency used by Guard's release test environment.
 
 ### Verified
-- `python -m pytest -q`: `215 passed` in the dependency-complete Python 3.12 environment.
-- `python -m build`: built the source distribution and wheel successfully.
-- Wheel metadata reports `Requires-Python: >=3.10`.
+- Focused external-agent and Cloud-client tests: `41 passed`.
+- `python -m pytest`: `226 passed` in the dependency-complete Python 3.14 environment.
+- `python -m build`: built `waveframe_guard-0.14.0.tar.gz` and `waveframe_guard-0.14.0-py3-none-any.whl`.
+- `python -m twine check dist/*`: source distribution and wheel passed.
+- Fresh wheel-only installation outside the repository reported public and package metadata version `0.14.0` with no source-tree import shadowing.
+- External-agent clean-machine acceptance passed all expected markers with two preservation and two attestation requests.
 
 ## [0.13.0] - Published Authority Consumption
 
