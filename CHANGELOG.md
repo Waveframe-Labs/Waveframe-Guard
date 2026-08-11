@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-## [0.14.0] - 2026-08-09 - External Agent Integration
+## [0.14.0] - 2026-08-10 - External Agent Integration
 
 ### Added
 - Added organization-scoped Cloud preservation credentials through explicit `Guard.local()` configuration or `WAVEFRAME_CLOUD_ORGANIZATION_ID` and `WAVEFRAME_CLOUD_API_KEY`.
