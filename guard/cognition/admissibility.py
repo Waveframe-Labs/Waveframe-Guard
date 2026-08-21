@@ -22,6 +22,9 @@ def assess_admissibility(
     continuity_requirements = []
     replay_obligations = []
 
+    violated_constraints.extend(
+        _target_scope_constraints(compiled_authority, execution_request)
+    )
     violated_constraints.extend(_role_constraints(compiled_authority, actor_identity))
     required_evidence.extend(
         _approval_evidence_requirements(
@@ -73,6 +76,78 @@ def assess_admissibility(
         "enforcement_consequences": enforcement_consequences,
         "continuation_status": continuation_status,
     }
+
+
+def _target_scope_constraints(
+    authority: dict[str, Any], execution_request: dict[str, Any]
+) -> list[dict[str, Any]]:
+    if "target_requirements" not in authority:
+        return []
+
+    requirements = authority["target_requirements"]
+    if not isinstance(requirements, dict):
+        return [_target_scope_violation("target_requirements")]
+
+    if set(requirements) != {"allow", "deny"}:
+        return [_target_scope_violation("target_requirements")]
+
+    allow_rules = requirements["allow"]
+    deny_rules = requirements["deny"]
+    if not isinstance(allow_rules, list) or not isinstance(deny_rules, list):
+        return [_target_scope_violation("target_requirements")]
+    if not allow_rules and not deny_rules:
+        return [_target_scope_violation("target_requirements")]
+    if not all(_is_target_rule(rule) for rule in [*allow_rules, *deny_rules]):
+        return [_target_scope_violation("target_requirements")]
+
+    target = execution_request.get("target")
+    if not isinstance(target, str) or not target.strip():
+        return [
+            {
+                "constraint": "execution_target",
+                "rationale": "execution target is required for target-scoped authority",
+            }
+        ]
+
+    if any(_target_rule_matches(rule, target) for rule in deny_rules):
+        return [
+            {
+                "constraint": "target_scope_deny",
+                "rationale": "execution target is denied by compiled target scope",
+            }
+        ]
+    if allow_rules and not any(_target_rule_matches(rule, target) for rule in allow_rules):
+        return [
+            {
+                "constraint": "target_scope_allow",
+                "rationale": "execution target is outside the allowed target scope",
+            }
+        ]
+    return []
+
+
+def _target_scope_violation(constraint: str) -> dict[str, Any]:
+    return {
+        "constraint": constraint,
+        "rationale": "compiled target scope is invalid and cannot authorize execution",
+    }
+
+
+def _is_target_rule(rule: Any) -> bool:
+    return (
+        isinstance(rule, dict)
+        and set(rule) == {"match", "value"}
+        and isinstance(rule["match"], str)
+        and rule["match"] in {"exact", "prefix"}
+        and isinstance(rule["value"], str)
+        and bool(rule["value"].strip())
+    )
+
+
+def _target_rule_matches(rule: dict[str, str], target: str) -> bool:
+    if rule["match"] == "exact":
+        return target == rule["value"]
+    return target.startswith(rule["value"])
 
 
 def _role_constraints(authority: dict[str, Any], actor: dict[str, Any]) -> list[dict[str, Any]]:

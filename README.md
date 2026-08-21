@@ -189,6 +189,24 @@ Guard to evaluate it against the selected authority, and invokes the original
 function only when admissible. A blocked call never reaches the original
 function.
 
+## Target scope
+
+Target scope controls which resources an automated action may or may not
+change. A compiled authority can allow `README.md` while denying the
+`deployment/` prefix:
+
+```json
+{
+  "target_requirements": {
+    "allow": [{"match": "exact", "value": "README.md"}],
+    "deny": [{"match": "prefix", "value": "deployment/"}]
+  }
+}
+```
+
+Guard compares the normalized target from the actual tool call with these
+literal, case-sensitive rules before the callback runs. Deny rules win.
+
 ## Local development path
 
 For offline development, a local authority registry is still supported:
