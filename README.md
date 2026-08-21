@@ -156,6 +156,11 @@ Long-running processes may call `guard.heartbeat()` from their existing health
 loop. Cloud reporting failures are returned as structured status and never
 change Guard's local decision or cause an allowed callback to run twice.
 
+Evidence preservation uses a 10-second timeout by default. Configure it only
+when needed: `Guard.cloud(..., preservation_timeout_seconds=15.0)`. Guard
+never retries an ambiguous preservation write automatically, because Cloud may
+already have committed the immutable evidence.
+
 Tool arguments are excluded from preserved evidence by default. Add only safe,
 decision-relevant names to `include_arguments`; prompts, tokens, file contents,
 and other sensitive values should remain excluded.

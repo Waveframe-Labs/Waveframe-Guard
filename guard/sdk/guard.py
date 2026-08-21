@@ -15,6 +15,10 @@ from waveframe_guard.cloud import (
     CloudPreservationClient,
     CloudRuntimeClient,
 )
+from waveframe_guard.cloud.client import (
+    DEFAULT_PRESERVATION_TIMEOUT_SECONDS,
+    _preservation_timeout_seconds,
+)
 
 from .authority_source import AuthoritySource
 from .execution import GuardRuntimeBoundary
@@ -41,6 +45,7 @@ class Guard:
         execution_context: dict[str, Any] | None = None,
         evaluation_time_source: Callable[[], str] | None = None,
         preserve_to: str | None = None,
+        preservation_timeout_seconds: float = DEFAULT_PRESERVATION_TIMEOUT_SECONDS,
         cloud_organization_id: str | None = None,
         cloud_api_key: str | None = None,
         cloud_runtime_client: CloudRuntimeClient | None = None,
@@ -65,9 +70,13 @@ class Guard:
         self.execution_context = execution_context or {"surface": "guard_sdk"}
         self.evaluation_time_source = evaluation_time_source
         self.preserve_to = preserve_to
+        self.preservation_timeout_seconds = _preservation_timeout_seconds(
+            preservation_timeout_seconds
+        )
         self.cloud_preservation_client = (
             CloudPreservationClient(
                 preserve_to,
+                timeout_seconds=self.preservation_timeout_seconds,
                 organization_id=_cloud_setting(
                     cloud_organization_id,
                     "WAVEFRAME_CLOUD_ORGANIZATION_ID",
@@ -98,6 +107,7 @@ class Guard:
         execution_context: dict[str, Any] | None = None,
         evaluation_time_source: Callable[[], str] | None = None,
         preserve_to: str | None = None,
+        preservation_timeout_seconds: float = DEFAULT_PRESERVATION_TIMEOUT_SECONDS,
         cloud_organization_id: str | None = None,
         cloud_api_key: str | None = None,
     ) -> "Guard":
@@ -116,6 +126,7 @@ class Guard:
             execution_context=execution_context,
             evaluation_time_source=evaluation_time_source,
             preserve_to=preserve_to,
+            preservation_timeout_seconds=preservation_timeout_seconds,
             cloud_organization_id=cloud_organization_id,
             cloud_api_key=cloud_api_key,
         )
@@ -137,6 +148,7 @@ class Guard:
         evaluation_time_source: Callable[[], str] | None = None,
         runtime_id: str | None = None,
         environment: str | None = None,
+        preservation_timeout_seconds: float = DEFAULT_PRESERVATION_TIMEOUT_SECONDS,
     ) -> "Guard":
         """Connect Guard to hosted Cloud without a repository checkout.
 
@@ -189,6 +201,7 @@ class Guard:
             execution_context=execution_context,
             evaluation_time_source=evaluation_time_source,
             preserve_to=resolved_url,
+            preservation_timeout_seconds=preservation_timeout_seconds,
             cloud_organization_id=resolved_organization_id,
             cloud_api_key=resolved_api_key,
             cloud_runtime_client=runtime_client,

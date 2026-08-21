@@ -6,6 +6,8 @@
 - Enforced optional compiled target scope locally before callback execution.
   Target scope controls which resources an automated action may or may not
   change.
+- Evidence preservation now uses a configurable, operation-specific 10-second
+  timeout. Guard never automatically retries an ambiguous preservation write.
 
 ## [0.14.0] - 2026-08-10 - External Agent Integration
 

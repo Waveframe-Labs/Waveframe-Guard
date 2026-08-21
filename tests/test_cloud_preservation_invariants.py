@@ -179,6 +179,85 @@ def test_cloud_failure_isolation_for_allowed_execution(
     assert failed["guard"].store.replay(record["run_id"])["matches"] is True
 
 
+def test_preservation_timeout_does_not_duplicate_local_evidence_or_allowed_callback(tmp_path, monkeypatch):
+    attempts = []
+
+    def timeout(*args, **kwargs):
+        attempts.append((args, kwargs))
+        raise requests.Timeout("response was not received")
+
+    monkeypatch.setattr("waveframe_guard.cloud.client.requests.post", timeout)
+    failed = _run_allowed(
+        tmp_path / "timeout",
+        preserve_to="http://cloud.example",
+        preservation_timeout_seconds=0.1,
+    )
+
+    assert len(attempts) == 1
+    assert failed["calls"] == [500]
+    assert failed["result"]["cloud_preservation"]["ambiguous"] is True
+    assert len(failed["guard"].store.history()) == 1
+    assert "cloud_preservation" not in failed["record"]
+    assert failed["guard"].store.replay(failed["record"]["run_id"])["matches"] is True
+
+
+def test_preservation_timeout_does_not_execute_blocked_callback(tmp_path, monkeypatch):
+    attempts = []
+    calls = []
+
+    def timeout(*args, **kwargs):
+        attempts.append((args, kwargs))
+        raise requests.Timeout("response was not received")
+
+    monkeypatch.setattr("waveframe_guard.cloud.client.requests.post", timeout)
+    guard = Guard.local(
+        workspace=tmp_path / "blocked-timeout",
+        preserve_to="http://cloud.example",
+        preservation_timeout_seconds=0.1,
+        authorities={"finance-policy@1.0.0": _authority()},
+        actor_identity={"id": "employee-1", "type": "human", "role": "employee"},
+        evaluation_time_source=lambda: EVALUATION_TIME,
+    )
+    result = guard.boundary_for("finance-policy@1.0.0").execute(
+        lambda amount: calls.append(amount),
+        execution_request=_request(amount=12_500),
+        args=(12_500,),
+        raise_on_block=False,
+    )
+
+    assert len(attempts) == 1
+    assert calls == []
+    assert result["executed"] is False
+    assert result["evaluation"]["status"] == "blocked"
+    assert result["cloud_preservation"]["ambiguous"] is True
+
+
+@pytest.mark.parametrize("timeout", [0, -1, float("nan"), float("inf"), True, "10"])
+def test_guard_rejects_invalid_preservation_timeout_configuration(tmp_path, timeout):
+    with pytest.raises(ValueError, match="preservation_timeout_seconds must be a positive finite number"):
+        Guard.local(
+            workspace=tmp_path,
+            authorities={"finance-policy@1.0.0": _authority()},
+            preservation_timeout_seconds=timeout,
+        )
+
+
+def test_guard_preservation_timeout_configuration_is_backward_compatible(tmp_path):
+    legacy = Guard.local(
+        workspace=tmp_path / "legacy",
+        authorities={"finance-policy@1.0.0": _authority()},
+    )
+    configured = Guard.local(
+        workspace=tmp_path / "configured",
+        preserve_to="http://cloud.example",
+        preservation_timeout_seconds=12.5,
+        authorities={"finance-policy@1.0.0": _authority()},
+    )
+
+    assert legacy.preservation_timeout_seconds == 10.0
+    assert configured.cloud_preservation_client.timeout_seconds == 12.5
+
+
 def test_append_cloud_preservation_preserves_history_integrity(tmp_path):
     store = LocalEvaluationStore(tmp_path / "guard-runs")
     first = _save_direct(store, amount=500)
@@ -261,11 +340,12 @@ def test_cloud_preservation_annotation_semantics_are_documented():
     assert "It is not proof that the protected business mutation completed" in normalized
 
 
-def _run_allowed(workspace, *, preserve_to=None):
+def _run_allowed(workspace, *, preserve_to=None, preservation_timeout_seconds=10.0):
     calls = []
     guard = Guard.local(
         workspace=workspace,
         preserve_to=preserve_to,
+        preservation_timeout_seconds=preservation_timeout_seconds,
         authorities={"finance-policy@1.0.0": _authority()},
         actor_identity={"id": "manager-1", "type": "human", "role": "manager"},
         approvals=[{"role": "manager", "approved_by": "manager-approval"}],
