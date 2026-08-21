@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from numbers import Number
 from typing import Any, Mapping, Optional
 from urllib.parse import quote
 from uuid import uuid4
@@ -18,7 +20,7 @@ from waveframe_guard.authority.loader import parse_authority_ref
 
 
 DEFAULT_CLOUD_BASE_URL = "http://localhost:8000"
-DEFAULT_PRESERVATION_TIMEOUT_SECONDS = 2.0
+DEFAULT_PRESERVATION_TIMEOUT_SECONDS = 10.0
 DEFAULT_AUTHORITY_TIMEOUT_SECONDS = 5.0
 DEFAULT_RUNTIME_TIMEOUT_SECONDS = 5.0
 
@@ -111,6 +113,7 @@ class CloudPreservationResult:
     status_code: Optional[int] = None
     error: Optional[str] = None
     error_type: Optional[str] = None
+    ambiguous: bool = False
 
 
 class CloudPreservationClient:
@@ -123,7 +126,7 @@ class CloudPreservationClient:
         api_key: str | None = None,
     ):
         self.base_url = base_url.rstrip("/")
-        self.timeout_seconds = timeout_seconds
+        self.timeout_seconds = _preservation_timeout_seconds(timeout_seconds)
         self.organization_id = _optional_credential("organization_id", organization_id)
         self._api_key = _optional_credential("api_key", api_key)
         if (self.organization_id is None) != (self._api_key is None):
@@ -150,11 +153,13 @@ class CloudPreservationClient:
         except requests.Timeout as exc:
             return CloudPreservationResult(
                 ok=False,
-                error=_redact_secret(
-                    str(exc) or "Cloud preservation request timed out",
-                    self._api_key,
+                error=(
+                    "Cloud evidence preservation was not confirmed; the local Guard "
+                    "decision remains authoritative. Do not blindly retry because Cloud "
+                    "may already have committed it."
                 ),
                 error_type="timeout",
+                ambiguous=True,
             )
         except requests.RequestException as exc:
             return CloudPreservationResult(
@@ -452,6 +457,20 @@ def _optional_credential(name: str, value: str | None) -> str | None:
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"{name} must be a non-empty string when configured")
     return value
+
+
+def _preservation_timeout_seconds(value: Any) -> float:
+    if isinstance(value, bool) or not isinstance(value, Number):
+        raise ValueError("preservation_timeout_seconds must be a positive finite number")
+    try:
+        timeout = float(value)
+    except (TypeError, ValueError, OverflowError) as exc:
+        raise ValueError(
+            "preservation_timeout_seconds must be a positive finite number"
+        ) from exc
+    if not math.isfinite(timeout) or timeout <= 0:
+        raise ValueError("preservation_timeout_seconds must be a positive finite number")
+    return timeout
 
 
 def _required_credential(name: str, value: str) -> str:

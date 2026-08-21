@@ -373,6 +373,7 @@ def test_guard_cloud_fetches_authority_from_environment_without_repository_check
         workspace=tmp_path / ".guard-local",
         authority="finance-policy@1.0.0",
         actor_identity={"id": "repo-agent", "type": "agent", "role": "manager"},
+        preservation_timeout_seconds=12.5,
     )
 
     assert guard.default_authority_ref == "finance-policy@1.0.0"
@@ -387,6 +388,7 @@ def test_guard_cloud_fetches_authority_from_environment_without_repository_check
     ]
     assert guard.preserve_to == "https://cloud.waveframelabs.com"
     assert guard.cloud_preservation_client.organization_id == "acme"
+    assert guard.cloud_preservation_client.timeout_seconds == 12.5
     assert guard.cloud_runtime_client.runtime_id == "repo-agent"
     assert guard.cloud_runtime_client.environment == "development"
     assert guard.runtime_connection.ok is True
