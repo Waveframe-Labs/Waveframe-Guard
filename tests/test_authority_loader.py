@@ -367,6 +367,21 @@ def test_bundle_loader_rejects_bundle_level_contract_hash_mismatch(tmp_path):
         AuthorityVerifier().verify(bundle)
 
 
+def test_bundle_loader_rejects_target_scope_contract_hash_mismatch(tmp_path):
+    registry_path = _write_authority_fixture(tmp_path)
+    entry = LocalRegistryResolver(registry_path, workspace_root=tmp_path).resolve("finance-policy@1.2.0")
+    payload = json.loads(entry.bundle_path.read_text(encoding="utf-8"))
+    payload["authority_contract"]["target_requirements"] = {
+        "allow": [{"match": "exact", "value": "README.md"}],
+        "deny": [],
+    }
+    entry.bundle_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    bundle = BundleLoader().load(entry)
+
+    with pytest.raises(AuthorityVerificationError, match="bundle contract hash mismatch"):
+        AuthorityVerifier().verify(bundle)
+
+
 def test_bundle_loader_requires_bundle_authority_ref(tmp_path):
     registry_path = _write_authority_fixture(tmp_path)
     entry = LocalRegistryResolver(registry_path, workspace_root=tmp_path).resolve("finance-policy@1.2.0")

@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Added
+- Enforced optional compiled target scope locally before callback execution.
+  Target scope controls which resources an automated action may or may not
+  change.
+
 ## [0.14.0] - 2026-08-10 - External Agent Integration
 
 ### Added
