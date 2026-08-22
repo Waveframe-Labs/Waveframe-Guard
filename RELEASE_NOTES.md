@@ -1,40 +1,37 @@
-# Waveframe Guard v0.14.0 Release Notes
+# Waveframe Guard v0.15.0 Release Notes
 
-## External Agent Integration
+## Deterministic Target Enforcement
 
-Waveframe Guard v0.14.0 stabilizes the public, provider-neutral enforcement path for existing Python agent tools. Customers install the package, create `Guard.cloud(...)` with explicit runtime and actor identity plus a versioned authority reference, and wrap the function that can mutate real state with `Guard.tool(...)`.
+Guard v0.15.0 enforces deterministic target requirements from a compiled
+authority at the execution boundary. Exact and prefix rules match literal,
+case-sensitive targets; deny rules take precedence. Malformed scope and missing
+or invalid scoped targets fail closed, while legacy target-free authorities
+retain their existing decisions and evidence.
 
-The integration does not require Ollama, a particular agent framework, or a Waveframe repository checkout. The customer's model and orchestration layer remain unchanged; Guard owns only the enforcement boundary immediately before execution.
+The commercial demo path is now explicit: the same actor and published
+authority can allow a `README.md` mutation exactly once while blocking
+`deployment/production.example.yml` before its callback runs.
 
-## Highlights
+## Preservation Timeout
 
-- Added the packaged external-agent quickstart and console entry point.
-- Added provider-neutral `Guard.tool(...)` wrappers for ordinary Python callables.
-- Added hosted authority resolution through `Guard.cloud(authority="name@x.y.z")`.
-- Added explicit Cloud URL, runtime credential, organization, runtime identity, environment, actor identity, and authority configuration.
-- Added runtime registration, heartbeat, and post-execution attestation.
-- Added preservation package, receipt, and proof identifiers to successful quickstart output.
-- Demonstrated one allowed action, one blocked action, and exactly one underlying mutation.
-
-## Acceptance Hardening
-
-The external-agent quickstart now treats Cloud integration as an acceptance contract. It succeeds only when runtime registration and heartbeat succeed, the allowed callback executes, the blocked callback does not execute, exactly one mutation occurs, both decisions are preserved with their required identifiers, and both execution attestations succeed.
-
-Failures report the affected action, sanitized HTTP status, error type, and Cloud error without exposing credentials. Guard's general Cloud behavior remains best effort; this strict contract applies only to the acceptance quickstart.
-
-Saved evaluations are detached from live result objects before hashing. This prevents later `run_id` decoration from mutating the preservation payload after its `record_hash` has been calculated.
+`preservation_timeout_seconds` defaults to 10.0 seconds and applies only to
+Cloud `POST /v1/preserve`. A timeout is treated as ambiguous because Cloud may
+already have committed immutable evidence; Guard performs no blind automatic
+retry. Local decisions and callback boundaries remain authoritative and
+unchanged.
 
 ## Compatibility
 
-The authoritative release compatibility matrix is maintained in [`docs/getting-started/README.md`](docs/getting-started/README.md#release-compatibility-matrix). Waveframe Cloud 0.5.0 is the coordinated recommended release and remains marked as not yet published during this release-preparation phase.
+CRI-CORE Contract Compiler v0.4.0 defines deterministic target requirements.
+Guard v0.15.0 consumes the compiled authority artifacts and enforces them; it
+does not become a policy compiler or add a compiler runtime dependency.
+Waveframe Cloud v0.5.5 remains compatible and unchanged. The authoritative
+matrix is in [`docs/getting-started/README.md`](docs/getting-started/README.md#release-compatibility-matrix).
 
-## Verification
+## References
 
-- Focused external-agent and Cloud-client tests: `41 passed`.
-- Complete Guard suite: `226 passed`.
-- `python -m build`: built `waveframe_guard-0.14.0.tar.gz` and `waveframe_guard-0.14.0-py3-none-any.whl`.
-- `python -m twine check dist/*`: passed for both distributions.
-- Fresh wheel-only virtual environment outside the checkout: public and metadata versions `0.14.0`, imports resolved from the virtual environment, and no source-tree shadowing.
-- Clean-machine external-agent acceptance: all expected markers, two preservation requests, and two attestation requests.
+Closes #12 and #14 through PRs #13 and #15. References
+Waveframe-Labs/Waveframe-Cloud#109.
 
-This is release preparation only. No tag, GitHub release, or PyPI publication is part of this change.
+This is release preparation only. No merge, tag, GitHub release, PyPI upload,
+Cloud modification, or hosted acceptance is part of this change.

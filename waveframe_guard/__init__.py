@@ -10,7 +10,7 @@ from .schemas import (
     GOVERNED_EXECUTION_STATE_V1,
 )
 
-__version__ = "0.14.0"
+__version__ = "0.15.0"
 
 
 def __getattr__(name):

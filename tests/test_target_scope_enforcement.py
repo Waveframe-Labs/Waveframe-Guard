@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import pytest
+from compiler.compile_policy import compile_policy
 
 from guard import evaluate_runtime
 from guard.adapters import COMPILED_AUTHORITY_CONTRACT_V1, NORMALIZED_EXECUTION_REQUEST_V1
@@ -142,6 +143,50 @@ def test_tool_enforces_and_preserves_the_same_target_once(tmp_path):
     assert history[0]["evaluation"]["admissibility_projection"]["execution_request"]["target"] == "README.md"
     assert history[1]["inputs"]["execution_request"]["target"] == "deployment/production.example.yml"
     assert history[1]["evaluation"]["violated_constraints"][0]["constraint"] == "target_scope_deny"
+
+
+def test_public_compiler_target_scope_enforces_at_the_tool_boundary(tmp_path):
+    compiled = compile_policy(
+        {
+            "contract_id": "repository",
+            "contract_version": "1.0.0",
+            "targets": {
+                "allow": [_rule("exact", "README.md")],
+                "deny": [_rule("prefix", "deployment/")],
+            },
+        }
+    )
+    calls = []
+    guard = Guard.local(
+        workspace=tmp_path,
+        authorities={
+            "repository@1.0.0": {
+                "schema_version": COMPILED_AUTHORITY_CONTRACT_V1,
+                **compiled,
+            }
+        },
+        actor_identity={"id": "repo-agent", "type": "agent", "role": "maintainer"},
+        evaluation_time_source=lambda: "2026-08-21T00:00:00+00:00",
+    )
+
+    @guard.tool(authority="repository@1.0.0", target="path")
+    def write_file(path):
+        calls.append(path)
+        return path
+
+    assert write_file("README.md") == "README.md"
+    with pytest.raises(GuardExecutionBlocked):
+        write_file("deployment/production.example.yml")
+
+    assert calls == ["README.md"]
+    blocked = guard.store.history()[1]
+    assert blocked["inputs"]["execution_request"]["target"] == "deployment/production.example.yml"
+    assert blocked["evaluation"]["violated_constraints"] == [
+        {
+            "constraint": "target_scope_deny",
+            "rationale": "execution target is denied by compiled target scope",
+        }
+    ]
 
 
 def test_action_and_arguments_cannot_select_target_scope_verdict():

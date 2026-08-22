@@ -116,7 +116,7 @@ acceptance runner:
 
 ```powershell
 python -m build
-$wheel=(Resolve-Path .\dist\waveframe_guard-0.14.0-py3-none-any.whl).Path
+$wheel=(Resolve-Path .\dist\waveframe_guard-0.15.0-py3-none-any.whl).Path
 python .\tools\acceptance\external_agent_clean_machine.py --install-spec $wheel
 ```
 
@@ -131,14 +131,14 @@ This is the authoritative compatibility matrix for Guard releases. “Not
 declared” means Guard does not impose a package minimum and the tested pairing
 is the evidence available for this release.
 
-| Component | Minimum supported version | Recommended paired version | Actually tested for Guard 0.14.0 | Notes |
+| Component | Minimum supported version | Recommended paired version | Actually tested for Guard 0.15.0 | Notes |
 | --- | --- | --- | --- | --- |
-| Waveframe Guard | 0.14.0 for this external-agent path | 0.14.0 | 0.14.0 release candidate | Public package and runtime version agree. |
-| Waveframe Cloud | Not declared | 0.5.0 (coordinated; not yet published) | Local 0.5.0 integration candidate and controlled Cloud boundary | Cloud must provide authority fetch, runtime registration/heartbeat, preservation receipts/proofs, and execution attestation. |
+| Waveframe Guard | 0.15.0 for deterministic target enforcement | 0.15.0 | 0.15.0 release candidate | Public package and runtime version agree. |
+| Waveframe Cloud | Not declared | 0.5.5 | Compatible and unchanged | Cloud preservation uses the existing `POST /v1/preserve` boundary. |
 | CRI-CORE | Not declared | 0.13.0 | 0.13.0 | Guard intentionally leaves the runtime dependency unpinned. |
 | CRI-CORE proposal normalizer | Not declared | 0.2.0 | 0.2.0 | Guard intentionally leaves the runtime dependency unpinned. |
 | Waveframe Ledger / `authority_bundle.v1` | 0.5.0 | 0.5.0 | 0.5.0 | Release test extras pin Ledger 0.5.0 and verify canonical bundle loading. |
-| CRI-CORE contract compiler | 0.3.0 | 0.3.0 | 0.3.0 | Relevant to compiler-produced authority compatibility; pinned in release test extras. |
+| CRI-CORE contract compiler | 0.4.0 | 0.4.0 | 0.4.0 | Defines deterministic target requirements; pinned only in release test extras, not Guard runtime dependencies. |
 | Python | 3.10 | 3.10 or newer | 3.14.4 | Declared by package metadata as `Requires-Python: >=3.10`. |
 
 ## Basic Usage
