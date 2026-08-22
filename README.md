@@ -8,7 +8,7 @@ Stop unsafe AI and automated actions **before they execute**.
 
 Waveframe Guard is an execution-boundary SDK. It wraps sensitive actions, resolves compiled authority, evaluates through CRI-CORE, and only runs the action when the outcome is allowed.
 
-Current release: `0.14.0`.
+Current release: `0.15.0`.
 
 ```text
 Guard does not generate actions.
@@ -209,8 +209,16 @@ change. A compiled authority can allow `README.md` while denying the
 }
 ```
 
-Guard compares the normalized target from the actual tool call with these
-literal, case-sensitive rules before the callback runs. Deny rules win.
+Guard v0.15.0 enforces the compiler-defined target requirements against the
+normalized target from the actual tool call before the callback runs. Rules
+are literal and case-sensitive; deny rules win. Missing or malformed scope, or
+a missing/invalid target when scope is present, fails closed. Authorities with
+no target requirements retain their legacy target-free behavior.
+
+CRI-CORE Contract Compiler v0.4.0 defines deterministic target requirements;
+Guard v0.15.0 consumes the compiled authority artifact and enforces them. It
+does not compile policy or add a compiler runtime dependency. Waveframe Cloud
+v0.5.5 remains compatible and unchanged.
 
 ## Local development path
 

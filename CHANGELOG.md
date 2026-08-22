@@ -2,12 +2,31 @@
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-08-21 - Deterministic Target Enforcement
+
 ### Added
-- Enforced optional compiled target scope locally before callback execution.
-  Target scope controls which resources an automated action may or may not
-  change.
-- Evidence preservation now uses a configurable, operation-specific 10-second
-  timeout. Guard never automatically retries an ambiguous preservation write.
+- Enforced compiler-defined exact and prefix target requirements locally before
+  callback execution. Matching is literal and case-sensitive, and deny rules
+  take precedence over allow rules.
+- Failed closed for malformed target scope and for missing or invalid targets
+  when target scope is declared, while retaining legacy target-free authority
+  decisions and evidence unchanged.
+- Preserved target differentiation for the same actor and published authority:
+  an allowed `README.md` mutation runs once, while a denied
+  `deployment/production.example.yml` mutation never runs.
+- Added `preservation_timeout_seconds`, with a 10.0-second default, exclusively
+  for `POST /v1/preserve`. A timeout is ambiguous, does not retry blindly, and
+  never changes local enforcement or callback behavior.
+
+### Compatibility
+- CRI-CORE Contract Compiler v0.4.0 defines deterministic target requirements;
+  Guard v0.15.0 consumes and enforces compiled authority artifacts without a
+  compiler runtime dependency.
+- Waveframe Cloud v0.5.5 remains compatible and unchanged.
+
+### References
+- Closes #12 and #14 via PRs #13 and #15.
+- References Waveframe-Labs/Waveframe-Cloud#109.
 
 ## [0.14.0] - 2026-08-10 - External Agent Integration
 
