@@ -7,22 +7,30 @@
   `publication_receipt.v2` loading for `repository-changes/1.0.0`.
 - Added a deterministic fact-provider boundary keyed by the exact published
   domain-pack and runtime-fact-schema identities and hashes.
-- Added compact authority/fact evidence bindings and post-decision mutation
-  attestations without changing the existing Cloud preservation protocol.
+- Added compact authority/fact evidence bindings and a Guard-owned execution
+  attestation that distinguishes decision, callback invocation/completion,
+  execution outcome, and known/unknown mutation state without changing the
+  existing Cloud preservation protocol.
 
 ### Hardened
 - V2 contracts now require successful public Ledger bundle, receipt, and
   runtime-fact compatibility validation before use or caching.
-- V2 cache reuse revalidates publication artifacts and rejects contract drift
-  and cross-authority substitution.
-- Missing, mistyped, unsupported, or caller-injected runtime facts fail closed
-  before callback execution; unrelated proposal fields cannot affect v2
-  decisions.
+- Cold load, refresh, untrusted serialized-cache recovery, and suspected drift
+  run Ledger's complete validators. Warm process-local cache reads and governed
+  actions use an immutable verified runtime projection plus a compact integrity
+  check, while still rejecting contract drift and cross-authority substitution.
+- Missing, mistyped, unsupported, or caller-supplied runtime facts fail closed
+  before callback execution. Unrelated proposal metadata is ignored and cannot
+  affect either decisions or the canonical derived-fact hash.
+- Registry artifact locations are validated portable POSIX logical references;
+  machine- and tenant-specific physical storage paths are not evidence inputs.
 
 ### Compatibility
-- The base `governance-ledger==0.7.0` package is a runtime dependency. Guard
-  never depends on `governance-ledger[guard]`, and the v1 loading and evaluation
-  paths remain backward compatible.
+- The base `governance-ledger>=0.7.0,<0.8.0` package is a runtime dependency.
+  Guard tests the public 0.7.0 minimum; immutable v2 artifact schema dispatch is
+  the validation boundary within the compatible 0.7 release line. Guard never
+  depends on `governance-ledger[guard]`, and the v1 loading and evaluation paths
+  remain backward compatible.
 
 ## [0.15.0] - 2026-08-21 - Deterministic Target Enforcement
 

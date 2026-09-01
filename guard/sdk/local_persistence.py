@@ -172,6 +172,14 @@ class LocalEvaluationStore:
                 return record
         raise FileNotFoundError(f"saved Guard evaluation not found: {run_id}")
 
+    def load_execution_attestation(self, run_id: str) -> dict[str, Any]:
+        path = self.execution_attestation_root / f"{run_id}.json"
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as exc:
+            raise GuardArtifactError(f"unreadable execution attestation: {exc.msg}") from exc
+        return validate_execution_attestation(payload)
+
     def replay(self, run_id: str) -> dict[str, Any]:
         record = self.load_run(run_id)
         if record.get("schema_version") != SAVED_EVALUATION_V1:
@@ -247,14 +255,107 @@ class LocalEvaluationStore:
         return path
 
     def export_execution_attestation(self, attestation: dict[str, Any]) -> Path:
-        if attestation.get("schema_version") != GUARD_EXECUTION_ATTESTATION_V1:
-            raise UnsupportedArtifactSchemaError(
-                f"unsupported execution attestation schema: {attestation.get('schema_version')}"
-            )
+        validated = validate_execution_attestation(attestation)
         self.execution_attestation_root.mkdir(parents=True, exist_ok=True)
-        path = self.execution_attestation_root / f"{attestation['run_id']}.json"
-        path.write_text(json.dumps(attestation, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        path = self.execution_attestation_root / f"{validated['run_id']}.json"
+        path.write_text(json.dumps(validated, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         return path
+
+
+def build_execution_attestation(
+    *,
+    run_id: str,
+    guard_receipt_hash: str | None,
+    authority_evidence_hash: str,
+    runtime_facts_hash: str,
+    decision: str,
+    callback_invoked: bool | None,
+    callback_completed: bool | None,
+    execution_status: str,
+    mutation_status: str,
+    mutation_executed: bool | None,
+) -> dict[str, Any]:
+    attestation = {
+        "schema_version": GUARD_EXECUTION_ATTESTATION_V1,
+        "run_id": run_id,
+        "guard_receipt_hash": guard_receipt_hash,
+        "authority_evidence_hash": authority_evidence_hash,
+        "runtime_facts_hash": runtime_facts_hash,
+        "decision": decision,
+        "callback_invoked": callback_invoked,
+        "callback_completed": callback_completed,
+        "execution_status": execution_status,
+        "mutation_status": mutation_status,
+        "mutation_executed": mutation_executed,
+    }
+    attestation["attestation_hash"] = stable_hash(attestation)
+    return validate_execution_attestation(attestation)
+
+
+def validate_execution_attestation(attestation: Any) -> dict[str, Any]:
+    if not isinstance(attestation, dict):
+        raise GuardArtifactError("execution attestation must be a JSON object")
+    if attestation.get("schema_version") != GUARD_EXECUTION_ATTESTATION_V1:
+        raise UnsupportedArtifactSchemaError(
+            f"unsupported execution attestation schema: {attestation.get('schema_version')}"
+        )
+    required_fields = {
+        "schema_version",
+        "run_id",
+        "guard_receipt_hash",
+        "authority_evidence_hash",
+        "runtime_facts_hash",
+        "decision",
+        "callback_invoked",
+        "callback_completed",
+        "execution_status",
+        "mutation_status",
+        "mutation_executed",
+        "attestation_hash",
+    }
+    if set(attestation) != required_fields:
+        raise GuardArtifactError("execution attestation fields do not match its schema")
+    for field in ("run_id", "authority_evidence_hash", "runtime_facts_hash", "attestation_hash"):
+        if not isinstance(attestation.get(field), str) or not attestation[field]:
+            raise GuardArtifactError(f"execution attestation has invalid {field}")
+    if attestation["guard_receipt_hash"] is not None and not isinstance(
+        attestation["guard_receipt_hash"], str
+    ):
+        raise GuardArtifactError("execution attestation has invalid guard_receipt_hash")
+    if attestation["decision"] not in {"admissible", "blocked", "escalated"}:
+        raise GuardArtifactError("execution attestation has invalid decision")
+    if attestation["execution_status"] not in {"not_run", "succeeded", "failed", "incomplete"}:
+        raise GuardArtifactError("execution attestation has invalid execution_status")
+    if attestation["mutation_status"] not in {"not_performed", "executed", "unknown"}:
+        raise GuardArtifactError("execution attestation has invalid mutation_status")
+    for field in ("callback_invoked", "callback_completed", "mutation_executed"):
+        if attestation[field] is not None and not isinstance(attestation[field], bool):
+            raise GuardArtifactError(f"execution attestation has invalid {field}")
+
+    state = (
+        attestation["decision"],
+        attestation["callback_invoked"],
+        attestation["callback_completed"],
+        attestation["execution_status"],
+        attestation["mutation_status"],
+        attestation["mutation_executed"],
+    )
+    valid_states = {
+        ("blocked", False, False, "not_run", "not_performed", False),
+        ("escalated", False, False, "not_run", "not_performed", False),
+        ("admissible", True, True, "succeeded", "executed", True),
+        ("admissible", True, False, "failed", "unknown", None),
+        ("admissible", None, None, "incomplete", "unknown", None),
+        ("admissible", True, False, "incomplete", "unknown", None),
+    }
+    if state not in valid_states:
+        raise GuardArtifactError("execution attestation contains a contradictory execution state")
+    expected_hash = stable_hash(
+        {key: value for key, value in attestation.items() if key != "attestation_hash"}
+    )
+    if attestation["attestation_hash"] != expected_hash:
+        raise GuardArtifactError("execution attestation hash mismatch")
+    return deepcopy(attestation)
 
 
 def build_enforcement_receipt(

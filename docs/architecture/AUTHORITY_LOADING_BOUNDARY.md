@@ -67,11 +67,19 @@ The resolver still runs before every cache lookup. Guard must obtain the current
 registry entry, including the current lifecycle state and expected bundle hash,
 before deciding whether a verified authority can be reused.
 
-Cache hits may skip bundle loading and cryptographic re-verification, but they
-must not skip lifecycle enforcement. For v2, Guard re-runs Ledger's public
-bundle and receipt validators against the cached publication artifacts before
-reuse. A cached authority is loadable only when the freshly resolved registry
-entry still permits it and every publication identity still matches.
+Cache hits may skip bundle loading but must not skip lifecycle enforcement. For
+v2, initial load, insertion, refresh/replacement, untrusted serialized-cache
+recovery, and suspected integrity drift run Ledger's complete public bundle,
+receipt, schema, and compatibility validators. A normal process-local cache hit
+checks the freshly resolved registry identities and a compact runtime integrity
+binding; it does not reconstruct the source-to-publication chain.
+
+Governed actions use an immutable projection containing only the exact verified
+compiled contract, compact publication identities, runtime fact schema, and
+required fact IDs. They never parse source policy, mappings, Constraint IR,
+bundle, or receipt. Timing for cold validation and the most recent warm
+integrity/fact-derivation step is diagnostic data on the runtime boundary; it is
+not a performance guarantee or a decision input.
 
 The initial cache adapter is `MemoryAuthorityCache`. It stores verified
 `LoadedAuthority` objects only after successful verification and returns
@@ -92,8 +100,11 @@ Each stage has one responsibility:
 
 - `AuthorityResolver` maps an explicit authority ref to a registry entry.
 - `AuthorityResolver` verifies `registry_hash` before trusting registry entries.
-- Local registry artifact paths are workspace-root-relative, not
-  registry-file-relative.
+- Local registry artifact references are opaque, workspace-root-relative POSIX
+  logical identifiers. The resolver maps them to physical storage; Guard does
+  not bind evidence to drive letters, tenant directories, separator style, or
+  deployment layout. Absolute, traversal, backslash, and ambiguously normalized
+  references fail closed.
 - `BundleLoader` opens the published authority bundle and returns it unchanged.
 - `AuthorityVerifier` owns all trust decisions.
 - `LoadedAuthority` is the verified authority object Guard can consume.
@@ -142,6 +153,12 @@ Guard never extracts an embedded v2 contract first and validates it later. It
 never downgrades v2 to v1, infers missing lineage, or copies Ledger's validator
 logic. The initial trusted fact provider is keyed to the immutable
 `repository-changes/1.0.0` pack and its exact published runtime schema.
+
+`bundle_path` and `receipt_path` retain their registry field names for
+compatibility, but their values are logical references. A resolver retrieves
+the bytes using those references; matching physical filenames cannot substitute
+for a different logical reference, and receipt hash verification remains
+mandatory after retrieval.
 
 ## Loader Invariant
 

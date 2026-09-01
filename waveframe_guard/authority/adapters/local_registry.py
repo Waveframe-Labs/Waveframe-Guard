@@ -3,20 +3,29 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
+from pathlib import PurePosixPath
 from typing import Any
 
 from ..exceptions import AuthorityNotFound, MalformedAuthorityRegistry
 from ..loader import parse_authority_ref
 from ..types import RegistryEntry
-from .common import validate_registry_entry
+from .common import validate_logical_artifact_ref, validate_registry_entry
 
 
 class LocalRegistryResolver:
     def __init__(self, registry_path: str | Path | None = None, *, workspace_root: str | Path | None = None):
-        self.workspace_root = Path(workspace_root) if workspace_root is not None else Path.cwd()
-        self.registry_path = Path(registry_path) if registry_path is not None else self.workspace_root / "contracts" / "index.json"
-        if not self.registry_path.is_absolute():
-            self.registry_path = self.workspace_root / self.registry_path
+        self.workspace_root = (
+            Path(workspace_root).resolve() if workspace_root is not None else Path.cwd().resolve()
+        )
+        if registry_path is None:
+            self.registry_path = self.workspace_root / "contracts" / "index.json"
+        else:
+            selected_registry_path = Path(registry_path)
+            self.registry_path = (
+                selected_registry_path
+                if selected_registry_path.is_absolute()
+                else self.workspace_root / selected_registry_path
+            )
 
     def resolve(self, authority_ref: str) -> RegistryEntry:
         contract_id, contract_version = parse_authority_ref(authority_ref)
@@ -85,9 +94,8 @@ def _registry_entry_from_mapping(
     lifecycle_state = entry.get("lifecycle_state") or entry.get("status")
     if lifecycle_state is None:
         raise MalformedAuthorityRegistry(f"authority registry entry is missing lifecycle_state: {authority_ref}")
-    bundle_path = Path(bundle_path_value)
-    if not bundle_path.is_absolute():
-        bundle_path = workspace_root / bundle_path
+    bundle_ref = validate_logical_artifact_ref(bundle_path_value, authority_ref=authority_ref, field="bundle_path")
+    bundle_path = _resolve_logical_ref(workspace_root, bundle_ref, authority_ref=authority_ref)
     receipt_path_value = entry.get("receipt_path") or entry.get("publication_receipt_path")
     receipt_hash = entry.get("receipt_hash") or entry.get("publication_receipt_hash")
     if (receipt_path_value is None) != (receipt_hash is None):
@@ -104,9 +112,14 @@ def _registry_entry_from_mapping(
             raise MalformedAuthorityRegistry(
                 f"authority registry entry has invalid receipt_hash: {authority_ref}"
             )
-        receipt_path = Path(receipt_path_value)
-        if not receipt_path.is_absolute():
-            receipt_path = workspace_root / receipt_path
+        receipt_ref = validate_logical_artifact_ref(
+            receipt_path_value,
+            authority_ref=authority_ref,
+            field="receipt_path",
+        )
+        receipt_path = _resolve_logical_ref(workspace_root, receipt_ref, authority_ref=authority_ref)
+    else:
+        receipt_ref = None
     return RegistryEntry(
         authority_ref=authority_ref,
         contract_id=contract_id,
@@ -117,11 +130,23 @@ def _registry_entry_from_mapping(
         publication_id=entry.get("publication_id"),
         bundle_hash=bundle_hash,
         receipt_hash=receipt_hash,
+        bundle_ref=bundle_ref,
+        receipt_ref=receipt_ref,
         lifecycle_state=lifecycle_state,
         published_at=entry.get("published_at"),
         published_by=entry.get("published_by"),
         raw=entry,
     )
+
+
+def _resolve_logical_ref(workspace_root: Path, logical_ref: str, *, authority_ref: str) -> Path:
+    root = workspace_root.resolve()
+    resolved = root.joinpath(*PurePosixPath(logical_ref).parts).resolve()
+    if not resolved.is_relative_to(root):
+        raise MalformedAuthorityRegistry(
+            f"authority registry logical artifact reference escapes its storage root: {authority_ref}"
+        )
+    return resolved
 
 
 def _verify_registry_hash(registry: dict[str, Any]) -> None:

@@ -20,6 +20,8 @@ class RegistryEntry:
     raw: Mapping[str, Any] | None = None
     receipt_path: Optional[Path] = None
     receipt_hash: Optional[str] = None
+    bundle_ref: Optional[str] = None
+    receipt_ref: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -31,6 +33,8 @@ class Bundle:
     receipt_payload: Mapping[str, Any] | None = None
     receipt_hash: Optional[str] = None
     receipt_path: Optional[Path] = None
+    bundle_ref: Optional[str] = None
+    receipt_ref: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -52,3 +56,7 @@ class LoadedAuthority:
     publication_receipt: Mapping[str, Any] | None = None
     runtime_fact_schema: Mapping[str, Any] | None = None
     authority_evidence: Mapping[str, Any] | None = None
+    required_runtime_facts: tuple[str, ...] = ()
+    runtime_integrity_hash: Optional[str] = None
+    validation_duration_ns: Optional[int] = None
+    _verification_marker: Any = None

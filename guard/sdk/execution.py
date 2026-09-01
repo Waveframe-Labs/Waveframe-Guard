@@ -4,16 +4,20 @@ from datetime import datetime, timezone
 from dataclasses import asdict
 from copy import deepcopy
 from functools import wraps
+from time import perf_counter_ns
 from typing import Any, Callable
 
 from guard.runtime import evaluate_runtime
 from guard.runtime.builders import validate_guard_enforcement_outcome
 from guard.runtime.identity import stable_hash
 from waveframe_guard.cloud import CloudPreservationClient, CloudRuntimeClient
-from waveframe_guard.authority.runtime_facts import RepositoryChangesFactProvider
+from waveframe_guard.authority.runtime_facts import (
+    RepositoryChangesFactProvider,
+    VerifiedRuntimeAuthority,
+)
 from waveframe_guard.authority.types import LoadedAuthority
 from waveframe_guard.authority.exceptions import AuthorityVerificationError
-from .local_persistence import GUARD_EXECUTION_ATTESTATION_V1
+from .local_persistence import build_execution_attestation
 
 
 GUARD_CLOUD_PRESERVATION_PACKAGE_V1 = "guard_cloud_preservation_package.v1"
@@ -54,6 +58,11 @@ class GuardRuntimeBoundary:
     ):
         self.compiled_authority = deepcopy(compiled_authority)
         self.loaded_authority = deepcopy(loaded_authority)
+        self._verified_runtime_authority = None
+        self.timing_diagnostics: dict[str, int | None] = {
+            "cold_load_validation_ns": None,
+            "warm_integrity_and_fact_derivation_ns": None,
+        }
         if self.compiled_authority.get("schema_version") == "compiled_authority_contract.v2":
             if self.loaded_authority is None:
                 raise AuthorityVerificationError(
@@ -63,6 +72,12 @@ class GuardRuntimeBoundary:
                 raise AuthorityVerificationError(
                     "verified authority contract does not match the evaluated v2 contract"
                 )
+            self._verified_runtime_authority = VerifiedRuntimeAuthority.from_loaded(
+                self.loaded_authority
+            )
+            self.timing_diagnostics["cold_load_validation_ns"] = (
+                self._verified_runtime_authority.cold_validation_duration_ns
+            )
         self.actor_identity = actor_identity
         self.approvals = approvals or []
         self.continuity_state = continuity_state or {}
@@ -92,29 +107,32 @@ class GuardRuntimeBoundary:
         authority_evidence = None
         evaluation_request = original_request
         evaluation_actor = selected_actor
-        verified_v2 = self.compiled_authority.get("schema_version") == "compiled_authority_contract.v2"
+        verified_v2 = self._verified_runtime_authority is not None
+        evaluated_contract = self.compiled_authority
         if verified_v2:
-            if self.loaded_authority is None:
-                raise AuthorityVerificationError(
-                    "compiled_authority_contract.v2 is not bound to verified publication artifacts"
-                )
+            warm_started_ns = perf_counter_ns()
+            self._verified_runtime_authority.verify_candidate_contract(self.compiled_authority)
+            evaluated_contract = self._verified_runtime_authority.contract()
             v2_facts = RepositoryChangesFactProvider().derive(
-                authority=self.loaded_authority,
+                authority=self._verified_runtime_authority,
                 execution_request=original_request,
                 actor_identity=selected_actor,
             )
             evaluation_request = dict(v2_facts.evaluation_request)
             evaluation_actor = dict(v2_facts.evaluation_actor)
             authority_evidence = {
-                **deepcopy(dict(self.loaded_authority.authority_evidence or {})),
+                **self._verified_runtime_authority.evidence(),
                 "runtime_facts": {
                     "provider_key": asdict(v2_facts.provider_key),
                     "facts": deepcopy(dict(v2_facts.facts)),
                     "canonical_hash": v2_facts.canonical_hash,
                 },
             }
+            self.timing_diagnostics["warm_integrity_and_fact_derivation_ns"] = (
+                perf_counter_ns() - warm_started_ns
+            )
         result = evaluate_runtime(
-            compiled_authority=self.compiled_authority,
+            compiled_authority=evaluated_contract,
             execution_request=evaluation_request,
             actor_identity=evaluation_actor,
             continuity_state=continuity_state if continuity_state is not None else self.continuity_state,
@@ -134,7 +152,7 @@ class GuardRuntimeBoundary:
         validate_guard_enforcement_outcome(result["enforcement_outcome"])
         if save and self.store is not None:
             saved_inputs = {
-                "compiled_authority": deepcopy(self.compiled_authority),
+                "compiled_authority": deepcopy(evaluated_contract),
                 "execution_request": original_request,
                 "runtime_evidence": result["runtime_evidence"],
             }
@@ -168,11 +186,24 @@ class GuardRuntimeBoundary:
                     )
                     saved_record["cloud_preservation"] = updated_record["cloud_preservation"]
         if verified_v2:
-            self._record_execution_evidence(
-                result,
-                execution_status="not_attempted",
-                mutation_executed=False,
-            )
+            if result["status"] == "admissible":
+                self._record_execution_evidence(
+                    result,
+                    callback_invoked=None,
+                    callback_completed=None,
+                    execution_status="incomplete",
+                    mutation_status="unknown",
+                    mutation_executed=None,
+                )
+            else:
+                self._record_execution_evidence(
+                    result,
+                    callback_invoked=False,
+                    callback_completed=False,
+                    execution_status="not_run",
+                    mutation_status="not_performed",
+                    mutation_executed=False,
+                )
         return result
 
     def enforce(self, execution_request: dict[str, Any], **kwargs: Any) -> dict[str, Any]:
@@ -199,7 +230,10 @@ class GuardRuntimeBoundary:
         except GuardExecutionError as exc:
             self._record_execution_evidence(
                 exc.evaluation,
-                execution_status=("blocked" if exc.evaluation["status"] == "blocked" else "not_executed"),
+                callback_invoked=False,
+                callback_completed=False,
+                execution_status="not_run",
+                mutation_status="not_performed",
                 mutation_executed=False,
             )
             attestation = self._attest_execution_result(
@@ -220,12 +254,23 @@ class GuardRuntimeBoundary:
                 "cloud_runtime_attestation": attestation,
             }
 
+        self._record_execution_evidence(
+            evaluation,
+            callback_invoked=True,
+            callback_completed=False,
+            execution_status="incomplete",
+            mutation_status="unknown",
+            mutation_executed=None,
+        )
         try:
             value = fn(*(args or ()), **(kwargs or {}))
         except Exception as exc:
             self._record_execution_evidence(
                 evaluation,
-                execution_status="callback_failed",
+                callback_invoked=True,
+                callback_completed=False,
+                execution_status="failed",
+                mutation_status="unknown",
                 mutation_executed=None,
             )
             attestation = self._attest_execution_result(
@@ -239,7 +284,10 @@ class GuardRuntimeBoundary:
             raise
         self._record_execution_evidence(
             evaluation,
+            callback_invoked=True,
+            callback_completed=True,
             execution_status="succeeded",
+            mutation_status="executed",
             mutation_executed=True,
         )
         attestation = self._attest_execution_result(
@@ -262,7 +310,10 @@ class GuardRuntimeBoundary:
         self,
         evaluation: dict[str, Any],
         *,
+        callback_invoked: bool | None,
+        callback_completed: bool | None,
         execution_status: str,
+        mutation_status: str,
         mutation_executed: bool | None,
     ) -> dict[str, Any] | None:
         authority_evidence = evaluation.get("authority_evidence")
@@ -275,17 +326,18 @@ class GuardRuntimeBoundary:
                 receipt_hash = self.store.load_run(evaluation["run_id"])["receipt"]["receipt_hash"]
             except (FileNotFoundError, KeyError, TypeError):
                 receipt_hash = None
-        attestation = {
-            "schema_version": GUARD_EXECUTION_ATTESTATION_V1,
-            "run_id": run_id,
-            "guard_receipt_hash": receipt_hash,
-            "authority_evidence_hash": stable_hash(authority_evidence),
-            "runtime_facts_hash": evaluation.get("runtime_facts_hash"),
-            "decision": evaluation["status"],
-            "execution_status": execution_status,
-            "mutation_executed": mutation_executed,
-        }
-        attestation["attestation_hash"] = stable_hash(attestation)
+        attestation = build_execution_attestation(
+            run_id=run_id,
+            guard_receipt_hash=receipt_hash,
+            authority_evidence_hash=stable_hash(authority_evidence),
+            runtime_facts_hash=evaluation["runtime_facts_hash"],
+            decision=evaluation["status"],
+            callback_invoked=callback_invoked,
+            callback_completed=callback_completed,
+            execution_status=execution_status,
+            mutation_status=mutation_status,
+            mutation_executed=mutation_executed,
+        )
         evaluation["execution_attestation"] = attestation
         if self.store is not None and evaluation.get("run_id"):
             self.store.export_execution_attestation(attestation)

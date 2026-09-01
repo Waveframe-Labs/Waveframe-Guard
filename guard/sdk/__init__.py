@@ -23,6 +23,8 @@ from .local_persistence import (
     LocalEvaluationStore,
     build_artifact_manifest,
     build_enforcement_receipt,
+    build_execution_attestation,
+    validate_execution_attestation,
 )
 
 __all__ = [
@@ -35,6 +37,8 @@ __all__ = [
     "LocalEvaluationStore",
     "build_artifact_manifest",
     "build_enforcement_receipt",
+    "build_execution_attestation",
+    "validate_execution_attestation",
     "SAVED_EVALUATION_V1",
     "ENFORCEMENT_RECEIPT_V1",
     "GUARD_ARTIFACT_MANIFEST_V1",

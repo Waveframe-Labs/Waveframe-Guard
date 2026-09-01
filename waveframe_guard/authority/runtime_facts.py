@@ -7,6 +7,7 @@ from typing import Any, Mapping
 
 from .exceptions import AuthorityVerificationError
 from .types import LoadedAuthority
+from .verifier import _compute_runtime_integrity_hash
 
 
 class RuntimeFactError(AuthorityVerificationError):
@@ -32,28 +33,91 @@ class DerivedRuntimeFacts:
     evaluation_actor: Mapping[str, Any]
 
 
+@dataclass(frozen=True)
+class VerifiedRuntimeAuthority:
+    """Immutable, compact warm-path projection of a cold-verified publication."""
+
+    authority_ref: str
+    contract_json: str
+    evidence_json: str
+    runtime_fact_schema_json: str
+    required_runtime_facts: tuple[str, ...]
+    integrity_hash: str
+    cold_validation_duration_ns: int | None
+
+    @classmethod
+    def from_loaded(cls, authority: LoadedAuthority) -> "VerifiedRuntimeAuthority":
+        if not isinstance(authority.authority_evidence, Mapping) or not isinstance(
+            authority.runtime_fact_schema, Mapping
+        ):
+            raise RuntimeFactError("verified v2 authority is missing verified runtime state")
+        if not isinstance(authority.runtime_integrity_hash, str):
+            raise RuntimeFactError("verified v2 authority is missing its runtime integrity binding")
+        actual = _compute_runtime_integrity_hash(
+            contract=authority.contract,
+            evidence=authority.authority_evidence,
+            runtime_fact_schema=authority.runtime_fact_schema,
+            required_runtime_facts=authority.required_runtime_facts,
+        )
+        if actual != authority.runtime_integrity_hash:
+            raise RuntimeFactError("verified v2 runtime authority integrity mismatch")
+        return cls(
+            authority_ref=authority.authority_ref,
+            contract_json=_canonical_json(authority.contract),
+            evidence_json=_canonical_json(authority.authority_evidence),
+            runtime_fact_schema_json=_canonical_json(authority.runtime_fact_schema),
+            required_runtime_facts=tuple(authority.required_runtime_facts),
+            integrity_hash=authority.runtime_integrity_hash,
+            cold_validation_duration_ns=authority.validation_duration_ns,
+        )
+
+    def contract(self) -> dict[str, Any]:
+        return json.loads(self.contract_json)
+
+    def evidence(self) -> dict[str, Any]:
+        return json.loads(self.evidence_json)
+
+    def runtime_fact_schema(self) -> dict[str, Any]:
+        return json.loads(self.runtime_fact_schema_json)
+
+    def verify_candidate_contract(self, candidate: Mapping[str, Any]) -> None:
+        if _canonical_json(candidate) != self.contract_json:
+            raise RuntimeFactError("verified v2 compiled contract changed after activation")
+
+
 class RepositoryChangesFactProvider:
     """Trusted deterministic binding for repository-changes/1.0.0 only."""
 
     def derive(
         self,
         *,
-        authority: LoadedAuthority,
+        authority: LoadedAuthority | VerifiedRuntimeAuthority,
         execution_request: Mapping[str, Any],
         actor_identity: Mapping[str, Any],
     ) -> DerivedRuntimeFacts:
-        schema = authority.runtime_fact_schema
-        bundle = authority.authority_bundle
-        if not isinstance(schema, Mapping) or not isinstance(bundle, Mapping):
-            raise RuntimeFactError("verified v2 authority is missing its runtime fact schema")
+        runtime_authority = (
+            authority
+            if isinstance(authority, VerifiedRuntimeAuthority)
+            else VerifiedRuntimeAuthority.from_loaded(authority)
+        )
+        schema = runtime_authority.runtime_fact_schema()
         key = runtime_fact_provider_key(authority)
-        if key != _installed_repository_provider_key():
+        if key != _trusted_repository_provider_key():
             raise RuntimeFactError(
                 "unsupported runtime fact schema: "
                 f"{key.schema_id}@{key.schema_version} ({key.schema_hash})"
             )
 
         permitted = _schema_fact_index(schema)
+        _reject_fact_injection(execution_request, permitted)
+        _reject_fact_injection(
+            {
+                key_: value
+                for key_, value in actor_identity.items()
+                if key_ not in {"id", "type", "role"}
+            },
+            permitted,
+        )
         candidates = {
             "actor.subject_kind": actor_identity.get("type"),
             "actor.principal_id": actor_identity.get("id"),
@@ -72,22 +136,7 @@ class RepositoryChangesFactProvider:
             for fact_id in permitted
             if fact_id in candidates and candidates[fact_id] is not None
         }
-        required = {
-            fact_id for fact_id, definition in permitted.items() if definition.get("required") is True
-        }
-        constraint_ir = bundle.get("constraint_ir")
-        if not isinstance(constraint_ir, Mapping):
-            raise RuntimeFactError("verified v2 authority is missing Constraint IR")
-        constraints = constraint_ir.get("constraints")
-        if not isinstance(constraints, list):
-            raise RuntimeFactError("verified v2 authority has malformed Constraint IR constraints")
-        for constraint in constraints:
-            if not isinstance(constraint, Mapping):
-                raise RuntimeFactError("verified v2 authority has malformed Constraint IR constraint")
-            referenced = constraint.get("required_runtime_facts")
-            if not isinstance(referenced, list):
-                raise RuntimeFactError("verified v2 authority has malformed required runtime facts")
-            required.update(referenced)
+        required = set(runtime_authority.required_runtime_facts)
 
         missing = sorted(required - facts.keys())
         if missing:
@@ -120,8 +169,14 @@ class RepositoryChangesFactProvider:
         )
 
 
-def runtime_fact_provider_key(authority: LoadedAuthority) -> RuntimeFactProviderKey:
-    evidence = authority.authority_evidence
+def runtime_fact_provider_key(
+    authority: LoadedAuthority | VerifiedRuntimeAuthority,
+) -> RuntimeFactProviderKey:
+    evidence = (
+        authority.evidence()
+        if isinstance(authority, VerifiedRuntimeAuthority)
+        else authority.authority_evidence
+    )
     if not isinstance(evidence, Mapping):
         raise RuntimeFactError("v2 authority is missing verified authority evidence")
     pack = evidence.get("domain_pack")
@@ -141,23 +196,14 @@ def runtime_fact_provider_key(authority: LoadedAuthority) -> RuntimeFactProvider
         raise RuntimeFactError("v2 authority evidence is missing fact-provider identity") from exc
 
 
-def _installed_repository_provider_key() -> RuntimeFactProviderKey:
-    try:
-        from governance_ledger import get_builtin_domain_pack
-
-        pack = get_builtin_domain_pack("repository-changes", "1.0.0")
-    except (ImportError, TypeError, ValueError) as exc:
-        raise RuntimeFactError(
-            "the released repository-changes/1.0.0 fact provider is unavailable"
-        ) from exc
-    schema = pack["runtime_fact_schema"]
+def _trusted_repository_provider_key() -> RuntimeFactProviderKey:
     return RuntimeFactProviderKey(
-        domain_pack_id=pack["domain_pack_id"],
-        domain_pack_version=pack["domain_pack_version"],
-        domain_pack_hash=pack["canonical_hash"],
-        schema_id=schema["schema_id"],
-        schema_version=schema["schema_version_number"],
-        schema_hash=schema["schema_hash"],
+        domain_pack_id="repository-changes",
+        domain_pack_version="1.0.0",
+        domain_pack_hash="sha256:4b6ff9a3ebf3b419151fbaa3f899012dca39ff354de8e768da05146ad0c64b80",
+        schema_id="repository-changes-runtime",
+        schema_version="1.0.0",
+        schema_hash="sha256:c1595ef8d77165a7a486151673f01eda5a93000786f47e1f048875f17eb396a1",
     )
 
 
@@ -191,5 +237,44 @@ def _validate_fact_value(fact_id: str, value: Any, definition: Mapping[str, Any]
 
 
 def _canonical_hash(value: Mapping[str, Any]) -> str:
-    canonical = json.dumps(value, sort_keys=True, separators=(",", ":"))
+    canonical = _canonical_json(value)
     return "sha256:" + hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def _canonical_json(value: Mapping[str, Any]) -> str:
+    return json.dumps(value, sort_keys=True, separators=(",", ":"))
+
+
+def _reject_fact_injection(
+    execution_request: Mapping[str, Any],
+    permitted: Mapping[str, Mapping[str, Any]],
+) -> None:
+    reserved_interfaces = {
+        "facts",
+        "runtime_facts",
+        "enforcement_facts",
+        "derived_facts",
+        "actor",
+        "proposal",
+    }
+
+    def inspect(value: Any) -> bool:
+        if isinstance(value, Mapping):
+            for key, nested in value.items():
+                if isinstance(key, str) and (
+                    key in reserved_interfaces
+                    or key in permitted
+                    or key.startswith("actor.")
+                    or key.startswith("proposal.")
+                ):
+                    return True
+                if inspect(nested):
+                    return True
+        elif isinstance(value, (list, tuple)):
+            return any(inspect(item) for item in value)
+        return False
+
+    if inspect(execution_request):
+        raise RuntimeFactError(
+            "caller-supplied enforcement facts are not accepted; Guard derives the fact set"
+        )

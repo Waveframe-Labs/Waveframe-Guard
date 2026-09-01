@@ -6,7 +6,7 @@ from pathlib import Path
 import re
 from typing import Any
 
-from .cache import AuthorityCache
+from .cache import AuthorityCache, MemoryAuthorityCache
 from .exceptions import AuthorityVerificationError, InvalidAuthorityRef
 from .resolver import AuthorityResolver
 from .types import Bundle, LoadedAuthority, RegistryEntry
@@ -27,7 +27,11 @@ def load_authority(
     registry_entry = active_resolver.resolve(authority_ref)
     cached = cache.get(registry_entry.authority_ref, registry_entry.bundle_hash or "") if cache else None
     if cached is not None:
-        return verifier.verify_registry_entry(registry_entry, cached)
+        return verifier.verify_registry_entry(
+            registry_entry,
+            cached,
+            revalidate_publication=not isinstance(cache, MemoryAuthorityCache),
+        )
 
     authority = verifier.verify(loader.load(registry_entry))
     if cache is not None:
@@ -62,6 +66,8 @@ class BundleLoader:
             receipt_payload=receipt_payload,
             receipt_hash=receipt_hash,
             receipt_path=receipt_path,
+            bundle_ref=registry_entry.bundle_ref,
+            receipt_ref=registry_entry.receipt_ref,
         )
 
 

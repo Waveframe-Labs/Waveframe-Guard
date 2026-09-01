@@ -218,20 +218,27 @@ no target requirements retain their legacy target-free behavior.
 CRI-CORE Contract Compiler v0.4.0 defines deterministic target requirements;
 Guard consumes the compiled authority artifact unchanged and enforces it. It
 does not compile policy. The native Ledger v2 path uses the base
-`governance-ledger==0.7.0` package for publication verification; it never uses
-Ledger's `guard` extra. Waveframe Cloud v0.5.5 remains compatible and unchanged.
+`governance-ledger>=0.7.0,<0.8.0` base package for publication verification; it
+tests the public 0.7.0 minimum and never uses Ledger's `guard` extra. Immutable
+artifact schema versions, not a single patch-level package pin, define the v2
+validation boundary. Waveframe Cloud v0.5.5 remains compatible and unchanged.
 
 ## Five-minute Ledger v2 repository example
 
 Ledger translates the company policy with its trusted `repository-changes/1.0.0`
-domain pack and publishes the versioned authority bundle plus receipt. Point the
-local registry at both published files, then protect the repository mutation:
+domain pack and publishes the versioned authority bundle plus receipt. Configure
+the existing resolver once for the publication registry, then protect the
+repository mutation:
 
 ```python
 from waveframe_guard import Guard
+from waveframe_guard.authority.adapters import LocalRegistryResolver
+
+resolver = LocalRegistryResolver(workspace_root=".")
 
 guard = Guard.local(
     authority="repository-authority@1.0.0",
+    authority_resolver=resolver,
     actor_identity={
         "id": "repository-agent",
         "type": "agent",
@@ -251,6 +258,11 @@ Guard verifies the complete publication before the authority is cached or used.
 It then supplies only the fact names and types selected by the published domain
 pack. Guard does not read or interpret policy prose. Fact derivation and
 enforcement are deterministic and fail closed.
+
+Application code does not open bundle or receipt files, calculate hashes,
+construct runtime facts, or call Ledger validators. The resolver retrieves the
+complete publication package by identity; physical storage layout remains an
+implementation detail behind that boundary.
 
 Native v2 support initially covers only `repository-changes/1.0.0`. Other
 domains require their own separately trusted domain pack and Guard fact
