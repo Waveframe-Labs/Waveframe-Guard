@@ -3,7 +3,7 @@
 # filetype: "python"
 # type: "test"
 # domain: "guard-sdk"
-# version: "0.15.0"
+# version: "0.16.0"
 # status: "Active"
 # author:
 #   name: "Waveframe Labs"
@@ -24,17 +24,18 @@ def test_public_guard_export_is_sdk_facade():
 
 
 def test_public_version_matches_release():
-    assert __version__ == "0.15.0"
+    assert __version__ == "0.16.0"
 
 
-def test_release_metadata_matches_v0150_release():
+def test_release_metadata_matches_v0160_release():
     pyproject = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
     citation = (REPO_ROOT / "CITATION.cff").read_text(encoding="utf-8")
     changelog = (REPO_ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
 
-    assert 'version = "0.15.0"' in pyproject
-    assert 'version: "0.15.0"' in citation
-    assert 'date-released: "2026-08-21"' in citation
+    assert 'version = "0.16.0"' in pyproject
+    assert 'version: "0.16.0"' in citation
+    assert 'date-released: "2026-09-01"' in citation
+    assert "## [0.16.0] - 2026-09-01" in changelog
     assert "## [0.15.0] - 2026-08-21" in changelog
     assert "## [0.14.0] - 2026-08-10" in changelog
-    assert changelog.index("## [Unreleased]") < changelog.index("## [0.15.0]")
+    assert changelog.index("## [Unreleased]") < changelog.index("## [0.16.0]")
