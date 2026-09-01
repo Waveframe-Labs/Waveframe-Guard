@@ -3,12 +3,17 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
-import tomllib
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
 from pathlib import Path
 
 import pytest
+
+try:
+    import tomllib
+except ModuleNotFoundError:  # Python 3.10
+    import tomli as tomllib
+
 from governance_ledger import (
     apply_policy_mapping_decision,
     finalize_domain_policy_authority,
