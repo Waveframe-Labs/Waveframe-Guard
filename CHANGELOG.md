@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-09-01 - Verified Ledger Authority Enforcement
+
+Guard verifies the exact Ledger-published authority, derives only
+schema-approved runtime facts, and binds every decision to immutable evidence.
+
 ### Added
 - Added native, provenance-complete Ledger v0.7 `authority_bundle.v2` and
   `publication_receipt.v2` loading for `repository-changes/1.0.0`.

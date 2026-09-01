@@ -8,7 +8,7 @@ Stop unsafe AI and automated actions **before they execute**.
 
 Waveframe Guard is an execution-boundary SDK. It wraps sensitive actions, resolves compiled authority, evaluates through CRI-CORE, and only runs the action when the outcome is allowed.
 
-Current release: `0.15.0`.
+Current release: `0.16.0`.
 
 ```text
 Guard does not generate actions.
@@ -20,7 +20,7 @@ Guard decides whether this action may run now.
 ## Install
 
 ```powershell
-pip install waveframe-guard
+pip install waveframe-guard==0.16.0
 ```
 
 No Ollama installation or Waveframe repository checkout is required. Keep the
@@ -68,7 +68,7 @@ mkdir guard-quickstart
 cd guard-quickstart
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install waveframe-guard
+python -m pip install waveframe-guard==0.16.0
 Invoke-WebRequest https://raw.githubusercontent.com/Waveframe-Labs/Waveframe-Guard/main/examples/external_agent_quickstart.py -OutFile quickstart.py
 ```
 
@@ -209,7 +209,7 @@ change. A compiled authority can allow `README.md` while denying the
 }
 ```
 
-Guard v0.15.0 enforces the compiler-defined target requirements against the
+Guard enforces the compiler-defined target requirements against the
 normalized target from the actual tool call before the callback runs. Rules
 are literal and case-sensitive; deny rules win. Missing or malformed scope, or
 a missing/invalid target when scope is present, fails closed. Authorities with
@@ -221,7 +221,7 @@ does not compile policy. The native Ledger v2 path uses the base
 `governance-ledger>=0.7.0,<0.8.0` base package for publication verification; it
 tests the public 0.7.0 minimum and never uses Ledger's `guard` extra. Immutable
 artifact schema versions, not a single patch-level package pin, define the v2
-validation boundary. Waveframe Cloud v0.5.5 remains compatible and unchanged.
+validation boundary.
 
 ## Five-minute Ledger v2 repository example
 
@@ -259,6 +259,13 @@ It then supplies only the fact names and types selected by the published domain
 pack. Guard does not read or interpret policy prose. Fact derivation and
 enforcement are deterministic and fail closed.
 
+Guard verifies the exact Ledger-published authority, derives only
+schema-approved runtime facts, and binds every decision to immutable evidence.
+The evidence binds the complete bundle, receipt, contract, domain pack, runtime
+fact schema, Constraint IR, and derived fact set. Execution attestations report
+callback invocation and completion truthfully; after a callback exception,
+mutation state remains unknown rather than being guessed.
+
 Application code does not open bundle or receipt files, calculate hashes,
 construct runtime facts, or call Ledger validators. The resolver retrieves the
 complete publication package by identity; physical storage layout remains an
@@ -268,6 +275,20 @@ Native v2 support initially covers only `repository-changes/1.0.0`. Other
 domains require their own separately trusted domain pack and Guard fact
 provider; finance and existing integrations continue through the legacy v1
 compatibility path.
+
+Guard does not interpret policy prose and contains no AI, NLP model, heuristic
+policy interpretation, or runtime inference. Ledger and a trusted domain pack
+produce authority. Only the repository-change fact provider is native in this
+release; other domains require separately trusted domain packs and
+deterministic fact providers. Cloud integration for the complete v2 workflow is
+follow-on work, and this release does not claim that Cloud distributes or
+consumes the full v2 chain.
+
+Ledger's published `governance-ledger[guard]==0.7.0` extra still represents its
+previously released Guard 0.15 compatibility pairing. Install
+`waveframe-guard==0.16.0` directly for this release. Guard itself depends only
+on the public Ledger base package through
+`governance-ledger>=0.7.0,<0.8.0`, never on the `guard` extra.
 
 ## Local development path
 
@@ -317,14 +338,19 @@ Guard does **not** author governance, publish authority, host organization workf
 | Ledger / Workspace | Author, review, activate, and publish deterministic governance authority. |
 | CRI-CORE | Deterministic admissibility kernel used under the Guard boundary. |
 
-The product flow is:
+The complete Ledger v2 product flow is:
 
 ```text
 Ledger translates policy with a trusted domain pack and publishes authority
-        -> Cloud distributes authority and records evidence
-        -> Guard enforces before execution
-        -> Cloud stores receipts and replay history
+        -> Guard resolves and verifies the complete publication
+        -> Guard derives typed facts and enforces before execution
+        -> Guard emits bound decision evidence and execution attestation
 ```
+
+Cloud integration for distribution and consumption of this complete v2 chain
+is follow-on work. Existing Cloud-facing v1 and finance behavior remains
+compatible; Cloud is not claimed to distribute or consume the full v2 chain in
+this release.
 
 Cloud can publish lifecycle metadata such as `active`, `superseded`, or `revoked`, but Cloud does not decide runtime admissibility. Guard evaluates locally against compiled authority.
 
