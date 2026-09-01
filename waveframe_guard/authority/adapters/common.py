@@ -22,6 +22,20 @@ def validate_registry_entry(entry: RegistryEntry) -> RegistryEntry:
         raise MalformedAuthorityRegistry(f"authority registry entry is missing bundle_hash: {entry.authority_ref}")
     if not isinstance(entry.bundle_path, Path):
         raise MalformedAuthorityRegistry(f"authority registry entry is missing bundle_path: {entry.authority_ref}")
+    if (entry.receipt_path is None) != (entry.receipt_hash is None):
+        raise MalformedAuthorityRegistry(
+            f"authority registry receipt_path and receipt_hash must be supplied together: {entry.authority_ref}"
+        )
+    if entry.receipt_path is not None and not isinstance(entry.receipt_path, Path):
+        raise MalformedAuthorityRegistry(
+            f"authority registry entry has invalid receipt_path: {entry.authority_ref}"
+        )
+    if entry.receipt_hash is not None and (
+        not isinstance(entry.receipt_hash, str) or not entry.receipt_hash
+    ):
+        raise MalformedAuthorityRegistry(
+            f"authority registry entry has invalid receipt_hash: {entry.authority_ref}"
+        )
     if not isinstance(entry.lifecycle_state, str) or not entry.lifecycle_state:
         raise MalformedAuthorityRegistry(f"authority registry entry is missing lifecycle_state: {entry.authority_ref}")
     if entry.lifecycle_state not in CANONICAL_LIFECYCLE_STATES:

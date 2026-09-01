@@ -109,9 +109,16 @@ change crosses the system boundary and must be moved out of Guard.
 
 ## Intake rule
 
-Guard only accepts `compiled_authority_contract.v1` at the authority boundary.
-Raw policy text, semantic extraction payloads, and authority bundles are rejected
-unless they have already been compiled into that contract form upstream.
+Guard accepts `compiled_authority_contract.v1` through the legacy compatibility
+boundary. It accepts `compiled_authority_contract.v2` only after the complete
+Ledger bundle and publication receipt have been verified; direct v2 contract
+injection is rejected. Raw policy text and semantic extraction payloads remain
+inadmissible.
+
+Ledger defines domain vocabulary and the runtime fact schema. Guard owns the
+trusted, deterministic binding from an intercepted proposal to those selected
+facts. That binding may reject, type-check, and supply facts; it must not parse
+policy prose, guess defaults, or create a global cross-domain lexicon.
 
 Execution requests must also arrive through a normalization boundary. Guard may
 call a Proposal Normalizer adapter when available, but Guard must not duplicate

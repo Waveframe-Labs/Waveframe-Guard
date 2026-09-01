@@ -68,8 +68,10 @@ registry entry, including the current lifecycle state and expected bundle hash,
 before deciding whether a verified authority can be reused.
 
 Cache hits may skip bundle loading and cryptographic re-verification, but they
-must not skip lifecycle enforcement. A cached authority is loadable only when
-the freshly resolved registry entry still permits it.
+must not skip lifecycle enforcement. For v2, Guard re-runs Ledger's public
+bundle and receipt validators against the cached publication artifacts before
+reuse. A cached authority is loadable only when the freshly resolved registry
+entry still permits it and every publication identity still matches.
 
 The initial cache adapter is `MemoryAuthorityCache`. It stores verified
 `LoadedAuthority` objects only after successful verification and returns
@@ -120,10 +122,26 @@ The canonical bundle hash is the SHA-256 of the canonical JSON payload:
 json.dumps(payload, sort_keys=True, separators=(",", ":"))
 ```
 
-Guard consumes Ledger `authority_bundle.v1` objects. A loadable bundle must use
+Guard retains the Ledger `authority_bundle.v1` compatibility path. A loadable v1 bundle must use
 `schema_version: authority_bundle.v1` and expose the runtime contract at
 `authority_contract`. Guard does not accept the former Guard-local
 `published_authority_bundle.v1` / `contract` fixture shape at this boundary.
+
+The native v2 path requires all of the following before use or caching:
+
+- an `authority_bundle.v2` and matching `publication_receipt.v2`
+- registry `receipt_path` and `receipt_hash` fields in addition to the existing
+  bundle and contract bindings
+- successful public Ledger `validate_authority_bundle` and
+  `validate_publication_receipt` calls
+- successful public Ledger runtime-fact compatibility validation
+- exact authority, bundle, receipt, contract, domain-pack, fact-schema, and
+  registry identity/hash agreement
+
+Guard never extracts an embedded v2 contract first and validates it later. It
+never downgrades v2 to v1, infers missing lineage, or copies Ledger's validator
+logic. The initial trusted fact provider is keyed to the immutable
+`repository-changes/1.0.0` pack and its exact published runtime schema.
 
 ## Loader Invariant
 

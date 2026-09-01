@@ -216,9 +216,46 @@ a missing/invalid target when scope is present, fails closed. Authorities with
 no target requirements retain their legacy target-free behavior.
 
 CRI-CORE Contract Compiler v0.4.0 defines deterministic target requirements;
-Guard v0.15.0 consumes the compiled authority artifact and enforces them. It
-does not compile policy or add a compiler runtime dependency. Waveframe Cloud
-v0.5.5 remains compatible and unchanged.
+Guard consumes the compiled authority artifact unchanged and enforces it. It
+does not compile policy. The native Ledger v2 path uses the base
+`governance-ledger==0.7.0` package for publication verification; it never uses
+Ledger's `guard` extra. Waveframe Cloud v0.5.5 remains compatible and unchanged.
+
+## Five-minute Ledger v2 repository example
+
+Ledger translates the company policy with its trusted `repository-changes/1.0.0`
+domain pack and publishes the versioned authority bundle plus receipt. Point the
+local registry at both published files, then protect the repository mutation:
+
+```python
+from waveframe_guard import Guard
+
+guard = Guard.local(
+    authority="repository-authority@1.0.0",
+    actor_identity={
+        "id": "repository-agent",
+        "type": "agent",
+        "role": "repository-maintainer",
+    },
+)
+
+@guard.tool(action="modify", target="path")
+def write_file(path: str):
+    return your_existing_write(path)
+
+write_file("README.md")                   # allowed; callback runs once
+write_file("deployment/production.yml")  # blocked; callback never runs
+```
+
+Guard verifies the complete publication before the authority is cached or used.
+It then supplies only the fact names and types selected by the published domain
+pack. Guard does not read or interpret policy prose. Fact derivation and
+enforcement are deterministic and fail closed.
+
+Native v2 support initially covers only `repository-changes/1.0.0`. Other
+domains require their own separately trusted domain pack and Guard fact
+provider; finance and existing integrations continue through the legacy v1
+compatibility path.
 
 ## Local development path
 
@@ -238,10 +275,12 @@ def wire_transfer(account_id, amount):
     return perform_transfer(account_id, amount)
 ```
 
-`Guard.local(authority=...)` loads a verified Ledger `authority_bundle.v1` from
-the local authority registry. Direct `contract=...`, `authorities={...}`, and
-`authority_loader=...` inputs remain available for advanced integrations and
-compatibility.
+`Guard.local(authority=...)` loads either a legacy Ledger `authority_bundle.v1`
+or a provenance-complete Ledger `authority_bundle.v2`. A v2 registry entry must
+also name the matching publication receipt and its canonical hash; a standalone
+or directly injected v2 contract is rejected. Direct `contract=...`,
+`authorities={...}`, and `authority_loader=...` inputs remain available for v1
+advanced integrations and compatibility.
 
 ## What Guard owns
 
@@ -261,7 +300,7 @@ Guard does **not** author governance, publish authority, host organization workf
 
 | Product | Responsibility |
 | --- | --- |
-| Guard | Enforce locally before execution. |
+| Guard | Verify published authority, derive schema-approved runtime facts, and enforce locally before execution. |
 | Cloud | Store authority, evidence, receipts, replay packages, lifecycle state, and continuity records. |
 | Ledger / Workspace | Author, review, activate, and publish deterministic governance authority. |
 | CRI-CORE | Deterministic admissibility kernel used under the Guard boundary. |
@@ -269,13 +308,17 @@ Guard does **not** author governance, publish authority, host organization workf
 The product flow is:
 
 ```text
-Ledger publishes authority
+Ledger translates policy with a trusted domain pack and publishes authority
         -> Cloud distributes authority and records evidence
         -> Guard enforces before execution
         -> Cloud stores receipts and replay history
 ```
 
 Cloud can publish lifecycle metadata such as `active`, `superseded`, or `revoked`, but Cloud does not decide runtime admissibility. Guard evaluates locally against compiled authority.
+
+The selected domain pack owns the vocabulary and runtime fact schema. Guard
+supplies those facts from the intercepted proposal and never interprets policy
+language.
 
 See the single authoritative [release compatibility matrix](docs/getting-started/README.md#release-compatibility-matrix) for minimum, recommended, and release-tested pairings.
 

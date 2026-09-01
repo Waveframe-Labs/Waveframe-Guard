@@ -16,6 +16,7 @@ GUARD_ARTIFACT_MANIFEST_V1 = "guard_artifact_manifest.v1"
 GUARD_REPLAY_RECORD_V1 = "guard_replay_record.v1"
 GUARD_REPLAY_RESULT_V1 = "guard_replay_result.v1"
 CLOUD_PRESERVATION_METADATA_V1 = "guard_cloud_preservation_metadata.v1"
+GUARD_EXECUTION_ATTESTATION_V1 = "guard_execution_attestation.v1"
 
 REPLAY_MISMATCH_CLASSES = {
     "contract_drift",
@@ -50,6 +51,7 @@ class LocalEvaluationStore:
         self.receipt_root = self.root / "receipts"
         self.manifest_root = self.root / "manifests"
         self.replay_root = self.root / "replays"
+        self.execution_attestation_root = self.root / "execution-attestations"
 
     def save_evaluation(
         self,
@@ -179,7 +181,7 @@ class LocalEvaluationStore:
         original_reasons = _artifact_replay_failure_reasons(record)
         replayed = evaluate_runtime(
             compiled_authority=inputs["compiled_authority"],
-            execution_request=inputs["execution_request"],
+            execution_request=inputs.get("evaluated_execution_request", inputs["execution_request"]),
             actor_identity=runtime_evidence["actor_identity"],
             continuity_state=inputs.get("continuity_posture", runtime_evidence.get("continuity_snapshot")),
             replay_posture=runtime_evidence.get("replay_evidence"),
@@ -190,6 +192,10 @@ class LocalEvaluationStore:
             },
             evaluation_time=runtime_evidence["timestamp_source"]["timestamp"],
             start_sequence=_start_sequence(record["evaluation"]),
+            _verified_v2_authority=(
+                inputs["compiled_authority"].get("schema_version")
+                == "compiled_authority_contract.v2"
+            ),
         )
         outcome_matches = (
             replayed["enforcement_outcome"]["outcome_hash"]
@@ -240,6 +246,16 @@ class LocalEvaluationStore:
         path.write_text(json.dumps(record, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         return path
 
+    def export_execution_attestation(self, attestation: dict[str, Any]) -> Path:
+        if attestation.get("schema_version") != GUARD_EXECUTION_ATTESTATION_V1:
+            raise UnsupportedArtifactSchemaError(
+                f"unsupported execution attestation schema: {attestation.get('schema_version')}"
+            )
+        self.execution_attestation_root.mkdir(parents=True, exist_ok=True)
+        path = self.execution_attestation_root / f"{attestation['run_id']}.json"
+        path.write_text(json.dumps(attestation, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        return path
+
 
 def build_enforcement_receipt(
     *,
@@ -266,6 +282,9 @@ def build_enforcement_receipt(
         "continuity_posture_hash": input_hashes["continuity_posture_hash"],
         "replay_basis_hash": stable_hash(replay_basis),
     }
+    if "authority_evidence_hash" in input_hashes:
+        run_basis["authority_evidence_hash"] = input_hashes["authority_evidence_hash"]
+        run_basis["runtime_facts_hash"] = input_hashes["runtime_facts_hash"]
     receipt = {
         "schema_version": ENFORCEMENT_RECEIPT_V1,
         "run_id": stable_id("guard_run", run_basis),
@@ -323,6 +342,10 @@ def build_artifact_manifest(
             "runtime_dependencies_hash",
         ],
     }
+    if "authority_evidence_hash" in receipt["input_hashes"]:
+        manifest["lineage_continuity_fields"].extend(
+            ["authority_evidence_hash", "runtime_facts_hash"]
+        )
     manifest["manifest_hash"] = stable_hash(manifest)
     return manifest
 
@@ -369,6 +392,10 @@ def _artifact_replay_failure_reasons(record: dict[str, Any]) -> list[dict[str, A
     _compare_hash(reasons, "evidence_mutation", "approvals", recorded_input_hashes.get("approval_evidence_hash"), current_input_hashes.get("approval_evidence_hash"), "Approval evidence changed after receipt emission.")
     _compare_hash(reasons, "evidence_mutation", "timestamp_source", recorded_input_hashes.get("timestamp_source_hash"), current_input_hashes.get("timestamp_source_hash"), "Timestamp source changed after receipt emission.")
     _compare_hash(reasons, "evidence_mutation", "runtime_dependencies", recorded_input_hashes.get("runtime_dependencies_hash"), current_input_hashes.get("runtime_dependencies_hash"), "Runtime dependencies changed after receipt emission.")
+    if "authority_evidence_hash" in recorded_input_hashes:
+        _compare_hash(reasons, "contract_drift", "authority_evidence", recorded_input_hashes.get("authority_evidence_hash"), current_input_hashes.get("authority_evidence_hash"), "Verified authority evidence changed after receipt emission.")
+        _compare_hash(reasons, "evidence_mutation", "runtime_facts", recorded_input_hashes.get("runtime_facts_hash"), current_input_hashes.get("runtime_facts_hash"), "Derived runtime facts changed after receipt emission.")
+        _compare_hash(reasons, "request_mismatch", "evaluated_execution_request", recorded_input_hashes.get("evaluated_execution_request_hash"), current_input_hashes.get("evaluated_execution_request_hash"), "Fact-projected execution request changed after receipt emission.")
     _compare_hash(reasons, "continuity_mismatch", "continuity_posture", recorded_input_hashes.get("continuity_posture_hash"), current_input_hashes.get("continuity_posture_hash"), "Lineage continuity changed after receipt emission.")
     _compare_hash(reasons, "chronology_mutation", "chronology", receipt.get("chronology_hash"), stable_hash(evaluation.get("telemetry_events", [])), "Generated execution chronology changed after receipt emission.")
     _compare_hash(reasons, "chronology_mutation", "chronology_event_ids", stable_hash(receipt.get("chronology_event_ids", [])), stable_hash([event.get("event_id") for event in evaluation.get("telemetry_events", [])]), "Chronology event identity changed after receipt emission.")
@@ -472,7 +499,7 @@ def _without_hash(payload: dict[str, Any], hash_key: str) -> dict[str, Any]:
 
 def _input_hashes(inputs: dict[str, Any]) -> dict[str, str]:
     runtime_evidence = inputs["runtime_evidence"]
-    return {
+    hashes = {
         "compiled_authority_hash": stable_hash(inputs["compiled_authority"]),
         "execution_request_hash": stable_hash(inputs["execution_request"]),
         "runtime_evidence_hash": stable_hash(runtime_evidence),
@@ -486,11 +513,18 @@ def _input_hashes(inputs: dict[str, Any]) -> dict[str, str]:
         "timestamp_source_hash": stable_hash(runtime_evidence.get("timestamp_source", {})),
         "runtime_dependencies_hash": stable_hash(runtime_evidence.get("runtime_dependencies", [])),
     }
+    if "authority_evidence" in inputs:
+        hashes["authority_evidence_hash"] = stable_hash(inputs["authority_evidence"])
+        hashes["runtime_facts_hash"] = stable_hash(inputs.get("runtime_facts", {}))
+        hashes["evaluated_execution_request_hash"] = stable_hash(
+            inputs.get("evaluated_execution_request", {})
+        )
+    return hashes
 
 
 def _replay_basis(inputs: dict[str, Any], evaluation: dict[str, Any]) -> dict[str, Any]:
     runtime_evidence = inputs["runtime_evidence"]
-    return {
+    basis = {
         "compiled_authority": inputs["compiled_authority"],
         "execution_request": inputs["execution_request"],
         "actor_identity": runtime_evidence["actor_identity"],
@@ -504,6 +538,11 @@ def _replay_basis(inputs: dict[str, Any], evaluation: dict[str, Any]) -> dict[st
         "evaluation_time": runtime_evidence["timestamp_source"]["timestamp"],
         "start_sequence": _start_sequence(evaluation),
     }
+    if "authority_evidence" in inputs:
+        basis["authority_evidence"] = inputs["authority_evidence"]
+        basis["runtime_facts"] = inputs.get("runtime_facts", {})
+        basis["evaluated_execution_request"] = inputs.get("evaluated_execution_request", {})
+    return basis
 
 
 def _lineage_continuity_basis(
@@ -514,7 +553,7 @@ def _lineage_continuity_basis(
     chronology_hash: str,
 ) -> dict[str, Any]:
     outcome = evaluation["enforcement_outcome"]
-    return {
+    basis = {
         "authority_ref": outcome["authority_ref"],
         "contract_hash": inputs["compiled_authority"].get("contract_hash"),
         "execution_request_hash": input_hashes["execution_request_hash"],
@@ -526,6 +565,10 @@ def _lineage_continuity_basis(
         "evaluation_trace_hash": evaluation["evaluation_trace"]["trace_hash"],
         "chronology_hash": chronology_hash,
     }
+    if "authority_evidence_hash" in input_hashes:
+        basis["authority_evidence_hash"] = input_hashes["authority_evidence_hash"]
+        basis["runtime_facts_hash"] = input_hashes["runtime_facts_hash"]
+    return basis
 
 
 def _evaluation_timestamp(evaluation: dict[str, Any]) -> str:

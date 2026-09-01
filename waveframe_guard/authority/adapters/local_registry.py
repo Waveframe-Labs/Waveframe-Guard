@@ -88,14 +88,35 @@ def _registry_entry_from_mapping(
     bundle_path = Path(bundle_path_value)
     if not bundle_path.is_absolute():
         bundle_path = workspace_root / bundle_path
+    receipt_path_value = entry.get("receipt_path") or entry.get("publication_receipt_path")
+    receipt_hash = entry.get("receipt_hash") or entry.get("publication_receipt_hash")
+    if (receipt_path_value is None) != (receipt_hash is None):
+        raise MalformedAuthorityRegistry(
+            f"authority registry receipt_path and receipt_hash must be supplied together: {authority_ref}"
+        )
+    receipt_path = None
+    if receipt_path_value is not None:
+        if not isinstance(receipt_path_value, str) or not receipt_path_value:
+            raise MalformedAuthorityRegistry(
+                f"authority registry entry has invalid receipt_path: {authority_ref}"
+            )
+        if not isinstance(receipt_hash, str) or not receipt_hash:
+            raise MalformedAuthorityRegistry(
+                f"authority registry entry has invalid receipt_hash: {authority_ref}"
+            )
+        receipt_path = Path(receipt_path_value)
+        if not receipt_path.is_absolute():
+            receipt_path = workspace_root / receipt_path
     return RegistryEntry(
         authority_ref=authority_ref,
         contract_id=contract_id,
         contract_version=contract_version,
         contract_hash=contract_hash,
         bundle_path=bundle_path,
+        receipt_path=receipt_path,
         publication_id=entry.get("publication_id"),
         bundle_hash=bundle_hash,
+        receipt_hash=receipt_hash,
         lifecycle_state=lifecycle_state,
         published_at=entry.get("published_at"),
         published_by=entry.get("published_by"),

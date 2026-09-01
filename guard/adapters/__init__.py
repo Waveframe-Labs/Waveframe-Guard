@@ -1,5 +1,6 @@
 from .compiled_authority import (
     COMPILED_AUTHORITY_CONTRACT_V1,
+    COMPILED_AUTHORITY_CONTRACT_V2,
     CompiledAuthorityIntakeError,
     intake_compiled_authority,
 )
@@ -17,6 +18,7 @@ from .upstream_semantics import (
 
 __all__ = [
     "COMPILED_AUTHORITY_CONTRACT_V1",
+    "COMPILED_AUTHORITY_CONTRACT_V2",
     "CompiledAuthorityIntakeError",
     "intake_compiled_authority",
     "NORMALIZED_EXECUTION_REQUEST_V1",

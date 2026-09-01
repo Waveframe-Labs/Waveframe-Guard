@@ -18,6 +18,8 @@ class RegistryEntry:
     published_at: Optional[str] = None
     published_by: Optional[str] = None
     raw: Mapping[str, Any] | None = None
+    receipt_path: Optional[Path] = None
+    receipt_hash: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -26,6 +28,9 @@ class Bundle:
     payload: Mapping[str, Any]
     bundle_hash: str
     bundle_path: Path
+    receipt_payload: Mapping[str, Any] | None = None
+    receipt_hash: Optional[str] = None
+    receipt_path: Optional[Path] = None
 
 
 @dataclass(frozen=True)
@@ -39,3 +44,11 @@ class LoadedAuthority:
     lifecycle_state: str
     published_at: Optional[str]
     published_by: Optional[str]
+    schema_version: str = "authority_bundle.v1"
+    receipt_id: Optional[str] = None
+    receipt_hash: Optional[str] = None
+    receipt_path: Optional[Path] = None
+    authority_bundle: Mapping[str, Any] | None = None
+    publication_receipt: Mapping[str, Any] | None = None
+    runtime_fact_schema: Mapping[str, Any] | None = None
+    authority_evidence: Mapping[str, Any] | None = None

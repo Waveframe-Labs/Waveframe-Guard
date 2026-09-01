@@ -4,6 +4,7 @@ from typing import Any
 
 
 COMPILED_AUTHORITY_CONTRACT_V1 = "compiled_authority_contract.v1"
+COMPILED_AUTHORITY_CONTRACT_V2 = "compiled_authority_contract.v2"
 
 REQUIRED_COMPILED_AUTHORITY_FIELDS = {
     "schema_version",
@@ -31,24 +32,32 @@ class CompiledAuthorityIntakeError(ValueError):
     pass
 
 
-def intake_compiled_authority(payload: dict[str, Any]) -> dict[str, Any]:
+def intake_compiled_authority(
+    payload: dict[str, Any],
+    *,
+    _verified_v2_authority: bool = False,
+) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise CompiledAuthorityIntakeError("compiled authority must be an object")
-    _reject_uncompiled_payload(payload)
+    _reject_uncompiled_payload(payload, verified_v2_authority=_verified_v2_authority)
     _validate_required_fields(payload)
     return dict(payload)
 
 
-def _reject_uncompiled_payload(payload: dict[str, Any]) -> None:
+def _reject_uncompiled_payload(payload: dict[str, Any], *, verified_v2_authority: bool) -> None:
     present_raw_fields = sorted(field for field in RAW_POLICY_FIELDS if field in payload)
     if present_raw_fields:
         raise CompiledAuthorityIntakeError(
             "Guard requires compiled authority; raw policy or semantic payload fields "
             f"are not admissible: {', '.join(present_raw_fields)}"
         )
-    if payload.get("schema_version") != COMPILED_AUTHORITY_CONTRACT_V1:
+    accepted = {COMPILED_AUTHORITY_CONTRACT_V1}
+    if verified_v2_authority:
+        accepted.add(COMPILED_AUTHORITY_CONTRACT_V2)
+    if payload.get("schema_version") not in accepted:
         raise CompiledAuthorityIntakeError(
-            f"compiled authority schema_version must be {COMPILED_AUTHORITY_CONTRACT_V1}"
+            "compiled authority schema_version must be "
+            + " or ".join(sorted(accepted))
         )
 
 

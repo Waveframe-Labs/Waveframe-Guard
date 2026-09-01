@@ -20,6 +20,15 @@ The saved evaluation contains:
   - `guard_runtime_evidence_model.v1`
   - runtime dependencies
   - optional continuity posture
+
+For native v2 decisions the same saved evaluation also carries compact
+`guard_verified_authority_evidence.v1` identities, the actual derived runtime
+fact set and its canonical hash, and the fact-projected request used for
+evaluation. The full Ledger bundle and receipt remain at the authority-loading
+boundary and are not duplicated into every event. Receipt input hashes bind the
+compact authority evidence and fact set. A separate
+`guard_execution_attestation.v1` records the decision, execution status, and
+whether the mutation callback ran.
 - `evaluation`
   - runtime admissibility result
   - runtime posture

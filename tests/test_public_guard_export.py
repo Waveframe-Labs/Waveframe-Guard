@@ -12,7 +12,6 @@
 # ---
 
 from pathlib import Path
-import re
 
 from waveframe_guard import Guard, __version__
 
@@ -38,4 +37,4 @@ def test_release_metadata_matches_v0150_release():
     assert 'date-released: "2026-08-21"' in citation
     assert "## [0.15.0] - 2026-08-21" in changelog
     assert "## [0.14.0] - 2026-08-10" in changelog
-    assert re.search(r"## \[Unreleased\]\s*\n## \[0.15.0\]", changelog)
+    assert changelog.index("## [Unreleased]") < changelog.index("## [0.15.0]")
