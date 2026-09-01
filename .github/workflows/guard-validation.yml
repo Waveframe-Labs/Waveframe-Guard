@@ -1,0 +1,154 @@
+name: Guard validation
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: guard-validation-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+  PIP_NO_INPUT: "1"
+
+jobs:
+  tests:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Tests — Python 3.10 / Ubuntu
+            os: ubuntu-latest
+            python: "3.10"
+            compatibility_baseline: true
+          - name: Tests — Python 3.14 / Ubuntu
+            os: ubuntu-latest
+            python: "3.14"
+            compatibility_baseline: false
+          - name: Tests — Python 3.14 / Windows
+            os: windows-latest
+            python: "3.14"
+            compatibility_baseline: false
+
+    steps:
+      - name: Check out the exact commit
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Set up Python ${{ matrix.python }}
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install pinned packaging and test tools
+        run: >-
+          python -m pip install --index-url https://pypi.org/simple
+          "pip==26.1.1" "setuptools==82.0.1" "wheel==0.48.0"
+          "build==1.6.0" "pytest==9.0.3" "twine==6.2.0"
+
+      - name: Install minimum public compatibility dependencies
+        if: matrix.compatibility_baseline
+        run: >-
+          python -m pip install --index-url https://pypi.org/simple --only-binary=:all:
+          "cricore==0.13.0" "cricore-proposal-normalizer==0.2.0"
+          "governance-ledger==0.5.0" "cricore-contract-compiler==0.4.0"
+
+      - name: Install Guard through the supported development path
+        run: >-
+          python -m pip install --index-url https://pypi.org/simple
+          --no-build-isolation --editable ".[test]"
+
+      - name: Check installed dependency consistency
+        run: python -m pip check
+
+      - name: Run the complete test suite
+        run: python -m pytest
+
+      - name: Compile Python sources and tests
+        run: python -m compileall -q guard waveframe_guard tests examples tools
+
+  package:
+    name: Package acceptance
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out the exact commit
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Set up Python 3.14
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.14"
+
+      - name: Install pinned packaging tools
+        run: >-
+          python -m pip install --index-url https://pypi.org/simple
+          "pip==26.1.1" "setuptools==82.0.1" "wheel==0.48.0"
+          "build==1.6.0" "twine==6.2.0"
+
+      - name: Build wheel and source distribution
+        run: python -m build --no-isolation --outdir ci-dist
+
+      - name: Inspect distributions and run clean-wheel acceptance
+        run: python tools/acceptance/package_acceptance.py --dist-dir ci-dist
+
+  governance:
+    name: Governance and repository integrity
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out the exact commit and comparison history
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python 3.14
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.14"
+
+      - name: Install pinned packaging and test tools
+        run: >-
+          python -m pip install --index-url https://pypi.org/simple
+          "pip==26.1.1" "setuptools==82.0.1" "wheel==0.48.0"
+          "build==1.6.0" "pytest==9.0.3" "twine==6.2.0"
+
+      - name: Install Guard through the supported development path
+        run: >-
+          python -m pip install --index-url https://pypi.org/simple
+          --no-build-isolation --editable ".[test]"
+
+      - name: Validate diff, metadata, schemas, secrets, and repository paths
+        env:
+          GUARD_DIFF_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: python tools/validate_repository.py --diff-base "$GUARD_DIFF_BASE"
+
+      - name: Run governance and schema boundary checks
+        run: >-
+          python -m pytest -q
+          tests/test_dependency_boundaries.py
+          tests/test_guard_integration_hardening.py
+          tests/test_authority_loader.py
+          tests/test_guard_artifact_semantics.py
+          tests/test_target_scope_enforcement.py
