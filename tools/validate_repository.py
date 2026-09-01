@@ -5,8 +5,12 @@ import json
 import re
 import subprocess
 import sys
-import tomllib
 from pathlib import Path, PurePosixPath
+
+try:
+    import tomllib
+except ModuleNotFoundError:  # Python 3.10
+    import tomli as tomllib
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -34,14 +38,21 @@ REQUIRED_FILES = {
     "pyproject.toml",
     "waveframe_guard/schemas.py",
 }
-PUBLIC_RUNTIME_DEPENDENCIES = {
+APPROVED_JSON_FILES = {
+    "contracts/finance-core-0.3.1.contract.json",
+    "contracts/finance-policy-1.0.0.authority-bundle.json",
+    "contracts/finance-policy-1.0.0.contract.json",
+    "contracts/index.json",
+    "examples/sdk/finance-policy.json",
+}
+EXPECTED_PUBLIC_RUNTIME_REQUIREMENTS = {
     "cricore",
     "cricore-proposal-normalizer",
+    "governance-ledger>=0.7.0,<0.8.0",
     "requests",
 }
 PINNED_TEST_DEPENDENCIES = {
     "cricore-contract-compiler==0.4.0",
-    "governance-ledger==0.5.0",
 }
 SECRET_PATTERNS = {
     "AWS access key": re.compile(rb"AKIA[0-9A-Z]{16}"),
@@ -115,12 +126,23 @@ def _validate_paths(tracked: list[PurePosixPath], failures: list[str]) -> None:
 
 def _validate_json(tracked: list[PurePosixPath], failures: list[str]) -> int:
     json_paths = [path for path in tracked if path.suffix.lower() == ".json"]
+    _validate_json_contract(json_paths, failures)
     for path in json_paths:
         try:
             json.loads((REPO_ROOT / Path(*path.parts)).read_text(encoding="utf-8"))
         except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
             failures.append(f"invalid JSON/schema input {path}: {exc}")
     return len(json_paths)
+
+
+def _validate_json_contract(json_paths: list[PurePosixPath], failures: list[str]) -> None:
+    actual = {path.as_posix() for path in json_paths}
+    unexpected = actual - APPROVED_JSON_FILES
+    missing = APPROVED_JSON_FILES - actual
+    if unexpected:
+        failures.append(f"unapproved JSON/schema files are tracked: {sorted(unexpected)}")
+    if missing:
+        failures.append(f"approved JSON/schema files are missing: {sorted(missing)}")
 
 
 def _validate_secrets(tracked: list[PurePosixPath], failures: list[str]) -> None:
@@ -152,15 +174,7 @@ def _validate_metadata(failures: list[str]) -> int:
         failures.append("project.requires-python must declare the supported >=3.10 boundary")
 
     dependencies = project.get("dependencies", [])
-    normalized = {_dependency_name(item) for item in dependencies if isinstance(item, str)}
-    if normalized != PUBLIC_RUNTIME_DEPENDENCIES:
-        failures.append(
-            "public runtime dependencies changed unexpectedly: "
-            f"expected {sorted(PUBLIC_RUNTIME_DEPENDENCIES)}, found {sorted(normalized)}"
-        )
-    for dependency in dependencies:
-        if not isinstance(dependency, str) or _is_non_public_reference(dependency):
-            failures.append(f"runtime dependency must resolve from a public package index: {dependency!r}")
+    _validate_runtime_dependencies(dependencies, failures)
 
     extras = project.get("optional-dependencies", {})
     test_dependencies = set(extras.get("test", []))
@@ -202,6 +216,47 @@ def _validate_diff(diff_base: str, failures: list[str]) -> None:
 
 def _dependency_name(requirement: str) -> str:
     return re.split(r"[<>=!~;\s\[]", requirement.strip(), maxsplit=1)[0].lower().replace("_", "-")
+
+
+def _validate_runtime_dependencies(dependencies: object, failures: list[str]) -> None:
+    if not isinstance(dependencies, list):
+        failures.append("project.dependencies must be an array")
+        return
+
+    actual: list[str] = []
+    for dependency in dependencies:
+        if not isinstance(dependency, str):
+            failures.append(f"runtime dependency must be a string: {dependency!r}")
+            continue
+        if _is_non_public_reference(dependency):
+            failures.append(f"runtime dependency must resolve from a public package index: {dependency!r}")
+        try:
+            actual.append(_normalize_requirement(dependency))
+        except ValueError as exc:
+            failures.append(f"invalid runtime dependency {dependency!r}: {exc}")
+
+    expected = {_normalize_requirement(item) for item in EXPECTED_PUBLIC_RUNTIME_REQUIREMENTS}
+    if len(actual) != len(set(actual)):
+        failures.append("public runtime dependencies contain a duplicate requirement")
+    if set(actual) != expected:
+        failures.append(
+            "public runtime dependency contract changed unexpectedly: "
+            f"expected {sorted(expected)}, found {sorted(set(actual))}"
+        )
+
+
+def _normalize_requirement(requirement: str) -> str:
+    compact = requirement.replace(" ", "")
+    if ";" in compact:
+        raise ValueError("environment markers are not approved for runtime dependencies")
+    match = re.fullmatch(r"([A-Za-z0-9_.-]+)(\[[A-Za-z0-9_.-]+(?:,[A-Za-z0-9_.-]+)*\])?(.*)", compact)
+    if match is None:
+        raise ValueError("unsupported requirement syntax")
+    name = match.group(1).lower().replace("_", "-")
+    extras = (match.group(2) or "").lower().replace("_", "-")
+    specifiers = match.group(3)
+    normalized_specifiers = ",".join(sorted(filter(None, specifiers.split(","))))
+    return f"{name}{extras}{normalized_specifiers}"
 
 
 def _is_non_public_reference(requirement: str) -> bool:

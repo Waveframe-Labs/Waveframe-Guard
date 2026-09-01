@@ -6,7 +6,7 @@ from pathlib import Path
 import re
 from typing import Any
 
-from .cache import AuthorityCache
+from .cache import AuthorityCache, MemoryAuthorityCache
 from .exceptions import AuthorityVerificationError, InvalidAuthorityRef
 from .resolver import AuthorityResolver
 from .types import Bundle, LoadedAuthority, RegistryEntry
@@ -27,7 +27,11 @@ def load_authority(
     registry_entry = active_resolver.resolve(authority_ref)
     cached = cache.get(registry_entry.authority_ref, registry_entry.bundle_hash or "") if cache else None
     if cached is not None:
-        return verifier.verify_registry_entry(registry_entry, cached)
+        return verifier.verify_registry_entry(
+            registry_entry,
+            cached,
+            revalidate_publication=not isinstance(cache, MemoryAuthorityCache),
+        )
 
     authority = verifier.verify(loader.load(registry_entry))
     if cache is not None:
@@ -38,11 +42,32 @@ def load_authority(
 class BundleLoader:
     def load(self, registry_entry: RegistryEntry) -> Bundle:
         payload = _read_json(registry_entry.bundle_path)
+        schema_version = payload.get("schema_version")
+        receipt_payload = None
+        receipt_hash = None
+        receipt_path = registry_entry.receipt_path
+        if receipt_path is not None:
+            receipt_payload = _read_json(receipt_path, artifact="publication receipt")
+            receipt_hash_value = receipt_payload.get("receipt_hash")
+            receipt_hash = receipt_hash_value if isinstance(receipt_hash_value, str) else None
+        if schema_version == "authority_bundle.v2" and receipt_payload is None:
+            raise AuthorityVerificationError(
+                f"authority_bundle.v2 requires a publication receipt: {registry_entry.authority_ref}"
+            )
         return Bundle(
             registry_entry=registry_entry,
             payload=payload,
             bundle_path=registry_entry.bundle_path,
-            bundle_hash=f"sha256:{_canonical_hash(payload)}",
+            bundle_hash=(
+                str(payload.get("bundle_hash") or "")
+                if schema_version == "authority_bundle.v2"
+                else f"sha256:{_canonical_hash(payload)}"
+            ),
+            receipt_payload=receipt_payload,
+            receipt_hash=receipt_hash,
+            receipt_path=receipt_path,
+            bundle_ref=registry_entry.bundle_ref,
+            receipt_ref=registry_entry.receipt_ref,
         )
 
 
@@ -61,11 +86,11 @@ def parse_authority_ref(authority_ref: str) -> tuple[str, str]:
     return name, version
 
 
-def _read_json(path: Path) -> dict[str, Any]:
+def _read_json(path: Path, *, artifact: str = "authority bundle") -> dict[str, Any]:
     with path.open("r", encoding="utf-8") as f:
         payload = json.load(f)
     if not isinstance(payload, dict):
-        raise AuthorityVerificationError("authority bundle must be a JSON object")
+        raise AuthorityVerificationError(f"{artifact} must be a JSON object")
     return payload
 
 

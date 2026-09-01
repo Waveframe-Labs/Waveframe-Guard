@@ -20,6 +20,27 @@ The saved evaluation contains:
   - `guard_runtime_evidence_model.v1`
   - runtime dependencies
   - optional continuity posture
+
+For native v2 decisions the same saved evaluation also carries compact
+`guard_verified_authority_evidence.v1` identities, the actual derived runtime
+fact set and its canonical hash, and the fact-projected request used for
+evaluation. The full Ledger bundle and receipt remain at the authority-loading
+boundary and are not duplicated into every event. Receipt input hashes bind the
+compact authority evidence and fact set. A separate Guard-owned
+`guard_execution_attestation.v1` distinguishes the Guard decision, callback
+invocation, callback completion, execution outcome, and a three-state mutation
+status (`not_performed`, `executed`, or `unknown`). Callback exceptions and
+incomplete/interrupted execution use `unknown`; Guard never encodes unknown as
+false.
+
+This separate schema is necessary because the saved evaluation and enforcement
+receipt are produced before the protected callback and cannot truthfully
+describe post-decision execution. Its canonical identity is the SHA-256 hash of
+sorted compact JSON excluding `attestation_hash`; load/export validates the
+exact state model and rejects tampering. It binds the saved receipt, compact
+authority evidence, and exact derived-fact hash rather than duplicating the
+publication. Cloud may preserve it additively in a follow-on integration, but
+this Guard change does not claim Cloud support or alter the Cloud protocol.
 - `evaluation`
   - runtime admissibility result
   - runtime posture

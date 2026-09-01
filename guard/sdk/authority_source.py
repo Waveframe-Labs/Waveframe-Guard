@@ -4,12 +4,13 @@ import json
 from dataclasses import dataclass
 from typing import Any, Callable
 
-from waveframe_guard.authority import AuthorityCache, AuthorityResolver, load_authority
+from waveframe_guard.authority import AuthorityCache, AuthorityResolver, LoadedAuthority, load_authority
 
 
 @dataclass(frozen=True)
 class AuthoritySource:
     authorities: dict[str, dict[str, Any]]
+    authority_bindings: dict[str, LoadedAuthority]
     authority_loader: Callable[[str], dict[str, Any]] | None
     default_authority_ref: str | None = None
 
@@ -30,6 +31,7 @@ class AuthoritySource:
             raise ValueError("authority_resolver requires authority")
 
         normalized_authorities = dict(authorities or {})
+        authority_bindings: dict[str, LoadedAuthority] = {}
         default_authority_ref = None
 
         if contract is not None:
@@ -58,10 +60,12 @@ class AuthoritySource:
                     loaded_authority.authority_ref,
                     dict(loaded_authority.contract),
                 )
+                authority_bindings[loaded_authority.authority_ref] = loaded_authority
                 default_authority_ref = loaded_authority.authority_ref
 
         return cls(
             authorities=normalized_authorities,
+            authority_bindings=authority_bindings,
             authority_loader=authority_loader,
             default_authority_ref=default_authority_ref,
         )

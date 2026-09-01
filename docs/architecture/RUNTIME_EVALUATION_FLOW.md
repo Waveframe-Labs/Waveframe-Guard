@@ -11,17 +11,20 @@ Guard never derives governance meaning from raw policy text.
 ## Flow
 
 1. Resolve the authority reference.
-2. Load and validate `compiled_authority_contract.v1` from the registry, cache,
-   or explicit runtime binding.
+2. Load a legacy `compiled_authority_contract.v1`, or verify the complete Ledger
+   v2 bundle/receipt chain before selecting the exact embedded
+   `compiled_authority_contract.v2`.
 3. Verify authority identity, version, hash, lifecycle, and lineage metadata.
 4. Accept only a normalized execution request.
-5. Validate execution state as a Guard runtime payload.
-6. Materialize `guard_runtime_evidence_model.v1`.
-7. Evaluate admissibility against compiled authority.
-8. Record chronology and revalidation metadata.
-9. Enforce the decision by allowing, blocking, or escalating execution.
-10. Emit telemetry, audit evidence, posture data, and
-    `guard_enforcement_outcome.v1`.
+5. For v2, select the fact provider by immutable domain-pack and fact-schema
+   identity/hash, derive the exact typed facts, and fail closed on any gap.
+6. Validate execution state as a Guard runtime payload.
+7. Materialize `guard_runtime_evidence_model.v1`.
+8. Evaluate admissibility against the unchanged compiled authority.
+9. Record chronology and revalidation metadata.
+10. Enforce the decision by allowing, blocking, or escalating execution.
+11. Emit telemetry, audit evidence, posture data, and
+   `guard_enforcement_outcome.v1`.
 
 ## Runtime cognition substrate
 

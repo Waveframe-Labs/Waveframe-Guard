@@ -61,6 +61,7 @@ class Guard:
             authority_loader=authority_loader,
         )
         self.authorities = authority_source.authorities
+        self.authority_bindings = authority_source.authority_bindings
         self.authority_loader = authority_source.authority_loader
         self.default_authority_ref = authority_source.default_authority_ref
         self.actor_identity = actor_identity or {"id": "unknown", "type": "unknown", "role": "unknown"}
@@ -343,6 +344,7 @@ class Guard:
     ) -> GuardRuntimeBoundary:
         return GuardRuntimeBoundary(
             compiled_authority=self.resolve_authority(self._resolve_authority_ref(authority)),
+            loaded_authority=self.authority_bindings.get(self._resolve_authority_ref(authority)),
             actor_identity=actor_identity or self.actor_identity,
             approvals=approvals if approvals is not None else self.approvals,
             continuity_state=continuity_state if continuity_state is not None else self.continuity_state,

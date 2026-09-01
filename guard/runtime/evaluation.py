@@ -41,8 +41,12 @@ def evaluate_runtime(
     evidence_posture: dict[str, Any] | None = None,
     evaluation_time: str = DEFAULT_EVALUATION_TIME,
     start_sequence: int = 1,
+    _verified_v2_authority: bool = False,
 ) -> dict[str, Any]:
-    compiled_authority = intake_compiled_authority(compiled_authority)
+    compiled_authority = intake_compiled_authority(
+        compiled_authority,
+        _verified_v2_authority=_verified_v2_authority,
+    )
     execution_request = require_normalized_execution_request(execution_request)
     runtime_evidence = build_runtime_evidence_model(
         actor_identity=actor_identity,

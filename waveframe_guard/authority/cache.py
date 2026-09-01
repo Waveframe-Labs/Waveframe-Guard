@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from threading import RLock
 from typing import Protocol
 
 from .types import LoadedAuthority
@@ -15,18 +16,33 @@ class AuthorityCache(Protocol):
 
 
 class MemoryAuthorityCache:
+    """Process-local verified cache with atomic copy-on-read replacement."""
+
     def __init__(self) -> None:
         self._entries: dict[tuple[str, str], LoadedAuthority] = {}
+        self._lock = RLock()
 
     def get(self, authority_ref: str, bundle_hash: str) -> LoadedAuthority | None:
-        authority = self._entries.get((authority_ref, _normalize_hash(bundle_hash)))
-        return deepcopy(authority) if authority is not None else None
+        with self._lock:
+            authority = self._entries.get((authority_ref, _normalize_hash(bundle_hash)))
+            return deepcopy(authority) if authority is not None else None
 
     def put(self, authority: LoadedAuthority) -> None:
-        self._entries[(authority.authority_ref, _normalize_hash(authority.bundle_hash))] = deepcopy(authority)
+        if authority.schema_version == "authority_bundle.v2":
+            from .exceptions import AuthorityVerificationError
+            from .verifier import _is_process_verified_v2
+
+            if not _is_process_verified_v2(authority):
+                raise AuthorityVerificationError(
+                    "v2 authority must complete publication validation before cache insertion"
+                )
+        replacement = deepcopy(authority)
+        with self._lock:
+            self._entries[(authority.authority_ref, _normalize_hash(authority.bundle_hash))] = replacement
 
     def __len__(self) -> int:
-        return len(self._entries)
+        with self._lock:
+            return len(self._entries)
 
 
 def _normalize_hash(value: str) -> str:

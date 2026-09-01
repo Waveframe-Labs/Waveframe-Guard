@@ -8,17 +8,23 @@ import subprocess
 import sys
 import tarfile
 import tempfile
-import tomllib
 import venv
 import zipfile
 from pathlib import Path, PurePosixPath
+
+try:
+    import tomllib
+except ModuleNotFoundError:  # Python 3.10
+    import tomli as tomllib
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 REQUIRED_WHEEL_FILES = {
     "guard/sdk/__init__.py",
     "guard/sdk/guard.py",
+    "guard/sdk/local_persistence.py",
     "waveframe_guard/__init__.py",
+    "waveframe_guard/authority/runtime_facts.py",
     "waveframe_guard/schemas.py",
 }
 REQUIRED_SDIST_FILES = {
@@ -26,9 +32,17 @@ REQUIRED_SDIST_FILES = {
     "PKG-INFO",
     "README.md",
     "guard/sdk/__init__.py",
+    "guard/sdk/local_persistence.py",
     "pyproject.toml",
     "waveframe_guard/__init__.py",
+    "waveframe_guard/authority/runtime_facts.py",
     "waveframe_guard/schemas.py",
+}
+EXPECTED_RUNTIME_REQUIREMENTS = {
+    "cricore",
+    "cricore-proposal-normalizer",
+    "governance-ledger>=0.7.0,<0.8.0",
+    "requests",
 }
 FORBIDDEN_PARTS = {
     ".git",
@@ -158,17 +172,32 @@ def _validate_metadata(metadata: email.message.Message, expected_version: str, l
     if metadata.get("Requires-Python") != ">=3.10":
         raise AssertionError(f"{label} metadata must report Requires-Python: >=3.10")
     requirements = metadata.get_all("Requires-Dist", [])
-    runtime_names = {
-        re.split(r"[ (<>=!~;\[]", requirement, maxsplit=1)[0].lower().replace("_", "-")
+    runtime_requirements = [
+        _normalize_requirement(requirement)
         for requirement in requirements
         if "extra ==" not in requirement
-    }
-    expected_runtime = {"cricore", "cricore-proposal-normalizer", "requests"}
-    if runtime_names != expected_runtime:
+    ]
+    expected_runtime = {_normalize_requirement(item) for item in EXPECTED_RUNTIME_REQUIREMENTS}
+    if len(runtime_requirements) != len(set(runtime_requirements)):
+        raise AssertionError(f"{label} contains duplicate runtime dependency metadata")
+    if set(runtime_requirements) != expected_runtime:
         raise AssertionError(
             f"{label} runtime dependency metadata differs: "
-            f"expected {sorted(expected_runtime)}, found {sorted(runtime_names)}"
+            f"expected {sorted(expected_runtime)}, found {sorted(set(runtime_requirements))}"
         )
+
+
+def _normalize_requirement(requirement: str) -> str:
+    compact = requirement.replace(" ", "")
+    if ";" in compact:
+        raise AssertionError(f"runtime dependency markers are not approved: {requirement!r}")
+    match = re.fullmatch(r"([A-Za-z0-9_.-]+)(\[[A-Za-z0-9_.-]+(?:,[A-Za-z0-9_.-]+)*\])?(.*)", compact)
+    if match is None:
+        raise AssertionError(f"unsupported dependency metadata: {requirement!r}")
+    name = match.group(1).lower().replace("_", "-")
+    extras = (match.group(2) or "").lower().replace("_", "-")
+    specifiers = ",".join(sorted(filter(None, match.group(3).split(","))))
+    return f"{name}{extras}{specifiers}"
 
 
 def _validate_archive_members(names: list[PurePosixPath], label: str) -> None:

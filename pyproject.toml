@@ -23,6 +23,7 @@ license-files = ["LICENSE"]
 dependencies = [
     "cricore",
     "cricore-proposal-normalizer",
+    "governance-ledger>=0.7.0,<0.8.0",
     "requests",
 ]
 
@@ -33,15 +34,15 @@ waveframe-guard-external-agent = "waveframe_guard.quickstarts.external_agent:mai
 test = [
     "build",
     "cricore-contract-compiler==0.4.0",
-    "governance-ledger==0.5.0",
     "pytest",
+    'tomli>=2.0.0; python_version < "3.11"',
     "twine",
 ]
 dev = [
     "build",
     "cricore-contract-compiler==0.4.0",
-    "governance-ledger==0.5.0",
     "pytest",
+    'tomli>=2.0.0; python_version < "3.11"',
     "twine",
 ]
 

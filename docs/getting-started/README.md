@@ -137,7 +137,7 @@ is the evidence available for this release.
 | Waveframe Cloud | Not declared | 0.5.5 | Compatible and unchanged | Cloud preservation uses the existing `POST /v1/preserve` boundary. |
 | CRI-CORE | Not declared | 0.13.0 | 0.13.0 | Guard intentionally leaves the runtime dependency unpinned. |
 | CRI-CORE proposal normalizer | Not declared | 0.2.0 | 0.2.0 | Guard intentionally leaves the runtime dependency unpinned. |
-| Waveframe Ledger / `authority_bundle.v1` | 0.5.0 | 0.5.0 | 0.5.0 | Release test extras pin Ledger 0.5.0 and verify canonical bundle loading. |
+| Waveframe Ledger | 0.7.0 | 0.7.x | `>=0.7.0,<0.8.0` public base package | Runtime dependency for native `authority_bundle.v2`/receipt validation; the public 0.7.0 minimum is tested and immutable artifact schema dispatch defines compatibility. Legacy v1 artifacts remain supported. The `[guard]` extra is never installed. |
 | CRI-CORE contract compiler | 0.4.0 | 0.4.0 | 0.4.0 | Defines deterministic target requirements; pinned only in release test extras, not Guard runtime dependencies. |
 | Python | 3.10 | 3.10 or newer | 3.14.4 | Declared by package metadata as `Requires-Python: >=3.10`. |
 
@@ -175,15 +175,27 @@ print(result["outcome"]["execution_state"])
 
 `Guard.local(authority="finance-policy@1.0.0")` expects a local Ledger-style registry at `contracts/index.json` by default.
 
-That registry must point to a Ledger `authority_bundle.v1` artifact, for example:
+That registry may point to a legacy Ledger `authority_bundle.v1`, or to a native
+v2 bundle plus its publication receipt. The v2 layout is:
 
 ```text
 contracts/
   index.json
-  finance-policy-1.0.0.authority-bundle.json
+  repository-authority-1.0.0.authority-bundle.json
+  repository-authority-1.0.0.publication-receipt.json
 ```
 
-Guard verifies the registry hash, resolves the exact authority reference, loads the authority bundle, validates the bundle and contract hashes, checks lifecycle state, and then passes the verified compiled authority into the existing enforcement pipeline.
+For v2, the registry entry supplies `receipt_path` and `receipt_hash` alongside
+the existing bundle and contract fields. Guard verifies the registry, calls
+Ledger's public bundle and receipt validators, checks the complete identity and
+hash chain, checks lifecycle state, derives the published typed runtime facts,
+and only then evaluates the exact compiled authority.
+
+The path-named registry fields are portable logical identifiers, not evidence
+about a local filesystem or Cloud tenant layout. Application code selects the
+authority and resolver; the resolver retrieves bundle and receipt bytes, while
+Guard verifies their published hashes. Applications do not construct facts or
+call Ledger validators.
 
 The accepted public authority identifier is always explicit and versioned:
 
