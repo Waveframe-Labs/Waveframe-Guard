@@ -9,7 +9,7 @@ Waveframe Guard enforces governance rules at execution time. It blocks actions t
 For application use:
 
 ```bash
-pip install waveframe-guard==0.16.0
+pip install waveframe-guard==0.16.1
 ```
 
 For local development and clean-checkout test runs:
@@ -61,7 +61,7 @@ From an empty directory:
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install waveframe-guard==0.16.0
+python -m pip install waveframe-guard==0.16.1
 Invoke-WebRequest https://raw.githubusercontent.com/Waveframe-Labs/Waveframe-Guard/main/examples/external_agent_quickstart.py -OutFile quickstart.py
 ```
 
@@ -116,7 +116,7 @@ acceptance runner:
 
 ```powershell
 python -m build
-$wheel=(Resolve-Path .\dist\waveframe_guard-0.16.0-py3-none-any.whl).Path
+$wheel=(Resolve-Path .\dist\waveframe_guard-0.16.1-py3-none-any.whl).Path
 python .\tools\acceptance\external_agent_clean_machine.py --install-spec $wheel
 ```
 
@@ -131,13 +131,13 @@ This is the authoritative compatibility matrix for Guard releases. “Not
 declared” means Guard does not impose a package minimum and the tested pairing
 is the evidence available for this release.
 
-| Component | Minimum supported version | Recommended paired version | Actually tested for Guard 0.16.0 | Notes |
+| Component | Minimum supported version | Recommended paired version | Actually tested for Guard 0.16.1 | Notes |
 | --- | --- | --- | --- | --- |
-| Waveframe Guard | 0.16.0 for verified Ledger v2 authority enforcement | 0.16.0 | 0.16.0 release candidate | Public package and runtime version agree. |
-| Waveframe Cloud | Not declared | Not declared for the complete v2 workflow | Existing v1 and finance integration behavior | Guard implements the additive atomic v2 publication client protocol. Current Cloud has not implemented the endpoint, so complete-v2 Cloud support is unavailable until that implementation ships. |
+| Waveframe Guard | 0.16.1 for Cloud v2 publication resolution | 0.16.1 | 0.16.1 release candidate | Public package and runtime version agree. Existing Guard 0.16 behavior remains compatible. |
+| Waveframe Cloud | Not declared | Not declared for the complete v2 workflow | Existing v1 and finance integration behavior | Guard implements the additive atomic v2 publication client protocol. Current released Cloud does not expose the endpoint; Cloud PR #133 is the follow-on implementation, so this client/protocol release does not claim hosted availability. |
 | CRI-CORE | Not declared | 0.13.0 | 0.13.0 | Guard intentionally leaves the runtime dependency unpinned. |
 | CRI-CORE proposal normalizer | Not declared | 0.2.0 | 0.2.0 | Guard intentionally leaves the runtime dependency unpinned. |
-| Waveframe Ledger | 0.7.0 | 0.7.x | `governance-ledger==0.7.0` minimum and `>=0.7.0,<0.8.0` metadata boundary | Runtime dependency for native `authority_bundle.v2` and `publication_receipt.v2` validation. Legacy v1 artifacts remain supported. The published `governance-ledger[guard]==0.7.0` extra represents Ledger's earlier Guard 0.15 compatibility pairing; Guard 0.16 users install `waveframe-guard==0.16.0` directly, and Guard never depends on the extra. |
+| Waveframe Ledger | 0.7.0 | 0.7.x | `governance-ledger==0.7.0` minimum and `>=0.7.0,<0.8.0` metadata boundary | Runtime dependency for native `authority_bundle.v2` and `publication_receipt.v2` validation. Legacy v1 artifacts remain supported. The published `governance-ledger[guard]==0.7.0` extra represents Ledger's earlier Guard 0.15 compatibility pairing; Guard 0.16 users install `waveframe-guard==0.16.1` directly, and Guard never depends on the extra. |
 | CRI-CORE contract compiler | 0.4.0 | 0.4.0 | 0.4.0 | Defines deterministic target requirements; pinned only in release test extras, not Guard runtime dependencies. |
 | Python | 3.10 | 3.10 or newer | 3.10 minimum dependencies and 3.14.4 | Declared by package metadata as `Requires-Python: >=3.10`. |
 
