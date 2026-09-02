@@ -2,11 +2,19 @@
 
 ## [Unreleased]
 
+## [0.16.1] - 2026-09-01 - Cloud v2 Publication Resolver
+
+Guard can now retrieve one atomic Ledger v2 publication from Cloud and verify
+it before enforcing any action.
+
 ### Added
 - Added an authenticated, tenant-bound `cloud_authority_publication.v1` resolver
   protocol at `GET /v1/authorities/{authority_ref}/publication`. Atomic Ledger
-  v2 bundles and receipts flow through Guard's existing verifier and verified
-  cache without new application inputs.
+  v2 bundle, receipt, logical-reference, registry, and envelope bindings flow
+  through Guard's existing verifier and verified cache without application-facing
+  facts, hashes, bundles, or Ledger-validator calls.
+- Added `runtime_credential=` as an alias for the existing Cloud API-key
+  credential. Existing organization and API-key authentication is unchanged.
 
 ### Hardened
 - Added strict envelope fields and canonical bindings, duplicate-key rejection,
@@ -16,14 +24,25 @@
 - Contract-only v2 responses still fail closed, and authority, tenant,
   registry, bundle, receipt, contract, domain-pack, runtime-schema, Constraint
   IR, mapping, and hash substitutions cannot activate an authority.
+- A cold resolution performs one publication request and full verification.
+  Warm evaluation performs no additional request or heavy Ledger validation.
 
 ### Compatibility
 - `Guard.cloud(...)`, Cloud headers, v1 endpoint behavior, finance behavior,
   local resolvers, caching, and enforcement semantics remain compatible. The
-  `runtime_credential=` spelling is an additive alias for the existing Cloud
-  API-key credential; no new argument is required.
-- Current Cloud has not implemented the additive publication endpoint. Complete
-  v2 Cloud resolution remains unavailable until a Cloud implementation ships.
+  `runtime_credential=` spelling is additive; no new argument is required.
+- Existing v1, finance, local-resolver, and Guard 0.16 behavior remains
+  compatible.
+- Current released Cloud does not expose the additive publication endpoint.
+  Cloud PR #133 is the follow-on implementation. This release provides the
+  client/protocol boundary and does not claim hosted availability.
+
+### Limitations
+- Native v2 runtime facts remain repository-change only. Guard does not
+  interpret policy prose, and no AI or heuristic inference is involved.
+
+### References
+- Releases issue #22 / PR #23.
 
 ## [0.16.0] - 2026-09-01 - Verified Ledger Authority Enforcement
 
