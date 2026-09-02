@@ -28,6 +28,7 @@ from waveframe_guard.authority.cache import MemoryAuthorityCache
 from waveframe_guard.authority.loader import BundleLoader
 from waveframe_guard.authority.types import RegistryEntry
 from waveframe_guard.cloud import (
+    CloudPublicationUnavailable,
     CloudRuntimeConnectionResult,
     CloudRuntimeOperationResult,
 )
@@ -358,6 +359,12 @@ def test_guard_cloud_fetches_authority_from_environment_without_repository_check
 
     monkeypatch.setattr("guard.sdk.guard.CloudAuthorityClient.fetch", fetch)
     monkeypatch.setattr(
+        "guard.sdk.guard.CloudAuthorityClient.fetch_publication",
+        lambda self, authority_ref: (_ for _ in ()).throw(
+            CloudPublicationUnavailable("legacy authority")
+        ),
+    )
+    monkeypatch.setattr(
         "guard.sdk.guard.CloudRuntimeClient.connect",
         lambda self: CloudRuntimeConnectionResult(
             ok=True,
@@ -421,6 +428,12 @@ def test_guard_cloud_fails_before_execution_when_authority_cannot_be_fetched(
         raise RuntimeError(f"authority unavailable: {authority_ref}")
 
     monkeypatch.setattr("guard.sdk.guard.CloudAuthorityClient.fetch", fail_fetch)
+    monkeypatch.setattr(
+        "guard.sdk.guard.CloudAuthorityClient.fetch_publication",
+        lambda self, authority_ref: (_ for _ in ()).throw(
+            CloudPublicationUnavailable("legacy authority")
+        ),
+    )
 
     with pytest.raises(RuntimeError, match="authority unavailable"):
         Guard.cloud(

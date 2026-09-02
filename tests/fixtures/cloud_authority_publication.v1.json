@@ -1,0 +1,700 @@
+{
+  "authority_bundle": {
+    "approval_record": {
+      "approval_id": "approval-1",
+      "approval_record_hash": "sha256:8a7d1a0c81a2842723340f06f3f27d5525a4a51a9fba77b3a3837f5fe3a1b799",
+      "approved_at": "2026-08-31T12:00:00Z",
+      "approved_by": "owner@example.com",
+      "approved_constraint_ir_hash": "sha256:13b5cba9243260e33ac599f140923a77c8ad27c373c83b6dc2f62969e7711e7c",
+      "approved_semantic_commit_hash": "sha256:2b88bdbfb0c6f4970fa37d61985cb71b39455a0c59b910a2cb4700ac170697b9"
+    },
+    "authority": {
+      "authority_id": "repository-authority",
+      "authority_identity_hash": "sha256:60d4cf29460f8cb5aae50bc67aa695d6e007bf6c64dca039ef37b659a107ea78",
+      "authority_ref": "repository-authority@1.0.0",
+      "authority_version": "1.0.0"
+    },
+    "bundle_hash": "sha256:e30bd413b5ecc06d35cfe59cf718a7d361af2350bdcddbfccd0b13f9c133bafb",
+    "canonical_cnl_previews": [
+      {
+        "constraint_id": "constraint-623c20fa4119a8ab61bfbe61ec197ec882ed216f8b4e4b8eaa5577528db52715",
+        "preview": "REQUIRE agent ACTING AS repository-maintainer TO modify repository_change:any."
+      },
+      {
+        "constraint_id": "constraint-5a6048b7d86d30b83332b7b213e3e0751ff9fd079cbc2e308ef168203a1ea965",
+        "preview": "ALLOW agent TO modify repository_path:exact \"README.md\"."
+      },
+      {
+        "constraint_id": "constraint-c38b3b0c3098031fd38ccf5247c3aa2768ce73c331c5abcc9ead1d081ed0e552",
+        "preview": "DENY agent TO modify repository_path:prefix \"deployment/\"."
+      }
+    ],
+    "compiled_authority_contract": {
+      "approval_requirements": {},
+      "artifact_requirements": {},
+      "authority_ref": "repository-authority@1.0.0",
+      "authority_requirements": {
+        "required_roles": [
+          "repository-maintainer"
+        ]
+      },
+      "compiled_from": {
+        "resolved_interpretation_count": 1,
+        "schema_version": "semantic_commit_bundle.v1",
+        "semantic_commit_hash": "sha256:2b88bdbfb0c6f4970fa37d61985cb71b39455a0c59b910a2cb4700ac170697b9",
+        "semantic_commit_id": "semantic-commit-2b88bdbfb0c6",
+        "source_hash": "sha256:da2979830771118b4538698ea6fc04ea82b624b09a1104f3d35d0957da2052f3"
+      },
+      "contract_hash": "sha256:9dbe54d7938ffb509970b6816178ed3f236c4a3a4ffc366ae4371440dbf9d12a",
+      "contract_id": "repository-authority",
+      "contract_version": "1.0.0",
+      "invariants": {},
+      "lineage": {
+        "compilation_report_hash": "sha256:aa0e9806eb864830e351eb9431f494e8d865f10230ede36cde525a3860f18e2f",
+        "review_id": "domain-interpretation-731c0f846f7304533e7841fc8845a655f073646bffeb5c3b4fe4665d06776a90",
+        "schema_version": "governance_authority_lineage.v1",
+        "source_hash": "sha256:da2979830771118b4538698ea6fc04ea82b624b09a1104f3d35d0957da2052f3"
+      },
+      "schema_version": "compiled_authority_contract.v2",
+      "stage_requirements": {},
+      "target_requirements": {
+        "allow": [
+          {
+            "match": "exact",
+            "value": "README.md"
+          }
+        ],
+        "deny": [
+          {
+            "match": "prefix",
+            "value": "deployment/"
+          }
+        ]
+      }
+    },
+    "constraint_ir": {
+      "constraints": [
+        {
+          "acting_role": {
+            "kind": "role",
+            "value": "repository-maintainer"
+          },
+          "action": "modify",
+          "condition": null,
+          "constraint_id": "constraint-623c20fa4119a8ab61bfbe61ec197ec882ed216f8b4e4b8eaa5577528db52715",
+          "effect": "require",
+          "exceptions": [],
+          "obligations": {
+            "approvals": [],
+            "evidence": [],
+            "separation_of_duties": []
+          },
+          "required_runtime_facts": [
+            "actor.role",
+            "actor.subject_kind",
+            "proposal.action",
+            "proposal.resource.kind"
+          ],
+          "resource": {
+            "kind": "repository_change",
+            "match": "any",
+            "value": null
+          },
+          "subject": {
+            "kind": "subject_kind",
+            "value": "agent"
+          }
+        },
+        {
+          "acting_role": null,
+          "action": "modify",
+          "condition": null,
+          "constraint_id": "constraint-5a6048b7d86d30b83332b7b213e3e0751ff9fd079cbc2e308ef168203a1ea965",
+          "effect": "allow",
+          "exceptions": [],
+          "obligations": {
+            "approvals": [],
+            "evidence": [],
+            "separation_of_duties": []
+          },
+          "required_runtime_facts": [
+            "actor.subject_kind",
+            "proposal.action",
+            "proposal.resource.kind",
+            "proposal.resource.path"
+          ],
+          "resource": {
+            "kind": "repository_path",
+            "match": "exact",
+            "value": "README.md"
+          },
+          "subject": {
+            "kind": "subject_kind",
+            "value": "agent"
+          }
+        },
+        {
+          "acting_role": null,
+          "action": "modify",
+          "condition": null,
+          "constraint_id": "constraint-c38b3b0c3098031fd38ccf5247c3aa2768ce73c331c5abcc9ead1d081ed0e552",
+          "effect": "deny",
+          "exceptions": [],
+          "obligations": {
+            "approvals": [],
+            "evidence": [],
+            "separation_of_duties": []
+          },
+          "required_runtime_facts": [
+            "actor.subject_kind",
+            "proposal.action",
+            "proposal.resource.kind",
+            "proposal.resource.path"
+          ],
+          "resource": {
+            "kind": "repository_path",
+            "match": "prefix",
+            "value": "deployment/"
+          },
+          "subject": {
+            "kind": "subject_kind",
+            "value": "agent"
+          }
+        }
+      ],
+      "domain_pack": {
+        "domain_pack_hash": "sha256:4b6ff9a3ebf3b419151fbaa3f899012dca39ff354de8e768da05146ad0c64b80",
+        "domain_pack_id": "repository-changes",
+        "domain_pack_version": "1.0.0"
+      },
+      "ir_hash": "sha256:13b5cba9243260e33ac599f140923a77c8ad27c373c83b6dc2f62969e7711e7c",
+      "runtime_fact_schema_hash": "sha256:c1595ef8d77165a7a486151673f01eda5a93000786f47e1f048875f17eb396a1",
+      "schema_version": "constraint_ir.v1"
+    },
+    "direct_parses": [
+      {
+        "compiler_id": "waveframe.repository-changes.grammar.v1",
+        "compiler_version": "1.0.0",
+        "constraint_ids": [
+          "constraint-623c20fa4119a8ab61bfbe61ec197ec882ed216f8b4e4b8eaa5577528db52715"
+        ],
+        "end_byte": 63,
+        "parse_hash": "sha256:7c49c1b70ddb57489f53547942ed53b8bc40920dbf16116eab9bb417dd99d85b",
+        "parse_id": "direct-parse-7c49c1b70ddb57489f53547942ed53b8bc40920dbf16116eab9bb417dd99d85b",
+        "start_byte": 0,
+        "statement_id": "statement-babb87d8f8938984fef32a4fbedf98cb4feb2e9d80fd131449b488547b813b43"
+      },
+      {
+        "compiler_id": "waveframe.repository-changes.grammar.v1",
+        "compiler_version": "1.0.0",
+        "constraint_ids": [
+          "constraint-5a6048b7d86d30b83332b7b213e3e0751ff9fd079cbc2e308ef168203a1ea965"
+        ],
+        "end_byte": 92,
+        "parse_hash": "sha256:04c672989d5c214afd62e8a9d39b89c0df75e30b36699dec3629caa95a96c826",
+        "parse_id": "direct-parse-04c672989d5c214afd62e8a9d39b89c0df75e30b36699dec3629caa95a96c826",
+        "start_byte": 63,
+        "statement_id": "statement-b20064cefaf38d13f97036f32637a58f4a44431be2f503165348a0d7da908b10"
+      },
+      {
+        "compiler_id": "waveframe.repository-changes.grammar.v1",
+        "compiler_version": "1.0.0",
+        "constraint_ids": [
+          "constraint-c38b3b0c3098031fd38ccf5247c3aa2768ce73c331c5abcc9ead1d081ed0e552"
+        ],
+        "end_byte": 140,
+        "parse_hash": "sha256:a733657f7bd69d6014ee270a7100d87473fa8a253071ebfd998f03fb656f2e14",
+        "parse_id": "direct-parse-a733657f7bd69d6014ee270a7100d87473fa8a253071ebfd998f03fb656f2e14",
+        "start_byte": 92,
+        "statement_id": "statement-c1bdce2f0351af8d49ce86ad39df2899076de9051949259fd3c7254316952f2c"
+      }
+    ],
+    "domain_pack": {
+      "domain_pack_hash": "sha256:4b6ff9a3ebf3b419151fbaa3f899012dca39ff354de8e768da05146ad0c64b80",
+      "domain_pack_id": "repository-changes",
+      "domain_pack_version": "1.0.0"
+    },
+    "provenance_bindings": {
+      "approval_record_hash": "sha256:8a7d1a0c81a2842723340f06f3f27d5525a4a51a9fba77b3a3837f5fe3a1b799",
+      "authority_identity_hash": "sha256:60d4cf29460f8cb5aae50bc67aa695d6e007bf6c64dca039ef37b659a107ea78",
+      "canonical_cnl_previews_hash": "sha256:13bf8f5b95a119f2244fec7583165a187689dd7d17e36874fe97c3ddf4d9d982",
+      "compiled_contract_hash": "sha256:9dbe54d7938ffb509970b6816178ed3f236c4a3a4ffc366ae4371440dbf9d12a",
+      "constraint_ir_hash": "sha256:13b5cba9243260e33ac599f140923a77c8ad27c373c83b6dc2f62969e7711e7c",
+      "direct_parses_hash": "sha256:c92afcbf85bb04916e627b7f35d33f53cebf8993afa4d59e18c164c41201a325",
+      "domain_pack_hash": "sha256:4b6ff9a3ebf3b419151fbaa3f899012dca39ff354de8e768da05146ad0c64b80",
+      "interpretation_hash": "sha256:aa0e9806eb864830e351eb9431f494e8d865f10230ede36cde525a3860f18e2f",
+      "interpretation_id": "domain-interpretation-731c0f846f7304533e7841fc8845a655f073646bffeb5c3b4fe4665d06776a90",
+      "publication_manifest_hash": "sha256:163f1d551a254d3927739fdf541e16c452df9f6ec59ef8d53617883a06afd79d",
+      "runtime_fact_schema_hash": "sha256:c1595ef8d77165a7a486151673f01eda5a93000786f47e1f048875f17eb396a1",
+      "semantic_commit_bundle_hash": "sha256:88b165ced0a410c30ab9ea072881126df1eced1ff2ce369099658d467a70e8b6",
+      "semantic_commit_hash": "sha256:2b88bdbfb0c6f4970fa37d61985cb71b39455a0c59b910a2cb4700ac170697b9",
+      "semantic_commit_id": "semantic-commit-2b88bdbfb0c6",
+      "source_snapshot_hash": "sha256:da2979830771118b4538698ea6fc04ea82b624b09a1104f3d35d0957da2052f3",
+      "source_statements_hash": "sha256:789e649c2bf727dbd573042edc4c1a12bd938a5ca4354e6da5e9cdcd04c1d8ca",
+      "source_to_constraint_mappings_hash": "sha256:57b60ad862982e19ca76c7d0c5877cc1c9bcb0e084782b1e2d395b8abae93748",
+      "statement_decisions_hash": "sha256:05f85f8e148e9220efc755d5f8b9d903a2017c1c203fcc7d5347a68f72ef4c1a"
+    },
+    "provenance_complete": true,
+    "publication_manifest": {
+      "contracts": [
+        {
+          "contract_hash": "sha256:9dbe54d7938ffb509970b6816178ed3f236c4a3a4ffc366ae4371440dbf9d12a",
+          "contract_id": "repository-authority",
+          "contract_version": "1.0.0",
+          "path": "contracts/repository-authority-1.0.0.contract.json",
+          "source_hash": "sha256:da2979830771118b4538698ea6fc04ea82b624b09a1104f3d35d0957da2052f3"
+        }
+      ],
+      "publication_id": "publication-1",
+      "published_at": "2026-08-31T12:02:00Z",
+      "published_by": "publisher@example.com",
+      "reviews": [
+        {
+          "path": "reviews/repository-policy.domain-policy.json"
+        }
+      ],
+      "schema_version": "publication_manifest.v1",
+      "snapshots": [
+        {
+          "path": "snapshots/repository-policy.source.json"
+        }
+      ]
+    },
+    "runtime_fact_schema": {
+      "facts": [
+        {
+          "canonical_unit": null,
+          "comparison_operators": [
+            "==",
+            "!="
+          ],
+          "derivation": {
+            "field_path": "/actor/subject_kind",
+            "kind": "proposal_field"
+          },
+          "enum_values": [
+            "agent"
+          ],
+          "fact_id": "actor.subject_kind",
+          "required": true,
+          "type": "enum"
+        },
+        {
+          "canonical_unit": null,
+          "comparison_operators": [
+            "==",
+            "!="
+          ],
+          "derivation": {
+            "field_path": "/actor/principal_id",
+            "kind": "proposal_field"
+          },
+          "enum_values": null,
+          "fact_id": "actor.principal_id",
+          "required": false,
+          "type": "string"
+        },
+        {
+          "canonical_unit": null,
+          "comparison_operators": [
+            "==",
+            "!="
+          ],
+          "derivation": {
+            "field_path": "/actor/role",
+            "kind": "proposal_field"
+          },
+          "enum_values": [
+            "repository-maintainer",
+            "repository-reviewer",
+            "security-reviewer"
+          ],
+          "fact_id": "actor.role",
+          "required": false,
+          "type": "enum"
+        },
+        {
+          "canonical_unit": null,
+          "comparison_operators": [
+            "==",
+            "!="
+          ],
+          "derivation": {
+            "field_path": "/action",
+            "kind": "proposal_field"
+          },
+          "enum_values": [
+            "modify"
+          ],
+          "fact_id": "proposal.action",
+          "required": true,
+          "type": "enum"
+        },
+        {
+          "canonical_unit": null,
+          "comparison_operators": [
+            "==",
+            "!="
+          ],
+          "derivation": {
+            "field_path": "/resource/kind",
+            "kind": "proposal_field"
+          },
+          "enum_values": [
+            "repository_change",
+            "repository_path"
+          ],
+          "fact_id": "proposal.resource.kind",
+          "required": true,
+          "type": "enum"
+        },
+        {
+          "canonical_unit": null,
+          "comparison_operators": [
+            "==",
+            "!=",
+            "starts_with"
+          ],
+          "derivation": {
+            "field_path": "/resource/path",
+            "kind": "proposal_field"
+          },
+          "enum_values": null,
+          "fact_id": "proposal.resource.path",
+          "required": false,
+          "type": "string"
+        }
+      ],
+      "name": "Repository change proposal facts",
+      "schema_hash": "sha256:c1595ef8d77165a7a486151673f01eda5a93000786f47e1f048875f17eb396a1",
+      "schema_id": "repository-changes-runtime",
+      "schema_version": "runtime_fact_schema.v1",
+      "schema_version_number": "1.0.0"
+    },
+    "schema_version": "authority_bundle.v2",
+    "semantic_commit_bundle": {
+      "approved_constraints": {
+        "approval": {
+          "attestation_required": false,
+          "human_in_loop_required": false,
+          "independent": false,
+          "minimum_approvals": null,
+          "required_roles": [],
+          "self_approval_prohibited": false
+        },
+        "continuity": {
+          "drift_result": null,
+          "identity_continuity_required": false,
+          "resume_comparison": null,
+          "revalidation_required": false,
+          "revocation_invalidates_resume": false,
+          "snapshot_hash_algorithm": null,
+          "snapshot_subject": null,
+          "state_snapshot_required": false
+        },
+        "escalation": {
+          "escalation_semantics": "",
+          "review_role": "escalation_review",
+          "threshold": null
+        },
+        "execution": {
+          "execution_context": {},
+          "ledger_boundary": "models deterministic runtime representation only",
+          "runtime_enforced_by": "Guard/Cloud",
+          "temporal_validation": {}
+        }
+      },
+      "bundle_hash": "sha256:88b165ced0a410c30ab9ea072881126df1eced1ff2ce369099658d467a70e8b6",
+      "committed_at": "2026-08-31T12:01:00Z",
+      "committed_by": "owner@example.com",
+      "committed_capabilities": [],
+      "committed_semantic_meaning": {
+        "approval_thresholds": [],
+        "canonical_compiler_input": {
+          "authority": {
+            "required_roles": [
+              "repository-maintainer"
+            ]
+          },
+          "contract_id": "repository-authority",
+          "contract_version": "1.0.0",
+          "targets": {
+            "allow": [
+              {
+                "match": "exact",
+                "value": "README.md"
+              }
+            ],
+            "deny": [
+              {
+                "match": "prefix",
+                "value": "deployment/"
+              }
+            ]
+          }
+        },
+        "confirmed_rules": [
+          {
+            "role": "repository-maintainer",
+            "rule_id": "rule-1762f07b4f96cb66fa15405989534ac75bbd6208ff9d812787832fe60323f733",
+            "rule_type": "required_actor_role"
+          },
+          {
+            "effect": "allow",
+            "match": "exact",
+            "rule_id": "rule-5e0d97e16c00769d4b7daba84ba1d4b48d8adba73f579953881cbac9e7c37f65",
+            "rule_type": "target",
+            "value": "README.md"
+          },
+          {
+            "effect": "deny",
+            "match": "prefix",
+            "rule_id": "rule-5d36a84183a7cf45c6956419ced0d4a88b9d6e19cf2bb1e3c778e21eb80f44ed",
+            "rule_type": "target",
+            "value": "deployment/"
+          }
+        ],
+        "contract_id": "repository-authority",
+        "contract_version": "1.0.0",
+        "governed_operations": [
+          "modify"
+        ],
+        "governed_targets": [
+          "README.md",
+          "deployment/"
+        ],
+        "required_actor_roles": [
+          "repository-maintainer"
+        ],
+        "separation_of_duties_constraints": [],
+        "target_rules": {
+          "allow": [
+            {
+              "match": "exact",
+              "value": "README.md"
+            }
+          ],
+          "deny": [
+            {
+              "match": "prefix",
+              "value": "deployment/"
+            }
+          ]
+        }
+      },
+      "continuity_posture": {
+        "drift_result": null,
+        "identity_continuity_required": false,
+        "resume_comparison": null,
+        "revalidation_required": false,
+        "revocation_invalidates_resume": false,
+        "snapshot_hash_algorithm": null,
+        "snapshot_subject": null,
+        "state_snapshot_required": false
+      },
+      "execution_admissibility_semantics": {
+        "execution_context": {},
+        "ledger_boundary": "models deterministic runtime representation only",
+        "runtime_enforced_by": "Guard/Cloud",
+        "temporal_validation": {}
+      },
+      "extraction_id": "domain-interpretation-731c0f846f7304533e7841fc8845a655f073646bffeb5c3b4fe4665d06776a90",
+      "identity_bindings": {
+        "approval_chain_semantics": {},
+        "authority_role_binding": {},
+        "governance_actor": {},
+        "identity_continuity_semantics": {}
+      },
+      "lifecycle_posture": {
+        "revocation_invalidates_resume": false,
+        "supersession_requires_revalidation": false
+      },
+      "non_goals": [
+        "does_not_interpret_raw_policy_text",
+        "does_not_compile_provisional_extraction",
+        "does_not_resolve_ambiguities",
+        "does_not_call_guard",
+        "does_not_determine_runtime_admissibility"
+      ],
+      "replay_obligations": [],
+      "resolved_interpretations": [
+        {
+          "decision_hash": "sha256:c794c36f57e8e552476471e69c938a66c42bcfeab9f807cadcca3deb965d84d5",
+          "disposition": "informational",
+          "domain_pack": {
+            "domain_pack_hash": "sha256:4b6ff9a3ebf3b419151fbaa3f899012dca39ff354de8e768da05146ad0c64b80",
+            "domain_pack_id": "repository-changes",
+            "domain_pack_version": "1.0.0"
+          },
+          "end_byte": 166,
+          "human_reason": null,
+          "mapped_at": "2026-08-31T11:59:00Z",
+          "mapper_identity": "owner@example.com",
+          "reason_code": "context-only",
+          "schema_version": "policy_mapping_decision.v1",
+          "source_document_hash": "sha256:da2979830771118b4538698ea6fc04ea82b624b09a1104f3d35d0957da2052f3",
+          "start_byte": 140,
+          "statement_id": "statement-3c664ba676522d6c1e46343b11b61014902d0dd42fe1b9b3e6c87b79717935c6"
+        }
+      ],
+      "schema_version": "semantic_commit_bundle.v1",
+      "semantic_commit_hash": "sha256:2b88bdbfb0c6f4970fa37d61985cb71b39455a0c59b910a2cb4700ac170697b9",
+      "semantic_commit_id": "semantic-commit-2b88bdbfb0c6",
+      "source_hash": "sha256:da2979830771118b4538698ea6fc04ea82b624b09a1104f3d35d0957da2052f3",
+      "source_id": "repository-policy"
+    },
+    "source_policy": {
+      "content_encoding": "base64",
+      "snapshot_hash": "sha256:da2979830771118b4538698ea6fc04ea82b624b09a1104f3d35d0957da2052f3",
+      "source_bytes_base64": "UmVwb3NpdG9yeSBjaGFuZ2VzIG1heSBiZSBtYWRlIG9ubHkgYnkgcmVwb3NpdG9yeS1tYWludGFpbmVycy4KQWdlbnRzIG1heSBtb2RpZnkgUkVBRE1FLm1kLgpBZ2VudHMgbXVzdCBub3QgbW9kaWZ5IGZpbGVzIHVuZGVyIGRlcGxveW1lbnQvLgpSZXBvc2l0b3J5IHBvbGljeSBjb250ZXh0Lg==",
+      "source_policy_id": "repository-policy",
+      "source_policy_ref": "repository-policy@rev-1",
+      "source_revision": "rev-1"
+    },
+    "source_statements": [
+      {
+        "available_mapping_control_ids": [],
+        "classification": "direct",
+        "decision_hash": null,
+        "end_byte": 63,
+        "start_byte": 0,
+        "statement_bytes_base64": "UmVwb3NpdG9yeSBjaGFuZ2VzIG1heSBiZSBtYWRlIG9ubHkgYnkgcmVwb3NpdG9yeS1tYWludGFpbmVycy4K",
+        "statement_hash": "sha256:a1b8e45828b7ee0bfcab6d1217d3336624f62c1f5a35ca9777da8926ab81e6d0",
+        "statement_id": "statement-babb87d8f8938984fef32a4fbedf98cb4feb2e9d80fd131449b488547b813b43"
+      },
+      {
+        "available_mapping_control_ids": [],
+        "classification": "direct",
+        "decision_hash": null,
+        "end_byte": 92,
+        "start_byte": 63,
+        "statement_bytes_base64": "QWdlbnRzIG1heSBtb2RpZnkgUkVBRE1FLm1kLgo=",
+        "statement_hash": "sha256:38410290e857ba95618d3b7c8264435da31384610db16300b50538193884ea21",
+        "statement_id": "statement-b20064cefaf38d13f97036f32637a58f4a44431be2f503165348a0d7da908b10"
+      },
+      {
+        "available_mapping_control_ids": [],
+        "classification": "direct",
+        "decision_hash": null,
+        "end_byte": 140,
+        "start_byte": 92,
+        "statement_bytes_base64": "QWdlbnRzIG11c3Qgbm90IG1vZGlmeSBmaWxlcyB1bmRlciBkZXBsb3ltZW50Ly4K",
+        "statement_hash": "sha256:63a5e3b0b5f35a39fbed286e5676bbe9f40fcb6276aba5775a961bba4d18bad4",
+        "statement_id": "statement-c1bdce2f0351af8d49ce86ad39df2899076de9051949259fd3c7254316952f2c"
+      },
+      {
+        "available_mapping_control_ids": [],
+        "classification": "informational",
+        "decision_hash": "sha256:c794c36f57e8e552476471e69c938a66c42bcfeab9f807cadcca3deb965d84d5",
+        "end_byte": 166,
+        "start_byte": 140,
+        "statement_bytes_base64": "UmVwb3NpdG9yeSBwb2xpY3kgY29udGV4dC4=",
+        "statement_hash": "sha256:f257e3d00689ad668c37bbe7d4f74d4387b98685c9f4ed5f1008bfb1dd82717c",
+        "statement_id": "statement-3c664ba676522d6c1e46343b11b61014902d0dd42fe1b9b3e6c87b79717935c6"
+      }
+    ],
+    "source_to_constraint_mappings": [
+      {
+        "constraint_ids": [
+          "constraint-623c20fa4119a8ab61bfbe61ec197ec882ed216f8b4e4b8eaa5577528db52715"
+        ],
+        "end_byte": 63,
+        "mapping_id": "constraint-mapping-1dafda4b3e8401525b27b8ed1d5fab476a033203ee05d95056e76eb869195c21",
+        "mode": "direct",
+        "start_byte": 0,
+        "statement_decision_hash": null,
+        "statement_id": "statement-babb87d8f8938984fef32a4fbedf98cb4feb2e9d80fd131449b488547b813b43"
+      },
+      {
+        "constraint_ids": [
+          "constraint-5a6048b7d86d30b83332b7b213e3e0751ff9fd079cbc2e308ef168203a1ea965"
+        ],
+        "end_byte": 92,
+        "mapping_id": "constraint-mapping-d821813b8d55d90039e7277737001a3399302ed4b780b2a4afcc62318f7cef5d",
+        "mode": "direct",
+        "start_byte": 63,
+        "statement_decision_hash": null,
+        "statement_id": "statement-b20064cefaf38d13f97036f32637a58f4a44431be2f503165348a0d7da908b10"
+      },
+      {
+        "constraint_ids": [
+          "constraint-c38b3b0c3098031fd38ccf5247c3aa2768ce73c331c5abcc9ead1d081ed0e552"
+        ],
+        "end_byte": 140,
+        "mapping_id": "constraint-mapping-b2401c299e69b00ea20bb2d2395a8b3e65f15dd62ef4c51d4a406ae8b8fc3eb8",
+        "mode": "direct",
+        "start_byte": 92,
+        "statement_decision_hash": null,
+        "statement_id": "statement-c1bdce2f0351af8d49ce86ad39df2899076de9051949259fd3c7254316952f2c"
+      }
+    ],
+    "statement_decisions": [
+      {
+        "decision_hash": "sha256:c794c36f57e8e552476471e69c938a66c42bcfeab9f807cadcca3deb965d84d5",
+        "disposition": "informational",
+        "domain_pack": {
+          "domain_pack_hash": "sha256:4b6ff9a3ebf3b419151fbaa3f899012dca39ff354de8e768da05146ad0c64b80",
+          "domain_pack_id": "repository-changes",
+          "domain_pack_version": "1.0.0"
+        },
+        "end_byte": 166,
+        "human_reason": null,
+        "mapped_at": "2026-08-31T11:59:00Z",
+        "mapper_identity": "owner@example.com",
+        "reason_code": "context-only",
+        "schema_version": "policy_mapping_decision.v1",
+        "source_document_hash": "sha256:da2979830771118b4538698ea6fc04ea82b624b09a1104f3d35d0957da2052f3",
+        "start_byte": 140,
+        "statement_id": "statement-3c664ba676522d6c1e46343b11b61014902d0dd42fe1b9b3e6c87b79717935c6"
+      }
+    ]
+  },
+  "authority_ref": "repository-authority@1.0.0",
+  "envelope_hash": "sha256:3fe810f55cb85048d43d6575e1a6cfe772f2b7453527c2e5659533f57a946f24",
+  "organization_id": "example-organization",
+  "publication_receipt": {
+    "approval_record_hash": "sha256:8a7d1a0c81a2842723340f06f3f27d5525a4a51a9fba77b3a3837f5fe3a1b799",
+    "authority_identity_hash": "sha256:60d4cf29460f8cb5aae50bc67aa695d6e007bf6c64dca039ef37b659a107ea78",
+    "authority_ref": "repository-authority@1.0.0",
+    "bundle_hash": "sha256:e30bd413b5ecc06d35cfe59cf718a7d361af2350bdcddbfccd0b13f9c133bafb",
+    "compiled_contract_hash": "sha256:9dbe54d7938ffb509970b6816178ed3f236c4a3a4ffc366ae4371440dbf9d12a",
+    "compiled_contract_ref": "repository-authority@1.0.0",
+    "constraint_ir_hash": "sha256:13b5cba9243260e33ac599f140923a77c8ad27c373c83b6dc2f62969e7711e7c",
+    "domain_pack": {
+      "domain_pack_hash": "sha256:4b6ff9a3ebf3b419151fbaa3f899012dca39ff354de8e768da05146ad0c64b80",
+      "domain_pack_id": "repository-changes",
+      "domain_pack_version": "1.0.0"
+    },
+    "provenance_complete": true,
+    "publication_id": "publication-1",
+    "publication_manifest_hash": "sha256:163f1d551a254d3927739fdf541e16c452df9f6ec59ef8d53617883a06afd79d",
+    "published_at": "2026-08-31T12:02:00Z",
+    "published_by": "publisher@example.com",
+    "receipt_hash": "sha256:8c75dfb204c3bdf95d0c6c094ceb9c38b1d1340b7e9f29189fca0f7e10a5da82",
+    "receipt_id": "receipt-v2-e30bd413b5ecc06d35cfe59cf718a7d361af2350bdcddbfccd0b13f9c133bafb",
+    "runtime_fact_schema_hash": "sha256:c1595ef8d77165a7a486151673f01eda5a93000786f47e1f048875f17eb396a1",
+    "schema_version": "publication_receipt.v2",
+    "semantic_commit_bundle_hash": "sha256:88b165ced0a410c30ab9ea072881126df1eced1ff2ce369099658d467a70e8b6",
+    "semantic_commit_hash": "sha256:2b88bdbfb0c6f4970fa37d61985cb71b39455a0c59b910a2cb4700ac170697b9",
+    "semantic_commit_id": "semantic-commit-2b88bdbfb0c6",
+    "source_snapshot_hash": "sha256:da2979830771118b4538698ea6fc04ea82b624b09a1104f3d35d0957da2052f3",
+    "source_statements_hash": "sha256:789e649c2bf727dbd573042edc4c1a12bd938a5ca4354e6da5e9cdcd04c1d8ca",
+    "statement_decisions_hash": "sha256:05f85f8e148e9220efc755d5f8b9d903a2017c1c203fcc7d5347a68f72ef4c1a"
+  },
+  "registry_entry": {
+    "authority_ref": "repository-authority@1.0.0",
+    "bundle_hash": "sha256:e30bd413b5ecc06d35cfe59cf718a7d361af2350bdcddbfccd0b13f9c133bafb",
+    "bundle_ref": "publications/repository-authority/1.0.0/authority-bundle.json",
+    "contract_hash": "sha256:9dbe54d7938ffb509970b6816178ed3f236c4a3a4ffc366ae4371440dbf9d12a",
+    "contract_id": "repository-authority",
+    "contract_version": "1.0.0",
+    "lifecycle_state": "active",
+    "publication_id": "publication-1",
+    "published_at": "2026-08-31T12:02:00Z",
+    "published_by": "publisher@example.com",
+    "receipt_hash": "sha256:8c75dfb204c3bdf95d0c6c094ceb9c38b1d1340b7e9f29189fca0f7e10a5da82",
+    "receipt_ref": "publications/repository-authority/1.0.0/publication-receipt.json"
+  },
+  "registry_entry_hash": "sha256:3240719c01379dfcfef84b207c8ebad8dfec17710de834800a131ca17b4d38bf",
+  "schema_version": "cloud_authority_publication.v1"
+}

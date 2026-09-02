@@ -44,6 +44,7 @@ APPROVED_JSON_FILES = {
     "contracts/finance-policy-1.0.0.contract.json",
     "contracts/index.json",
     "examples/sdk/finance-policy.json",
+    "tests/fixtures/cloud_authority_publication.v1.json",
 }
 EXPECTED_PUBLIC_RUNTIME_REQUIREMENTS = {
     "cricore",

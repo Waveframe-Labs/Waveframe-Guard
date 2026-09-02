@@ -9,10 +9,12 @@ from typing import Any, Callable
 from uuid import uuid4
 
 from guard.adapters import NORMALIZED_EXECUTION_REQUEST_V1
-from waveframe_guard.authority import AuthorityCache, AuthorityResolver
+from waveframe_guard.authority import AuthorityCache, AuthorityResolver, MemoryAuthorityCache
 from waveframe_guard.cloud import (
     CloudAuthorityClient,
+    CloudAuthorityResolver,
     CloudPreservationClient,
+    CloudPublicationUnavailable,
     CloudRuntimeClient,
 )
 from waveframe_guard.cloud.client import (
@@ -62,6 +64,7 @@ class Guard:
         )
         self.authorities = authority_source.authorities
         self.authority_bindings = authority_source.authority_bindings
+        self.authority_cache = authority_cache
         self.authority_loader = authority_source.authority_loader
         self.default_authority_ref = authority_source.default_authority_ref
         self.actor_identity = actor_identity or {"id": "unknown", "type": "unknown", "role": "unknown"}
@@ -141,6 +144,7 @@ class Guard:
         cloud_url: str | None = None,
         cloud_organization_id: str | None = None,
         cloud_api_key: str | None = None,
+        runtime_credential: str | None = None,
         actor_identity: dict[str, Any] | None = None,
         approvals: list[dict[str, Any]] | None = None,
         continuity_state: dict[str, Any] | None = None,
@@ -163,8 +167,11 @@ class Guard:
             cloud_organization_id,
             "WAVEFRAME_CLOUD_ORGANIZATION_ID",
         )
+        if runtime_credential is not None and cloud_api_key is not None:
+            if runtime_credential != cloud_api_key:
+                raise ValueError("runtime_credential and cloud_api_key must not conflict")
         resolved_api_key = _required_cloud_setting(
-            cloud_api_key,
+            runtime_credential if runtime_credential is not None else cloud_api_key,
             "WAVEFRAME_CLOUD_API_KEY",
         )
         resolved_runtime_id = runtime_id or (actor_identity or {}).get("id")
@@ -181,7 +188,44 @@ class Guard:
             organization_id=resolved_organization_id,
             api_key=resolved_api_key,
         )
-        compiled_authority = authority_client.fetch(authority)
+        authority_cache = MemoryAuthorityCache()
+        publication_resolver = CloudAuthorityResolver(authority_client)
+        try:
+            guard = cls(
+                workspace=workspace,
+                authority=authority,
+                authority_resolver=publication_resolver,
+                authority_cache=authority_cache,
+                actor_identity=actor_identity,
+                approvals=approvals,
+                continuity_state=continuity_state,
+                replay_posture=replay_posture,
+                execution_context=execution_context,
+                evaluation_time_source=evaluation_time_source,
+                preserve_to=resolved_url,
+                preservation_timeout_seconds=preservation_timeout_seconds,
+                cloud_organization_id=resolved_organization_id,
+                cloud_api_key=resolved_api_key,
+            )
+        except CloudPublicationUnavailable:
+            compiled_authority = authority_client.fetch(authority)
+            guard = cls(
+                workspace=workspace,
+                authority=authority,
+                authority_loader=lambda requested_ref: compiled_authority,
+                actor_identity=actor_identity,
+                approvals=approvals,
+                continuity_state=continuity_state,
+                replay_posture=replay_posture,
+                execution_context=execution_context,
+                evaluation_time_source=evaluation_time_source,
+                preserve_to=resolved_url,
+                preservation_timeout_seconds=preservation_timeout_seconds,
+                cloud_organization_id=resolved_organization_id,
+                cloud_api_key=resolved_api_key,
+            )
+        finally:
+            publication_resolver.close()
         runtime_client = CloudRuntimeClient(
             resolved_url,
             organization_id=resolved_organization_id,
@@ -191,22 +235,7 @@ class Guard:
             authority_ref=authority,
             runtime_version=f"guard-{_guard_version()}",
         )
-        guard = cls(
-            workspace=workspace,
-            authority=authority,
-            authority_loader=lambda requested_ref: compiled_authority,
-            actor_identity=actor_identity,
-            approvals=approvals,
-            continuity_state=continuity_state,
-            replay_posture=replay_posture,
-            execution_context=execution_context,
-            evaluation_time_source=evaluation_time_source,
-            preserve_to=resolved_url,
-            preservation_timeout_seconds=preservation_timeout_seconds,
-            cloud_organization_id=resolved_organization_id,
-            cloud_api_key=resolved_api_key,
-            cloud_runtime_client=runtime_client,
-        )
+        guard.cloud_runtime_client = runtime_client
         guard.runtime_connection = runtime_client.connect()
         return guard
 

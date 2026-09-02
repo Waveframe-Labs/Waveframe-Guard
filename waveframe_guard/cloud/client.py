@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import zlib
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from numbers import Number
@@ -17,16 +18,26 @@ from guard.adapters.compiled_authority import (
     intake_compiled_authority,
 )
 from waveframe_guard.authority.loader import parse_authority_ref
+from .publication import (
+    CloudAuthorityPublication,
+    CloudPublicationProtocolError,
+    parse_cloud_authority_publication,
+)
 
 
 DEFAULT_CLOUD_BASE_URL = "http://localhost:8000"
 DEFAULT_PRESERVATION_TIMEOUT_SECONDS = 10.0
 DEFAULT_AUTHORITY_TIMEOUT_SECONDS = 5.0
 DEFAULT_RUNTIME_TIMEOUT_SECONDS = 5.0
+MAX_CLOUD_PUBLICATION_BODY_BYTES = 8 * 1024 * 1024
 
 
 class CloudAuthorityFetchError(RuntimeError):
     """Raised when Guard cannot obtain a trustworthy authority from Cloud."""
+
+
+class CloudPublicationUnavailable(CloudAuthorityFetchError):
+    """Signals the narrow, explicit legacy fallback condition."""
 
 
 class CloudAuthorityClient:
@@ -59,6 +70,7 @@ class CloudAuthorityClient:
                     "X-API-Key": self._api_key,
                 },
                 timeout=self.timeout_seconds,
+                allow_redirects=False,
             )
         except requests.Timeout as exc:
             raise CloudAuthorityFetchError("Cloud authority request timed out") from exc
@@ -66,11 +78,10 @@ class CloudAuthorityClient:
             message = _redact_secret(str(exc) or "Cloud authority request failed", self._api_key)
             raise CloudAuthorityFetchError(message) from exc
 
+        if 300 <= response.status_code < 400:
+            raise CloudAuthorityFetchError("Cloud authority request rejected an HTTP redirect")
         if not 200 <= response.status_code < 300:
-            detail = _redact_secret(response.text, self._api_key)
-            raise CloudAuthorityFetchError(
-                f"Cloud authority request failed with HTTP {response.status_code}: {detail}"
-            )
+            raise CloudAuthorityFetchError(_authority_http_error(response.status_code))
 
         try:
             contract = response.json()
@@ -79,7 +90,12 @@ class CloudAuthorityClient:
         if not isinstance(contract, dict):
             raise CloudAuthorityFetchError("Cloud authority response must be a JSON object")
         try:
-            contract = intake_compiled_authority(contract)
+            contract = intake_compiled_authority(
+                contract,
+                _verified_v2_authority=(
+                    contract.get("schema_version") == "compiled_authority_contract.v2"
+                ),
+            )
         except CompiledAuthorityIntakeError as exc:
             raise CloudAuthorityFetchError(
                 f"Cloud authority response is not enforceable: {exc}"
@@ -99,6 +115,64 @@ class CloudAuthorityClient:
                 "Cloud authority response failed its contract_hash integrity check"
             )
         return contract
+
+    def fetch_publication(self, authority_ref: str) -> CloudAuthorityPublication:
+        parse_authority_ref(authority_ref)
+        url = f"{self.base_url}/v1/authorities/{quote(authority_ref, safe='')}/publication"
+        try:
+            response = requests.get(
+                url,
+                headers={
+                    "Accept": "application/json",
+                    "Accept-Encoding": "gzip, identity",
+                    "X-Organization-ID": self.organization_id,
+                    "X-API-Key": self._api_key,
+                },
+                timeout=self.timeout_seconds,
+                allow_redirects=False,
+                stream=True,
+            )
+        except requests.Timeout as exc:
+            raise CloudAuthorityFetchError("Cloud publication request timed out") from exc
+        except requests.RequestException as exc:
+            message = _redact_secret(str(exc) or "Cloud publication request failed", self._api_key)
+            raise CloudAuthorityFetchError(message) from exc
+
+        try:
+            if 300 <= response.status_code < 400:
+                raise CloudAuthorityFetchError("Cloud publication request rejected an HTTP redirect")
+            if response.status_code == 404:
+                body = _read_publication_body(response)
+                error_code = _error_code_from_json(body)
+                if error_code in {
+                    "not found",
+                    "not_found",
+                    "endpoint_not_found",
+                    "authority_publication_not_found",
+                }:
+                    raise CloudPublicationUnavailable(
+                        "Cloud publication endpoint is unavailable for this authority"
+                    )
+                raise CloudAuthorityFetchError(_publication_http_error(404))
+            if not 200 <= response.status_code < 300:
+                raise CloudAuthorityFetchError(_publication_http_error(response.status_code))
+            body = _read_publication_body(response)
+        finally:
+            response.close()
+
+        try:
+            payload = _strict_json_object(body)
+            return parse_cloud_authority_publication(
+                payload,
+                requested_authority_ref=authority_ref,
+                expected_organization_id=self.organization_id,
+            )
+        except (UnicodeDecodeError, json.JSONDecodeError, CloudPublicationProtocolError) as exc:
+            if isinstance(exc, CloudPublicationProtocolError):
+                message = str(exc)
+            else:
+                message = "Cloud publication response was not valid strict UTF-8 JSON"
+            raise CloudAuthorityFetchError(message) from exc
 
 
 @dataclass(frozen=True)
@@ -492,6 +566,97 @@ def _contract_hash(contract: Mapping[str, Any]) -> str:
 
 def _normalize_hash(value: str) -> str:
     return value if value.startswith("sha256:") else f"sha256:{value}"
+
+
+def _read_publication_body(response: Any) -> bytes:
+    content_type = str(response.headers.get("Content-Type", ""))
+    if content_type.split(";", 1)[0].strip().lower() != "application/json":
+        raise CloudAuthorityFetchError("Cloud publication response must use application/json")
+    content_length = response.headers.get("Content-Length")
+    if content_length is not None:
+        try:
+            parsed_length = int(content_length)
+            if parsed_length < 0:
+                raise ValueError
+            if parsed_length > MAX_CLOUD_PUBLICATION_BODY_BYTES:
+                raise CloudAuthorityFetchError("Cloud publication response exceeded the body limit")
+        except ValueError as exc:
+            raise CloudAuthorityFetchError("Cloud publication response had an invalid Content-Length") from exc
+
+    encoding = str(response.headers.get("Content-Encoding", "identity")).strip().lower()
+    if encoding not in {"", "identity", "gzip"}:
+        raise CloudAuthorityFetchError("Cloud publication response used an unsupported content encoding")
+    response.raw.decode_content = False
+    encoded = bytearray()
+    while True:
+        chunk = response.raw.read(64 * 1024)
+        if not chunk:
+            break
+        encoded.extend(chunk)
+        if len(encoded) > MAX_CLOUD_PUBLICATION_BODY_BYTES:
+            raise CloudAuthorityFetchError("Cloud publication response exceeded the encoded body limit")
+    if not encoded:
+        raise CloudAuthorityFetchError("Cloud publication response body was empty")
+    if encoding != "gzip":
+        return bytes(encoded)
+
+    decompressor = zlib.decompressobj(16 + zlib.MAX_WBITS)
+    try:
+        decoded = decompressor.decompress(bytes(encoded), MAX_CLOUD_PUBLICATION_BODY_BYTES + 1)
+        if len(decoded) <= MAX_CLOUD_PUBLICATION_BODY_BYTES:
+            decoded += decompressor.flush(MAX_CLOUD_PUBLICATION_BODY_BYTES + 1 - len(decoded))
+    except zlib.error as exc:
+        raise CloudAuthorityFetchError("Cloud publication response had invalid gzip encoding") from exc
+    if len(decoded) > MAX_CLOUD_PUBLICATION_BODY_BYTES or decompressor.unconsumed_tail:
+        raise CloudAuthorityFetchError("Cloud publication response exceeded the decompressed body limit")
+    if not decompressor.eof or decompressor.unused_data:
+        raise CloudAuthorityFetchError("Cloud publication response had ambiguous gzip framing")
+    return decoded
+
+
+def _strict_json_object(body: bytes) -> dict[str, Any]:
+    def reject_duplicates(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+        result: dict[str, Any] = {}
+        for key, value in pairs:
+            if key in result:
+                raise CloudPublicationProtocolError("Cloud publication response contains duplicate JSON keys")
+            result[key] = value
+        return result
+
+    payload = json.loads(body.decode("utf-8"), object_pairs_hook=reject_duplicates)
+    if not isinstance(payload, dict):
+        raise CloudPublicationProtocolError("Cloud publication response must be a JSON object")
+    return payload
+
+
+def _error_code_from_json(body: bytes) -> str | None:
+    try:
+        payload = _strict_json_object(body)
+    except (UnicodeDecodeError, json.JSONDecodeError, CloudPublicationProtocolError) as exc:
+        raise CloudAuthorityFetchError("Cloud publication 404 response was not valid strict JSON") from exc
+    error = payload.get("error")
+    return error if isinstance(error, str) else None
+
+
+def _authority_http_error(status_code: int) -> str:
+    return f"Cloud authority request failed with HTTP {status_code}"
+
+
+def _publication_http_error(status_code: int) -> str:
+    labels = {
+        401: "authentication failed",
+        403: "authorization failed",
+        404: "publication was not found",
+        409: "publication conflicted",
+        413: "publication was too large",
+        422: "publication was invalid",
+        429: "publication request was rate limited",
+    }
+    if status_code >= 500:
+        label = "Cloud service failed"
+    else:
+        label = labels.get(status_code, "request failed")
+    return f"Cloud publication {label} (HTTP {status_code})"
 
 
 def _redact_secret(message: str, secret: str | None) -> str:

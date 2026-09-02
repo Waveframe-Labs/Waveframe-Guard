@@ -12,6 +12,7 @@ The public docs are tiered by purpose.
 - `architecture/ENFORCEMENT_MODEL.md`
 - `architecture/RUNTIME_EVALUATION_FLOW.md`
 - `architecture/LOCAL_CLOUD_LIFECYCLE_BOUNDARY.md`
+- `architecture/CLOUD_AUTHORITY_PUBLICATION_PROTOCOL.md`
 
 ## Runtime
 

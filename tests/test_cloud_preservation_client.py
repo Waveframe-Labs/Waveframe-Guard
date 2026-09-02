@@ -516,4 +516,4 @@ def test_cloud_authority_client_redacts_runtime_secret_from_http_failures():
         server.server_close()
 
     assert secret not in str(exc_info.value)
-    assert "[REDACTED]" in str(exc_info.value)
+    assert str(exc_info.value) == "Cloud authority request failed with HTTP 403"

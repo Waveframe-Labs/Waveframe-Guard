@@ -334,6 +334,7 @@ def test_external_agent_quickstart_reports_both_decisions_and_identities_to_clou
     assert summary["blocked_package_id"] == "pkg-2"
     assert summary["blocked_receipt_id"] == "receipt-2"
     paths = [request["path"] for request in state["requests"]]
+    assert paths.count("/v1/authorities/budget-quickstart@1.0.0/publication") == 1
     assert paths.count("/v1/contracts/budget-quickstart/1.0.0") == 1
     assert paths.count("/v1/runtimes/register") == 1
     assert paths.count("/v1/runtimes/budget-agent-runtime/heartbeats") == 1
@@ -523,7 +524,11 @@ def _serve_cloud_boundary(state):
         }
         state["requests"].append(request)
 
-        if request["path"] == "/v1/contracts/budget-quickstart/1.0.0":
+        status = "200 OK"
+        if request["path"] == "/v1/authorities/budget-quickstart@1.0.0/publication":
+            response = {"error": "not found"}
+            status = "404 Not Found"
+        elif request["path"] == "/v1/contracts/budget-quickstart/1.0.0":
             response = authority
         elif request["path"] == "/v1/preserve":
             state["preservation_count"] += 1
@@ -539,7 +544,7 @@ def _serve_cloud_boundary(state):
 
         encoded = json.dumps(response).encode("utf-8")
         start_response(
-            "200 OK",
+            status,
             [
                 ("Content-Type", "application/json"),
                 ("Content-Length", str(len(encoded))),

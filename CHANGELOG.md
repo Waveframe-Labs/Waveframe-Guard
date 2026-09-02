@@ -2,6 +2,29 @@
 
 ## [Unreleased]
 
+### Added
+- Added an authenticated, tenant-bound `cloud_authority_publication.v1` resolver
+  protocol at `GET /v1/authorities/{authority_ref}/publication`. Atomic Ledger
+  v2 bundles and receipts flow through Guard's existing verifier and verified
+  cache without new application inputs.
+
+### Hardened
+- Added strict envelope fields and canonical bindings, duplicate-key rejection,
+  encoded and decompressed 8 MiB limits, bounded gzip handling, redirect
+  rejection, opaque logical-reference validation, safe status mapping, and a
+  narrow explicit 404-only fallback to the unchanged legacy v1 contract path.
+- Contract-only v2 responses still fail closed, and authority, tenant,
+  registry, bundle, receipt, contract, domain-pack, runtime-schema, Constraint
+  IR, mapping, and hash substitutions cannot activate an authority.
+
+### Compatibility
+- `Guard.cloud(...)`, Cloud headers, v1 endpoint behavior, finance behavior,
+  local resolvers, caching, and enforcement semantics remain compatible. The
+  `runtime_credential=` spelling is an additive alias for the existing Cloud
+  API-key credential; no new argument is required.
+- Current Cloud has not implemented the additive publication endpoint. Complete
+  v2 Cloud resolution remains unavailable until a Cloud implementation ships.
+
 ## [0.16.0] - 2026-09-01 - Verified Ledger Authority Enforcement
 
 Guard verifies the exact Ledger-published authority, derives only

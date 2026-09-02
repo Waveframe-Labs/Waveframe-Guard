@@ -25,6 +25,7 @@ REQUIRED_WHEEL_FILES = {
     "guard/sdk/local_persistence.py",
     "waveframe_guard/__init__.py",
     "waveframe_guard/authority/runtime_facts.py",
+    "waveframe_guard/cloud/publication.py",
     "waveframe_guard/schemas.py",
 }
 REQUIRED_SDIST_FILES = {
@@ -36,6 +37,7 @@ REQUIRED_SDIST_FILES = {
     "pyproject.toml",
     "waveframe_guard/__init__.py",
     "waveframe_guard/authority/runtime_facts.py",
+    "waveframe_guard/cloud/publication.py",
     "waveframe_guard/schemas.py",
 }
 EXPECTED_RUNTIME_REQUIREMENTS = {
@@ -264,6 +266,7 @@ def _clean_wheel_smoke(wheel: Path, expected_version: str) -> None:
         environment["GUARD_EXPECTED_VERSION"] = expected_version
         environment["GUARD_REPOSITORY_ROOT"] = str(REPO_ROOT)
         _run([str(python), "-c", SMOKE_SCRIPT], cwd=smoke_dir, env=environment)
+        _run([str(python), "-c", CLOUD_V2_SMOKE_SCRIPT], cwd=smoke_dir, env=environment)
         _run([str(python), "-m", "pip", "check"], cwd=smoke_dir, env=environment)
 
 
@@ -330,6 +333,168 @@ else:
     raise AssertionError("blocked package smoke callback unexpectedly executed")
 assert calls == ["README.md"], calls
 print(f"Clean wheel smoke passed from {module_path}: allowed=1 blocked=1 callbacks=1")
+'''
+
+
+CLOUD_V2_SMOKE_SCRIPT = r'''
+import hashlib
+import json
+import os
+import threading
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+
+import waveframe_guard
+from governance_ledger import (
+    apply_policy_mapping_decision,
+    finalize_domain_policy_authority,
+    interpret_policy_with_domain_pack,
+)
+from guard.sdk import Guard, GuardExecutionBlocked
+
+
+repository_root = Path(os.environ["GUARD_REPOSITORY_ROOT"]).resolve()
+module_path = Path(waveframe_guard.__file__).resolve()
+assert repository_root not in module_path.parents, module_path
+
+
+def canonical_hash(value):
+    encoded = json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return "sha256:" + hashlib.sha256(encoded).hexdigest()
+
+
+source = (
+    b"Repository changes may be made only by repository-maintainers.\n"
+    b"Agents may modify README.md.\n"
+    b"Agents must not modify files under deployment/.\n"
+    b"Repository policy context."
+)
+draft = interpret_policy_with_domain_pack(
+    source,
+    domain_pack_id="repository-changes",
+    domain_pack_version="1.0.0",
+    source_policy_id="repository-policy",
+    source_revision="rev-1",
+    authority_id="repository-authority",
+    authority_version="1.0.0",
+)
+pending = next(item for item in draft["source_statements"] if item["classification"] == "pending")
+mapped = apply_policy_mapping_decision(
+    draft,
+    statement_id=pending["statement_id"],
+    disposition="informational",
+    mapper_identity="owner@example.com",
+    mapped_at="2026-08-31T11:59:00Z",
+    reason_code="context-only",
+)
+publication = finalize_domain_policy_authority(
+    mapped["updated_interpretation"],
+    approval_id="approval-1",
+    approved_by="owner@example.com",
+    approved_at="2026-08-31T12:00:00Z",
+    committed_by="owner@example.com",
+    committed_at="2026-08-31T12:01:00Z",
+    publication_id="publication-1",
+    published_by="publisher@example.com",
+    published_at="2026-08-31T12:02:00Z",
+)
+registry_entry = {
+    "authority_ref": "repository-authority@1.0.0",
+    "contract_id": "repository-authority",
+    "contract_version": "1.0.0",
+    "contract_hash": publication["compiled_authority_contract"]["contract_hash"],
+    "publication_id": publication["publication_receipt"]["publication_id"],
+    "bundle_ref": "publications/repository-authority/1.0.0/authority-bundle.json",
+    "bundle_hash": publication["authority_bundle"]["bundle_hash"],
+    "receipt_ref": "publications/repository-authority/1.0.0/publication-receipt.json",
+    "receipt_hash": publication["publication_receipt"]["receipt_hash"],
+    "lifecycle_state": "active",
+    "published_at": publication["publication_receipt"]["published_at"],
+    "published_by": publication["publication_receipt"]["published_by"],
+}
+envelope = {
+    "schema_version": "cloud_authority_publication.v1",
+    "organization_id": "example-organization",
+    "authority_ref": "repository-authority@1.0.0",
+    "registry_entry": registry_entry,
+    "registry_entry_hash": canonical_hash(registry_entry),
+    "authority_bundle": publication["authority_bundle"],
+    "publication_receipt": publication["publication_receipt"],
+}
+envelope["envelope_hash"] = canonical_hash(envelope)
+state = {"publication_gets": 0}
+
+
+class Handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        assert self.path == "/v1/authorities/repository-authority%401.0.0/publication"
+        assert self.headers["X-Organization-ID"] == "example-organization"
+        assert self.headers["X-API-Key"] == "clean-wheel-runtime-credential"
+        state["publication_gets"] += 1
+        body = json.dumps(envelope, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def do_POST(self):
+        length = int(self.headers.get("Content-Length") or "0")
+        if length:
+            self.rfile.read(length)
+        body = b'{"ok":true}'
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def log_message(self, format, *args):
+        return
+
+
+server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+thread = threading.Thread(target=server.serve_forever, daemon=True)
+thread.start()
+try:
+    guard = Guard.cloud(
+        cloud_url=f"http://127.0.0.1:{server.server_port}",
+        runtime_credential="clean-wheel-runtime-credential",
+        cloud_organization_id="example-organization",
+        authority="repository-authority@1.0.0",
+        runtime_id="clean-wheel-runtime",
+        actor_identity={"id": "repo-agent", "type": "agent", "role": "repository-maintainer"},
+        workspace=Path.cwd() / "cloud-v2-state",
+    )
+    guard.cloud_preservation_client = None
+    guard.cloud_runtime_client = None
+    callbacks = []
+
+    @guard.tool(action="modify", target="path", return_result=True)
+    def write_file(path):
+        callbacks.append(path)
+        return path
+
+    allowed = write_file("README.md")
+    try:
+        write_file("deployment/production.yml")
+    except GuardExecutionBlocked as blocked:
+        assert blocked.evaluation["execution_attestation"]["callback_invoked"] is False
+    else:
+        raise AssertionError("deployment proposal was not blocked")
+finally:
+    server.shutdown()
+    server.server_close()
+
+assert allowed["executed"] is True
+assert callbacks == ["README.md"]
+assert state["publication_gets"] == 1
+assert guard.authority_bindings["repository-authority@1.0.0"].schema_version == "authority_bundle.v2"
+print(
+    f"Clean wheel Cloud v2 passed from {module_path}: "
+    "allowed=README.md blocked=deployment/production.yml callbacks=1 "
+    "manual_facts=0 caller_ledger_validators=0 publication_gets=1 repository_imports=0"
+)
 '''
 
 
