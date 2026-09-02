@@ -46,10 +46,13 @@ Current resolver adapters:
 
 - `LocalRegistryResolver`
 - `MemoryAuthorityResolver`
+- `CloudAuthorityResolver`
 
-Future resolver adapters may include Cloud or Enterprise sources, but they must
-still return `RegistryEntry`. Resolvers must not return bundles, load bundle
-payloads, verify bundle contents, alter lifecycle state, or select `latest`.
+Resolver adapters must still return `RegistryEntry`. Resolvers must not return bundles,
+verify bundle contents, alter lifecycle state, or select `latest`.
+Transport resolvers may retrieve an atomic publication and materialize its
+unchanged artifacts behind opaque logical references so the existing
+`BundleLoader` and `AuthorityVerifier` stages remain authoritative.
 
 ## Authority Cache
 

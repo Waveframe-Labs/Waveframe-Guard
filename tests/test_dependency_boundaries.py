@@ -53,6 +53,7 @@ FORBIDDEN_CLOUD_PERSISTENCE_MODULE_NAMES = {
 ALLOWED_CLOUD_PRESERVATION_CLIENT_FILES = {
     "waveframe_guard/cloud/__init__.py",
     "waveframe_guard/cloud/client.py",
+    "waveframe_guard/cloud/publication.py",
 }
 
 

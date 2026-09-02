@@ -46,8 +46,8 @@ allocate_budget = guard.tool(
 ```
 
 The wrapped callable keeps its normal Python interface. Guard resolves the
-versioned authority, evaluates before mutation, and reports the execution to
-Cloud.
+complete published authority from Cloud, verifies it, evaluates before
+mutation, and reports the execution to Cloud.
 
 ## Five-Minute Cloud Quickstart
 
@@ -134,7 +134,7 @@ is the evidence available for this release.
 | Component | Minimum supported version | Recommended paired version | Actually tested for Guard 0.16.0 | Notes |
 | --- | --- | --- | --- | --- |
 | Waveframe Guard | 0.16.0 for verified Ledger v2 authority enforcement | 0.16.0 | 0.16.0 release candidate | Public package and runtime version agree. |
-| Waveframe Cloud | Not declared | Not declared for the complete v2 workflow | Existing v1 and finance integration behavior | Cloud integration for distribution and consumption of the complete v2 chain is follow-on work. Guard 0.16.0 does not claim Cloud currently distributes or consumes that chain. |
+| Waveframe Cloud | Not declared | Not declared for the complete v2 workflow | Existing v1 and finance integration behavior | Guard implements the additive atomic v2 publication client protocol. Current Cloud has not implemented the endpoint, so complete-v2 Cloud support is unavailable until that implementation ships. |
 | CRI-CORE | Not declared | 0.13.0 | 0.13.0 | Guard intentionally leaves the runtime dependency unpinned. |
 | CRI-CORE proposal normalizer | Not declared | 0.2.0 | 0.2.0 | Guard intentionally leaves the runtime dependency unpinned. |
 | Waveframe Ledger | 0.7.0 | 0.7.x | `governance-ledger==0.7.0` minimum and `>=0.7.0,<0.8.0` metadata boundary | Runtime dependency for native `authority_bundle.v2` and `publication_receipt.v2` validation. Legacy v1 artifacts remain supported. The published `governance-ledger[guard]==0.7.0` extra represents Ledger's earlier Guard 0.15 compatibility pairing; Guard 0.16 users install `waveframe-guard==0.16.0` directly, and Guard never depends on the extra. |
