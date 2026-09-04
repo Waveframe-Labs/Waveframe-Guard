@@ -93,11 +93,11 @@ jobs:
           ref: ${{ github.sha }}
           persist-credentials: false
 
-      - name: Check out the reviewed Ledger 0.8 candidate
+      - name: Check out the merged Ledger 0.8 candidate
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: Waveframe-Labs/Waveframe-Ledger
-          ref: c4f61e0c352db2df11a7d7af8fd8aad06854c2a8
+          ref: 2b9a6b0a239d0e834d1bb42cd2efa30abe299e70
           path: ledger-source
           persist-credentials: false
 
@@ -136,7 +136,7 @@ jobs:
           python -m build --no-isolation --outdir guard-dist
           python -m twine check guard-dist/*
 
-      - name: Verify independent v2 publication from clean wheels
+      - name: Verify independent v2 and v3 publications from clean wheels
         shell: bash
         run: |
           ledger_wheel="$(find ledger-dist -maxdepth 1 -name '*.whl' -print -quit)"
@@ -144,6 +144,9 @@ jobs:
           test -n "$ledger_wheel"
           test -n "$guard_wheel"
           python tools/acceptance/ledger_v2_clean_wheel.py \
+            --ledger-install-spec "$ledger_wheel" \
+            --install-spec "$guard_wheel"
+          python tools/acceptance/ledger_v3_clean_wheel.py \
             --ledger-install-spec "$ledger_wheel" \
             --install-spec "$guard_wheel"
 

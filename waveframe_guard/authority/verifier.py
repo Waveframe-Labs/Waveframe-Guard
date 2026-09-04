@@ -22,9 +22,16 @@ def _is_process_verified_v2(authority: LoadedAuthority) -> bool:
     return authority._verification_marker is _PROCESS_VERIFICATION_MARKER
 
 
+def _is_process_verified_v3(authority: LoadedAuthority) -> bool:
+    return authority._verification_marker is _PROCESS_VERIFICATION_MARKER
+
+
 class AuthorityVerifier:
     def verify(self, bundle: Bundle) -> LoadedAuthority:
-        if bundle.payload.get("schema_version") == "authority_bundle.v2":
+        schema_version = bundle.payload.get("schema_version")
+        if schema_version == "authority_bundle.v3":
+            return _verify_v3_authority(bundle)
+        if schema_version == "authority_bundle.v2":
             return _verify_v2_authority(bundle)
         registry_entry = bundle.registry_entry
         contract = _bundle_contract(bundle)
@@ -55,15 +62,15 @@ class AuthorityVerifier:
         _verify_registry_lifecycle_state(registry_entry)
         if registry_entry.authority_ref != authority.authority_ref:
             raise AuthorityVerificationError(f"cached authority_ref mismatch for {registry_entry.authority_ref}")
-        if authority.schema_version == "authority_bundle.v2":
+        if authority.schema_version in {"authority_bundle.v2", "authority_bundle.v3"}:
             if revalidate_publication:
-                return _revalidate_cached_v2(self, registry_entry, authority)
+                return _revalidate_cached_publication(self, registry_entry, authority)
             try:
-                _verify_cached_v2_integrity(registry_entry, authority)
+                _verify_cached_publication_integrity(registry_entry, authority)
             except AuthorityVerificationError:
                 # A compact integrity failure is evidence of drift. Re-run Ledger's
                 # complete provenance validators before rejecting the cache entry.
-                _revalidate_cached_v2(self, registry_entry, authority)
+                _revalidate_cached_publication(self, registry_entry, authority)
                 raise
             return authority
         if _normalize_hash(registry_entry.bundle_hash or "") != _normalize_hash(authority.bundle_hash):
@@ -81,24 +88,48 @@ class AuthorityVerifier:
 
 
 def _verify_v2_authority(bundle: Bundle) -> LoadedAuthority:
+    return _verify_publication_authority(
+        bundle,
+        bundle_schema="authority_bundle.v2",
+        receipt_schema="publication_receipt.v2",
+        major="v2",
+    )
+
+
+def _verify_v3_authority(bundle: Bundle) -> LoadedAuthority:
+    return _verify_publication_authority(
+        bundle,
+        bundle_schema="authority_bundle.v3",
+        receipt_schema="publication_receipt.v3",
+        major="v3",
+    )
+
+
+def _verify_publication_authority(
+    bundle: Bundle,
+    *,
+    bundle_schema: str,
+    receipt_schema: str,
+    major: str,
+) -> LoadedAuthority:
     validation_started_ns = perf_counter_ns()
     registry_entry = bundle.registry_entry
     if registry_entry.bundle_ref is None or registry_entry.receipt_ref is None:
         raise AuthorityVerificationError(
-            f"v2 publication requires logical bundle and receipt references for {registry_entry.authority_ref}"
+            f"{major} publication requires logical bundle and receipt references for {registry_entry.authority_ref}"
         )
     if bundle.bundle_ref != registry_entry.bundle_ref:
         raise AuthorityVerificationError(
-            f"v2 authority bundle logical reference mismatch for {registry_entry.authority_ref}"
+            f"{major} authority bundle logical reference mismatch for {registry_entry.authority_ref}"
         )
     if bundle.receipt_ref != registry_entry.receipt_ref:
         raise AuthorityVerificationError(
-            f"v2 publication receipt logical reference mismatch for {registry_entry.authority_ref}"
+            f"{major} publication receipt logical reference mismatch for {registry_entry.authority_ref}"
         )
     receipt = bundle.receipt_payload
     if not isinstance(receipt, Mapping):
         raise AuthorityVerificationError(
-            f"authority_bundle.v2 requires a publication receipt: {registry_entry.authority_ref}"
+            f"{bundle_schema} requires a publication receipt: {registry_entry.authority_ref}"
         )
 
     try:
@@ -113,7 +144,25 @@ def _verify_v2_authority(bundle: Bundle) -> LoadedAuthority:
         payload = dict(bundle.payload)
         receipt_payload = dict(receipt)
         bundle_status = validate_authority_bundle(payload)
+        if major == "v3" and bundle_status.get("schema_version") != bundle_schema:
+            raise AuthorityVerificationError(
+                "installed governance-ledger does not support authority_bundle.v3; "
+                "governance-ledger>=0.8.0 is required"
+            )
+        if major == "v3" and not bundle_status.get("provenance_complete"):
+            raise AuthorityVerificationError(
+                f"Ledger did not verify a provenance-complete {bundle_schema}: "
+                f"{registry_entry.authority_ref}"
+            )
         receipt_status = validate_publication_receipt(payload, receipt_payload)
+        if major == "v3" and (
+            receipt_status.get("schema_version") != receipt_schema
+            or not receipt_status.get("provenance_complete")
+        ):
+            raise AuthorityVerificationError(
+                f"Ledger did not verify a provenance-complete {receipt_schema}: "
+                f"{registry_entry.authority_ref}"
+            )
         runtime_fact_schema = _required_mapping(payload, "runtime_fact_schema")
         constraint_ir = _required_mapping(payload, "constraint_ir")
         domain_pack_ref = _required_mapping(payload, "domain_pack")
@@ -148,22 +197,24 @@ def _verify_v2_authority(bundle: Bundle) -> LoadedAuthority:
             dict(runtime_fact_schema),
             domain_pack=installed_pack,
         )
-    except (KeyError, TypeError, ValueError) as exc:
+    except AuthorityVerificationError:
+        raise
+    except (ImportError, KeyError, TypeError, ValueError) as exc:
         raise AuthorityVerificationError(
-            f"Ledger rejected the v2 publication chain for {registry_entry.authority_ref}: {exc}"
+            f"Ledger rejected the {major} publication chain for {registry_entry.authority_ref}: {exc}"
         ) from exc
 
-    if bundle_status.get("schema_version") != "authority_bundle.v2" or not bundle_status.get(
+    if bundle_status.get("schema_version") != bundle_schema or not bundle_status.get(
         "provenance_complete"
     ):
         raise AuthorityVerificationError(
-            f"Ledger did not verify a provenance-complete authority_bundle.v2: {registry_entry.authority_ref}"
+            f"Ledger did not verify a provenance-complete {bundle_schema}: {registry_entry.authority_ref}"
         )
-    if receipt_status.get("schema_version") != "publication_receipt.v2" or not receipt_status.get(
+    if receipt_status.get("schema_version") != receipt_schema or not receipt_status.get(
         "provenance_complete"
     ):
         raise AuthorityVerificationError(
-            f"Ledger did not verify a provenance-complete publication_receipt.v2: {registry_entry.authority_ref}"
+            f"Ledger did not verify a provenance-complete {receipt_schema}: {registry_entry.authority_ref}"
         )
     if not compatibility.get("compatible"):
         raise AuthorityVerificationError(
@@ -193,7 +244,7 @@ def _verify_v2_authority(bundle: Bundle) -> LoadedAuthority:
     _require_hash_equal(bundle_hash, registry_entry.bundle_hash, "authority bundle hash")
     if registry_entry.receipt_hash is None:
         raise AuthorityVerificationError(
-            f"authority_bundle.v2 registry entry is missing receipt_hash: {registry_entry.authority_ref}"
+            f"{bundle_schema} registry entry is missing receipt_hash: {registry_entry.authority_ref}"
         )
     _require_hash_equal(receipt_hash, registry_entry.receipt_hash, "publication receipt hash")
     if registry_entry.publication_id is not None:
@@ -219,13 +270,13 @@ def _verify_v2_authority(bundle: Bundle) -> LoadedAuthority:
             "authority_identity_hash": _required_string(authority, "authority_identity_hash"),
         },
         "authority_bundle": {
-            "schema_version": "authority_bundle.v2",
+            "schema_version": bundle_schema,
             "publication_id": publication_id,
             "bundle_hash": bundle_hash,
             "logical_ref": bundle.bundle_ref,
         },
         "publication_receipt": {
-            "schema_version": "publication_receipt.v2",
+            "schema_version": receipt_schema,
             "receipt_id": _required_string(receipt_payload, "receipt_id"),
             "receipt_hash": receipt_hash,
             "logical_ref": bundle.receipt_ref,
@@ -279,7 +330,7 @@ def _verify_v2_authority(bundle: Bundle) -> LoadedAuthority:
         lifecycle_state=registry_entry.lifecycle_state,
         published_at=_required_string(receipt_payload, "published_at"),
         published_by=_required_string(receipt_payload, "published_by"),
-        schema_version="authority_bundle.v2",
+        schema_version=bundle_schema,
         receipt_id=_required_string(receipt_payload, "receipt_id"),
         receipt_hash=receipt_hash,
         receipt_path=bundle.receipt_path,
@@ -294,13 +345,13 @@ def _verify_v2_authority(bundle: Bundle) -> LoadedAuthority:
     )
 
 
-def _verify_cached_v2_integrity(
+def _verify_cached_publication_integrity(
     registry_entry: RegistryEntry,
     authority: LoadedAuthority,
 ) -> None:
     if authority.authority_evidence is None or authority.runtime_fact_schema is None:
         raise AuthorityVerificationError(
-            f"cached v2 authority is missing verified runtime state for {registry_entry.authority_ref}"
+            f"cached {authority.schema_version} authority is missing verified runtime state for {registry_entry.authority_ref}"
         )
     _require_hash_equal(authority.bundle_hash, registry_entry.bundle_hash, "cached authority bundle hash")
     _require_hash_equal(authority.contract_hash, registry_entry.contract_hash, "cached compiled contract hash")
@@ -329,14 +380,14 @@ def _verify_cached_v2_integrity(
     _require_hash_equal(actual_integrity_hash, authority.runtime_integrity_hash, "cached runtime authority integrity")
 
 
-def _revalidate_cached_v2(
+def _revalidate_cached_publication(
     verifier: AuthorityVerifier,
     registry_entry: RegistryEntry,
     authority: LoadedAuthority,
 ) -> LoadedAuthority:
     if authority.authority_bundle is None or authority.publication_receipt is None:
         raise AuthorityVerificationError(
-            f"cached v2 authority is missing publication artifacts for {registry_entry.authority_ref}"
+            f"cached {authority.schema_version} authority is missing publication artifacts for {registry_entry.authority_ref}"
         )
     reverified = verifier.verify(
         Bundle(

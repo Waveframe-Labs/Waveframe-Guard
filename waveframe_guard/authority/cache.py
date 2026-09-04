@@ -28,13 +28,19 @@ class MemoryAuthorityCache:
             return deepcopy(authority) if authority is not None else None
 
     def put(self, authority: LoadedAuthority) -> None:
-        if authority.schema_version == "authority_bundle.v2":
+        if authority.schema_version in {"authority_bundle.v2", "authority_bundle.v3"}:
             from .exceptions import AuthorityVerificationError
-            from .verifier import _is_process_verified_v2
+            from .verifier import _is_process_verified_v2, _is_process_verified_v3
 
-            if not _is_process_verified_v2(authority):
+            verified = (
+                _is_process_verified_v2(authority)
+                if authority.schema_version == "authority_bundle.v2"
+                else _is_process_verified_v3(authority)
+            )
+            if not verified:
+                major = authority.schema_version.rsplit(".", 1)[-1]
                 raise AuthorityVerificationError(
-                    "v2 authority must complete publication validation before cache insertion"
+                    f"{major} authority must complete publication validation before cache insertion"
                 )
         replacement = deepcopy(authority)
         with self._lock:

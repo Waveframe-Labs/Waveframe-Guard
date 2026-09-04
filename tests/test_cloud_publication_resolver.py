@@ -46,6 +46,32 @@ def _rehash(payload: dict, *, registry: bool = True) -> dict:
     return payload
 
 
+def test_cloud_publication_protocol_accepts_matching_v3_envelope() -> None:
+    payload = _fixture()
+    payload["authority_bundle"]["schema_version"] = "authority_bundle.v3"
+    payload["publication_receipt"]["schema_version"] = "publication_receipt.v3"
+    _rehash(payload)
+    parsed = parse_cloud_authority_publication(
+        payload,
+        requested_authority_ref=AUTHORITY_REF,
+        expected_organization_id=ORGANIZATION_ID,
+    )
+    assert parsed.authority_bundle["schema_version"] == "authority_bundle.v3"
+    assert parsed.publication_receipt["schema_version"] == "publication_receipt.v3"
+
+
+def test_cloud_publication_protocol_rejects_cross_version_v3_envelope() -> None:
+    payload = _fixture()
+    payload["authority_bundle"]["schema_version"] = "authority_bundle.v3"
+    _rehash(payload)
+    with pytest.raises(CloudPublicationProtocolError, match="versions do not match"):
+        parse_cloud_authority_publication(
+            payload,
+            requested_authority_ref=AUTHORITY_REF,
+            expected_organization_id=ORGANIZATION_ID,
+        )
+
+
 class _Handler(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
 
