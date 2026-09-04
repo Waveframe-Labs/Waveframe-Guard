@@ -57,10 +57,11 @@ runtime payload without a model.
 
 ## Availability
 
-The local and protocol verification boundary accepts matching v2 or v3 bundle
-and receipt pairs. Current hosted Cloud is not claimed to serve v3
-publications. Hosted v3 delivery requires a separately reviewed Cloud change;
-this release does not modify or deploy Cloud.
+Guard 0.17.0 can parse and verify matching v2 and v3 publication envelopes.
+Current released/hosted Cloud does not yet serve the complete atomic v2 or v3
+publication path. Cloud PR #133 remains the pending v2 server implementation.
+Hosted v3 serving requires an additional Cloud update. This release does not
+modify or deploy Cloud.
 
 The authoritative compatibility matrix is in
 [`docs/getting-started/README.md`](docs/getting-started/README.md#release-compatibility-matrix).

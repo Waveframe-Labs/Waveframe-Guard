@@ -143,16 +143,18 @@ The three choices are intentionally independent:
 - `authority` selects the explicit, versioned policy Guard will enforce.
 - `agent` records optional framework and model metadata for Console and audit evidence.
 
-`Guard.cloud(...)` can retrieve one atomic Ledger v2 or v3 publication from
-`GET /v1/authorities/{authority_ref}/publication`, validate its
-`cloud_authority_publication.v1` envelope, and verify it before enforcing any
-action. The response binds the bundle, receipt, logical references, registry,
-and envelope as one tenant-scoped publication. Existing organization/API-key
-authentication is unchanged. Legacy v1 authorities retain their existing
-contract endpoint through a narrow publication-not-found fallback; a
-contract-only v2 response still fails closed. Current hosted Cloud is not
-claimed to serve v3 publications. Guard uses `runtime_id=` when provided and otherwise uses
-`actor_identity["id"]` as the runtime identity. Guard registers that runtime,
+Guard 0.17.0 can parse and verify matching v2 and v3 publication envelopes
+returned by `GET /v1/authorities/{authority_ref}/publication`. The
+`cloud_authority_publication.v1` response binds the bundle, receipt, logical
+references, registry, and envelope as one tenant-scoped publication. Current
+released/hosted Cloud does not yet serve the complete atomic v2 or v3
+publication path. Cloud PR #133 remains the pending v2 server implementation.
+Hosted v3 serving requires an additional Cloud update. Existing
+organization/API-key authentication is unchanged. Legacy v1 authorities retain
+their existing contract endpoint through a narrow publication-not-found
+fallback; a contract-only v2 response still fails closed. Guard uses
+`runtime_id=` when provided and otherwise uses `actor_identity["id"]` as the
+runtime identity. Guard registers that runtime,
 sends its first heartbeat, and exposes the observational result as
 `guard.runtime_connection`. Guard still evaluates locally before calling the
 wrapped function. Afterward, it preserves the decision and attests whether the
@@ -298,9 +300,11 @@ Guard does not interpret policy prose and contains no AI or model-provider
 integration, heuristic policy interpretation, or runtime inference. Ledger and
 a trusted domain pack produce authority. Only the repository-change fact
 provider is native in this release; other domains require separately trusted
-domain packs and deterministic fact providers. Guard's atomic Cloud envelope
-parser accepts matching v2 or v3 bundle/receipt pairs, but current hosted Cloud
-is not claimed to serve v3 publications.
+domain packs and deterministic fact providers. Guard 0.17.0 can parse and
+verify matching v2 and v3 publication envelopes. Current released/hosted Cloud
+does not yet serve the complete atomic v2 or v3 publication path. Cloud PR #133
+remains the pending v2 server implementation. Hosted v3 serving requires an
+additional Cloud update.
 
 Ledger's published `governance-ledger[guard]==0.7.0` extra still represents its
 previously released Guard 0.15 compatibility pairing. Install
@@ -371,9 +375,11 @@ Ledger translates policy with a trusted domain pack and publishes authority
 For v3, Guard verifies the complete bundle and mandatory receipt, then evaluates
 the unchanged `compiled_authority_contract.v2` runtime payload. Translation
 proposals and private provider evidence are not runtime inputs. Existing
-Cloud-facing v1/v2 and finance behavior remains compatible. Current hosted
-Cloud is not claimed to serve v3 publications; hosted v3 delivery remains a
-separately reviewed Cloud change.
+Cloud-facing v1/v2 and finance client behavior remains compatible. Guard 0.17.0
+can parse and verify matching v2 and v3 publication envelopes. Current
+released/hosted Cloud does not yet serve the complete atomic v2 or v3
+publication path. Cloud PR #133 remains the pending v2 server implementation.
+Hosted v3 serving requires an additional Cloud update.
 
 Cloud can publish lifecycle metadata such as `active`, `superseded`, or `revoked`, but Cloud does not decide runtime admissibility. Guard evaluates locally against compiled authority.
 

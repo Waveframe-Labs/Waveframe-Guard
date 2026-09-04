@@ -35,8 +35,11 @@ payload.
 
 ### Limitations
 - Guard continues to evaluate `compiled_authority_contract.v2` after the
-  complete v3 bundle and receipt pass validation. Current hosted Cloud is not
-  claimed to serve v3 publications.
+  complete v3 bundle and receipt pass validation. Guard 0.17.0 can parse and
+  verify matching v2 and v3 publication envelopes. Current released/hosted
+  Cloud does not yet serve the complete atomic v2 or v3 publication path. Cloud
+  PR #133 remains the pending v2 server implementation. Hosted v3 serving
+  requires an additional Cloud update.
 - Guard does not call, integrate, or depend on an AI or model provider. Policy
   translation proposals and private provider evidence are not runtime inputs.
 
