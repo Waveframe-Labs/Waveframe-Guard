@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Compatibility
+- Widened the base Ledger dependency to `governance-ledger>=0.7.0,<0.9.0`
+  after exercising the exact Ledger 0.8 development candidate through normal
+  dependency resolution, the complete Guard suite, packaging, and clean-wheel
+  acceptance. Ledger 0.7.0 remains the minimum compatibility baseline.
+- Guard continues to verify `compiled_authority_contract.v2`,
+  `authority_bundle.v2`, and `publication_receipt.v2` independently. Translation
+  proposals, human review records, and private provider evidence are not Guard
+  runtime inputs.
+
 ## [0.16.1] - 2026-09-01 - Cloud v2 Publication Resolver
 
 Guard can now retrieve one atomic Ledger v2 publication from Cloud and verify
