@@ -71,7 +71,7 @@ registry entry, including the current lifecycle state and expected bundle hash,
 before deciding whether a verified authority can be reused.
 
 Cache hits may skip bundle loading but must not skip lifecycle enforcement. For
-v2, initial load, insertion, refresh/replacement, untrusted serialized-cache
+v2 and v3, initial load, insertion, refresh/replacement, untrusted serialized-cache
 recovery, and suspected integrity drift run Ledger's complete public bundle,
 receipt, schema, and compatibility validators. A normal process-local cache hit
 checks the freshly resolved registry identities and a compact runtime integrity
@@ -150,7 +150,26 @@ The native v2 path requires all of the following before use or caching:
   `validate_publication_receipt` calls
 - successful public Ledger runtime-fact compatibility validation
 - exact authority, bundle, receipt, contract, domain-pack, fact-schema, and
-  registry identity/hash agreement
+registry identity/hash agreement
+
+The additive native v3 path applies the same boundary to an
+`authority_bundle.v3` and matching, mandatory `publication_receipt.v3`.
+Ledger's version-dispatched public validators must report both artifacts as
+provenance complete before Guard reads the runtime projection. Guard then
+checks the registry, authority, publication, manifest, domain-pack,
+runtime-fact-schema, Constraint IR, compiled-contract, bundle, and receipt
+identities and hashes before it evaluates the embedded, unchanged
+`compiled_authority_contract.v2`.
+
+The v3 public commitment may contain independently confirmed controls and
+acknowledged residual policy meaning. Only the compiled controls execute;
+residual meaning remains provenance. Translation proposals and private model,
+prompt, retry, token-usage, request, response, or explanation evidence are not
+runtime inputs and may be deleted without changing verification.
+
+Ledger 0.7 remains supported for existing v1/v2 publications. If a v3 bundle
+is supplied while Ledger 0.7 is installed, Guard fails closed with a clear
+requirement for Ledger 0.8; it does not partially verify or attempt a v1 path.
 
 Guard never extracts an embedded v2 contract first and validates it later. It
 never downgrades v2 to v1, infers missing lineage, or copies Ledger's validator

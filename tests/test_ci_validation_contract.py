@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import email
+from pathlib import Path
 from pathlib import PurePosixPath
 
 import pytest
@@ -17,7 +18,7 @@ APPROVED_RUNTIME_DEPENDENCIES = [
 ]
 
 
-def test_repository_contract_accepts_exact_ledger_v2_dependencies():
+def test_repository_contract_accepts_exact_ledger_runtime_dependencies():
     failures = []
 
     validate_repository._validate_runtime_dependencies(
@@ -90,3 +91,10 @@ def test_package_metadata_contract_rejects_injected_dependency():
 
     with pytest.raises(AssertionError, match="runtime dependency metadata differs"):
         package_acceptance._validate_metadata(metadata, "0.15.0", "test package")
+
+
+def test_ci_binds_v3_acceptance_to_merged_ledger_commit():
+    workflow = Path(".github/workflows/guard-validation.yml").read_text(encoding="utf-8")
+
+    assert "2b9a6b0a239d0e834d1bb42cd2efa30abe299e70" in workflow
+    assert "tools/acceptance/ledger_v3_clean_wheel.py" in workflow

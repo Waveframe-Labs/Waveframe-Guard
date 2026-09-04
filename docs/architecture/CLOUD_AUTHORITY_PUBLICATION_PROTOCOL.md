@@ -77,6 +77,11 @@ SHA-256 of compact, key-sorted UTF-8 JSON for the exact `registry_entry` object.
 object with only `envelope_hash` omitted. These two hashes bind the transport
 snapshot; they are not provenance and never replace Ledger validation.
 
+The protocol also accepts a complete `authority_bundle.v3` paired with
+`publication_receipt.v3`; cross-version pairs fail closed. This is an additive
+Guard client capability. It does not claim that hosted Cloud currently serves
+v3 publications.
+
 The Ledger bundle and receipt retain their own canonical hashes and immutable
 bindings. Guard passes them unchanged to Ledger's public bundle, receipt,
 runtime-schema, and compatibility validators. The compiled contract is trusted
@@ -141,3 +146,9 @@ serves the tenant-scoped atomic response above, and reproduces the golden
 fixture in its own protocol tests. Guard's client capability remains dormant
 and uses the legacy v1 contract endpoint when the current Cloud route reports
 that the publication endpoint is unavailable.
+
+Serving v3 requires a separately reviewed Cloud change that persists and
+returns the exact v3 bundle and receipt as one tenant-scoped snapshot while
+preserving the existing envelope, registry, size, authentication, and
+canonical-hash rules. No proposal or private translation evidence belongs in
+that response.

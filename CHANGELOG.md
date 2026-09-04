@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### Added
+- Added native, receipt-required verification for Ledger
+  `authority_bundle.v3` and `publication_receipt.v3`. Guard delegates complete
+  normative reconstruction to Ledger before evaluating the unchanged
+  `compiled_authority_contract.v2`, and v3 verification evidence identifies the
+  artifact versions exactly.
+- Added v3 cache integrity, revalidation, drift, substitution, and runtime-fact
+  acceptance coverage, including multi-control and partial-coverage
+  publications that require no translation proposal or private provider
+  evidence at runtime.
+
 ### Compatibility
 - Widened the base Ledger dependency to `governance-ledger>=0.7.0,<0.9.0`
   after exercising the exact Ledger 0.8 development candidate through normal
@@ -11,6 +22,9 @@
   `authority_bundle.v2`, and `publication_receipt.v2` independently. Translation
   proposals, human review records, and private provider evidence are not Guard
   runtime inputs.
+- Guard 0.17 development remains compatible with Ledger `>=0.7.0,<0.9.0`.
+  Ledger 0.7 continues to support existing v1/v2 use; supplying a v3 artifact
+  with Ledger 0.7 fails closed with an explicit Ledger 0.8 requirement.
 
 ## [0.16.1] - 2026-09-01 - Cloud v2 Publication Resolver
 
