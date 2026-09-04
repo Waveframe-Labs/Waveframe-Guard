@@ -480,6 +480,26 @@ def test_v3_cross_publication_substitution_fails(tmp_path, multi_publication):
         load_authority(AUTHORITY_REF, resolver=resolver)
 
 
+def test_v3_tampered_registry_diagnostic_never_identifies_artifact_as_v2(
+    tmp_path, multi_publication
+):
+    resolver = _write_artifacts(tmp_path, multi_publication)
+    registry_path = resolver.registry_path
+    registry = json.loads(registry_path.read_text(encoding="utf-8"))
+    registry["contracts"][0]["contract_hash"] = "sha256:" + "0" * 64
+    registry["registry_hash"] = _canonical_hash(
+        {key: value for key, value in registry.items() if key != "registry_hash"}
+    )
+    registry_path.write_text(json.dumps(registry, sort_keys=True), encoding="utf-8")
+
+    with pytest.raises(AuthorityVerificationError) as exc_info:
+        load_authority(AUTHORITY_REF, resolver=resolver)
+
+    diagnostic = str(exc_info.value)
+    assert diagnostic == "publication compiled contract hash mismatch"
+    assert "v2" not in diagnostic.lower()
+
+
 def test_v3_runtime_fact_incompatibility_fails_closed(tmp_path, multi_publication):
     guard = Guard.local(
         workspace=tmp_path / "evidence",

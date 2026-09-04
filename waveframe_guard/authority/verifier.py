@@ -416,7 +416,7 @@ def _required_runtime_fact_ids(
     facts = runtime_fact_schema.get("facts")
     constraints = constraint_ir.get("constraints")
     if not isinstance(facts, list) or not isinstance(constraints, list):
-        raise AuthorityVerificationError("v2 publication has malformed runtime fact requirements")
+        raise AuthorityVerificationError("publication has malformed runtime fact requirements")
     required = {
         definition.get("fact_id")
         for definition in facts
@@ -425,10 +425,10 @@ def _required_runtime_fact_ids(
     for constraint in constraints:
         referenced = constraint.get("required_runtime_facts") if isinstance(constraint, Mapping) else None
         if not isinstance(referenced, list) or not all(isinstance(item, str) and item for item in referenced):
-            raise AuthorityVerificationError("v2 publication has malformed required runtime facts")
+            raise AuthorityVerificationError("publication has malformed required runtime facts")
         required.update(referenced)
     if not all(isinstance(item, str) and item for item in required):
-        raise AuthorityVerificationError("v2 publication has malformed required runtime facts")
+        raise AuthorityVerificationError("publication has malformed required runtime facts")
     return tuple(sorted(required))
 
 
@@ -525,22 +525,22 @@ def _normalize_hash(value: str) -> str:
 def _required_mapping(payload: Mapping[str, Any], field: str) -> Mapping[str, Any]:
     value = payload.get(field)
     if not isinstance(value, Mapping):
-        raise AuthorityVerificationError(f"v2 publication artifact is missing {field}")
+        raise AuthorityVerificationError(f"publication artifact is missing {field}")
     return value
 
 
 def _required_string(payload: Mapping[str, Any], field: str) -> str:
     value = payload.get(field)
     if not isinstance(value, str) or not value:
-        raise AuthorityVerificationError(f"v2 publication artifact is missing {field}")
+        raise AuthorityVerificationError(f"publication artifact is missing {field}")
     return value
 
 
 def _require_equal(actual: Any, expected: Any, label: str) -> None:
     if actual != expected:
-        raise AuthorityVerificationError(f"v2 {label} mismatch")
+        raise AuthorityVerificationError(f"publication {label} mismatch")
 
 
 def _require_hash_equal(actual: str, expected: str | None, label: str) -> None:
     if expected is None or _normalize_hash(actual) != _normalize_hash(expected):
-        raise AuthorityVerificationError(f"v2 {label} mismatch")
+        raise AuthorityVerificationError(f"publication {label} mismatch")
