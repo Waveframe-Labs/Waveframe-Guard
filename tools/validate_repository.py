@@ -49,7 +49,7 @@ APPROVED_JSON_FILES = {
 EXPECTED_PUBLIC_RUNTIME_REQUIREMENTS = {
     "cricore",
     "cricore-proposal-normalizer",
-    "governance-ledger>=0.7.0,<0.8.0",
+    "governance-ledger>=0.7.0,<0.9.0",
     "requests",
 }
 PINNED_TEST_DEPENDENCIES = {

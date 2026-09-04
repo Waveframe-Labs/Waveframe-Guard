@@ -235,7 +235,7 @@ no target requirements retain their legacy target-free behavior.
 CRI-CORE Contract Compiler v0.4.0 defines deterministic target requirements;
 Guard consumes the compiled authority artifact unchanged and enforces it. It
 does not compile policy. The native Ledger v2 path uses the base
-`governance-ledger>=0.7.0,<0.8.0` base package for publication verification; it
+`governance-ledger>=0.7.0,<0.9.0` base package for publication verification; it
 tests the public 0.7.0 minimum and never uses Ledger's `guard` extra. Immutable
 artifact schema versions, not a single patch-level package pin, define the v2
 validation boundary.
@@ -306,7 +306,7 @@ Ledger's published `governance-ledger[guard]==0.7.0` extra still represents its
 previously released Guard 0.15 compatibility pairing. Install
 `waveframe-guard==0.16.1` directly for this release. Guard itself depends only
 on the public Ledger base package through
-`governance-ledger>=0.7.0,<0.8.0`, never on the `guard` extra.
+`governance-ledger>=0.7.0,<0.9.0`, never on the `guard` extra.
 
 ## Local development path
 

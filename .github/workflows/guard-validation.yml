@@ -81,6 +81,72 @@ jobs:
       - name: Compile Python sources and tests
         run: python -m compileall -q guard waveframe_guard tests examples tools
 
+  ledger-08-compatibility:
+    name: Ledger 0.8 compatibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Check out the exact Guard commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Check out the reviewed Ledger 0.8 candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: Waveframe-Labs/Waveframe-Ledger
+          ref: c4f61e0c352db2df11a7d7af8fd8aad06854c2a8
+          path: ledger-source
+          persist-credentials: false
+
+      - name: Set up Python 3.14
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.14"
+
+      - name: Install pinned packaging and test tools
+        run: >-
+          python -m pip install --index-url https://pypi.org/simple
+          "pip==26.1.1" "setuptools==82.0.1" "wheel==0.48.0"
+          "build==1.6.0" "pytest==9.0.3" "twine==6.2.0"
+
+      - name: Build and install the exact Ledger candidate
+        shell: bash
+        run: |
+          python -m build --no-isolation --wheel --outdir ledger-dist ledger-source
+          ledger_wheel="$(find ledger-dist -maxdepth 1 -name '*.whl' -print -quit)"
+          test -n "$ledger_wheel"
+          python -m pip install --index-url https://pypi.org/simple "$ledger_wheel"
+
+      - name: Install Guard through normal dependency resolution
+        run: >-
+          python -m pip install --index-url https://pypi.org/simple
+          --no-build-isolation --editable ".[test]"
+
+      - name: Verify dependency consistency and complete Guard behavior
+        run: |
+          python -m pip check
+          python -m pytest tests
+          python -m compileall -q guard waveframe_guard tests examples tools
+
+      - name: Build and inspect the Guard candidate
+        run: |
+          python -m build --no-isolation --outdir guard-dist
+          python -m twine check guard-dist/*
+
+      - name: Verify independent v2 publication from clean wheels
+        shell: bash
+        run: |
+          ledger_wheel="$(find ledger-dist -maxdepth 1 -name '*.whl' -print -quit)"
+          guard_wheel="$(find guard-dist -maxdepth 1 -name '*.whl' -print -quit)"
+          test -n "$ledger_wheel"
+          test -n "$guard_wheel"
+          python tools/acceptance/ledger_v2_clean_wheel.py \
+            --ledger-install-spec "$ledger_wheel" \
+            --install-spec "$guard_wheel"
+
   package:
     name: Package acceptance
     runs-on: ubuntu-latest

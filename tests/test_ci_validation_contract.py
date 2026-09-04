@@ -12,7 +12,7 @@ from tools.acceptance import package_acceptance
 APPROVED_RUNTIME_DEPENDENCIES = [
     "cricore",
     "cricore-proposal-normalizer",
-    "governance-ledger>=0.7.0,<0.8.0",
+    "governance-ledger>=0.7.0,<0.9.0",
     "requests",
 ]
 
@@ -35,7 +35,7 @@ def test_repository_contract_accepts_exact_ledger_v2_dependencies():
         [
             "cricore",
             "cricore-proposal-normalizer",
-            "governance-ledger[guard]>=0.7.0,<0.8.0",
+            "governance-ledger[guard]>=0.7.0,<0.9.0",
             "requests",
         ],
     ],

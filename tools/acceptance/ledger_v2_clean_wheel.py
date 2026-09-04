@@ -148,9 +148,20 @@ def main() -> None:
         description="Run Ledger v2 Guard acceptance from a clean wheel-only environment."
     )
     parser.add_argument("--install-spec", required=True, help="Guard wheel path or pip spec")
+    parser.add_argument(
+        "--ledger-install-spec",
+        default="governance-ledger==0.7.0",
+        help="Ledger wheel path or pip spec to install before the Guard wheel",
+    )
     args = parser.parse_args()
     install_spec = Path(args.install_spec)
     resolved_spec = str(install_spec.resolve()) if install_spec.exists() else args.install_spec
+    ledger_install_spec = Path(args.ledger_install_spec)
+    resolved_ledger_spec = (
+        str(ledger_install_spec.resolve())
+        if ledger_install_spec.exists()
+        else args.ledger_install_spec
+    )
 
     started = time.perf_counter()
     with tempfile.TemporaryDirectory(prefix="waveframe-guard-ledger-v2-") as raw_directory:
@@ -158,7 +169,7 @@ def main() -> None:
         environment = root / ".venv"
         _run([sys.executable, "-m", "venv", str(environment)], cwd=root)
         python = environment / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
-        _run([str(python), "-m", "pip", "install", "governance-ledger==0.7.0"], cwd=root)
+        _run([str(python), "-m", "pip", "install", resolved_ledger_spec], cwd=root)
         _run([str(python), "-m", "pip", "install", resolved_spec], cwd=root)
         runner = root / "acceptance.py"
         runner.write_text(textwrap.dedent(RUNNER), encoding="utf-8")
