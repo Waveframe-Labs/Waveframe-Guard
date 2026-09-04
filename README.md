@@ -8,7 +8,7 @@ Stop unsafe AI and automated actions **before they execute**.
 
 Waveframe Guard is an execution-boundary SDK. It wraps sensitive actions, resolves compiled authority, evaluates through CRI-CORE, and only runs the action when the outcome is allowed.
 
-Current release: `0.16.1`.
+Current release: `0.17.0`.
 
 ```text
 Guard does not generate actions.
@@ -20,7 +20,7 @@ Guard decides whether this action may run now.
 ## Install
 
 ```powershell
-pip install waveframe-guard==0.16.1
+pip install waveframe-guard==0.17.0
 ```
 
 No Ollama installation or Waveframe repository checkout is required. Keep the
@@ -68,7 +68,7 @@ mkdir guard-quickstart
 cd guard-quickstart
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install waveframe-guard==0.16.1
+python -m pip install waveframe-guard==0.17.0
 Invoke-WebRequest https://raw.githubusercontent.com/Waveframe-Labs/Waveframe-Guard/main/examples/external_agent_quickstart.py -OutFile quickstart.py
 ```
 
@@ -143,14 +143,15 @@ The three choices are intentionally independent:
 - `authority` selects the explicit, versioned policy Guard will enforce.
 - `agent` records optional framework and model metadata for Console and audit evidence.
 
-`Guard.cloud(...)` can retrieve one atomic Ledger v2 publication from
+`Guard.cloud(...)` can retrieve one atomic Ledger v2 or v3 publication from
 `GET /v1/authorities/{authority_ref}/publication`, validate its
 `cloud_authority_publication.v1` envelope, and verify it before enforcing any
 action. The response binds the bundle, receipt, logical references, registry,
 and envelope as one tenant-scoped publication. Existing organization/API-key
 authentication is unchanged. Legacy v1 authorities retain their existing
 contract endpoint through a narrow publication-not-found fallback; a
-contract-only v2 response still fails closed. Guard uses `runtime_id=` when provided and otherwise uses
+contract-only v2 response still fails closed. Current hosted Cloud is not
+claimed to serve v3 publications. Guard uses `runtime_id=` when provided and otherwise uses
 `actor_identity["id"]` as the runtime identity. Guard registers that runtime,
 sends its first heartbeat, and exposes the observational result as
 `guard.runtime_connection`. Guard still evaluates locally before calling the
@@ -166,8 +167,8 @@ unchanged.
 Application code supplies no runtime facts, hashes, bundles, or Ledger
 validator calls. A cold resolution performs one publication request and the
 complete verification chain. Warm evaluation performs no additional request
-and no heavy Ledger validation. Existing v1, finance, local-resolver, and Guard
-0.16 behavior remains compatible.
+and no heavy Ledger validation. Existing v1/v2, finance, and local-resolver
+behavior remains compatible.
 
 Long-running processes may call `guard.heartbeat()` from their existing health
 loop. Cloud reporting failures are returned as structured status and never
@@ -288,23 +289,22 @@ construct runtime facts, or call Ledger validators. The resolver retrieves the
 complete publication package by identity; physical storage layout remains an
 implementation detail behind that boundary.
 
-Native v2 support initially covers only `repository-changes/1.0.0`. Other
+Native v2 and v3 support currently covers only `repository-changes/1.0.0`. Other
 domains require their own separately trusted domain pack and Guard fact
 provider; finance and existing integrations continue through the legacy v1
 compatibility path.
 
-Guard does not interpret policy prose and contains no AI, NLP model, heuristic
-policy interpretation, or runtime inference. Ledger and a trusted domain pack
-produce authority. Only the repository-change fact provider is native in this
-release; other domains require separately trusted domain packs and
-deterministic fact providers. Guard contains the additive complete-v2 Cloud
-publication client protocol, but current released Cloud has not implemented
-that endpoint. Cloud PR #133 is the follow-on implementation. This release
-provides the client/protocol boundary and does not claim hosted availability.
+Guard does not interpret policy prose and contains no AI or model-provider
+integration, heuristic policy interpretation, or runtime inference. Ledger and
+a trusted domain pack produce authority. Only the repository-change fact
+provider is native in this release; other domains require separately trusted
+domain packs and deterministic fact providers. Guard's atomic Cloud envelope
+parser accepts matching v2 or v3 bundle/receipt pairs, but current hosted Cloud
+is not claimed to serve v3 publications.
 
 Ledger's published `governance-ledger[guard]==0.7.0` extra still represents its
 previously released Guard 0.15 compatibility pairing. Install
-`waveframe-guard==0.16.1` directly for this release. Guard itself depends only
+`waveframe-guard==0.17.0` directly for this release. Guard itself depends only
 on the public Ledger base package through
 `governance-ledger>=0.7.0,<0.9.0`, never on the `guard` extra.
 
@@ -326,10 +326,13 @@ def wire_transfer(account_id, amount):
     return perform_transfer(account_id, amount)
 ```
 
-`Guard.local(authority=...)` loads either a legacy Ledger `authority_bundle.v1`
-or a provenance-complete Ledger `authority_bundle.v2`. A v2 registry entry must
-also name the matching publication receipt and its canonical hash; a standalone
-or directly injected v2 contract is rejected. Direct `contract=...`,
+`Guard.local(authority=...)` loads a legacy Ledger `authority_bundle.v1` or a
+provenance-complete Ledger `authority_bundle.v2` or `authority_bundle.v3`.
+Every v2 or v3 registry entry must also name the matching publication receipt
+and its canonical hash; a standalone or directly injected v2 contract is
+rejected. Native v3 verification requires Ledger 0.8 or later. With Ledger 0.7,
+v1/v2 remain supported and a supplied v3 artifact fails closed with a clear
+unsupported-Ledger-version error. Direct `contract=...`,
 `authorities={...}`, and `authority_loader=...` inputs remain available for v1
 advanced integrations and compatibility.
 
@@ -356,7 +359,7 @@ Guard does **not** author governance, publish authority, host organization workf
 | Ledger / Workspace | Author, review, activate, and publish deterministic governance authority. |
 | CRI-CORE | Deterministic admissibility kernel used under the Guard boundary. |
 
-The complete Ledger v2 product flow is:
+The complete Ledger v2/v3 product flow is:
 
 ```text
 Ledger translates policy with a trusted domain pack and publishes authority
@@ -365,12 +368,12 @@ Ledger translates policy with a trusted domain pack and publishes authority
         -> Guard emits bound decision evidence and execution attestation
 ```
 
-Guard supports the additive atomic protocol needed to distribute this complete
-v2 chain. Existing Cloud-facing v1 and finance behavior remains compatible.
-Current released Cloud has not implemented the endpoint and is not claimed to
-distribute or consume the full v2 chain until Cloud PR #133 ships. This release
-provides the client/protocol boundary only; it does not claim hosted
-availability.
+For v3, Guard verifies the complete bundle and mandatory receipt, then evaluates
+the unchanged `compiled_authority_contract.v2` runtime payload. Translation
+proposals and private provider evidence are not runtime inputs. Existing
+Cloud-facing v1/v2 and finance behavior remains compatible. Current hosted
+Cloud is not claimed to serve v3 publications; hosted v3 delivery remains a
+separately reviewed Cloud change.
 
 Cloud can publish lifecycle metadata such as `active`, `superseded`, or `revoked`, but Cloud does not decide runtime admissibility. Guard evaluates locally against compiled authority.
 

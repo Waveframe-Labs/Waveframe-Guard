@@ -1,73 +1,69 @@
-# Waveframe Guard v0.16.1 Release Notes
+# Waveframe Guard v0.17.0 Release Notes
 
-## Cloud v2 Publication Resolver
+## Native Ledger v3 Authority Verification
 
-Guard can now retrieve one atomic Ledger v2 publication from Cloud and verify
-it before enforcing any action.
+Waveframe Guard v0.17.0 adds native verification of Ledger's additive
+`authority_bundle.v3` and mandatory matching `publication_receipt.v3`.
+Guard delegates normative reconstruction to Ledger's version-dispatched public
+validators and requires provenance-complete results before using any runtime
+projection.
 
-This patch releases the issue #22 / PR #23 client and protocol boundary. An
-authenticated `Guard.cloud(...)` cold resolution requests:
+The verified envelope binds the registry, authority, publication, manifest,
+domain pack, runtime-fact schema, Constraint IR, compiled contract, bundle, and
+receipt identities and hashes. Verification evidence identifies v3 artifacts
+truthfully. Cache insertion, reuse, revalidation, drift detection, and
+substitution rejection cover v3 without changing the existing v1/v2 paths.
 
-```text
-GET /v1/authorities/{authority_ref}/publication
-```
+Multi-control v3 authority can enforce every published control from one source
+clause. Partial-coverage authority enforces only its published controls;
+acknowledged residual meaning remains public provenance and never becomes
+executable behavior. Guard evaluates the unchanged
+`compiled_authority_contract.v2` only after the complete v3 bundle and receipt
+pass validation.
 
-The `cloud_authority_publication.v1` response binds the exact atomic authority
-bundle, publication receipt, opaque logical bundle and receipt references,
-registry entry and hash, requested authority, organization, and envelope hash.
-Guard reuses the existing organization/API-key authentication. The additive
-`runtime_credential=` argument is an alias for the existing Cloud API-key
-credential; existing arguments and environment configuration remain valid.
+## Compatibility
 
-Application code supplies no runtime facts, hashes, bundles, receipts, or
-Ledger-validator calls. Guard preserves the published structures, verifies the
-bundle and receipt through the existing public Ledger 0.7 boundary, derives
-only trusted repository-change runtime facts, and caches the immutable verified
-projection. Cold resolution performs one publication request. Warm evaluation
-performs no additional request and no heavy Ledger validation.
-
-## Fail-Closed and Compatibility Behavior
-
-Fallback to the unchanged legacy v1 contract endpoint occurs only for the
-narrow documented publication-not-found response. Contract-only v2 remains
-fail-closed; it is never downgraded to v1. Authentication failures, conflicts,
-rate limits, server errors, redirects, invalid or oversized bodies, partial
-publications, and binding failures do not fall back.
-
-Existing v1, finance, local resolver, and Guard 0.16 behavior remains
-compatible. Resolver behavior, the HTTP protocol, schemas, canonical hashing,
-runtime facts, authority verification, cache behavior, and public API shape are
-unchanged from the merged issue #22 implementation.
-
-The package retains the public dependency boundary:
+The public Ledger dependency remains:
 
 ```text
-governance-ledger>=0.7.0,<0.8.0
+governance-ledger>=0.7.0,<0.9.0
 ```
 
-Guard never depends on `governance-ledger[guard]`.
+- Ledger 0.7 supports existing v1 and v2 authority unchanged.
+- Native v3 verification requires Ledger 0.8 or later.
+- Supplying a v3 artifact with Ledger 0.7 fails closed with a clear Ledger 0.8
+  requirement; Guard does not partially verify or downgrade the publication.
+- Existing v1/v2 loading, caching, Cloud-envelope, runtime-fact, and
+  enforcement behavior remains compatible.
 
-Primary installation:
+Primary installation after publication:
 
 ```text
-pip install waveframe-guard==0.16.1
+pip install waveframe-guard==0.17.0
 ```
 
-## Availability and Limitations
+## Evidence and Provider Boundaries
 
-Current released Cloud does not yet expose the publication endpoint. Cloud PR
-#133 is the follow-on implementation. Waveframe Guard v0.16.1 provides the
-client/protocol boundary; it does not claim hosted availability and does not
-modify or deploy Cloud.
+Runtime verification requires the published authority bundle and receipt. It
+does not require a translation proposal or retained private provider evidence.
+Private model details, prompts, requests, responses, retries, failures, token
+usage, and explanations can remain absent without changing authority or Guard
+verification.
 
-Native v2 runtime facts remain repository-change only. Other domains require a
-separately trusted domain pack and deterministic fact provider. Guard does not
-interpret policy prose. No AI, NLP model, heuristic policy interpretation, or
-runtime inference is involved.
+Guard contains no AI or model-provider integration. It does not call a model,
+interpret policy prose, or trust provider explanations. Ledger publishes the
+normative authority; Guard verifies and deterministically enforces the compiled
+runtime payload without a model.
+
+## Availability
+
+The local and protocol verification boundary accepts matching v2 or v3 bundle
+and receipt pairs. Current hosted Cloud is not claimed to serve v3
+publications. Hosted v3 delivery requires a separately reviewed Cloud change;
+this release does not modify or deploy Cloud.
 
 The authoritative compatibility matrix is in
 [`docs/getting-started/README.md`](docs/getting-started/README.md#release-compatibility-matrix).
 
-This is release preparation only. It does not merge, tag, create a GitHub
-release, upload to PyPI, publish, deploy, modify Cloud or Ledger, or modify any
-other repository.
+This is release preparation only. It does not merge this release branch,
+create a tag or GitHub release, upload to PyPI, publish, or deploy any service.

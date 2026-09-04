@@ -23,7 +23,7 @@ def _client():
         runtime_id="support-agent",
         environment="production",
         authority_ref="support-policy@2.1.0",
-        runtime_version="guard-0.16.1",
+        runtime_version="guard-0.17.0",
     )
 
 
