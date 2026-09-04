@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-09-04 - Native Ledger v3 Authority Verification
+
+Guard now verifies Ledger's additive multi-control and partial-coverage v3
+publication envelope before enforcing its unchanged compiled v2 runtime
+payload.
+
 ### Added
 - Added native, receipt-required verification for Ledger
   `authority_bundle.v3` and `publication_receipt.v3`. Guard delegates complete
@@ -22,9 +28,23 @@
   `authority_bundle.v2`, and `publication_receipt.v2` independently. Translation
   proposals, human review records, and private provider evidence are not Guard
   runtime inputs.
-- Guard 0.17 development remains compatible with Ledger `>=0.7.0,<0.9.0`.
-  Ledger 0.7 continues to support existing v1/v2 use; supplying a v3 artifact
-  with Ledger 0.7 fails closed with an explicit Ledger 0.8 requirement.
+- Guard 0.17.0 remains compatible with Ledger `>=0.7.0,<0.9.0`. Ledger 0.7
+  continues to support existing v1/v2 authority; native v3 verification
+  requires Ledger 0.8 or later, and supplying v3 with Ledger 0.7 fails closed
+  with an explicit Ledger 0.8 requirement.
+
+### Limitations
+- Guard continues to evaluate `compiled_authority_contract.v2` after the
+  complete v3 bundle and receipt pass validation. Guard 0.17.0 can parse and
+  verify matching v2 and v3 publication envelopes. Current released/hosted
+  Cloud does not yet serve the complete atomic v2 or v3 publication path. Cloud
+  PR #133 remains the pending v2 server implementation. Hosted v3 serving
+  requires an additional Cloud update.
+- Guard does not call, integrate, or depend on an AI or model provider. Policy
+  translation proposals and private provider evidence are not runtime inputs.
+
+### References
+- Releases issue #27 / PR #28.
 
 ## [0.16.1] - 2026-09-01 - Cloud v2 Publication Resolver
 
