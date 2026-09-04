@@ -128,7 +128,7 @@ jobs:
       - name: Verify dependency consistency and complete Guard behavior
         run: |
           python -m pip check
-          python -m pytest
+          python -m pytest tests
           python -m compileall -q guard waveframe_guard tests examples tools
 
       - name: Build and inspect the Guard candidate
