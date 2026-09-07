@@ -3,6 +3,28 @@ import json
 from compiler.compile_policy import compile_policy
 
 from waveframe_guard import GovernedExecutionResult, GovernedRuntime
+from waveframe_guard import LegacyExecutionError
+import pytest
+
+
+@pytest.mark.parametrize("raise_on_block", [False, True])
+def test_legacy_execution_never_returns_success_result(tmp_path, raise_on_block):
+    _, path = write_contract(tmp_path)
+    runtime = GovernedRuntime(registry_path=write_registry(tmp_path, path))
+    with pytest.raises(LegacyExecutionError):
+        runtime.execute(actor={"id": "u", "type": "human", "role": "manager"},
+                        contract_id="finance-policy@1.0.0", fn=lambda: pytest.fail("callback ran"),
+                        raise_on_block=raise_on_block)
+
+
+def test_historical_execution_result_remains_serializable():
+    result = GovernedExecutionResult(allowed=True, reason="historical record", value="saved",
+                                      contract_id="t", contract_version="1.0.0", contract_hash="saved-hash",
+                                      execution_state={"schema_version": "governed_execution_state.v1",
+                                                       "authority_ref": "t@1.0.0", "actor": {},
+                                                       "approvals": [], "arguments": {}, "artifacts": []})
+    assert result.to_dict()["allowed"] is True
+    assert result.value == "saved"
 
 
 def write_contract(tmp_path):
@@ -34,55 +56,3 @@ def write_registry(tmp_path, contract_path):
         encoding="utf-8",
     )
     return registry_path
-
-
-def test_runtime_result_for_allowed_execution(tmp_path):
-    contract, contract_path = write_contract(tmp_path)
-    registry_path = write_registry(tmp_path, contract_path)
-    runtime = GovernedRuntime(registry_path=registry_path)
-
-    def transfer(amount):
-        return f"transferred {amount}"
-
-    result = runtime.execute(
-        actor={"id": "user-1", "type": "human", "role": "manager"},
-        contract_id="finance-policy@1.0.0",
-        fn=transfer,
-        args=(125,),
-        raise_on_block=False,
-    )
-
-    assert result == GovernedExecutionResult(
-        allowed=True,
-        reason="execution allowed",
-        contract_id="finance-policy",
-        contract_version="1.0.0",
-        contract_hash=contract["contract_hash"],
-        value="transferred 125",
-    )
-
-
-def test_runtime_result_for_blocked_execution(tmp_path):
-    contract, contract_path = write_contract(tmp_path)
-    registry_path = write_registry(tmp_path, contract_path)
-    runtime = GovernedRuntime(registry_path=registry_path)
-
-    def transfer(amount):
-        return f"transferred {amount}"
-
-    result = runtime.execute(
-        actor={"id": "user-1", "type": "human", "role": "intern"},
-        contract_id="finance-policy@1.0.0",
-        fn=transfer,
-        args=(1250000,),
-        raise_on_block=False,
-    )
-
-    assert result == GovernedExecutionResult(
-        allowed=False,
-        reason="required role not satisfied: manager",
-        contract_id="finance-policy",
-        contract_version="1.0.0",
-        contract_hash=contract["contract_hash"],
-        error="Execution blocked: required role not satisfied: manager",
-    )

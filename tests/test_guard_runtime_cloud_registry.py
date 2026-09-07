@@ -7,7 +7,8 @@ from wsgiref.simple_server import make_server
 
 
 from compiler.compile_policy import compile_policy
-from waveframe_guard import GuardRuntime, GovernedRuntime
+from waveframe_guard import GuardRuntime, GovernedRuntime, LegacyExecutionError
+import pytest
 
 
 def transfer(amount: int) -> str:
@@ -152,150 +153,44 @@ def _registry_hash(registry):
     return _json_hash(canonical_registry)
 
 
-def test_governed_runtime_fetches_contract_from_cloud_and_enforces_locally(tmp_path):
+def test_cloud_and_offline_registry_cannot_authorize_legacy_execution(tmp_path):
     contract = seed_cloud_data(tmp_path / "cloud-data")
     server, registry_url = serve_cloud(tmp_path / "cloud-data")
     cache_dir = tmp_path / "guard-cache"
-
     try:
-        runtime = GovernedRuntime(
-            registry_url=registry_url,
-            cache_dir=cache_dir,
-        )
+        runtime = GovernedRuntime(registry_url=registry_url, cache_dir=cache_dir)
+        assert runtime._load_contract("finance-policy", "1.0.0") == contract
         runtime.bind_contract("finance-policy@1.0.0")
-
-        runtime.install_actor(
-            {
-                "id": "user-1",
-                "type": "human",
-                "role": "intern",
-            }
-        )
-        blocked = runtime.execute(
-            fn=transfer,
-            args=(1_250_000,),
-            raise_on_block=False,
-        )
-
-        runtime.install_actor(
-            {
-                "id": "manager-1",
-                "type": "human",
-                "role": "manager",
-            }
-        )
-        allowed = runtime.execute(
-            fn=transfer,
-            args=(1_250_000,),
-            raise_on_block=False,
-        )
+        runtime.install_actor({"id": "u", "type": "human", "role": "manager"})
+        with pytest.raises(LegacyExecutionError):
+            runtime.execute(fn=lambda: pytest.fail("callback ran"), raise_on_block=False)
+        assert runtime.audit_events == []
     finally:
         server.shutdown()
         server.server_close()
-
-    assert blocked.allowed is False
-    assert blocked.reason == "required role not satisfied: manager"
-    assert blocked.event["schema_version"] == "governed_execution.v1"
-    assert blocked.event["authority_ref"] == "finance-policy@1.0.0"
-    assert blocked.event["contract_ref"] == "finance-policy@1.0.0"
-    assert blocked.event["decision"] == "BLOCKED"
-    assert blocked.event["contract_source"] == "registry_url"
-    assert blocked.audit_receipt == blocked.event["audit_receipt"]
-    assert blocked.audit_receipt["status"] == "accepted"
-    assert blocked.audit_receipt["event_id"] == blocked.event["event_id"]
-    assert blocked.audit_receipt["authority_ref"] == "finance-policy@1.0.0"
-    assert blocked.audit_receipt["event_hash"].startswith("sha256:")
-    assert blocked.audit_receipt["received_at"]
-    assert blocked.audit_receipt["path"] == "audits/governed-execution.jsonl"
-    assert allowed.allowed is True
-    assert allowed.value == "Transferred $1250000"
-    assert allowed.event["decision"] == "ALLOWED"
-    assert allowed.audit_receipt["status"] == "accepted"
-
-    cached_contracts = list(cache_dir.glob("*.contract.json"))
-    assert len(cached_contracts) == 1
-    assert json.loads(cached_contracts[0].read_text(encoding="utf-8")) == contract
-    assert (cache_dir / "registry-index.json").exists()
-    cached_registry = json.loads((cache_dir / "registry-index.json").read_text(encoding="utf-8"))
-    assert cached_registry["registry_hash"].startswith("sha256:")
-
-    audit_lines = (
-        tmp_path / "cloud-data" / "audits" / "governed-execution.jsonl"
-    ).read_text(encoding="utf-8").splitlines()
-    assert len(audit_lines) == 2
-    assert json.loads(audit_lines[0])["allowed"] is False
-    assert json.loads(audit_lines[1])["allowed"] is True
-    audit_index = json.loads(
-        (tmp_path / "cloud-data" / "audits" / "audit-index.json").read_text(encoding="utf-8")
-    )
-    assert audit_index["schema_version"] == "audit_index.v1"
-    assert audit_index["event_count"] == 2
-    assert audit_index["events"][0]["event_hash"].startswith("sha256:")
-
-    offline_runtime = GovernedRuntime(
-        registry_url=registry_url,
-        cache_dir=cache_dir,
-        offline=True,
-    )
-    offline_runtime.bind_contract("finance-policy@1.0.0")
-    offline_runtime.install_actor(
-        {
-            "id": "manager-1",
-            "type": "human",
-            "role": "manager",
-        }
-    )
-    offline_allowed = offline_runtime.execute(
-        fn=transfer,
-        args=(1_250_000,),
-        raise_on_block=False,
-    )
-    assert offline_allowed.allowed is True
-    assert offline_allowed.event["contract_source"] == "cache"
+    offline = GovernedRuntime(registry_url=registry_url, cache_dir=cache_dir, offline=True)
+    assert offline._load_contract("finance-policy", "1.0.0") == contract
+    with pytest.raises(LegacyExecutionError):
+        offline.execute_proposal({}, actor={"id": "u", "type": "human", "role": "manager"},
+                                 contract_id="finance-policy@1.0.0", raise_on_block=False)
+    assert offline.audit_events == []
+    assert not (tmp_path / "cloud-data" / "audits").exists()
 
 
-def test_guard_runtime_from_cloud_spools_evidence_until_explicit_flush(tmp_path):
+def test_cloud_legacy_migration_error_does_not_spool_or_upload_evidence(tmp_path):
     seed_cloud_data(tmp_path / "cloud-data")
-    state = {"audit_available": True}
-    server, registry_url = serve_cloud(tmp_path / "cloud-data", state=state)
-    evidence_dir = tmp_path / "guard-evidence"
-
+    server, registry_url = serve_cloud(tmp_path / "cloud-data")
     try:
         runtime = GuardRuntime.from_cloud(
-            authority="finance-policy@1.0.0",
-            api_key="test-key",
-            base_url=registry_url,
-            cache_dir=tmp_path / "guard-cache",
-            evidence_dir=evidence_dir,
-            actor={"id": "manager-1", "type": "human", "role": "manager"},
-        )
-
-        result = runtime.execute(
-            fn=transfer,
-            args=(1_250_000,),
-            raise_on_block=False,
-        )
-        assert result.allowed is True
-        assert result.audit_receipt is None
-        assert runtime._evidence_counts() == {"pending": 1, "sent": 0, "failed": 0}
+            authority="finance-policy@1.0.0", api_key="test-key", base_url=registry_url,
+            cache_dir=tmp_path / "cache", evidence_dir=tmp_path / "evidence",
+            actor={"id": "u", "type": "human", "role": "manager"})
+        with pytest.raises(LegacyExecutionError):
+            runtime.execute(fn=lambda: pytest.fail("callback ran"), raise_on_block=False)
+        assert runtime._evidence_counts() == {"pending": 0, "sent": 0, "failed": 0}
+        assert runtime.flush_evidence() == {"pending": 0, "sent": 0, "failed": 0}
+        assert runtime.audit_events == [] and runtime.runtime_logs == []
         assert not (tmp_path / "cloud-data" / "audits").exists()
-
-        state["audit_available"] = False
-        assert runtime.flush_evidence() == {"pending": 0, "sent": 0, "failed": 1}
-        failed_payload = json.loads(next((evidence_dir / "failed").glob("*.json")).read_text(encoding="utf-8"))
-        assert failed_payload["event_id"] == result.event["event_id"]
-        assert failed_payload["flush_error"]
-
-        state["audit_available"] = True
-        assert runtime.flush_evidence() == {"pending": 0, "sent": 1, "failed": 0}
-        sent_payload = json.loads(next((evidence_dir / "sent").glob("*.json")).read_text(encoding="utf-8"))
-        assert sent_payload["audit_receipt"]["status"] == "accepted"
-
-        runtime_log_types = [event["event_type"] for event in runtime.runtime_logs]
-        assert "authority_resolution_started" in runtime_log_types
-        assert "authority_resolution_completed" in runtime_log_types
-        assert "admissibility_evaluation_started" in runtime_log_types
-        assert "admissibility_evaluation_completed" in runtime_log_types
     finally:
         server.shutdown()
         server.server_close()
@@ -337,7 +232,7 @@ def test_governed_runtime_rejects_unversioned_contract_binding(tmp_path):
         runtime.bind_contract(unversioned_authority_ref)
         runtime.install_actor({"id": "manager-1", "type": "human", "role": "manager"})
         try:
-            runtime.execute(fn=transfer, args=(1_250_000,), raise_on_block=False)
+            runtime._resolve_contract_binding(None, None)
         except ValueError as exc:
             assert "Missing contract_version" in str(exc)
         else:
@@ -356,7 +251,7 @@ def test_governed_runtime_rejects_cached_hash_mismatch(tmp_path):
         runtime = GovernedRuntime(registry_url=registry_url, cache_dir=cache_dir)
         runtime.bind_contract("finance-policy@1.0.0")
         runtime.install_actor({"id": "manager-1", "type": "human", "role": "manager"})
-        runtime.execute(fn=transfer, args=(1_250_000,), raise_on_block=False)
+        runtime._load_contract("finance-policy", "1.0.0")
     finally:
         server.shutdown()
         server.server_close()
@@ -370,7 +265,7 @@ def test_governed_runtime_rejects_cached_hash_mismatch(tmp_path):
     offline_runtime.bind_contract("finance-policy@1.0.0")
     offline_runtime.install_actor({"id": "manager-1", "type": "human", "role": "manager"})
     try:
-        offline_runtime.execute(fn=transfer, args=(1_250_000,), raise_on_block=False)
+        offline_runtime._load_contract("finance-policy", "1.0.0")
     except Exception as exc:
         assert "hash mismatch" in str(exc)
     else:
@@ -386,7 +281,7 @@ def test_governed_runtime_rejects_cached_registry_hash_mismatch(tmp_path):
         runtime = GovernedRuntime(registry_url=registry_url, cache_dir=cache_dir)
         runtime.bind_contract("finance-policy@1.0.0")
         runtime.install_actor({"id": "manager-1", "type": "human", "role": "manager"})
-        runtime.execute(fn=transfer, args=(1_250_000,), raise_on_block=False)
+        runtime._load_contract("finance-policy", "1.0.0")
     finally:
         server.shutdown()
         server.server_close()

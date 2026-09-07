@@ -2,15 +2,12 @@ from datetime import datetime, timedelta, timezone
 import hashlib
 import json
 import os
-import sys
 import threading
 import warnings
 
 import requests
-from proposal_normalizer.build_proposal import build_proposal
-from cricore.api import evaluate_structured
 
-from .context import get_context, resolve_actor
+from .context import get_context
 
 
 DEFAULT_BASE_URL = "http://localhost:8000"
@@ -20,68 +17,27 @@ class GovernanceError(RuntimeError):
     pass
 
 
+class LegacyExecutionError(GovernanceError):
+    """Stable migration error for APIs without trusted strict execution evidence."""
+
+    code = "GUARD_LEGACY_EXECUTION_UNSUPPORTED"
+
+    def __init__(self, api):
+        super().__init__(
+            f"{self.code}: {api} cannot establish strict execution evidence "
+            "(integrity/publication prerequisites). Migrate to Guard.local() or "
+            "Guard.cloud() and guarded tools. Guard execution is never advisory."
+        )
+
+
 def execute(fn, *, args=None, kwargs=None, actor=None, contract=None):
-    ctx = get_context()
+    """Deprecated: always raise LegacyExecutionError before resolving or executing.
 
-    actor = actor or ctx.get("actor") or resolve_actor()
-    mode = ctx.get("mode", "local")
-    contract, unverified = _resolve_contract(ctx, contract)
-
-    if contract is None:
-        if mode == "cloud" and ctx.get("fail_mode") == "open":
-            _print_unverified_decision()
-            send_to_cloud_async(
-                {
-                    "decision": {
-                        "commit_allowed": True,
-                        "failed_stages": [],
-                        "summary": "Cloud unreachable; fail-open execution allowed",
-                        "status": "unverified",
-                    },
-                    "proposal": None,
-                    "trace_hash": None,
-                },
-                ctx,
-            )
-            return fn(*(args or []), **(kwargs or {}))
-
-        raise ValueError("Missing contract")
-
-    proposal = build_proposal(
-        proposal_id="auto",
-        actor=actor,
-        mutation=_infer_mutation(fn, args, kwargs),
-        contract={
-            "id": contract["contract_id"],
-            "version": contract["contract_version"],
-            "hash": contract["contract_hash"],
-        },
-        artifact_paths=[],
-    )
-
-    result = evaluate_structured(
-        proposal=proposal,
-        compiled_contract=contract,
-        run_context=_build_run_context(actor, contract, mode, unverified),
-    )
-    _tag_decision(result, unverified, ctx.get("policy_source", "cloud"))
-
-    if result.meta["verification"] == "unverified":
-        _print_unverified_decision()
-
-    send_to_cloud_async(
-        {
-            "decision": _serialize_decision(result),
-            "proposal": proposal,
-            "trace_hash": contract["contract_hash"],
-        },
-        ctx,
-    )
-
-    if not result.commit_allowed:
-        raise GovernanceError(f"Execution blocked: {_blocked_reason(result)}")
-
-    return fn(*(args or []), **(kwargs or {}))
+    Use Guard.local()/Guard.cloud() with tool() or repository_tool(). Local/cloud
+    selects authority resolution, never CRI enforcement strength. Legacy contracts,
+    caches and fail_mode="open" cannot establish strict execution evidence.
+    """
+    raise LegacyExecutionError("waveframe_guard.execute()")
 
 
 def fetch_policy(api_key):
@@ -196,18 +152,8 @@ def _resolve_unreachable_cloud(ctx):
 
 
 def _resolve_no_policy(ctx):
-    if ctx.get("fail_mode") == "closed":
-        raise GovernanceError("No policy available")
-
-    if ctx.get("fail_mode") == "open":
-        warnings.warn(
-            "Cloud unreachable; allowing execution without policy enforcement",
-            RuntimeWarning,
-            stacklevel=2,
-        )
-        return None, True
-
-    raise GovernanceError("No policy available")
+    raise GovernanceError("No policy available; legacy fail-open execution is disabled. "
+                          "Migrate to Guard.local() or Guard.cloud() and guarded tools.")
 
 
 def _cache_is_fresh(cache):
@@ -286,75 +232,3 @@ def _record_cloud_failure(ctx):
 def _record_cloud_success(ctx):
     ctx["failure_count"] = 0
     ctx["offline"] = False
-
-
-def _print_unverified_decision():
-    encoding = (getattr(sys.stdout, "encoding", None) or "").lower()
-    if "utf" in encoding:
-        print("\u26a0\ufe0f Decision unverified (cloud unavailable)")
-    else:
-        print("WARNING: Decision unverified (cloud unavailable)")
-
-
-def _infer_mutation(fn, args, kwargs):
-    return {
-        "domain": "python",
-        "resource": fn.__name__,
-        "action": "call",
-    }
-
-
-def _build_run_context(actor, contract, mode, unverified=False):
-    required_roles = (
-        contract.get("authority_requirements", {}).get("required_roles")
-        or [actor.get("role")]
-    )
-
-    return {
-        "mode": mode,
-        "decision_status": "unverified" if unverified else "verified",
-        "contract_metadata": _contract_metadata(contract),
-        "identities": {
-            "actors": [actor],
-            "required_roles": required_roles,
-            "conflict_flags": {},
-        },
-    }
-
-
-def _tag_decision(result, unverified, source):
-    object.__setattr__(
-        result,
-        "meta",
-        {
-            "verification": "unverified" if unverified else "verified",
-            "source": source,
-        },
-    )
-
-
-def _serialize_decision(result):
-    return {
-        "commit_allowed": result.commit_allowed,
-        "failed_stages": result.failed_stages,
-        "summary": result.summary,
-        "meta": result.meta,
-        "stage_results": [
-            {
-                "stage_id": stage.stage_id,
-                "passed": stage.passed,
-                "messages": stage.messages,
-            }
-            for stage in result.stage_results
-        ],
-    }
-
-
-def _blocked_reason(result):
-    for stage in result.stage_results:
-        if stage.passed:
-            continue
-        if stage.messages:
-            return stage.messages[0]
-
-    return result.summary or "policy violation"

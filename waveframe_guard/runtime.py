@@ -8,16 +8,8 @@ from urllib import request
 from urllib.error import URLError
 from urllib.parse import quote, urljoin
 
-from cricore.api import evaluate_structured
-
-from .context import install_guard
 from .contracts import load_contract
-from .execute import (
-    GovernanceError,
-    _blocked_reason as decision_blocked_reason,
-    _build_run_context,
-    execute as execute_guarded,
-)
+from .execute import GovernanceError, LegacyExecutionError
 from .result import GovernedExecutionResult
 from .schemas import (
     GOVERNED_EXECUTION_EVENT_V1,
@@ -36,6 +28,12 @@ REVALIDATION_REQUIRED = "REVALIDATION_REQUIRED"
 
 
 class GovernedRuntime:
+    """Legacy registry/evidence reader; execution and permission APIs fail closed.
+
+    Existing artifacts remain readable. Use Guard.local()/Guard.cloud() and
+    guarded tools for new execution; registry connectivity is not permission.
+    """
+
     def __init__(
         self,
         *,
@@ -138,99 +136,22 @@ class GovernedRuntime:
         target=None,
         now=None,
     ):
-        actor = self._resolve_actor(actor)
-        contract_id, contract_version = self._resolve_contract_binding(contract_id, contract_version)
-        self._log_runtime_event(
-            "authority_resolution_started",
-            authority_ref=_contract_ref(contract_id, contract_version),
-        )
-        entry = self._resolve_authority_entry(contract_id, contract_version)
-        contract = self._load_contract_from_entry(entry)
-        self._enforce_authority_lineage(contract)
-        execution_state = _build_execution_state(
-            actor=actor,
-            contract=contract,
-            fn=fn,
-            args=args or (),
-            kwargs=kwargs or {},
-            approvals=approvals or [],
-            target=target,
-        )
-        try:
-            validate_execution_state(execution_state)
-        except SchemaValidationError as exc:
-            raise GovernanceError(f"Malformed execution state: {exc}") from exc
+        """Deprecated: fail closed; migrate to Guard.local()/Guard.cloud() tools.
 
-        self._log_runtime_event(
-            "admissibility_evaluation_started",
-            authority_ref=_contract_ref(contract_id, contract_version),
-            action=execution_state.get("action"),
-        )
-        approval_decision = _evaluate_approval_admissibility(
-            contract=contract,
-            execution_state=execution_state,
-        )
-        self._record_continuity_metadata(entry, now=now)
-        self._log_runtime_event(
-            "admissibility_evaluation_completed",
-            authority_ref=_contract_ref(contract_id, contract_version),
-            allowed=approval_decision["allowed"],
-            reason=approval_decision["reason"],
-            continuity_signals=self.last_continuity_signals,
-        )
-        return GovernedExecutionResult(
-            allowed=approval_decision["allowed"],
-            reason=approval_decision["reason"],
-            missing_approvals=approval_decision["missing_approvals"],
-            execution_state=execution_state,
-            decision_trace=approval_decision.get("trace"),
-            **self._contract_metadata(contract),
-        )
+        This legacy API cannot establish strict execution evidence. It raises
+        LegacyExecutionError before resolution, evaluation, callbacks or events,
+        including when raise_on_block=False is supplied to an execution method.
+        """
+        raise LegacyExecutionError("GovernedRuntime.evaluate()")
 
     def revalidate(self, decision, *, actor=None, now=None):
-        execution_state = decision.execution_state if isinstance(decision, GovernedExecutionResult) else decision
-        if not isinstance(execution_state, dict):
-            raise ValueError("revalidate requires a GovernedExecutionResult or execution_state")
-        authority_ref = execution_state.get("authority_ref")
-        contract_id, contract_version = _split_contract_ref(authority_ref)
-        current_actor = actor or execution_state.get("actor")
-        entry = self._lookup_contract(contract_id, contract_version)
-        contract = self._load_contract_from_entry(entry)
+        """Deprecated: fail closed; migrate to Guard.local()/Guard.cloud() tools.
 
-        signals = []
-        lifecycle = _authority_lifecycle(entry)
-        if lifecycle is not None:
-            status = lifecycle["status"]
-            if status == "revoked":
-                signals.append(AUTHORITY_REVOKED_POST_DECISION)
-            elif status == "superseded":
-                signals.append(AUTHORITY_SUPERSEDED_DURING_EXECUTION)
-
-        if _actor_identity(current_actor) != _actor_identity(execution_state.get("actor")):
-            signals.append(ACTOR_CONTINUITY_BROKEN)
-
-        valid_until = getattr(decision, "valid_until", None)
-        if _window_expired(valid_until, now or datetime.now(timezone.utc)):
-            signals.append(ADMISSIBILITY_WINDOW_EXPIRED)
-
-        signals = _with_revalidation_required(signals)
-        self.last_authority_lifecycle = lifecycle
-        self.last_valid_until = valid_until
-        self.last_revalidation_required_after = getattr(decision, "revalidation_required_after", None)
-        self.last_continuity_signals = signals
-        self._log_runtime_event(
-            "admissibility_revalidation_completed",
-            authority_ref=authority_ref,
-            continuity_signals=signals,
-        )
-        return GovernedExecutionResult(
-            allowed=decision.allowed if isinstance(decision, GovernedExecutionResult) else True,
-            reason=decision.reason if isinstance(decision, GovernedExecutionResult) else "revalidation completed",
-            execution_state=execution_state,
-            decision_trace=decision.decision_trace if isinstance(decision, GovernedExecutionResult) else None,
-            missing_approvals=decision.missing_approvals if isinstance(decision, GovernedExecutionResult) else [],
-            **self._contract_metadata(contract),
-        )
+        This legacy API cannot establish strict execution evidence. It raises
+        LegacyExecutionError before resolution, evaluation, callbacks or events,
+        including when raise_on_block=False is supplied to an execution method.
+        """
+        raise LegacyExecutionError("GovernedRuntime.revalidate()")
 
     def execute(
         self,
@@ -244,140 +165,13 @@ class GovernedRuntime:
         approvals=None,
         raise_on_block=True,
     ):
-        actor = self._resolve_actor(actor)
-        contract_id, contract_version = self._resolve_contract_binding(contract_id, contract_version)
-        self._log_runtime_event(
-            "authority_resolution_started",
-            authority_ref=_contract_ref(contract_id, contract_version),
-        )
-        entry = self._resolve_authority_entry(contract_id, contract_version)
-        contract = self._load_contract_from_entry(entry)
-        self._enforce_authority_lineage(contract)
-        execution_state = _build_execution_state(
-            actor=actor,
-            contract=contract,
-            fn=fn,
-            args=args or (),
-            kwargs=kwargs or {},
-            approvals=approvals or [],
-        )
-        try:
-            validate_execution_state(execution_state)
-        except SchemaValidationError as exc:
-            raise GovernanceError(f"Malformed execution state: {exc}") from exc
+        """Deprecated: fail closed; migrate to Guard.local()/Guard.cloud() tools.
 
-        self._log_runtime_event(
-            "admissibility_evaluation_started",
-            authority_ref=_contract_ref(contract_id, contract_version),
-            action=execution_state.get("action"),
-        )
-        approval_decision = _evaluate_approval_admissibility(
-            contract=contract,
-            execution_state=execution_state,
-        )
-        self._record_continuity_metadata(entry)
-        self._log_runtime_event(
-            "admissibility_evaluation_completed",
-            authority_ref=_contract_ref(contract_id, contract_version),
-            allowed=approval_decision["allowed"],
-            reason=approval_decision["reason"],
-            continuity_signals=self.last_continuity_signals,
-        )
-        if not approval_decision["allowed"]:
-            error = f"Execution blocked: {approval_decision['reason']}"
-            event = self._build_event(
-                actor=actor,
-                contract=contract,
-                execution_type="function",
-                allowed=False,
-                reason=approval_decision["reason"],
-                error=error,
-                target=getattr(fn, "__name__", None),
-                execution_state=execution_state,
-                missing_approvals=approval_decision["missing_approvals"],
-            )
-            self._emit_event(event)
-            if raise_on_block:
-                raise GovernanceError(error)
-            return GovernedExecutionResult(
-                allowed=False,
-                reason=approval_decision["reason"],
-                error=error,
-                event=event,
-                audit_receipt=event.get("audit_receipt"),
-                missing_approvals=approval_decision["missing_approvals"],
-                execution_state=execution_state,
-                decision_trace=approval_decision.get("trace"),
-                **self._contract_metadata(contract),
-            )
-
-        if _has_approval_requirements(contract):
-            value = fn(*(args or ()), **(kwargs or {}))
-        else:
-            install_guard(
-                actor=actor,
-                contract=contract,
-                mode="local",
-            )
-            try:
-                value = execute_guarded(
-                    fn,
-                    args=args or (),
-                    kwargs=kwargs or {},
-                    actor=actor,
-                    contract=contract,
-                )
-            except GovernanceError as exc:
-                error = str(exc)
-                event = self._build_event(
-                    actor=actor,
-                    contract=contract,
-                    execution_type="function",
-                    allowed=False,
-                    reason=self._blocked_reason(error),
-                    error=error,
-                    target=getattr(fn, "__name__", None),
-                    execution_state=execution_state,
-                )
-                self._emit_event(event)
-                if raise_on_block:
-                    raise
-
-                return GovernedExecutionResult(
-                    allowed=False,
-                    reason=self._blocked_reason(error),
-                    error=error,
-                    event=event,
-                    audit_receipt=event.get("audit_receipt"),
-                    execution_state=execution_state,
-                    decision_trace=_legacy_decision_trace(False, self._blocked_reason(error)),
-                    **self._contract_metadata(contract),
-                )
-
-        event = self._build_event(
-            actor=actor,
-            contract=contract,
-            execution_type="function",
-            allowed=True,
-            reason="execution allowed",
-            target=getattr(fn, "__name__", None),
-            execution_state=execution_state,
-        )
-        self._emit_event(event)
-
-        if raise_on_block:
-            return value
-
-        return GovernedExecutionResult(
-            allowed=True,
-            reason="execution allowed",
-            value=value,
-            event=event,
-            audit_receipt=event.get("audit_receipt"),
-            execution_state=execution_state,
-            decision_trace=approval_decision.get("trace"),
-            **self._contract_metadata(contract),
-        )
+        This legacy API cannot establish strict execution evidence. It raises
+        LegacyExecutionError before resolution, evaluation, callbacks or events,
+        including when raise_on_block=False is supplied to an execution method.
+        """
+        raise LegacyExecutionError("GovernedRuntime.execute()")
 
     def execute_proposal(
         self,
@@ -388,77 +182,13 @@ class GovernedRuntime:
         contract_version=None,
         raise_on_block=True,
     ):
-        actor = self._resolve_actor(actor)
-        contract_id, contract_version = self._resolve_contract_binding(contract_id, contract_version)
-        self._log_runtime_event(
-            "authority_resolution_started",
-            authority_ref=_contract_ref(contract_id, contract_version),
-        )
-        entry = self._resolve_authority_entry(contract_id, contract_version)
-        contract = self._load_contract_from_entry(entry)
-        self._enforce_authority_lineage(contract)
+        """Deprecated: fail closed; migrate to Guard.local()/Guard.cloud() tools.
 
-        install_guard(
-            actor=actor,
-            contract=contract,
-            mode="local",
-        )
-
-        decision = evaluate_structured(
-            proposal=proposal,
-            compiled_contract=contract,
-            run_context=_build_run_context(actor, contract, "local"),
-        )
-        self._log_runtime_event(
-            "admissibility_evaluation_completed",
-            authority_ref=_contract_ref(contract_id, contract_version),
-            allowed=decision.commit_allowed,
-            reason="execution allowed" if decision.commit_allowed else decision_blocked_reason(decision),
-            execution_type="proposal",
-        )
-
-        if decision.commit_allowed:
-            event = self._build_event(
-                actor=actor,
-                contract=contract,
-                execution_type="proposal",
-                allowed=True,
-                reason="execution allowed",
-                target=proposal.get("proposal_id") if isinstance(proposal, dict) else None,
-            )
-            self._emit_event(event)
-            return GovernedExecutionResult(
-                allowed=True,
-                reason="execution allowed",
-                value=proposal,
-                event=event,
-                audit_receipt=event.get("audit_receipt"),
-                **self._contract_metadata(contract),
-            )
-
-        reason = decision_blocked_reason(decision)
-        error = f"Execution blocked: {reason}"
-        event = self._build_event(
-            actor=actor,
-            contract=contract,
-            execution_type="proposal",
-            allowed=False,
-            reason=reason,
-            error=error,
-            target=proposal.get("proposal_id") if isinstance(proposal, dict) else None,
-        )
-        self._emit_event(event)
-        if raise_on_block:
-            raise GovernanceError(error)
-
-        return GovernedExecutionResult(
-            allowed=False,
-            reason=reason,
-            error=error,
-            event=event,
-            audit_receipt=event.get("audit_receipt"),
-            **self._contract_metadata(contract),
-        )
+        This legacy API cannot establish strict execution evidence. It raises
+        LegacyExecutionError before resolution, evaluation, callbacks or events,
+        including when raise_on_block=False is supplied to an execution method.
+        """
+        raise LegacyExecutionError("GovernedRuntime.execute_proposal()")
 
     def _load_registry(self):
         if self.registry_url is not None:
@@ -1039,7 +769,8 @@ def _normalize_approval_evidence(approval):
 
 
 def evaluate_admissibility(contract, execution_state):
-    return _evaluate_approval_admissibility(contract=contract, execution_state=execution_state)
+    """Deprecated permission API; migrate to Guard.local()/Guard.cloud() tools."""
+    raise LegacyExecutionError("waveframe_guard.evaluate_admissibility()")
 
 
 def _evaluate_approval_admissibility(*, contract, execution_state):

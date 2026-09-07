@@ -1,23 +1,19 @@
-from pathlib import Path
+"""Legacy migration example; see docs/getting-started/STRICT_EXECUTION_MIGRATION.md.
 
-from waveframe_guard import guard, install_guard
+Guard execution is never advisory. Local/cloud selects authority resolution.
+For a working supported tool example, run examples/quickstart_guard.py.
+"""
 
-
-CONTRACT_PATH = (
-    Path(__file__).resolve().parents[2]
-    / "contracts"
-    / "finance-policy-1.0.0.contract.json"
-)
-
-install_guard(
-    actor={"id": "u1", "type": "human", "role": "manager"},
-    contract_path=CONTRACT_PATH,
-)
+from waveframe_guard import LegacyExecutionError, guard
 
 
 @guard
-def demo_action():
-    return "executed"
+def legacy_action():
+    raise AssertionError("Legacy callbacks must never run")
 
 
-print(demo_action())
+if __name__ == "__main__":
+    try:
+        legacy_action()
+    except LegacyExecutionError as exc:
+        print(exc)

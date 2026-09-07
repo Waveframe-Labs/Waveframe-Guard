@@ -1,6 +1,6 @@
 from .guard import guard
 from .context import install_guard, resolve_actor
-from .execute import GovernanceError, execute
+from .execute import GovernanceError, LegacyExecutionError, execute
 from .contracts import load_contract
 from .result import GovernedExecutionResult
 from .runtime import GuardRuntime, GovernedRuntime, evaluate_admissibility
@@ -34,6 +34,7 @@ __all__ = [
     "resolve_actor",
     "execute",
     "GovernanceError",
+    "LegacyExecutionError",
     "load_contract",
     "GovernedExecutionResult",
     "GovernedRuntime",

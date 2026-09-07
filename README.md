@@ -10,7 +10,7 @@ for issue #33, supported platforms, and the `repository_tool` API.
 
 Stop unsafe AI and automated actions **before they execute**.
 
-Waveframe Guard is an execution-boundary SDK. It wraps sensitive actions, resolves compiled authority, evaluates through CRI-CORE, and only runs the action when the outcome is allowed.
+Waveframe Guard is an execution-boundary SDK. It wraps sensitive actions, resolves compiled authority, enforces the decision at the tool boundary, and only runs the action when the outcome is allowed.
 
 Current release: `0.17.0`.
 
@@ -365,7 +365,7 @@ Guard does **not** author governance, publish authority, host organization workf
 | Guard | Verify published authority, derive schema-approved runtime facts, and enforce locally before execution. |
 | Cloud | Store authority, evidence, receipts, replay packages, lifecycle state, and continuity records. |
 | Ledger / Workspace | Author, review, activate, and publish deterministic governance authority. |
-| CRI-CORE | Deterministic admissibility kernel used under the Guard boundary. |
+| CRI-CORE | Upstream deterministic kernel; advisory evaluation never grants Guard execution permission. |
 
 The complete Ledger v2/v3 product flow is:
 
@@ -393,65 +393,24 @@ language.
 
 See the single authoritative [release compatibility matrix](docs/getting-started/README.md#release-compatibility-matrix) for minimum, recommended, and release-tested pairings.
 
-## Local authority registry
+## Legacy execution migration (Unreleased)
 
-For applications that resolve published contracts from a local registry, use the runtime layer:
+Guard execution is never advisory. Local/cloud controls authority resolution and
+service connectivity, not enforcement strength. Advisory CRI evaluation is not
+permission to execute.
 
-```python
-from waveframe_guard import GovernedRuntime
+Legacy `waveframe_guard.execute`, `@waveframe_guard.guard`, and
+`GovernedRuntime`/`GuardRuntime` execution and permission methods now fail closed
+with `LegacyExecutionError` (a `GovernanceError` subclass). The exported
+`evaluate_admissibility` permission helper does too. These APIs cannot establish
+strict integrity/publication evidence. `fail_mode="open"` and
+`raise_on_block=False` cannot bypass this migration error; no callback or new
+execution evidence is produced.
 
-runtime = GovernedRuntime(
-    registry_path="contracts/index.json",
-    reject_revoked_authority=True,
-    warn_on_superseded=True,
-)
-
-runtime.install_actor({"id": "user-1", "type": "human", "role": "manager"})
-runtime.bind_contract("finance-policy@1.0.0")
-
-result = runtime.execute(
-    fn=transfer,
-    args=(1250000,),
-    raise_on_block=False,
-)
-```
-
-Runtime authority refs are explicit and versioned. Use `finance-policy@1.0.0`; unversioned IDs such as `finance-policy` are rejected because replay, audit, and cache integrity depend on deterministic authority identity.
-
-## Cloud-connected runtime
-
-For application code that needs Cloud authority metadata and evidence delivery, use the Cloud-connected runtime:
-
-```python
-from waveframe_guard import GuardRuntime
-
-runtime = GuardRuntime.from_cloud(
-    authority="finance-policy@1.0.0",
-    api_key="...",
-)
-
-result = runtime.execute(
-    actor={"id": "user-1", "type": "human", "role": "manager"},
-    fn=transfer,
-    args=(1250000,),
-    raise_on_block=False,
-)
-
-runtime.flush_evidence()
-```
-
-`execute(...)` still enforces locally. Cloud availability is only required when you explicitly call `flush_evidence()`.
-
-Guard writes evidence to a durable local spool first:
-
-```text
-.waveframe_guard/evidence/
-  pending/
-  sent/
-  failed/
-```
-
-If a flush fails, evidence is retained and can be submitted again later.
+Use the current `Guard.local()` / `Guard.cloud()` API and guarded tools shown
+above. See the [migration guide](docs/getting-started/STRICT_EXECUTION_MIGRATION.md)
+for the complete affected API list and repository-tool migration. This change
+is intended for 0.18.0 and does not prepare a release.
 
 ## Continuation and deferred release
 

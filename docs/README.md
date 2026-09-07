@@ -5,6 +5,8 @@ The public docs are tiered by purpose.
 ## Getting Started
 
 - `getting-started/README.md`
+- [Strict execution migration](getting-started/STRICT_EXECUTION_MIGRATION.md)
+- [Issue #39 security inventory and reproductions](security/ISSUE_39.md)
 
 ## Architecture
 

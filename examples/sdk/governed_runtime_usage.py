@@ -1,3 +1,9 @@
+"""Retained legacy migration demonstration; execution always fails closed.
+
+Use Guard.local()/Guard.cloud() guarded tools; see
+ docs/getting-started/STRICT_EXECUTION_MIGRATION.md and examples/quickstart_guard.py.
+"""
+
 from waveframe_guard import GovernanceError, GovernedRuntime
 
 

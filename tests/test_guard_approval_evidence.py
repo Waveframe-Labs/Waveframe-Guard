@@ -5,6 +5,29 @@ from pathlib import Path
 
 
 from waveframe_guard import GovernanceError, GovernedRuntime
+from waveframe_guard import LegacyExecutionError
+import pytest
+
+
+@pytest.mark.parametrize("approvals", [[], [{"role": "manager", "approved_by": "reviewer"}],
+    [{"role": "manager", "approved_by": "m"}, {"role": "director", "approved_by": "d"}]])
+@pytest.mark.parametrize("amount", [500, 12500])
+def test_approval_only_legacy_branch_cannot_invoke_callback(tmp_path, approvals, amount):
+    runtime = GovernedRuntime(registry_path=_write_registry(tmp_path, _compiled_contract()))
+    runtime.bind_contract("finance-policy@1.0.0")
+    runtime.install_actor({"id": "requester", "type": "human", "role": "employee"})
+    calls = []
+    with pytest.raises(LegacyExecutionError):
+        runtime.execute(fn=lambda value: calls.append(value), args=(amount,),
+                        approvals=approvals, raise_on_block=False)
+    assert calls == [] and runtime.audit_events == [] and runtime.runtime_logs == []
+
+
+def test_legacy_lineage_reader_still_validates_missing_lineage(tmp_path):
+    contract = _compiled_contract()
+    runtime = GovernedRuntime(registry_path=_write_registry(tmp_path, contract), require_verified_lineage=True)
+    with pytest.raises(GovernanceError, match="missing lineage"):
+        runtime._enforce_authority_lineage(contract)
 from waveframe_guard.schemas import (
     GOVERNED_EXECUTION_EVENT_V1,
     GOVERNED_EXECUTION_RESULT_V1,
@@ -14,244 +37,6 @@ from waveframe_guard.schemas import (
 
 def transfer(amount: int) -> str:
     return f"Transferred ${amount}"
-
-
-def test_guard_blocks_until_required_approval_evidence_is_present(tmp_path):
-    contract = _compiled_contract()
-    registry_path = _write_registry(tmp_path, contract)
-    runtime = GovernedRuntime(registry_path=registry_path)
-    runtime.bind_contract("finance-policy@1.0.0")
-    runtime.install_actor({"id": "requester-1", "type": "human", "role": "employee"})
-
-    blocked = runtime.execute(
-        fn=transfer,
-        args=(12_500,),
-        approvals=[{"role": "manager", "approved_by": "manager-1"}],
-        raise_on_block=False,
-    )
-
-    assert blocked.allowed is False
-    assert blocked.reason == "required approval missing: director"
-    assert blocked.decision_trace["schema_version"] == "governed_decision_trace.v1"
-    assert blocked.decision_trace["satisfied_approvals"] == [
-        {"role": "manager", "approved_by": "manager-1"}
-    ]
-    assert blocked.decision_trace["missing_approvals"] == [
-        {
-            "role": "director",
-            "condition": {
-                "field": "amount",
-                "operator": ">",
-                "value": 10000,
-            },
-        }
-    ]
-    assert blocked.decision_trace["conditions_triggered"] == [
-        {
-            "field": "amount",
-            "operator": ">",
-            "value": 10000,
-        }
-    ]
-    assert blocked.missing_approvals == [
-        {
-            "role": "director",
-            "condition": {
-                "field": "amount",
-                "operator": ">",
-                "value": 10000,
-            },
-        }
-    ]
-
-    allowed = runtime.execute(
-        fn=transfer,
-        args=(12_500,),
-        approvals=[
-            {"role": "manager", "approved_by": "manager-1"},
-            {"role": "director", "approved_by": "director-1"},
-        ],
-        raise_on_block=False,
-    )
-
-    assert allowed.allowed is True
-    assert allowed.value == "Transferred $12500"
-    assert allowed.event["approvals"][1]["role"] == "director"
-    assert allowed.execution_state["schema_version"] == GOVERNED_EXECUTION_STATE_V1
-    assert allowed.execution_state["actor"]["id"] == "requester-1"
-    assert allowed.execution_state["authority_ref"] == "finance-policy@1.0.0"
-    assert allowed.event["execution_state"] == allowed.execution_state
-    assert allowed.event["schema_version"] == GOVERNED_EXECUTION_EVENT_V1
-    assert allowed.to_dict() == {
-        "schema_version": GOVERNED_EXECUTION_RESULT_V1,
-        "decision": "ALLOWED",
-        "allowed": True,
-        "reason": "execution allowed",
-        "missing_approvals": [],
-        "authority_ref": "finance-policy@1.0.0",
-        "contract_id": "finance-policy",
-        "contract_version": "1.0.0",
-        "contract_hash": contract["contract_hash"],
-        "source_hash": None,
-        "compilation_report_hash": None,
-        "execution_state": allowed.execution_state,
-        "decision_trace": allowed.decision_trace,
-        "event_id": allowed.event["event_id"],
-        "event_hash": None,
-    }
-
-
-def test_guard_enforces_approval_separation_of_duties(tmp_path):
-    contract = _compiled_contract()
-    registry_path = _write_registry(tmp_path, contract)
-    runtime = GovernedRuntime(registry_path=registry_path)
-    runtime.bind_contract("finance-policy@1.0.0")
-    runtime.install_actor({"id": "requester-1", "type": "human", "role": "employee"})
-
-    blocked = runtime.execute(
-        fn=transfer,
-        args=(500,),
-        approvals=[{"role": "manager", "approved_by": "requester-1"}],
-        raise_on_block=False,
-    )
-
-    assert blocked.allowed is False
-    assert blocked.reason == "separation of duties violated: requester approved own transfer"
-    assert blocked.execution_state["approvals"] == [
-        {"role": "manager", "approved_by": "requester-1"}
-    ]
-
-
-def test_guard_enforces_list_shaped_separation_of_duties(tmp_path):
-    contract = _compiled_contract()
-    contract["invariants"] = {
-        "separation_of_duties": [["requester", "approver"]],
-    }
-    contract["contract_hash"] = _compute_contract_hash(contract)
-    registry_path = _write_registry(tmp_path, contract)
-    runtime = GovernedRuntime(registry_path=registry_path)
-    runtime.bind_contract("finance-policy@1.0.0")
-    runtime.install_actor({"id": "requester-1", "type": "human", "role": "employee"})
-
-    blocked = runtime.execute(
-        fn=transfer,
-        args=(500,),
-        approvals=[{"role": "manager", "approved_by": "requester-1"}],
-        raise_on_block=False,
-    )
-
-    assert blocked.allowed is False
-    assert blocked.reason == "separation of duties violated: requester approved own transfer"
-
-
-def test_guard_enforces_approval_thresholds_as_required_evidence(tmp_path):
-    contract = _compiled_contract()
-    contract["approval_requirements"] = {
-        "thresholds": [
-            {
-                "field": "amount",
-                "operator": ">",
-                "value": 1000,
-                "requires_role": "approver",
-            }
-        ]
-    }
-    contract["contract_hash"] = _compute_contract_hash(contract)
-    registry_path = _write_registry(tmp_path, contract)
-    runtime = GovernedRuntime(registry_path=registry_path)
-    runtime.bind_contract("finance-policy@1.0.0")
-    runtime.install_actor({"id": "requester-1", "type": "human", "role": "employee"})
-
-    blocked = runtime.execute(
-        fn=transfer,
-        args=(1_500,),
-        approvals=[],
-        raise_on_block=False,
-    )
-
-    assert blocked.allowed is False
-    assert blocked.reason == "required approval missing: approver"
-    assert blocked.missing_approvals == [
-        {
-            "role": "approver",
-            "condition": {"field": "amount", "operator": ">", "value": 1000},
-        }
-    ]
-
-    allowed = runtime.execute(
-        fn=transfer,
-        args=(1_500,),
-        approvals=[{"role": "approver", "approved_by": "approver-1"}],
-        raise_on_block=False,
-    )
-
-    assert allowed.allowed is True
-    assert allowed.value == "Transferred $1500"
-
-
-def test_guard_rejects_same_approver_for_distinct_required_roles(tmp_path):
-    contract = _compiled_contract()
-    registry_path = _write_registry(tmp_path, contract)
-    runtime = GovernedRuntime(registry_path=registry_path)
-    runtime.bind_contract("finance-policy@1.0.0")
-    runtime.install_actor({"id": "requester-1", "type": "human", "role": "employee"})
-
-    blocked = runtime.execute(
-        fn=transfer,
-        args=(12_500,),
-        approvals=[
-            {"role": "manager", "approved_by": "approver-1"},
-            {"role": "director", "approved_by": "approver-1"},
-        ],
-        raise_on_block=False,
-    )
-
-    assert blocked.allowed is False
-    assert (
-        blocked.reason
-        == "approval identity reused across required roles: approver-1 satisfied director, manager"
-    )
-    assert blocked.missing_approvals == []
-
-
-def test_guard_rejects_malformed_approval_evidence(tmp_path):
-    contract = _compiled_contract()
-    registry_path = _write_registry(tmp_path, contract)
-    runtime = GovernedRuntime(registry_path=registry_path)
-    runtime.bind_contract("finance-policy@1.0.0")
-    runtime.install_actor({"id": "requester-1", "type": "human", "role": "employee"})
-
-    blocked = runtime.execute(
-        fn=transfer,
-        args=(500,),
-        approvals=[{"role": "manager"}],
-        raise_on_block=False,
-    )
-
-    assert blocked.allowed is False
-    assert blocked.reason == "invalid approval evidence: approved_by is required"
-
-
-def test_guard_can_require_verified_authority_lineage(tmp_path):
-    contract = _compiled_contract()
-    registry_path = _write_registry(tmp_path, contract)
-    runtime = GovernedRuntime(registry_path=registry_path, require_verified_lineage=True)
-    runtime.bind_contract("finance-policy@1.0.0")
-    runtime.install_actor({"id": "requester-1", "type": "human", "role": "employee"})
-
-    try:
-        runtime.execute(
-            fn=transfer,
-            args=(500,),
-            approvals=[{"role": "manager", "approved_by": "manager-1"}],
-            raise_on_block=False,
-        )
-    except GovernanceError as exc:
-        assert str(exc) == "Authority provenance verification failed: missing lineage"
-    else:
-        raise AssertionError("expected provenance-gated execution to fail closed")
-    assert runtime.runtime_logs[-1]["event_type"] == "lineage_validation_failed"
-    assert runtime.runtime_logs[-1]["reason"] == "missing lineage"
 
 
 def _compiled_contract():
