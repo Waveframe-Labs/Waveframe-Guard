@@ -58,7 +58,13 @@ def test_separate_commercial_products_do_not_restrict_sdk_license():
     for product in ("Cloud", "Console", "hosted translation", "managed evidence operations",
                     "Guard Inspector", "Ledger Workspace", "enterprise identity/integrations", "support"):
         assert product in readme
-    assert "Commercial use, modification, and redistribution" in readme
+    permission = (
+        "Commercial use, modification, redistribution, and hosting of the Guard "
+        "Core SDK are permitted under Apache-2.0."
+    )
+    for document in ("README.md", "docs/LICENSING.md"):
+        text = (ROOT / document).read_text(encoding="utf-8")
+        assert permission in " ".join(text.split()), document
     assert "do not restrict Apache-2.0 rights to any SDK code included here" in readme
 
 

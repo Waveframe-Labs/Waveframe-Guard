@@ -2,7 +2,8 @@
 
 The Waveframe Guard Core SDK, repository-owned documentation, tests, fixtures,
 and examples in this repository are licensed under [Apache License 2.0](../LICENSE).
-Commercial use, modification and redistribution are permitted under its terms.
+Commercial use, modification, redistribution, and hosting of the Guard
+Core SDK are permitted under Apache-2.0.
 Keep the applicable license, attribution and modification notices when
 redistributing. [NOTICE](../NOTICE) supplies the Waveframe Labs attribution
 and adds no usage conditions. See [contribution terms](../CONTRIBUTING.md).

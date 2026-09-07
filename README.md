@@ -41,9 +41,10 @@ tool that can cause a real-world change.
 ## License and commercial boundary
 
 The Waveframe Guard Core SDK in this repository is open source under
-[Apache License 2.0](LICENSE). Commercial use, modification, and redistribution
-are permitted under that license, including use of the local SDK without a
-Waveframe subscription. Retain the applicable license and attribution notices.
+[Apache License 2.0](LICENSE). Commercial use, modification, redistribution, and
+hosting of the Guard Core SDK are permitted under Apache-2.0. This includes use
+of the local SDK without a Waveframe subscription. Retain the applicable license
+and attribution notices.
 
 Apache-2.0 does not grant rights to Waveframe names or trademarks, except for
 the license's customary origin-identification and NOTICE exceptions.
