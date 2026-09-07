@@ -17,6 +17,12 @@ def install_guard(
     fail_mode="cache",
     policy_refresh=60,
 ):
+    """Retain legacy configuration for migration; it cannot enable execution.
+
+    Use Guard.local()/Guard.cloud() and guarded tools. Local/cloud controls
+    authority resolution, not enforcement strength; fail_mode="open" no longer
+    permits legacy execution.
+    """
     if mode not in {"local", "cloud"}:
         raise ValueError("mode must be 'local' or 'cloud'")
 

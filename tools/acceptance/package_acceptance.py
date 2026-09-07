@@ -304,6 +304,26 @@ assert any(part in {"site-packages", "dist-packages"} for part in module_path.pa
 assert waveframe_guard.__version__ == expected_version
 assert version("waveframe-guard") == expected_version
 
+# Legacy symbols survive installation but can never grant execution permission.
+from waveframe_guard import LegacyExecutionError, GovernanceError, GuardRuntime, GovernedRuntime
+assert GuardRuntime is GovernedRuntime
+legacy_calls = []
+for operation in (
+    lambda: waveframe_guard.execute(lambda: legacy_calls.append(1)),
+    lambda: waveframe_guard.guard(lambda: legacy_calls.append(1))(),
+    lambda: waveframe_guard.evaluate_admissibility({}, {}),
+):
+    try:
+        operation()
+    except LegacyExecutionError as error:
+        assert isinstance(error, GovernanceError)
+        assert error.code == "GUARD_LEGACY_EXECUTION_UNSUPPORTED"
+        assert "Guard.local()" in str(error) and "Guard.cloud()" in str(error)
+    else:
+        raise AssertionError("legacy operation returned permission or executed")
+assert legacy_calls == []
+print("Clean wheel legacy migration: callback_count=0 permission_returned=false")
+
 authority = {
     "schema_version": "compiled_authority_contract.v1",
     "contract_id": "repository",

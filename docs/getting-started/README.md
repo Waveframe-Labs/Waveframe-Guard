@@ -1,5 +1,11 @@
 # Getting Started with Waveframe Guard
 
+Unreleased security migration: **Guard execution is never advisory**. Local/cloud
+controls authority resolution, not enforcement strength. Legacy execution and
+permission APIs now raise an actionable migration error. Use `Guard.local()` /
+`Guard.cloud()` with guarded tools; see [strict execution migration](STRICT_EXECUTION_MIGRATION.md).
+
+
 Waveframe Guard enforces governance rules at execution time. It blocks actions that violate published authority before they happen.
 
 ---

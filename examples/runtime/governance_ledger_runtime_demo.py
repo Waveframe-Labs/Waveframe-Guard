@@ -1,40 +1,19 @@
-from pathlib import Path
+"""Legacy migration example; see docs/getting-started/STRICT_EXECUTION_MIGRATION.md.
 
-from waveframe_guard import install_guard, guard, GovernanceError
+Guard execution is never advisory. Local/cloud selects authority resolution.
+For a working supported tool example, run examples/quickstart_guard.py.
+"""
 
-
-# Governance Ledger publishes contract
-#         ↓
-# Guard loads contract from contracts/
-#         ↓
-# AI proposal generated
-#         ↓
-# CRI-CORE evaluates proposal
-#         ↓
-# Execution blocked
-
-CONTRACT_PATH = (
-    Path(__file__).resolve().parents[2]
-    / "contracts"
-    / "finance-policy-1.0.0.contract.json"
-)
-
-
-install_guard(
-    actor={"id": "agent-1", "type": "agent", "role": "intern"},
-    contract_path=CONTRACT_PATH,
-)
+from waveframe_guard import LegacyExecutionError, guard
 
 
 @guard
-def approve_transfer(amount):
-    print(f"Approved transfer for ${amount}")
+def legacy_action():
+    raise AssertionError("Legacy callbacks must never run")
 
 
-print("\n--- Full-stack governance runtime demo ---")
-print(f"Loaded published contract: {CONTRACT_PATH}")
-
-try:
-    approve_transfer(100)
-except GovernanceError as exc:
-    print("BLOCKED:", exc)
+if __name__ == "__main__":
+    try:
+        legacy_action()
+    except LegacyExecutionError as exc:
+        print(exc)

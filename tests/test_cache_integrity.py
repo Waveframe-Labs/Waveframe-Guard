@@ -2,6 +2,7 @@ import pytest
 
 from waveframe_guard import install_guard, guard, GovernanceError
 from waveframe_guard.context import get_context
+from waveframe_guard.execute import _validate_policy_cache
 from compiler.compile_policy import compile_policy
 
 
@@ -25,4 +26,7 @@ def test_cache_tampering_detected():
         return "ok"
 
     with pytest.raises(GovernanceError, match="Cached policy integrity check failed"):
+        _validate_policy_cache(get_context()["policy_cache"])
+
+    with pytest.raises(GovernanceError, match="strict execution evidence"):
         f()

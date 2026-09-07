@@ -5,6 +5,21 @@ from compiler.compile_policy import compile_policy
 from proposal_normalizer.build_proposal import build_proposal
 
 from waveframe_guard import GovernanceError, GovernedExecutionResult, GovernedRuntime
+from waveframe_guard import LegacyExecutionError
+
+
+@pytest.mark.parametrize("bound", [False, True])
+@pytest.mark.parametrize("role", ["manager", "intern"])
+def test_execute_proposal_original_inputs_require_migration(tmp_path, bound, role):
+    contract, path = write_contract(tmp_path)
+    runtime = GovernedRuntime(registry_path=write_registry(tmp_path, path))
+    actor = {"id": "u", "type": "human", "role": role}
+    if bound:
+        runtime.bind_contract("finance-policy@1.0.0").install_actor(actor)
+    kwargs = {} if bound else {"actor": actor, "contract_id": "finance-policy@1.0.0"}
+    with pytest.raises(LegacyExecutionError):
+        runtime.execute_proposal(make_proposal(actor, contract), raise_on_block=False, **kwargs)
+    assert runtime.last_event is None
 
 
 def write_contract(tmp_path):
@@ -54,108 +69,3 @@ def make_proposal(actor, contract):
         },
         artifact_paths=[],
     )
-
-
-def test_runtime_uses_bound_actor_and_contract_for_function_execution(tmp_path):
-    _, contract_path = write_contract(tmp_path)
-    registry_path = write_registry(tmp_path, contract_path)
-    runtime = GovernedRuntime(registry_path=registry_path)
-    runtime.install_actor({"id": "user-1", "type": "human", "role": "manager"})
-    runtime.bind_contract("finance-policy@1.0.0")
-
-    def transfer(amount):
-        return f"transferred {amount}"
-
-    assert runtime.execute(fn=transfer, args=(125,)) == "transferred 125"
-
-
-def test_runtime_call_actor_overrides_bound_actor(tmp_path):
-    _, contract_path = write_contract(tmp_path)
-    registry_path = write_registry(tmp_path, contract_path)
-    runtime = GovernedRuntime(registry_path=registry_path)
-    runtime.install_actor({"id": "user-1", "type": "human", "role": "intern"})
-    runtime.bind_contract("finance-policy@1.0.0")
-
-    def transfer(amount):
-        return f"transferred {amount}"
-
-    assert runtime.execute(
-        actor={"id": "user-2", "type": "human", "role": "manager"},
-        fn=transfer,
-        args=(125,),
-    ) == "transferred 125"
-
-
-def test_runtime_requires_actor_context(tmp_path):
-    _, contract_path = write_contract(tmp_path)
-    registry_path = write_registry(tmp_path, contract_path)
-    runtime = GovernedRuntime(registry_path=registry_path)
-    runtime.bind_contract("finance-policy@1.0.0")
-
-    with pytest.raises(ValueError, match="Missing actor"):
-        runtime.execute(fn=lambda: "ok")
-
-
-def test_runtime_requires_contract_context(tmp_path):
-    _, contract_path = write_contract(tmp_path)
-    registry_path = write_registry(tmp_path, contract_path)
-    runtime = GovernedRuntime(registry_path=registry_path)
-    runtime.install_actor({"id": "user-1", "type": "human", "role": "manager"})
-
-    with pytest.raises(ValueError, match="Missing contract_id"):
-        runtime.execute(fn=lambda: "ok")
-
-
-def test_execute_proposal_allows_bound_context(tmp_path):
-    contract, contract_path = write_contract(tmp_path)
-    registry_path = write_registry(tmp_path, contract_path)
-    actor = {"id": "user-1", "type": "human", "role": "manager"}
-    runtime = GovernedRuntime(registry_path=registry_path)
-    runtime.install_actor(actor).bind_contract("finance-policy@1.0.0")
-
-    result = runtime.execute_proposal(
-        make_proposal(actor, contract),
-        raise_on_block=False,
-    )
-
-    assert result == GovernedExecutionResult(
-        allowed=True,
-        reason="execution allowed",
-        contract_id="finance-policy",
-        contract_version="1.0.0",
-        contract_hash=contract["contract_hash"],
-        value=make_proposal(actor, contract),
-    )
-
-
-def test_execute_proposal_blocks_bound_context(tmp_path):
-    contract, contract_path = write_contract(tmp_path)
-    registry_path = write_registry(tmp_path, contract_path)
-    actor = {"id": "user-1", "type": "human", "role": "intern"}
-    runtime = GovernedRuntime(registry_path=registry_path)
-    runtime.install_actor(actor).bind_contract("finance-policy@1.0.0")
-
-    result = runtime.execute_proposal(
-        make_proposal(actor, contract),
-        raise_on_block=False,
-    )
-
-    assert result == GovernedExecutionResult(
-        allowed=False,
-        reason="required role not satisfied: manager",
-        contract_id="finance-policy",
-        contract_version="1.0.0",
-        contract_hash=contract["contract_hash"],
-        error="Execution blocked: required role not satisfied: manager",
-    )
-
-
-def test_execute_proposal_raises_by_default(tmp_path):
-    contract, contract_path = write_contract(tmp_path)
-    registry_path = write_registry(tmp_path, contract_path)
-    actor = {"id": "user-1", "type": "human", "role": "intern"}
-    runtime = GovernedRuntime(registry_path=registry_path)
-    runtime.install_actor(actor).bind_contract("finance-policy@1.0.0")
-
-    with pytest.raises(GovernanceError, match="required role not satisfied"):
-        runtime.execute_proposal(make_proposal(actor, contract))

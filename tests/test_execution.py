@@ -1,7 +1,7 @@
 import json
 import pytest
 
-from waveframe_guard import install_guard, guard, GovernanceError
+from waveframe_guard import install_guard, guard, LegacyExecutionError
 from compiler.compile_policy import compile_policy
 
 
@@ -14,7 +14,7 @@ def setup_contract():
     return compile_policy(policy)
 
 
-def test_allowed_execution():
+def test_formerly_allowed_execution_requires_migration():
     contract = setup_contract()
 
     install_guard(
@@ -26,10 +26,11 @@ def test_allowed_execution():
     def f():
         return "ok"
 
-    assert f() == "ok"
+    with pytest.raises(LegacyExecutionError, match="Guard.local"):
+        f()
 
 
-def test_blocked_execution():
+def test_blocked_execution_requires_migration():
     contract = setup_contract()
 
     install_guard(
@@ -41,7 +42,7 @@ def test_blocked_execution():
     def f():
         return "ok"
 
-    with pytest.raises(GovernanceError, match="required role not satisfied"):
+    with pytest.raises(LegacyExecutionError, match="strict execution evidence"):
         f()
 
 
@@ -59,7 +60,8 @@ def test_contract_path_execution(tmp_path):
     def f():
         return "ok"
 
-    assert f() == "ok"
+    with pytest.raises(LegacyExecutionError, match="Guard.local"):
+        f()
 
 
 def test_contract_metadata_exposed():

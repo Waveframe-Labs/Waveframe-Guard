@@ -65,6 +65,13 @@ or route it later, but Guard does not own Cloud persistence behavior.
 
 ## Failure posture
 
-When authority cannot be resolved or verified, Guard must treat that as a runtime
-admissibility problem. It should fail closed unless an explicitly configured,
-auditable fail-open mode is in effect.
+When authority cannot be resolved or verified, execution fails closed. Legacy
+`fail_mode="open"` cannot invoke an ungoverned callback. Guard execution is never
+advisory: local/cloud controls authority resolution, not enforcement strength,
+and advisory CRI evaluation is not permission to execute. Legacy APIs unable to
+establish strict execution evidence raise a migration error; use
+`Guard.local()` / `Guard.cloud()` and guarded tools. See the
+[migration guide](../getting-started/STRICT_EXECUTION_MIGRATION.md).
+
+Modern post-decision Cloud preservation failures retain their existing diagnostic
+semantics; they do not replace authority resolution or grant permission.

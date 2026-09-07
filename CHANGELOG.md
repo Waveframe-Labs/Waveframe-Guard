@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+- Security/migration (#39): Guard execution is never advisory. Local/cloud
+  controls authority resolution, not enforcement strength; advisory CRI
+  evaluation is not permission to execute. Legacy `execute`, `@guard`,
+  `GovernedRuntime`/`GuardRuntime` execution and permission methods, and
+  `evaluate_admissibility` retain their symbols but raise `LegacyExecutionError`
+  (`GovernanceError`, code `GUARD_LEGACY_EXECUTION_UNSUPPORTED`) before callbacks
+  or execution evidence. Legacy `fail_mode="open"` no longer enables execution.
+  No integrity/publication evidence is fabricated. Migrate to `Guard.local()` /
+  `Guard.cloud()` and guarded tools; see the [migration guide](docs/getting-started/STRICT_EXECUTION_MIGRATION.md).
+  Modern Guard, repository tools, v1 literal and Ledger v2/v3 behavior is unchanged.
+  Intended for 0.18.0; release/version metadata remains unchanged.
+
 - Add an explicit repository workspace and bound-file adapter for issue #33.
   Repository paths are validated before authority comparison; generic repository
   callbacks fail closed. Existing-file mutation uses bound handles on local
