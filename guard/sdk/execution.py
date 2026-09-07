@@ -18,6 +18,7 @@ from waveframe_guard.authority.runtime_facts import (
 from waveframe_guard.authority.types import LoadedAuthority
 from waveframe_guard.authority.exceptions import AuthorityVerificationError
 from .local_persistence import build_execution_attestation
+from .repository_boundary import RepositoryBoundaryError, RepositoryWorkspace
 
 
 GUARD_CLOUD_PRESERVATION_PACKAGE_V1 = "guard_cloud_preservation_package.v1"
@@ -45,6 +46,8 @@ class GuardRuntimeBoundary:
         self,
         *,
         compiled_authority: dict[str, Any],
+        repository_workspace: RepositoryWorkspace | None = None,
+        target_domain: str | None = None,
         loaded_authority: LoadedAuthority | None = None,
         actor_identity: dict[str, Any],
         approvals: list[dict[str, Any]] | None = None,
@@ -58,6 +61,8 @@ class GuardRuntimeBoundary:
     ):
         self.compiled_authority = deepcopy(compiled_authority)
         self.loaded_authority = deepcopy(loaded_authority)
+        self._repository_workspace = repository_workspace
+        self._target_domain = target_domain
         self._verified_runtime_authority = None
         self.timing_diagnostics: dict[str, int | None] = {
             "cold_load_validation_ns": None,
@@ -88,7 +93,35 @@ class GuardRuntimeBoundary:
         self.cloud_preservation_client = cloud_preservation_client
         self.cloud_runtime_client = cloud_runtime_client
 
-    def evaluate(
+    def _repository_required(self):
+        if self._verified_runtime_authority is not None:
+            return True  # The only verified runtime provider is repository-changes.
+        return self._repository_workspace is not None or (
+            "target_requirements" in self.compiled_authority and self._target_domain != "literal"
+        )
+
+    def _require_workspace(self):
+        if self._repository_workspace is None:
+            raise RepositoryBoundaryError(
+                "repository authority requires repository_root=<absolute protected workspace> "
+                "and repository_tool(); untyped v1 non-repository targets must explicitly "
+                "select target_domain='literal'"
+            )
+        return self._repository_workspace
+
+    def evaluate(self, execution_request: dict[str, Any], **kwargs: Any) -> dict[str, Any]:
+        request = deepcopy(execution_request)
+        if self._repository_required():
+            with self._require_workspace().bind(
+                request.get("target"), requirements=self.compiled_authority.get("target_requirements")
+            ) as target:
+                request["target"] = target.relative_path
+                result = self._evaluate(request, **kwargs)
+                target._validate()
+                return result
+        return self._evaluate(request, **kwargs)
+
+    def _evaluate(
         self,
         execution_request: dict[str, Any],
         *,
@@ -216,6 +249,51 @@ class GuardRuntimeBoundary:
         return evaluation
 
     def execute(
+        self, fn: Callable[..., Any], *, execution_request: dict[str, Any], **kwargs: Any,
+    ) -> dict[str, Any]:
+        if self._repository_required():
+            # Retain authority/fact diagnostics, but never run the generic callback.
+            self.enforce(execution_request, save=False)
+            raise RepositoryBoundaryError(
+                "repository mutation requires repository_tool() or execute_repository(); "
+                "generic tool/protect/execute callbacks cannot bind the mutation target"
+            )
+        return self._execute(fn, execution_request=execution_request, **kwargs)
+
+    def execute_repository(
+        self, fn: Callable[..., Any], *, execution_request: dict[str, Any],
+        raise_on_block: bool = True, **evaluation_kwargs: Any,
+    ) -> dict[str, Any]:
+        request = deepcopy(execution_request)
+        workspace = self._require_workspace()
+        # Evaluate before acquiring a writable capability so a denial never opens
+        # a mutation handle, and unsupported forms cannot hide authority errors.
+        preflight_kwargs = {**evaluation_kwargs, "save": False}
+        evaluation = self.evaluate(request, **preflight_kwargs)
+        if evaluation["status"] != "admissible":
+            evaluation = self.evaluate(request, **evaluation_kwargs)
+            return self._execute(fn, execution_request=request, raise_on_block=raise_on_block,
+                                 _evaluation=evaluation)
+        with workspace.bind(
+            request.get("target"), mutation=True,
+            requirements=self.compiled_authority.get("target_requirements"),
+        ) as target:
+            # Re-evaluate while the complete namespace is locked. The first result
+            # is only preflight; only this locked decision authorizes the callback.
+            locked = self._evaluate(request, **evaluation_kwargs)
+
+            def invoke():
+                target._validate()
+                target._active = True
+                try:
+                    return fn(target)
+                finally:
+                    target._active = False
+
+            return self._execute(invoke, execution_request=request, raise_on_block=raise_on_block,
+                                 _evaluation=locked)
+
+    def _execute(
         self,
         fn: Callable[..., Any],
         *,
@@ -223,10 +301,15 @@ class GuardRuntimeBoundary:
         args: tuple[Any, ...] | None = None,
         kwargs: dict[str, Any] | None = None,
         raise_on_block: bool = True,
+        _evaluation: dict[str, Any] | None = None,
         **evaluation_kwargs: Any,
     ) -> dict[str, Any]:
         try:
-            evaluation = self.enforce(execution_request, **evaluation_kwargs)
+            evaluation = _evaluation if _evaluation is not None else self.enforce(execution_request, **evaluation_kwargs)
+            if evaluation["status"] == "blocked":
+                raise GuardExecutionBlocked(_enforcement_message(evaluation), evaluation=evaluation)
+            if evaluation["status"] == "escalated":
+                raise GuardExecutionEscalated(_enforcement_message(evaluation), evaluation=evaluation)
         except GuardExecutionError as exc:
             self._record_execution_evidence(
                 exc.evaluation,

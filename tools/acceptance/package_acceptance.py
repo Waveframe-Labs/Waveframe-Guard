@@ -20,6 +20,7 @@ except ModuleNotFoundError:  # Python 3.10
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 REQUIRED_WHEEL_FILES = {
+    "guard/sdk/repository_boundary.py",
     "guard/sdk/__init__.py",
     "guard/sdk/guard.py",
     "guard/sdk/local_persistence.py",
@@ -29,6 +30,7 @@ REQUIRED_WHEEL_FILES = {
     "waveframe_guard/schemas.py",
 }
 REQUIRED_SDIST_FILES = {
+    "guard/sdk/repository_boundary.py",
     "LICENSE",
     "PKG-INFO",
     "README.md",
@@ -313,7 +315,7 @@ authority = {
 }
 calls = []
 guard = Guard.local(
-    workspace=Path.cwd() / "guard-state",
+    workspace=Path.cwd() / "guard-state", target_domain="literal",
     authorities={"repository@1.0.0": authority},
     actor_identity={"id": "ci-agent", "type": "agent", "role": "maintainer"},
     evaluation_time_source=lambda: "2026-09-01T00:00:00+00:00",
@@ -465,17 +467,35 @@ try:
         runtime_id="clean-wheel-runtime",
         actor_identity={"id": "repo-agent", "type": "agent", "role": "repository-maintainer"},
         workspace=Path.cwd() / "cloud-v2-state",
+        repository_root=Path.cwd(),
     )
     guard.cloud_preservation_client = None
     guard.cloud_runtime_client = None
     callbacks = []
 
-    @guard.tool(action="modify", target="path", return_result=True)
-    def write_file(path):
-        callbacks.append(path)
-        return path
+    Path("README.md").write_bytes(b"original")
 
-    allowed = write_file("README.md")
+    @guard.repository_tool(action="modify", target="path", return_result=True)
+    def write_file(path):
+        callbacks.append(path.relative_path)
+        path.write_bytes(b"updated")
+        return path.relative_path
+
+    if os.name == "nt":
+        allowed = write_file("README.md")
+    else:
+        from guard.sdk import RepositoryBoundaryError
+        try:
+            write_file("README.md")
+        except RepositoryBoundaryError as exc:
+            assert "unsupported on POSIX" in str(exc)
+        else:
+            raise AssertionError("unsupported POSIX mutation ran")
+        allowed = {"executed": False}
+        assert guard.boundary_for().evaluate({
+            "schema_version": "normalized_execution_request.v1", "request_id": "wheel-eval",
+            "action": "modify", "target": "README.md", "arguments": {}, "artifacts": [],
+        }, save=False)["status"] == "admissible"
     try:
         write_file("deployment/production.yml")
     except GuardExecutionBlocked as blocked:
@@ -486,13 +506,13 @@ finally:
     server.shutdown()
     server.server_close()
 
-assert allowed["executed"] is True
-assert callbacks == ["README.md"]
+assert allowed["executed"] is (os.name == "nt")
+assert callbacks == (["README.md"] if os.name == "nt" else [])
 assert state["publication_gets"] == 1
 assert guard.authority_bindings["repository-authority@1.0.0"].schema_version == "authority_bundle.v2"
 print(
     f"Clean wheel Cloud v2 passed from {module_path}: "
-    "allowed=README.md blocked=deployment/production.yml callbacks=1 "
+    f"allowed=README.md blocked=deployment/production.yml callbacks={len(callbacks)} "
     "manual_facts=0 caller_ledger_validators=0 publication_gets=1 repository_imports=0"
 )
 '''

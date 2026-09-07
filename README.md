@@ -4,6 +4,10 @@
 
 # Waveframe Guard
 
+Repository integrations: see the unreleased
+[protected workspace boundary and migration guide](docs/architecture/REPOSITORY_WORKSPACE.md)
+for issue #33, supported platforms, and the `repository_tool` API.
+
 Stop unsafe AI and automated actions **before they execute**.
 
 Waveframe Guard is an execution-boundary SDK. It wraps sensitive actions, resolves compiled authority, evaluates through CRI-CORE, and only runs the action when the outcome is allowed.

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import os
 import hashlib
 import json
 from concurrent.futures import ThreadPoolExecutor
@@ -65,11 +66,17 @@ def _tamper_receipt_statement_binding(bundle, receipt):
     )
 
 
+@pytest.fixture(autouse=True)
+def repository_files(tmp_path):
+    (tmp_path / "README.md").write_bytes(b"original")
+
+
 @pytest.fixture(scope="module")
 def publication():
     return _publication()
 
 
+@pytest.mark.skipif(os.name != "nt", reason="repository mutation requires NTFS namespace locks")
 def test_public_ledger_v07_repository_publication_executes_exact_contract_once(
     tmp_path, publication
 ):
@@ -82,7 +89,7 @@ def test_public_ledger_v07_repository_publication_executes_exact_contract_once(
     }
     actor_before = copy.deepcopy(actor)
     guard = Guard.local(
-        workspace=tmp_path / "guard-evidence",
+        repository_root=tmp_path, workspace=tmp_path / "guard-evidence",
         authority=AUTHORITY_REF,
         authority_resolver=resolver,
         authority_cache=cache,
@@ -91,10 +98,11 @@ def test_public_ledger_v07_repository_publication_executes_exact_contract_once(
     )
     calls = []
 
-    @guard.tool(action="modify", target="path", return_result=True)
+    @guard.repository_tool(action="modify", target="path", return_result=True)
     def write_file(path, metadata=None):
-        calls.append(path)
-        return path
+        calls.append(path.relative_path)
+        path.write_bytes(b"updated")
+        return path.relative_path
 
     metadata = {"unknown": {"allow": False}, "trace_label": "customer-metadata"}
     metadata_before = copy.deepcopy(metadata)
@@ -161,7 +169,7 @@ def test_public_ledger_v07_repository_publication_executes_exact_contract_once(
 def test_v2_repeated_evaluation_is_deterministic_and_inputs_are_immutable(tmp_path, publication):
     resolver = _write_publication(tmp_path, publication)
     guard = Guard.local(
-        workspace=tmp_path / "evidence",
+        repository_root=tmp_path, workspace=tmp_path / "evidence",
         authority=AUTHORITY_REF,
         authority_resolver=resolver,
         actor_identity={"id": "repo-agent", "type": "agent", "role": "repository-maintainer"},
@@ -183,7 +191,7 @@ def test_v2_repeated_evaluation_is_deterministic_and_inputs_are_immutable(tmp_pa
 
 def test_fact_hash_changes_only_when_meaningful_typed_facts_change(tmp_path, publication):
     guard = Guard.local(
-        workspace=tmp_path / "evidence",
+        repository_root=tmp_path, workspace=tmp_path / "evidence",
         authority=AUTHORITY_REF,
         authority_resolver=_write_publication(tmp_path, publication),
         actor_identity={"id": "repo-agent", "type": "agent", "role": "repository-maintainer"},
@@ -196,7 +204,7 @@ def test_fact_hash_changes_only_when_meaningful_typed_facts_change(tmp_path, pub
 
 def test_schema_optional_fact_may_be_omitted(tmp_path, publication):
     guard = Guard.local(
-        workspace=tmp_path / "evidence",
+        repository_root=tmp_path, workspace=tmp_path / "evidence",
         authority=AUTHORITY_REF,
         authority_resolver=_write_publication(tmp_path, publication),
         actor_identity={"type": "agent", "role": "repository-maintainer"},
@@ -210,7 +218,7 @@ def test_v2_repository_maintainer_role_constraint_blocks_other_published_role(
     tmp_path, publication
 ):
     guard = Guard.local(
-        workspace=tmp_path / "evidence",
+        repository_root=tmp_path, workspace=tmp_path / "evidence",
         authority=AUTHORITY_REF,
         authority_resolver=_write_publication(tmp_path, publication),
         actor_identity={"id": "reviewer", "type": "agent", "role": "repository-reviewer"},
@@ -256,7 +264,7 @@ def test_modified_v2_publication_chain_fails_before_mutation(
 
     with pytest.raises(AuthorityVerificationError):
         guard = Guard.local(
-            workspace=tmp_path / "evidence",
+            repository_root=tmp_path, workspace=tmp_path / "evidence",
             authority=AUTHORITY_REF,
             authority_resolver=resolver,
             actor_identity={"id": "repo-agent", "type": "agent", "role": "repository-maintainer"},
@@ -281,7 +289,7 @@ def test_missing_v2_receipt_fails_before_mutation(tmp_path, publication):
     calls = []
     with pytest.raises(AuthorityVerificationError, match="requires a publication receipt"):
         Guard.local(
-            workspace=tmp_path / "evidence",
+            repository_root=tmp_path, workspace=tmp_path / "evidence",
             authority=AUTHORITY_REF,
             authority_resolver=resolver,
         )
@@ -298,7 +306,7 @@ def test_receipt_for_another_bundle_fails_before_mutation(tmp_path, publication)
         registry_receipt_hash=other["publication_receipt"]["receipt_hash"],
     )
     with pytest.raises(AuthorityVerificationError):
-        Guard.local(workspace=tmp_path / "evidence", authority=AUTHORITY_REF, authority_resolver=resolver)
+        Guard.local(repository_root=tmp_path, workspace=tmp_path / "evidence", authority=AUTHORITY_REF, authority_resolver=resolver)
 
 
 @pytest.mark.parametrize("claimed_schema", ["authority_bundle.v1", "authority_bundle.v2"])
@@ -321,7 +329,7 @@ def test_cross_version_artifacts_are_rejected(tmp_path, publication, claimed_sch
         publication=publication,
     )
     with pytest.raises(AuthorityVerificationError):
-        Guard.local(workspace=tmp_path / "evidence", authority=AUTHORITY_REF, authority_resolver=resolver)
+        Guard.local(repository_root=tmp_path, workspace=tmp_path / "evidence", authority=AUTHORITY_REF, authority_resolver=resolver)
 
 
 @pytest.mark.parametrize(
@@ -337,7 +345,7 @@ def test_missing_or_incorrect_runtime_facts_fail_before_callback(
 ):
     resolver = _write_publication(tmp_path, publication)
     guard = Guard.local(
-        workspace=tmp_path / "evidence",
+        repository_root=tmp_path, workspace=tmp_path / "evidence",
         authority=AUTHORITY_REF,
         authority_resolver=resolver,
         actor_identity=actor,
@@ -351,7 +359,7 @@ def test_missing_or_incorrect_runtime_facts_fail_before_callback(
 def test_unrelated_proposal_metadata_is_ignored_and_not_fact_hashed(tmp_path, publication):
     resolver = _write_publication(tmp_path, publication)
     guard = Guard.local(
-        workspace=tmp_path / "evidence",
+        repository_root=tmp_path, workspace=tmp_path / "evidence",
         authority=AUTHORITY_REF,
         authority_resolver=resolver,
         actor_identity={"id": "repo-agent", "type": "agent", "role": "repository-maintainer"},
@@ -385,7 +393,7 @@ def test_caller_fact_injection_and_override_interfaces_fail_closed(
     tmp_path, publication, injection
 ):
     guard = Guard.local(
-        workspace=tmp_path / "evidence",
+        repository_root=tmp_path, workspace=tmp_path / "evidence",
         authority=AUTHORITY_REF,
         authority_resolver=_write_publication(tmp_path, publication),
         actor_identity={"id": "repo-agent", "type": "agent", "role": "repository-maintainer"},
@@ -401,7 +409,7 @@ def test_caller_fact_injection_and_override_interfaces_fail_closed(
 
 def test_fact_injection_hidden_in_actor_metadata_fails_closed(tmp_path, publication):
     guard = Guard.local(
-        workspace=tmp_path / "evidence",
+        repository_root=tmp_path, workspace=tmp_path / "evidence",
         authority=AUTHORITY_REF,
         authority_resolver=_write_publication(tmp_path, publication),
         actor_identity={
@@ -436,7 +444,7 @@ def test_unsupported_runtime_fact_schema_fails_closed(tmp_path, publication):
 
 def test_direct_v2_contract_injection_is_rejected_before_callback(tmp_path, publication):
     guard = Guard.local(
-        workspace=tmp_path,
+        repository_root=tmp_path, workspace=tmp_path,
         authorities={AUTHORITY_REF: publication["compiled_authority_contract"]},
         actor_identity={"id": "repo-agent", "type": "agent", "role": "repository-maintainer"},
     )
@@ -519,7 +527,7 @@ def test_warm_cache_and_evaluation_do_not_repeat_heavy_ledger_validation(
     assert cold_calls == {"bundle": 1, "receipt": 1, "facts": 1, "schema": 1}
     load_authority(AUTHORITY_REF, resolver=resolver, cache=cache)
     boundary = Guard.local(
-        workspace=tmp_path / "evidence",
+        repository_root=tmp_path, workspace=tmp_path / "evidence",
         authority=AUTHORITY_REF,
         authority_resolver=resolver,
         authority_cache=cache,
@@ -631,21 +639,22 @@ def test_cache_refresh_revalidates_before_new_publication_activation(
     assert second.publication_id == "publication-refresh"
 
 
+@pytest.mark.skipif(os.name != "nt", reason="repository mutation requires NTFS namespace locks")
 def test_callback_exception_records_failed_execution_and_unknown_mutation(tmp_path, publication):
     guard = Guard.local(
-        workspace=tmp_path / "evidence",
+        repository_root=tmp_path, workspace=tmp_path / "evidence",
         authority=AUTHORITY_REF,
         authority_resolver=_write_publication(tmp_path, publication),
         actor_identity={"id": "repo-agent", "type": "agent", "role": "repository-maintainer"},
     )
     side_effects = []
 
-    def failing_callback():
+    def failing_callback(target):
         side_effects.append("may-have-mutated")
         raise ValueError("callback failed")
 
     with pytest.raises(ValueError, match="callback failed"):
-        guard.boundary_for().execute(failing_callback, execution_request=_request("README.md"))
+        guard.boundary_for().execute_repository(failing_callback, execution_request=_request("README.md"))
     assert side_effects == ["may-have-mutated"]
     run_id = guard.store.history()[0]["run_id"]
     attestation = guard.store.load_execution_attestation(run_id)
@@ -657,16 +666,17 @@ def test_callback_exception_records_failed_execution_and_unknown_mutation(tmp_pa
     assert attestation["mutation_executed"] is None
 
 
+@pytest.mark.skipif(os.name != "nt", reason="repository mutation requires NTFS namespace locks")
 def test_process_interruption_leaves_incomplete_unknown_attestation(tmp_path, publication):
     guard = Guard.local(
-        workspace=tmp_path / "evidence",
+        repository_root=tmp_path, workspace=tmp_path / "evidence",
         authority=AUTHORITY_REF,
         authority_resolver=_write_publication(tmp_path, publication),
         actor_identity={"id": "repo-agent", "type": "agent", "role": "repository-maintainer"},
     )
     with pytest.raises(KeyboardInterrupt):
-        guard.boundary_for().execute(
-            lambda: (_ for _ in ()).throw(KeyboardInterrupt()),
+        guard.boundary_for().execute_repository(
+            lambda target: (_ for _ in ()).throw(KeyboardInterrupt()),
             execution_request=_request("README.md"),
         )
     run_id = guard.store.history()[0]["run_id"]
@@ -678,14 +688,15 @@ def test_process_interruption_leaves_incomplete_unknown_attestation(tmp_path, pu
     assert attestation["mutation_executed"] is None
 
 
+@pytest.mark.skipif(os.name != "nt", reason="repository mutation requires NTFS namespace locks")
 def test_attestation_canonical_hash_and_tamper_rejection(tmp_path, publication):
     guard = Guard.local(
-        workspace=tmp_path / "evidence",
+        repository_root=tmp_path, workspace=tmp_path / "evidence",
         authority=AUTHORITY_REF,
         authority_resolver=_write_publication(tmp_path, publication),
         actor_identity={"id": "repo-agent", "type": "agent", "role": "repository-maintainer"},
     )
-    result = guard.boundary_for().execute(lambda: "ok", execution_request=_request("README.md"))
+    result = guard.boundary_for().execute_repository(lambda target: "ok", execution_request=_request("README.md"))
     attestation = result["evaluation"]["execution_attestation"]
     assert validate_execution_attestation(attestation) == attestation
     tampered = copy.deepcopy(attestation)
@@ -696,7 +707,7 @@ def test_attestation_canonical_hash_and_tamper_rejection(tmp_path, publication):
 
 def test_validation_failure_has_no_callback_or_success_attestation(tmp_path, publication):
     guard = Guard.local(
-        workspace=tmp_path / "evidence",
+        repository_root=tmp_path, workspace=tmp_path / "evidence",
         authority=AUTHORITY_REF,
         authority_resolver=_write_publication(tmp_path, publication),
         actor_identity={"id": "repo-agent", "type": "agent", "role": "repository-maintainer"},
@@ -857,7 +868,7 @@ def test_existing_v1_allowed_and_blocked_behavior_is_unchanged(tmp_path):
         },
     }
     guard = Guard.local(
-        workspace=tmp_path,
+        target_domain="literal", workspace=tmp_path,
         authorities={"legacy-repository@1.0.0": authority},
         actor_identity={"id": "agent", "type": "agent", "role": "maintainer"},
     )

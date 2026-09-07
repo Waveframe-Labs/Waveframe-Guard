@@ -119,7 +119,7 @@ def test_matching_is_case_sensitive_and_literal():
 def test_tool_enforces_and_preserves_the_same_target_once(tmp_path):
     calls = []
     guard = Guard.local(
-        workspace=tmp_path,
+        workspace=tmp_path, target_domain="literal",
         authorities={"repository@1.0.0": _authority(target_requirements=_scope(
             allow=[_rule("exact", "README.md")],
             deny=[_rule("prefix", "deployment/")],
@@ -158,7 +158,7 @@ def test_public_compiler_target_scope_enforces_at_the_tool_boundary(tmp_path):
     )
     calls = []
     guard = Guard.local(
-        workspace=tmp_path,
+        workspace=tmp_path, target_domain="literal",
         authorities={
             "repository@1.0.0": {
                 "schema_version": COMPILED_AUTHORITY_CONTRACT_V1,

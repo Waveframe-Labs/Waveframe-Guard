@@ -24,6 +24,7 @@ from pathlib import Path
 
 
 RUNNER = r'''
+import os
 import hashlib
 import json
 from pathlib import Path
@@ -105,19 +106,34 @@ registry["registry_hash"] = canonical_hash(registry)
 # This is the application-facing workflow: identity, resolver, proposal, callback.
 resolver = LocalRegistryResolver(workspace_root="publication")
 guard = Guard.local(
-    workspace="evidence",
+    workspace="evidence", repository_root=Path.cwd(),
     authority="repository-authority@1.0.0",
     authority_resolver=resolver,
     actor_identity={"id": "repo-agent", "type": "agent", "role": "repository-maintainer"},
 )
 mutations = []
 
-@guard.tool(action="modify", target="path", return_result=True)
+@guard.repository_tool(action="modify", target="path", return_result=True)
 def write_file(path):
-    mutations.append(path)
-    return path
+    mutations.append(path.relative_path)
+    path.write_bytes(b"updated")
+    return path.relative_path
 
-allowed = write_file("README.md")
+Path("README.md").write_bytes(b"original")
+if os.name == "nt":
+    allowed = write_file("README.md")
+else:
+    from guard.sdk import RepositoryBoundaryError
+    try:
+        write_file("README.md")
+    except RepositoryBoundaryError as exc:
+        assert "unsupported on POSIX" in str(exc)
+    else:
+        raise AssertionError("unsupported POSIX mutation ran")
+    allowed = {"executed": False, "evaluation": guard.boundary_for().evaluate({
+        "schema_version": "normalized_execution_request.v1", "request_id": "wheel-eval",
+        "action": "modify", "target": "README.md", "arguments": {}, "artifacts": [],
+    })}
 try:
     write_file("deployment/production.yml")
 except GuardExecutionBlocked as blocked:
@@ -125,9 +141,9 @@ except GuardExecutionBlocked as blocked:
 else:
     raise AssertionError("deployment proposal was not blocked")
 
-assert allowed["executed"] is True
+assert allowed["executed"] is (os.name == "nt")
 assert blocked_evaluation["status"] == "blocked"
-assert mutations == ["README.md"]
+assert mutations == (["README.md"] if os.name == "nt" else [])
 for evaluation in (allowed["evaluation"], blocked_evaluation):
     evidence = evaluation["authority_evidence"]
     for key in (
@@ -137,7 +153,7 @@ for evaluation in (allowed["evaluation"], blocked_evaluation):
         assert key in evidence
 print("allowed=README.md")
 print("blocked=deployment/production.yml")
-print("mutation_count=1")
+print(f"mutation_count={len(mutations)}")
 print("manual_runtime_facts=False")
 print("repository_imports=False")
 '''

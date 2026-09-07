@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import os
 import gzip
 import hashlib
 import json
@@ -145,7 +146,10 @@ def _v1_contract():
 
 
 def _cloud_guard(tmp_path, base_url, **kwargs):
+    tmp_path.mkdir(parents=True, exist_ok=True)
+    (tmp_path / "README.md").write_bytes(b"original")
     return Guard.cloud(
+        repository_root=tmp_path,
         authority=AUTHORITY_REF,
         workspace=tmp_path,
         cloud_url=base_url,
@@ -193,22 +197,32 @@ def test_atomic_v2_publication_allows_readme_blocks_deployment_and_stays_warm(
         cold_calls = dict(calls)
         callback_calls = []
 
-        @guard.tool(action="modify", target="path", return_result=True)
+        @guard.repository_tool(action="modify", target="path", return_result=True)
         def write_file(path, metadata):
-            callback_calls.append(path)
-            return path
+            callback_calls.append(path.relative_path)
+            path.write_bytes(b"updated")
+            return path.relative_path
 
         metadata = {"caller": ["unchanged"]}
         before = copy.deepcopy(metadata)
-        allowed = write_file("README.md", metadata)
+        if os.name == "nt":
+            allowed = write_file("README.md", metadata)
+        else:
+            from guard.sdk import RepositoryBoundaryError
+            with pytest.raises(RepositoryBoundaryError, match="unsupported on POSIX"):
+                write_file("README.md", metadata)
+            allowed = {"executed": False, "evaluation": guard.boundary_for().evaluate({
+                "schema_version": "normalized_execution_request.v1", "request_id": "cloud-evaluation",
+                "action": "modify", "target": "README.md", "arguments": {}, "artifacts": [],
+            })}
         with pytest.raises(GuardExecutionBlocked) as blocked:
             write_file("deployment/production.yml", metadata)
     finally:
         server.shutdown()
         server.server_close()
 
-    assert callback_calls == ["README.md"]
-    assert allowed["executed"] is True
+    assert callback_calls == (["README.md"] if os.name == "nt" else [])
+    assert allowed["executed"] is (os.name == "nt")
     assert blocked.value.evaluation["execution_attestation"]["callback_invoked"] is False
     assert allowed["evaluation"]["runtime_facts_hash"].startswith("sha256:")
     assert allowed["evaluation"]["runtime_facts"] == {

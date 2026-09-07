@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+- Add an explicit repository workspace and bound-file adapter for issue #33.
+  Repository paths are validated before authority comparison; generic repository
+  callbacks fail closed. Existing-file mutation currently requires local Windows
+  NTFS namespace locks; POSIX mutation and creation fail closed. See the
+  [workspace boundary and migration guide](docs/architecture/REPOSITORY_WORKSPACE.md).
+- Recommend 0.18.0 for this integration break, including explicit domain selection
+  for v1 target-scoped callers. This change does not prepare or publish a release.
+
 ## [0.17.0] - 2026-09-04 - Native Ledger v3 Authority Verification
 
 Guard now verifies Ledger's additive multi-control and partial-coverage v3

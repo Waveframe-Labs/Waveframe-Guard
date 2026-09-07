@@ -24,6 +24,7 @@ from pathlib import Path
 
 
 RUNNER = r'''
+import os
 import hashlib
 import json
 from pathlib import Path
@@ -203,7 +204,7 @@ registry["registry_hash"] = canonical_hash(registry)
 (contracts / "index.json").write_text(json.dumps(registry))
 
 guard = Guard.local(
-    workspace="evidence",
+    workspace="evidence", repository_root=Path.cwd(),
     authority="repository-authority@1.0.0",
     authority_resolver=LocalRegistryResolver(workspace_root="publication"),
     actor_identity={"id": "repo-agent", "type": "agent"},
@@ -211,14 +212,29 @@ guard = Guard.local(
 mutations = []
 
 
-@guard.tool(action="modify", target="path", return_result=True)
+@guard.repository_tool(action="modify", target="path", return_result=True)
 def modify(path):
-    mutations.append(path)
-    return path
+    mutations.append(path.relative_path)
+    path.write_bytes(b"updated")
+    return path.relative_path
 
 
-assert modify("README.md")["executed"] is True
-assert modify("CHANGELOG.md")["executed"] is True
+for path in ("README.md", "CHANGELOG.md"):
+    Path(path).write_bytes(b"original")
+    if os.name == "nt":
+        assert modify(path)["executed"] is True
+    else:
+        from guard.sdk import RepositoryBoundaryError
+        try:
+            modify(path)
+        except RepositoryBoundaryError as exc:
+            assert "unsupported on POSIX" in str(exc)
+        else:
+            raise AssertionError("unsupported POSIX mutation ran")
+        assert guard.boundary_for().evaluate({
+            "schema_version": "normalized_execution_request.v1", "request_id": "wheel-eval",
+            "action": "modify", "target": path, "arguments": {}, "artifacts": [],
+        }, save=False)["status"] == "admissible"
 try:
     modify("src/unpublished.py")
 except GuardExecutionBlocked:
@@ -230,7 +246,7 @@ assert loaded.schema_version == "authority_bundle.v3"
 assert loaded.contract["schema_version"] == "compiled_authority_contract.v2"
 assert loaded.authority_evidence["authority_bundle"]["schema_version"] == "authority_bundle.v3"
 assert loaded.authority_evidence["publication_receipt"]["schema_version"] == "publication_receipt.v3"
-assert mutations == ["README.md", "CHANGELOG.md"]
+assert mutations == (["README.md", "CHANGELOG.md"] if os.name == "nt" else [])
 print("allowed=README.md,CHANGELOG.md")
 print("blocked=src/unpublished.py")
 print("private_evidence_required=False")
