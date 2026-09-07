@@ -207,6 +207,17 @@ def _trusted_repository_provider_key() -> RuntimeFactProviderKey:
     )
 
 
+def resolve_target_domain_v1(authority: VerifiedRuntimeAuthority) -> str:
+    """Versioned routing from verified pack AND runtime-schema identity.
+
+    The current released provider is explicitly mapped. Future domains, versions
+    or hashes must be reviewed here; contract.v2 alone never implies repository.
+    """
+    if runtime_fact_provider_key(authority) == _trusted_repository_provider_key():
+        return "repository_path"
+    raise RuntimeFactError("unsupported verified target domain in guard.target-domain-resolver.v1")
+
+
 def _schema_fact_index(schema: Mapping[str, Any]) -> dict[str, Mapping[str, Any]]:
     definitions = schema.get("facts")
     if not isinstance(definitions, list):

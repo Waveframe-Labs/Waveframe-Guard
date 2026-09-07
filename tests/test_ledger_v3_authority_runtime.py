@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import os
 import hashlib
 import json
 from dataclasses import replace
@@ -362,9 +363,11 @@ def _write_artifacts(root: Path, publication: dict, *, receipt: dict | None = No
 def test_v3_multi_control_publication_loads_and_enforces_both_controls(
     tmp_path, multi_publication
 ):
+    (tmp_path / "README.md").write_bytes(b"original")
+    (tmp_path / "CHANGELOG.md").write_bytes(b"original")
     cache = MemoryAuthorityCache()
     guard = Guard.local(
-        workspace=tmp_path / "evidence",
+        repository_root=tmp_path, workspace=tmp_path / "evidence",
         authority=AUTHORITY_REF,
         authority_resolver=_write_artifacts(tmp_path / "publication", multi_publication),
         authority_cache=cache,
@@ -372,10 +375,11 @@ def test_v3_multi_control_publication_loads_and_enforces_both_controls(
     )
     calls = []
 
-    @guard.tool(action="modify", target="path", return_result=True)
+    @guard.repository_tool(action="modify", target="path", return_result=True)
     def modify(path):
-        calls.append(path)
-        return path
+        calls.append(path.relative_path)
+        path.write_bytes(b"updated")
+        return path.relative_path
 
     assert modify("README.md")["executed"] is True
     assert modify("CHANGELOG.md")["executed"] is True
@@ -394,7 +398,7 @@ def test_v3_partial_coverage_enforces_only_control_and_residual_is_not_executabl
     tmp_path, partial_publication
 ):
     guard = Guard.local(
-        workspace=tmp_path / "evidence",
+        repository_root=tmp_path, workspace=tmp_path / "evidence",
         authority=AUTHORITY_REF,
         authority_resolver=_write_artifacts(tmp_path / "publication", partial_publication),
         actor_identity={"id": "agent", "type": "agent"},
@@ -407,6 +411,24 @@ def test_v3_partial_coverage_enforces_only_control_and_residual_is_not_executabl
     assert clause["customer_coverage_state"] == "Partially enforceable"
     assert clause["residuals"][0]["acknowledgment"]["acknowledged_by"] == "policy-owner"
     assert "documentation" not in json.dumps(boundary.compiled_authority)
+
+
+def test_v3_multi_control_repository_evaluation_on_all_supported_platforms(tmp_path, multi_publication):
+    guard = Guard.local(
+        repository_root=tmp_path, workspace=tmp_path / "evidence",
+        authority=AUTHORITY_REF,
+        authority_resolver=_write_artifacts(tmp_path / "publication", multi_publication),
+        actor_identity={"id": "agent", "type": "agent"},
+    )
+    try:
+        boundary = guard.boundary_for()
+        for path, status in [("README.md", "admissible"), ("CHANGELOG.md", "admissible"),
+                             ("src/unpublished.py", "blocked")]:
+            result = boundary.evaluate(_request(path), save=False)
+            assert result["status"] == status
+            assert result["runtime_facts"]["proposal.resource.path"] == path
+    finally:
+        guard.close()
 
 
 def test_v3_publication_does_not_require_private_translation_evidence(
@@ -502,12 +524,13 @@ def test_v3_tampered_registry_diagnostic_never_identifies_artifact_as_v2(
 
 def test_v3_runtime_fact_incompatibility_fails_closed(tmp_path, multi_publication):
     guard = Guard.local(
-        workspace=tmp_path / "evidence",
+        repository_root=tmp_path, workspace=tmp_path / "evidence",
         authority=AUTHORITY_REF,
         authority_resolver=_write_artifacts(tmp_path / "publication", multi_publication),
         actor_identity={"id": "agent", "type": "agent"},
     )
-    with pytest.raises(RuntimeFactError):
+    from guard.sdk import RepositoryBoundaryError
+    with pytest.raises(RepositoryBoundaryError):
         guard.boundary_for().evaluate(
             {**_request("README.md"), "runtime_facts": {"proposal.resource.path": 42}},
             save=False,

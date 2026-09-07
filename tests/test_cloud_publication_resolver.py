@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import os
 import gzip
 import hashlib
 import json
@@ -145,7 +146,10 @@ def _v1_contract():
 
 
 def _cloud_guard(tmp_path, base_url, **kwargs):
+    tmp_path.mkdir(parents=True, exist_ok=True)
+    (tmp_path / "README.md").write_bytes(b"original")
     return Guard.cloud(
+        repository_root=tmp_path,
         authority=AUTHORITY_REF,
         workspace=tmp_path,
         cloud_url=base_url,
@@ -193,10 +197,11 @@ def test_atomic_v2_publication_allows_readme_blocks_deployment_and_stays_warm(
         cold_calls = dict(calls)
         callback_calls = []
 
-        @guard.tool(action="modify", target="path", return_result=True)
+        @guard.repository_tool(action="modify", target="path", return_result=True)
         def write_file(path, metadata):
-            callback_calls.append(path)
-            return path
+            callback_calls.append(path.relative_path)
+            path.write_bytes(b"updated")
+            return path.relative_path
 
         metadata = {"caller": ["unchanged"]}
         before = copy.deepcopy(metadata)

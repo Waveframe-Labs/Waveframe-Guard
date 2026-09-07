@@ -14,6 +14,10 @@ __version__ = "0.17.0"
 
 
 def __getattr__(name):
+    if name in {"RepositoryBoundaryError", "RepositoryTarget"}:
+        from guard.sdk import repository_boundary
+
+        return getattr(repository_boundary, name)
     if name == "Guard":
         from guard.sdk import Guard
 
@@ -23,6 +27,8 @@ def __getattr__(name):
 
 __all__ = [
     "Guard",
+    "RepositoryBoundaryError",
+    "RepositoryTarget",
     "guard",
     "install_guard",
     "resolve_actor",

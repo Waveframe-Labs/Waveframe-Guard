@@ -25,6 +25,7 @@ from waveframe_guard.cloud.client import (
 from .authority_source import AuthoritySource
 from .execution import GuardRuntimeBoundary
 from .local_persistence import LocalEvaluationStore
+from .repository_boundary import RepositoryWorkspace
 
 
 class Guard:
@@ -34,6 +35,8 @@ class Guard:
         self,
         *,
         workspace: str | Path,
+        repository_root: str | Path | None = None,
+        target_domain: str | None = None,
         authority: str | None = None,
         authority_resolver: AuthorityResolver | None = None,
         authority_cache: AuthorityCache | None = None,
@@ -53,6 +56,11 @@ class Guard:
         cloud_runtime_client: CloudRuntimeClient | None = None,
     ):
         self.workspace = Path(workspace)
+        if target_domain not in {None, "literal"} or (repository_root is not None and target_domain is not None):
+            raise ValueError("use repository_root for repository paths or target_domain='literal' for other targets")
+        self._repository_workspace = RepositoryWorkspace(repository_root) if repository_root is not None else None
+        self._target_domain = target_domain
+        self._target_configuration = (self._repository_workspace, target_domain)
         self.store = LocalEvaluationStore(self.workspace)
         authority_source = AuthoritySource.from_inputs(
             authority=authority,
@@ -98,6 +106,8 @@ class Guard:
         cls,
         *,
         workspace: str | Path = ".guard-local",
+        repository_root: str | Path | None = None,
+        target_domain: str | None = None,
         authority: str | None = None,
         authority_resolver: AuthorityResolver | None = None,
         authority_cache: AuthorityCache | None = None,
@@ -117,6 +127,8 @@ class Guard:
     ) -> "Guard":
         return cls(
             workspace=workspace,
+            repository_root=repository_root,
+            target_domain=target_domain,
             authority=authority,
             authority_resolver=authority_resolver,
             authority_cache=authority_cache,
@@ -141,6 +153,8 @@ class Guard:
         *,
         authority: str,
         workspace: str | Path = ".guard-local",
+        repository_root: str | Path | None = None,
+        target_domain: str | None = None,
         cloud_url: str | None = None,
         cloud_organization_id: str | None = None,
         cloud_api_key: str | None = None,
@@ -193,6 +207,8 @@ class Guard:
         try:
             guard = cls(
                 workspace=workspace,
+                repository_root=repository_root,
+                target_domain=target_domain,
                 authority=authority,
                 authority_resolver=publication_resolver,
                 authority_cache=authority_cache,
@@ -211,6 +227,8 @@ class Guard:
             compiled_authority = authority_client.fetch(authority)
             guard = cls(
                 workspace=workspace,
+                repository_root=repository_root,
+                target_domain=target_domain,
                 authority=authority,
                 authority_loader=lambda requested_ref: compiled_authority,
                 actor_identity=actor_identity,
@@ -371,7 +389,13 @@ class Guard:
         replay_posture: dict[str, Any] | None = None,
         execution_context: dict[str, Any] | None = None,
     ) -> GuardRuntimeBoundary:
+        if (self._repository_workspace, self._target_domain) != self._target_configuration:
+            from .repository_boundary import RepositoryBoundaryError
+
+            raise RepositoryBoundaryError("target configuration changed after Guard initialization")
         return GuardRuntimeBoundary(
+            repository_workspace=self._repository_workspace,
+            target_domain=self._target_domain,
             compiled_authority=self.resolve_authority(self._resolve_authority_ref(authority)),
             loaded_authority=self.authority_bindings.get(self._resolve_authority_ref(authority)),
             actor_identity=actor_identity or self.actor_identity,
@@ -384,6 +408,51 @@ class Guard:
             cloud_preservation_client=self.cloud_preservation_client,
             cloud_runtime_client=self.cloud_runtime_client,
         )
+
+    def close(self) -> None:
+        """Release the protected repository root handle."""
+        if self._repository_workspace is not None:
+            self._repository_workspace.close()
+
+    def repository_tool(
+        self, *, target: str, action: str = "modify", authority: str | None = None,
+        raise_on_block: bool = True, return_result: bool = False,
+    ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+        """Supply a RepositoryTarget capability in place of the named path argument.
+
+        Trusted callbacks must use its read_bytes/write_bytes methods. The current
+        adapter supports existing regular files on local Windows NTFS and
+        supported Linux filesystems through securely opened descriptors.
+        """
+        boundary = self.boundary_for(authority)
+
+        def decorate(fn):
+            fn_signature = signature(fn)
+            if target not in fn_signature.parameters:
+                raise ValueError("repository_tool target must name a callback argument")
+
+            @wraps(fn)
+            def wrapped(*args, **kwargs):
+                bound = fn_signature.bind(*args, **kwargs)
+                bound.apply_defaults()
+                request = {
+                    "schema_version": NORMALIZED_EXECUTION_REQUEST_V1,
+                    "request_id": f"repository_{uuid4().hex}",
+                    "action": action, "target": bound.arguments[target],
+                    "arguments": {}, "artifacts": [],
+                }
+
+                def invoke(capability):
+                    bound.arguments[target] = capability
+                    return fn(*bound.args, **bound.kwargs)
+
+                result = boundary.execute_repository(
+                    invoke, execution_request=request, raise_on_block=raise_on_block,
+                )
+                return result if return_result or not result["executed"] else result["value"]
+
+            return wrapped
+        return decorate
 
     def resolve_authority(self, authority: str) -> dict[str, Any]:
         if authority in self.authorities:

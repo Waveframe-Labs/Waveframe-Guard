@@ -151,8 +151,12 @@ jobs:
             --install-spec "$guard_wheel"
 
   package:
-    name: Package acceptance
-    runs-on: ubuntu-latest
+    name: Package acceptance / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
     timeout-minutes: 20
 
     steps:
@@ -221,3 +225,6 @@ jobs:
           tests/test_authority_loader.py
           tests/test_guard_artifact_semantics.py
           tests/test_target_scope_enforcement.py
+          tests/test_repository_workspace.py
+          tests/test_target_binding.py
+          tests/test_repository_execution_evidence.py

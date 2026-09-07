@@ -14,6 +14,7 @@ from .execution import (
     GuardRuntimeBoundary,
 )
 from .guard import Guard
+from .repository_boundary import RepositoryBoundaryError, RepositoryTarget
 from .local_persistence import (
     CLOUD_PRESERVATION_METADATA_V1,
     ConflictingCloudPreservationError,
@@ -31,6 +32,8 @@ __all__ = [
     "evaluate_runtime",
     "GuardRuntimeBoundary",
     "Guard",
+    "RepositoryBoundaryError",
+    "RepositoryTarget",
     "GuardExecutionError",
     "GuardExecutionBlocked",
     "GuardExecutionEscalated",

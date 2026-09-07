@@ -24,6 +24,7 @@ from pathlib import Path
 
 
 RUNNER = r'''
+import os
 import hashlib
 import json
 from pathlib import Path
@@ -105,18 +106,20 @@ registry["registry_hash"] = canonical_hash(registry)
 # This is the application-facing workflow: identity, resolver, proposal, callback.
 resolver = LocalRegistryResolver(workspace_root="publication")
 guard = Guard.local(
-    workspace="evidence",
+    workspace="evidence", repository_root=Path.cwd(),
     authority="repository-authority@1.0.0",
     authority_resolver=resolver,
     actor_identity={"id": "repo-agent", "type": "agent", "role": "repository-maintainer"},
 )
 mutations = []
 
-@guard.tool(action="modify", target="path", return_result=True)
+@guard.repository_tool(action="modify", target="path", return_result=True)
 def write_file(path):
-    mutations.append(path)
-    return path
+    mutations.append(path.relative_path)
+    path.write_bytes(b"updated")
+    return path.relative_path
 
+Path("README.md").write_bytes(b"original")
 allowed = write_file("README.md")
 try:
     write_file("deployment/production.yml")
@@ -128,18 +131,25 @@ else:
 assert allowed["executed"] is True
 assert blocked_evaluation["status"] == "blocked"
 assert mutations == ["README.md"]
+assert Path("README.md").read_bytes() == b"updated"
 for evaluation in (allowed["evaluation"], blocked_evaluation):
+    proof = evaluation["execution_attestation"]
+    assert proof["schema_version"] == "guard_execution_attestation.v2"
+    assert proof["authority_basis"]["kind"] == "published_authority"
+    assert guard.store.load_execution_attestation(proof["run_id"]) == proof
     evidence = evaluation["authority_evidence"]
     for key in (
         "authority", "authority_bundle", "publication_receipt", "compiled_contract",
         "domain_pack", "runtime_fact_schema", "constraint_ir", "runtime_facts",
     ):
         assert key in evidence
-print("allowed=README.md")
-print("blocked=deployment/production.yml")
-print("mutation_count=1")
+print("authorization_evaluation=admissible target=README.md")
+print("mutation_execution=executed target=README.md callback_count=1")
+print("authorization_evaluation=blocked target=deployment/production.yml")
+print("mutation_execution=blocked target=deployment/production.yml callback_count=0")
 print("manual_runtime_facts=False")
 print("repository_imports=False")
+print("execution_attestation=guard_execution_attestation.v2 authority_basis=published_authority reload_validated=true")
 '''
 
 

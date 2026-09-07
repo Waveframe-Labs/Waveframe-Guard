@@ -20,6 +20,9 @@ except ModuleNotFoundError:  # Python 3.10
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 REQUIRED_WHEEL_FILES = {
+    "guard/sdk/repository_evidence.py",
+    "guard/sdk/target_binding.py",
+    "guard/sdk/repository_boundary.py",
     "guard/sdk/__init__.py",
     "guard/sdk/guard.py",
     "guard/sdk/local_persistence.py",
@@ -29,6 +32,9 @@ REQUIRED_WHEEL_FILES = {
     "waveframe_guard/schemas.py",
 }
 REQUIRED_SDIST_FILES = {
+    "guard/sdk/repository_evidence.py",
+    "guard/sdk/target_binding.py",
+    "guard/sdk/repository_boundary.py",
     "LICENSE",
     "PKG-INFO",
     "README.md",
@@ -266,6 +272,8 @@ def _clean_wheel_smoke(wheel: Path, expected_version: str) -> None:
         environment["GUARD_EXPECTED_VERSION"] = expected_version
         environment["GUARD_REPOSITORY_ROOT"] = str(REPO_ROOT)
         _run([str(python), "-c", SMOKE_SCRIPT], cwd=smoke_dir, env=environment)
+        for mode in ("evaluation", "mutation"):
+            _run([str(python), "-c", REPOSITORY_SMOKE_SCRIPT, mode], cwd=smoke_dir, env=environment)
         _run([str(python), "-c", CLOUD_V2_SMOKE_SCRIPT], cwd=smoke_dir, env=environment)
         _run([str(python), "-m", "pip", "check"], cwd=smoke_dir, env=environment)
 
@@ -313,7 +321,7 @@ authority = {
 }
 calls = []
 guard = Guard.local(
-    workspace=Path.cwd() / "guard-state",
+    workspace=Path.cwd() / "guard-state", target_domain="literal",
     authorities={"repository@1.0.0": authority},
     actor_identity={"id": "ci-agent", "type": "agent", "role": "maintainer"},
     evaluation_time_source=lambda: "2026-09-01T00:00:00+00:00",
@@ -332,7 +340,79 @@ except GuardExecutionBlocked:
 else:
     raise AssertionError("blocked package smoke callback unexpectedly executed")
 assert calls == ["README.md"], calls
-print(f"Clean wheel smoke passed from {module_path}: allowed=1 blocked=1 callbacks=1")
+print(f"Clean wheel literal-target smoke passed from {module_path}: "
+      "authorization_evaluation=admissible callback_execution=executed callback_count=1; "
+      "denied_authorization_evaluation=blocked denied_callback_execution=blocked denied_callback_count=0")
+'''
+
+
+REPOSITORY_SMOKE_SCRIPT = r'''
+import sys
+from pathlib import Path
+from waveframe_guard import Guard, RepositoryBoundaryError
+from guard.sdk import GuardExecutionBlocked
+
+mode = sys.argv[1]
+root = Path.cwd() / f"repository-{mode}"
+(root / "safe").mkdir(parents=True)
+(root / "safe/file.txt").write_bytes(b"before")
+contract = {
+    "schema_version": "compiled_authority_contract.v1", "contract_id": "repository",
+    "contract_version": "1.0.0", "contract_hash": "sha256:acceptance",
+    "authority_requirements": {}, "approval_requirements": {}, "artifact_requirements": {},
+    "stage_requirements": {}, "invariants": {},
+    "target_requirements": {"allow": [], "deny": [{"match": "prefix", "value": "crypto/"}]},
+}
+guard = Guard.local(repository_root=root, workspace=Path.cwd() / f"evidence-{mode}", contract=contract)
+def request(path):
+    return {"schema_version": "normalized_execution_request.v1", "request_id": "acceptance",
+            "action": "modify", "target": path, "arguments": {}, "artifacts": []}
+calls = []
+@guard.repository_tool(target="path", action="modify", return_result=True)
+def write(path, content):
+    calls.append(path.relative_path)
+    return path.write_bytes(content)
+try:
+    if mode == "evaluation":
+        for path, status in [("safe/file.txt", "admissible"), ("crypto/key.txt", "blocked"),
+                             ("safe/new.txt", "admissible")]:
+            result = guard.boundary_for().evaluate(request(path), save=False)
+            assert result["status"] == status
+            assert result["target_binding"]["target_domain"] == "repository_path"
+            print(f"evaluation_only authorization_evaluation={status} target={path}")
+        assert calls == [] and (root / "safe/file.txt").read_bytes() == b"before"
+        print("evaluation_only callbacks=0 mutation_not_requested=true")
+    else:
+        result = write("safe/file.txt", b"after")
+        assert result["executed"] is True and result["evaluation"]["status"] == "admissible"
+        assert calls == ["safe/file.txt"] and (root / "safe/file.txt").read_bytes() == b"after"
+        proof = result["evaluation"]["execution_attestation"]
+        assert proof["schema_version"] == "guard_execution_attestation.v2"
+        assert proof["authority_basis"]["kind"] == "compiled_contract"
+        assert guard.store.load_execution_attestation(proof["run_id"]) == proof
+        print("authorization_evaluation=admissible mutation_execution=executed target=safe/file.txt callback_count=1")
+        try:
+            write("crypto/key.txt", b"blocked")
+        except GuardExecutionBlocked as error:
+            assert error.evaluation["status"] == "blocked"
+        else:
+            raise AssertionError("denied mutation ran")
+        print("authorization_evaluation=blocked mutation_execution=blocked target=crypto/key.txt callback_count=0")
+        assert guard.boundary_for().evaluate(request("safe/new.txt"), save=False)["status"] == "admissible"
+        try:
+            write("safe/new.txt", b"unsupported")
+        except RepositoryBoundaryError as error:
+            assert "creation is unsupported" in str(error)
+            proof = error.evaluation["execution_attestation"]
+            assert proof["callback_invoked"] is False and proof["mutation_status"] == "not_performed"
+            assert guard.store.load_execution_attestation(proof["run_id"]) == proof
+        else:
+            raise AssertionError("unsupported creation ran")
+        assert calls == ["safe/file.txt"] and not (root / "safe/new.txt").exists()
+        print("authorization_evaluation=admissible mutation_execution=unsupported target=safe/new.txt callback_count=0")
+        print("execution_attestation=guard_execution_attestation.v2 authority_basis=compiled_contract reload_validated=true")
+finally:
+    guard.close()
 '''
 
 
@@ -465,17 +545,22 @@ try:
         runtime_id="clean-wheel-runtime",
         actor_identity={"id": "repo-agent", "type": "agent", "role": "repository-maintainer"},
         workspace=Path.cwd() / "cloud-v2-state",
+        repository_root=Path.cwd(),
     )
     guard.cloud_preservation_client = None
     guard.cloud_runtime_client = None
     callbacks = []
 
-    @guard.tool(action="modify", target="path", return_result=True)
+    Path("README.md").write_bytes(b"original")
+
+    @guard.repository_tool(action="modify", target="path", return_result=True)
     def write_file(path):
-        callbacks.append(path)
-        return path
+        callbacks.append(path.relative_path)
+        path.write_bytes(b"updated")
+        return path.relative_path
 
     allowed = write_file("README.md")
+    assert Path("README.md").read_bytes() == b"updated"
     try:
         write_file("deployment/production.yml")
     except GuardExecutionBlocked as blocked:
@@ -492,7 +577,8 @@ assert state["publication_gets"] == 1
 assert guard.authority_bindings["repository-authority@1.0.0"].schema_version == "authority_bundle.v2"
 print(
     f"Clean wheel Cloud v2 passed from {module_path}: "
-    "allowed=README.md blocked=deployment/production.yml callbacks=1 "
+    "authorization_evaluation=admissible mutation_execution=executed target=README.md callback_count=1; "
+    "denied_authorization_evaluation=blocked denied_mutation_execution=blocked denied_callback_count=0 "
     "manual_facts=0 caller_ledger_validators=0 publication_gets=1 repository_imports=0"
 )
 '''
