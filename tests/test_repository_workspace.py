@@ -254,11 +254,19 @@ def test_windows_case_sensitive_workspace_where_supported(tmp_path):
         pytest.skip("Windows case-sensitive directory feature/privilege unavailable")
     (root / "crypto").mkdir()
     (root / "CRYPTO").mkdir()
+    (root / "crypto/key.txt").write_bytes(b"denied")
     (root / "CRYPTO/key.txt").write_bytes(b"distinct")
     instance = Guard.local(repository_root=root, workspace=tmp_path / "evidence", contract=authority())
     try:
         assert instance.boundary_for().evaluate(request("CRYPTO/key.txt"), save=False)["status"] == "admissible"
         assert instance.boundary_for().evaluate(request("crypto/key.txt"), save=False)["status"] == "blocked"
+        @instance.repository_tool(target="path")
+        def write(path):
+            assert path.read_bytes() == b"distinct"
+            return path.write_bytes(b"updated")
+        assert write("CRYPTO/key.txt") == 7
+        assert (root / "crypto/key.txt").read_bytes() == b"denied"
+        assert (root / "CRYPTO/key.txt").read_bytes() == b"updated"
     finally:
         instance.close()
 
