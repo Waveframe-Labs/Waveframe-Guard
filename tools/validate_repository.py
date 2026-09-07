@@ -47,10 +47,10 @@ APPROVED_JSON_FILES = {
     "tests/fixtures/cloud_authority_publication.v1.json",
 }
 EXPECTED_PUBLIC_RUNTIME_REQUIREMENTS = {
-    "cricore",
-    "cricore-proposal-normalizer",
+    "cricore>=0.13.0,<0.15.0",
+    "cricore-proposal-normalizer>=0.2.0,<0.3.0",
     "governance-ledger>=0.7.0,<0.9.0",
-    "requests",
+    "requests>=2.33.0,<3.0.0",
 }
 PINNED_TEST_DEPENDENCIES = {
     "cricore-contract-compiler==0.4.0",

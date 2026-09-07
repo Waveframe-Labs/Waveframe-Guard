@@ -57,98 +57,27 @@ jobs:
       - name: Install pinned packaging and test tools
         run: >-
           python -m pip install --index-url https://pypi.org/simple
-          "pip==26.1.1" "setuptools==82.0.1" "wheel==0.48.0"
+          "pip==26.2.1" "setuptools==83.0.0" "wheel==0.48.0"
           "build==1.6.0" "pytest==9.0.3" "twine==6.2.0"
 
-      - name: Install minimum public compatibility dependencies
+      - name: Check out the exact unpublished CRI candidate
+        if: ${{ !matrix.compatibility_baseline }}
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: Waveframe-Labs/CRI-CORE
+          ref: 411dfaa976fd4b37efc5fd3e39076edcd3603e1b
+          path: cri-source
+          persist-credentials: false
+
+      - name: Verify minimum resolved wheel, full suite, and acceptance
         if: matrix.compatibility_baseline
+        run: python tools/acceptance/dependency_matrix.py --profile minimum
+
+      - name: Verify exact candidate resolved wheel, full suite, and acceptance
+        if: ${{ !matrix.compatibility_baseline }}
         run: >-
-          python -m pip install --index-url https://pypi.org/simple --only-binary=:all:
-          "cricore==0.13.0" "cricore-proposal-normalizer==0.2.0"
-          "governance-ledger==0.7.0" "cricore-contract-compiler==0.4.0"
-
-      - name: Install Guard through the supported development path
-        run: >-
-          python -m pip install --index-url https://pypi.org/simple
-          --no-build-isolation --editable ".[test]"
-
-      - name: Check installed dependency consistency
-        run: python -m pip check
-
-      - name: Run the complete test suite
-        run: python -m pytest
-
-      - name: Compile Python sources and tests
-        run: python -m compileall -q guard waveframe_guard tests examples tools
-
-  ledger-08-compatibility:
-    name: Ledger 0.8 compatibility
-    runs-on: ubuntu-latest
-    timeout-minutes: 25
-
-    steps:
-      - name: Check out the exact Guard commit
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ github.sha }}
-          persist-credentials: false
-
-      - name: Check out the merged Ledger 0.8 candidate
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          repository: Waveframe-Labs/Waveframe-Ledger
-          ref: 2b9a6b0a239d0e834d1bb42cd2efa30abe299e70
-          path: ledger-source
-          persist-credentials: false
-
-      - name: Set up Python 3.14
-        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
-        with:
-          python-version: "3.14"
-
-      - name: Install pinned packaging and test tools
-        run: >-
-          python -m pip install --index-url https://pypi.org/simple
-          "pip==26.1.1" "setuptools==82.0.1" "wheel==0.48.0"
-          "build==1.6.0" "pytest==9.0.3" "twine==6.2.0"
-
-      - name: Build and install the exact Ledger candidate
-        shell: bash
-        run: |
-          python -m build --no-isolation --wheel --outdir ledger-dist ledger-source
-          ledger_wheel="$(find ledger-dist -maxdepth 1 -name '*.whl' -print -quit)"
-          test -n "$ledger_wheel"
-          python -m pip install --index-url https://pypi.org/simple "$ledger_wheel"
-
-      - name: Install Guard through normal dependency resolution
-        run: >-
-          python -m pip install --index-url https://pypi.org/simple
-          --no-build-isolation --editable ".[test]"
-
-      - name: Verify dependency consistency and complete Guard behavior
-        run: |
-          python -m pip check
-          python -m pytest tests
-          python -m compileall -q guard waveframe_guard tests examples tools
-
-      - name: Build and inspect the Guard candidate
-        run: |
-          python -m build --no-isolation --outdir guard-dist
-          python -m twine check guard-dist/*
-
-      - name: Verify independent v2 and v3 publications from clean wheels
-        shell: bash
-        run: |
-          ledger_wheel="$(find ledger-dist -maxdepth 1 -name '*.whl' -print -quit)"
-          guard_wheel="$(find guard-dist -maxdepth 1 -name '*.whl' -print -quit)"
-          test -n "$ledger_wheel"
-          test -n "$guard_wheel"
-          python tools/acceptance/ledger_v2_clean_wheel.py \
-            --ledger-install-spec "$ledger_wheel" \
-            --install-spec "$guard_wheel"
-          python tools/acceptance/ledger_v3_clean_wheel.py \
-            --ledger-install-spec "$ledger_wheel" \
-            --install-spec "$guard_wheel"
+          python tools/acceptance/dependency_matrix.py --profile candidate
+          --cri-source cri-source
 
   package:
     name: Package acceptance / ${{ matrix.os }}
@@ -174,13 +103,15 @@ jobs:
       - name: Install pinned packaging tools
         run: >-
           python -m pip install --index-url https://pypi.org/simple
-          "pip==26.1.1" "setuptools==82.0.1" "wheel==0.48.0"
+          "pip==26.2.1" "setuptools==83.0.0" "wheel==0.48.0"
           "build==1.6.0" "twine==6.2.0"
 
       - name: Build wheel and source distribution
         run: python -m build --no-isolation --outdir ci-dist
 
       - name: Inspect distributions and run clean-wheel acceptance
+        env:
+          PIP_CONSTRAINT: ${{ github.workspace }}/.github/constraints/published.txt
         run: python tools/acceptance/package_acceptance.py --dist-dir ci-dist
 
   governance:
@@ -204,10 +135,12 @@ jobs:
       - name: Install pinned packaging and test tools
         run: >-
           python -m pip install --index-url https://pypi.org/simple
-          "pip==26.1.1" "setuptools==82.0.1" "wheel==0.48.0"
+          "pip==26.2.1" "setuptools==83.0.0" "wheel==0.48.0"
           "build==1.6.0" "pytest==9.0.3" "twine==6.2.0"
 
       - name: Install Guard through the supported development path
+        env:
+          PIP_CONSTRAINT: ${{ github.workspace }}/.github/constraints/published.txt
         run: >-
           python -m pip install --index-url https://pypi.org/simple
           --no-build-isolation --editable ".[test]"
