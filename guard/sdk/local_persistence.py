@@ -213,6 +213,8 @@ class LocalEvaluationStore:
         mismatch_classes = sorted({reason["class"] for reason in replay_reasons})
         replay_result = {
             "schema_version": GUARD_REPLAY_RESULT_V1,
+            "replay_scope": "logical_decision_only",
+            "filesystem_state_recreated": False,
             "run_id": run_id,
             "matches": outcome_matches and not replay_reasons,
             "outcome_matches": outcome_matches,
@@ -222,6 +224,12 @@ class LocalEvaluationStore:
             "replayed_outcome_hash": replayed["enforcement_outcome"]["outcome_hash"],
             "replayed_evaluation": replayed,
         }
+        if "target_binding" in inputs:
+            replay_result["target_binding"] = deepcopy(inputs["target_binding"])
+            replay_result["target_binding_hash"] = stable_hash(inputs["target_binding"])
+            replay_result["binding_assurance"] = "recorded_not_revalidated"
+            replayed["target_binding"] = deepcopy(inputs["target_binding"])
+            replayed["target_binding_hash"] = stable_hash(inputs["target_binding"])
         self.export_replay_record(replay_result)
         return replay_result
 
@@ -242,6 +250,8 @@ class LocalEvaluationStore:
         self.replay_root.mkdir(parents=True, exist_ok=True)
         record = {
             "schema_version": GUARD_REPLAY_RECORD_V1,
+            "replay_scope": replay_result["replay_scope"],
+            "filesystem_state_recreated": replay_result["filesystem_state_recreated"],
             "run_id": replay_result["run_id"],
             "matches": replay_result["matches"],
             "mismatch_classes": replay_result["mismatch_classes"],
@@ -249,6 +259,9 @@ class LocalEvaluationStore:
             "original_outcome_hash": replay_result["original_outcome_hash"],
             "replayed_outcome_hash": replay_result["replayed_outcome_hash"],
         }
+        for field in ("target_binding", "target_binding_hash", "binding_assurance"):
+            if field in replay_result:
+                record[field] = deepcopy(replay_result[field])
         record["replay_record_hash"] = stable_hash(record)
         path = self.replay_root / f"{replay_result['run_id']}.json"
         path.write_text(json.dumps(record, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -274,6 +287,7 @@ def build_execution_attestation(
     execution_status: str,
     mutation_status: str,
     mutation_executed: bool | None,
+    target_binding: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     attestation = {
         "schema_version": GUARD_EXECUTION_ATTESTATION_V1,
@@ -288,6 +302,9 @@ def build_execution_attestation(
         "mutation_status": mutation_status,
         "mutation_executed": mutation_executed,
     }
+    if target_binding is not None:
+        attestation["target_binding"] = deepcopy(target_binding)
+        attestation["target_binding_hash"] = stable_hash(target_binding)
     attestation["attestation_hash"] = stable_hash(attestation)
     return validate_execution_attestation(attestation)
 
@@ -313,6 +330,10 @@ def validate_execution_attestation(attestation: Any) -> dict[str, Any]:
         "mutation_executed",
         "attestation_hash",
     }
+    if "target_binding" in attestation or "target_binding_hash" in attestation:
+        required_fields.update({"target_binding", "target_binding_hash"})
+        if not isinstance(attestation.get("target_binding"), dict) or attestation.get("target_binding_hash") != stable_hash(attestation["target_binding"]):
+            raise GuardArtifactError("execution attestation target binding hash mismatch")
     if set(attestation) != required_fields:
         raise GuardArtifactError("execution attestation fields do not match its schema")
     for field in ("run_id", "authority_evidence_hash", "runtime_facts_hash", "attestation_hash"):
@@ -341,10 +362,12 @@ def validate_execution_attestation(attestation: Any) -> dict[str, Any]:
         attestation["mutation_executed"],
     )
     valid_states = {
+        ("admissible", False, False, "not_run", "not_performed", False),
         ("blocked", False, False, "not_run", "not_performed", False),
         ("escalated", False, False, "not_run", "not_performed", False),
         ("admissible", True, True, "succeeded", "executed", True),
         ("admissible", True, False, "failed", "unknown", None),
+        ("admissible", True, True, "failed", "unknown", None),
         ("admissible", None, None, "incomplete", "unknown", None),
         ("admissible", True, False, "incomplete", "unknown", None),
     }
@@ -386,6 +409,8 @@ def build_enforcement_receipt(
     if "authority_evidence_hash" in input_hashes:
         run_basis["authority_evidence_hash"] = input_hashes["authority_evidence_hash"]
         run_basis["runtime_facts_hash"] = input_hashes["runtime_facts_hash"]
+    if "target_binding_hash" in input_hashes:
+        run_basis["target_binding_hash"] = input_hashes["target_binding_hash"]
     receipt = {
         "schema_version": ENFORCEMENT_RECEIPT_V1,
         "run_id": stable_id("guard_run", run_basis),
@@ -447,6 +472,8 @@ def build_artifact_manifest(
         manifest["lineage_continuity_fields"].extend(
             ["authority_evidence_hash", "runtime_facts_hash"]
         )
+    if "target_binding_hash" in receipt["input_hashes"]:
+        manifest["lineage_continuity_fields"].append("target_binding_hash")
     manifest["manifest_hash"] = stable_hash(manifest)
     return manifest
 
@@ -486,6 +513,12 @@ def _artifact_replay_failure_reasons(record: dict[str, Any]) -> list[dict[str, A
     _compare_hash(reasons, "manifest_integrity_failure", "receipt.receipt_hash", receipt.get("receipt_hash"), stable_hash(_without_hash(receipt, "receipt_hash")), "Unreadable receipt.", error_class="unreadable_receipt")
     current_input_hashes = _input_hashes(inputs)
     recorded_input_hashes = receipt.get("input_hashes", {})
+    if "target_binding_hash" in recorded_input_hashes or "target_binding" in inputs:
+        binding_hash = current_input_hashes.get("target_binding_hash")
+        _compare_hash(reasons, "evidence_mutation", "target_binding", recorded_input_hashes.get("target_binding_hash"), binding_hash, "Trusted target semantics or workspace binding changed after receipt emission.")
+        _compare_hash(reasons, "evidence_mutation", "evaluation.target_binding", binding_hash, stable_hash(evaluation.get("target_binding")), "Evaluation target binding differs from saved inputs.")
+        _compare_hash(reasons, "evidence_mutation", "evaluation.target_binding_hash", binding_hash, evaluation.get("target_binding_hash"), "Evaluation target binding hash changed.")
+        _compare_hash(reasons, "evidence_mutation", "runtime_evidence.target_binding", binding_hash, stable_hash(inputs.get("runtime_evidence", {}).get("execution_context", {}).get("target_binding")), "Runtime evidence target binding differs from saved inputs.")
     _compare_hash(reasons, "contract_drift", "compiled_authority", recorded_input_hashes.get("compiled_authority_hash"), current_input_hashes.get("compiled_authority_hash"), "Compiled authority changed after receipt emission.")
     _compare_hash(reasons, "request_mismatch", "execution_request", recorded_input_hashes.get("execution_request_hash"), current_input_hashes.get("execution_request_hash"), "Execution request changed after receipt emission.")
     _compare_hash(reasons, "evidence_mutation", "runtime_evidence", recorded_input_hashes.get("runtime_evidence_hash"), current_input_hashes.get("runtime_evidence_hash"), "Runtime evidence changed after receipt emission.")
@@ -614,6 +647,8 @@ def _input_hashes(inputs: dict[str, Any]) -> dict[str, str]:
         "timestamp_source_hash": stable_hash(runtime_evidence.get("timestamp_source", {})),
         "runtime_dependencies_hash": stable_hash(runtime_evidence.get("runtime_dependencies", [])),
     }
+    if "target_binding" in inputs:
+        hashes["target_binding_hash"] = stable_hash(inputs["target_binding"])
     if "authority_evidence" in inputs:
         hashes["authority_evidence_hash"] = stable_hash(inputs["authority_evidence"])
         hashes["runtime_facts_hash"] = stable_hash(inputs.get("runtime_facts", {}))
@@ -639,6 +674,8 @@ def _replay_basis(inputs: dict[str, Any], evaluation: dict[str, Any]) -> dict[st
         "evaluation_time": runtime_evidence["timestamp_source"]["timestamp"],
         "start_sequence": _start_sequence(evaluation),
     }
+    if "target_binding" in inputs:
+        basis["target_binding"] = inputs["target_binding"]
     if "authority_evidence" in inputs:
         basis["authority_evidence"] = inputs["authority_evidence"]
         basis["runtime_facts"] = inputs.get("runtime_facts", {})
@@ -669,6 +706,8 @@ def _lineage_continuity_basis(
     if "authority_evidence_hash" in input_hashes:
         basis["authority_evidence_hash"] = input_hashes["authority_evidence_hash"]
         basis["runtime_facts_hash"] = input_hashes["runtime_facts_hash"]
+    if "target_binding_hash" in input_hashes:
+        basis["target_binding_hash"] = input_hashes["target_binding_hash"]
     return basis
 
 

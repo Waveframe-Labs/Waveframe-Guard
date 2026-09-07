@@ -6,12 +6,14 @@ import ctypes
 import os
 import platform
 import stat
+import struct
 from contextlib import contextmanager
 from pathlib import Path
+from uuid import uuid4
 
 
 class RepositoryBoundaryError(ValueError):
-    """A repository request cannot be safely bound; no callback was invoked."""
+    """Repository binding failed, possibly after a callback partially wrote bytes."""
 
 
 def canonical_repository_path(value: object) -> str:
@@ -48,6 +50,7 @@ class RepositoryTarget:
     def __init__(self, relative_path, fd, validate):
         self._relative_path = relative_path
         self._fd = fd
+        self._file_identity = _identity(os.fstat(fd)) if fd is not None else None
         self._validate = validate
         self._active = False
 
@@ -58,6 +61,8 @@ class RepositoryTarget:
     def _check(self):
         if not self._active or self._fd is None:
             raise RepositoryBoundaryError("repository target capability is not active")
+        if _identity(os.fstat(self._fd)) != self._file_identity:
+            raise RepositoryBoundaryError("repository target capability was substituted")
         self._validate()
 
     def read_bytes(self) -> bytes:
@@ -88,6 +93,7 @@ class RepositoryWorkspace:
 
     def __init__(self, root: str | Path):
         self._root_fd = None
+        self._binding_id = "workspace_" + uuid4().hex
         supplied = Path(root)
         if not supplied.is_absolute():
             raise RepositoryBoundaryError("repository_root must be an explicit absolute directory")
@@ -113,6 +119,15 @@ class RepositoryWorkspace:
         if self._root_fd is not None:
             os.close(self._root_fd)
             self._root_fd = None
+
+    @property
+    def binding_id(self) -> str:
+        """Opaque activation identity; never derived from the absolute path."""
+        return self._binding_id
+
+    @property
+    def assurance_class(self) -> str:
+        return "ntfs-sharing-locks.v1" if os.name == "nt" else "linux-openat2-descriptor.v1"
 
     def __del__(self):
         self.close()
@@ -156,7 +171,8 @@ class RepositoryWorkspace:
                     if os.name == "nt":
                         fd = _windows_open(current, directory=directory, writable=mutation and not directory)
                     else:
-                        fd = _linux_open(self._root_fd, "/".join(components[:index + 1]), directory)
+                        fd = _linux_open(self._root_fd, "/".join(components[:index + 1]), directory,
+                                         writable=mutation and not directory)
                 except FileNotFoundError:
                     missing = True
                     continue
@@ -177,21 +193,29 @@ class RepositoryWorkspace:
                     leaf_fd = fd
 
             def validate():
-                self._check_root()
-                for path, identity in snapshots:
-                    info = path.lstat()
-                    if _indirect(info) or _identity(info) != identity:
-                        raise RepositoryBoundaryError("repository target or ancestor was substituted")
-                if leaf_fd is not None and os.fstat(leaf_fd).st_nlink != 1:
-                    raise RepositoryBoundaryError("repository target acquired a hard-link alias")
+                try:
+                    self._check_root()
+                    for path, identity in snapshots:
+                        info = path.lstat()
+                        if _indirect(info) or _identity(info) != identity:
+                            raise RepositoryBoundaryError("repository target or ancestor was substituted")
+                        if os.name != "nt":
+                            # Recheck secure resolution too: lstat identity alone
+                            # cannot detect a same-inode bind mount introduced later.
+                            checked = _linux_open(self._root_fd, path.relative_to(self._root).as_posix(),
+                                                  stat.S_ISDIR(info.st_mode))
+                            try:
+                                if _identity(os.fstat(checked)) != identity:
+                                    raise RepositoryBoundaryError("repository target was substituted")
+                            finally:
+                                os.close(checked)
+                    if leaf_fd is not None and os.fstat(leaf_fd).st_nlink != 1:
+                        raise RepositoryBoundaryError("repository target acquired a hard-link alias")
+                except OSError as exc:
+                    raise RepositoryBoundaryError("repository identity revalidation failed") from exc
 
             validate()
             if mutation:
-                if os.name != "nt":
-                    raise RepositoryBoundaryError(
-                        "repository mutation is unsupported on POSIX: the adapter cannot lock "
-                        "the namespace against concurrent rename/link operations"
-                    )
                 if leaf_fd is None:
                     raise RepositoryBoundaryError(
                         "repository mutation requires an existing regular file; creation is unsupported"
@@ -245,7 +269,7 @@ def _validate_repository_rules(requirements):
             canonical_repository_path(value)
 
 
-def _linux_open(root_fd, relative, directory):
+def _linux_open(root_fd, relative, directory, *, writable=False):
     # No resolve()/open() race; openat2 rejects bind mounts as well as symlinks.
     if platform.machine().lower() not in {"x86_64", "aarch64", "amd64"}:
         raise RepositoryBoundaryError("unsupported Linux openat2 architecture")
@@ -253,7 +277,7 @@ def _linux_open(root_fd, relative, directory):
         _fields_ = [("flags", ctypes.c_uint64), ("mode", ctypes.c_uint64), ("resolve", ctypes.c_uint64)]
     libc = ctypes.CDLL(None, use_errno=True)
     libc.syscall.restype = ctypes.c_long
-    flags = os.O_RDONLY | os.O_NONBLOCK | os.O_CLOEXEC | (os.O_DIRECTORY if directory else 0)
+    flags = (os.O_RDWR if writable else os.O_RDONLY) | os.O_NONBLOCK | os.O_CLOEXEC | (os.O_DIRECTORY if directory else 0)
     how = OpenHow(flags, 0, 0x01 | 0x04 | 0x08)
     fd = libc.syscall(ctypes.c_long(437), ctypes.c_int(root_fd), relative.encode("ascii"), ctypes.byref(how), ctypes.sizeof(how))
     if fd < 0:
@@ -280,11 +304,18 @@ def _case_sensitive(fd):
     fs_type = ctypes.c_long.from_buffer(buffer).value
     if fs_type not in {0xEF53, 0x58465342, 0x9123683E, 0x01021994}:
         raise RepositoryBoundaryError("unsupported repository filesystem")
-    if fs_type == 0xEF53:
+    if fs_type != 0x01021994:
         flags = array.array("L", [0])
         fcntl.ioctl(fd, 0x80086601, flags)
         if flags[0] & 0x40000000:
             raise RepositoryBoundaryError("casefold filesystem directories are unsupported")
+    if fs_type == 0x58465342:
+        # XFS_IOC_FSGEOMETRY_V1, 64-bit ABI: flags at byte 92, DIRV2CI bit 12.
+        # Older XFS supports filesystem-wide ASCII case-insensitive names.
+        geometry = bytearray(112)
+        fcntl.ioctl(fd, 0x80705864, geometry)
+        if struct.unpack_from("=I", geometry, 92)[0] & 0x1000:
+            raise RepositoryBoundaryError("case-insensitive XFS filesystems are unsupported")
     return True
 
 

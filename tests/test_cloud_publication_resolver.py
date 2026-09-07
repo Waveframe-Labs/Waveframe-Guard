@@ -205,24 +205,15 @@ def test_atomic_v2_publication_allows_readme_blocks_deployment_and_stays_warm(
 
         metadata = {"caller": ["unchanged"]}
         before = copy.deepcopy(metadata)
-        if os.name == "nt":
-            allowed = write_file("README.md", metadata)
-        else:
-            from guard.sdk import RepositoryBoundaryError
-            with pytest.raises(RepositoryBoundaryError, match="unsupported on POSIX"):
-                write_file("README.md", metadata)
-            allowed = {"executed": False, "evaluation": guard.boundary_for().evaluate({
-                "schema_version": "normalized_execution_request.v1", "request_id": "cloud-evaluation",
-                "action": "modify", "target": "README.md", "arguments": {}, "artifacts": [],
-            })}
+        allowed = write_file("README.md", metadata)
         with pytest.raises(GuardExecutionBlocked) as blocked:
             write_file("deployment/production.yml", metadata)
     finally:
         server.shutdown()
         server.server_close()
 
-    assert callback_calls == (["README.md"] if os.name == "nt" else [])
-    assert allowed["executed"] is (os.name == "nt")
+    assert callback_calls == ["README.md"]
+    assert allowed["executed"] is True
     assert blocked.value.evaluation["execution_attestation"]["callback_invoked"] is False
     assert allowed["evaluation"]["runtime_facts_hash"].startswith("sha256:")
     assert allowed["evaluation"]["runtime_facts"] == {

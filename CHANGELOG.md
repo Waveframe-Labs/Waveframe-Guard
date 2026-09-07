@@ -4,11 +4,16 @@
 
 - Add an explicit repository workspace and bound-file adapter for issue #33.
   Repository paths are validated before authority comparison; generic repository
-  callbacks fail closed. Existing-file mutation currently requires local Windows
-  NTFS namespace locks; POSIX mutation and creation fail closed. See the
+  callbacks fail closed. Existing-file mutation uses bound handles on local
+  Windows NTFS and securely opened descriptors on supported Linux filesystems,
+  with pre/post-callback identity checks under the trusted adapter boundary.
+  macOS and creation/rename/deletion remain unsupported. See the
   [workspace boundary and migration guide](docs/architecture/REPOSITORY_WORKSPACE.md).
 - Recommend 0.18.0 for this integration break, including explicit domain selection
   for v1 target-scoped callers. This change does not prepare or publish a release.
+- Bind target semantics, opaque workspace activation identity, adapter version
+  and assurance class into SDK evidence, receipts, replay and technical proof.
+  Separate authorization evaluation from mutation execution in acceptance results.
 
 ## [0.17.0] - 2026-09-04 - Native Ledger v3 Authority Verification
 

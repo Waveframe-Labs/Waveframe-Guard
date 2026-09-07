@@ -221,20 +221,8 @@ def modify(path):
 
 for path in ("README.md", "CHANGELOG.md"):
     Path(path).write_bytes(b"original")
-    if os.name == "nt":
-        assert modify(path)["executed"] is True
-    else:
-        from guard.sdk import RepositoryBoundaryError
-        try:
-            modify(path)
-        except RepositoryBoundaryError as exc:
-            assert "unsupported on POSIX" in str(exc)
-        else:
-            raise AssertionError("unsupported POSIX mutation ran")
-        assert guard.boundary_for().evaluate({
-            "schema_version": "normalized_execution_request.v1", "request_id": "wheel-eval",
-            "action": "modify", "target": path, "arguments": {}, "artifacts": [],
-        }, save=False)["status"] == "admissible"
+    assert modify(path)["executed"] is True
+    assert Path(path).read_bytes() == b"updated"
 try:
     modify("src/unpublished.py")
 except GuardExecutionBlocked:
@@ -246,9 +234,12 @@ assert loaded.schema_version == "authority_bundle.v3"
 assert loaded.contract["schema_version"] == "compiled_authority_contract.v2"
 assert loaded.authority_evidence["authority_bundle"]["schema_version"] == "authority_bundle.v3"
 assert loaded.authority_evidence["publication_receipt"]["schema_version"] == "publication_receipt.v3"
-assert mutations == (["README.md", "CHANGELOG.md"] if os.name == "nt" else [])
-print("allowed=README.md,CHANGELOG.md")
-print("blocked=src/unpublished.py")
+assert mutations == ["README.md", "CHANGELOG.md"]
+for path in ("README.md", "CHANGELOG.md"):
+    print(f"authorization_evaluation=admissible target={path}")
+    print(f"mutation_execution=executed target={path} callback_count=1")
+print("authorization_evaluation=blocked target=src/unpublished.py")
+print("mutation_execution=blocked target=src/unpublished.py callback_count=0")
 print("private_evidence_required=False")
 print("bundle=authority_bundle.v3")
 print("receipt=publication_receipt.v3")

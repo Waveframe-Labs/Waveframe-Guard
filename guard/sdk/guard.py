@@ -60,6 +60,7 @@ class Guard:
             raise ValueError("use repository_root for repository paths or target_domain='literal' for other targets")
         self._repository_workspace = RepositoryWorkspace(repository_root) if repository_root is not None else None
         self._target_domain = target_domain
+        self._target_configuration = (self._repository_workspace, target_domain)
         self.store = LocalEvaluationStore(self.workspace)
         authority_source = AuthoritySource.from_inputs(
             authority=authority,
@@ -388,6 +389,10 @@ class Guard:
         replay_posture: dict[str, Any] | None = None,
         execution_context: dict[str, Any] | None = None,
     ) -> GuardRuntimeBoundary:
+        if (self._repository_workspace, self._target_domain) != self._target_configuration:
+            from .repository_boundary import RepositoryBoundaryError
+
+            raise RepositoryBoundaryError("target configuration changed after Guard initialization")
         return GuardRuntimeBoundary(
             repository_workspace=self._repository_workspace,
             target_domain=self._target_domain,
@@ -416,7 +421,8 @@ class Guard:
         """Supply a RepositoryTarget capability in place of the named path argument.
 
         Trusted callbacks must use its read_bytes/write_bytes methods. The current
-        adapter supports existing regular files on local Windows NTFS only.
+        adapter supports existing regular files on local Windows NTFS and
+        supported Linux filesystems through securely opened descriptors.
         """
         boundary = self.boundary_for(authority)
 

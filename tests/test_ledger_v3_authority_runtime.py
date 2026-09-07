@@ -360,7 +360,6 @@ def _write_artifacts(root: Path, publication: dict, *, receipt: dict | None = No
     return LocalRegistryResolver(registry_path=registry_path, workspace_root=root)
 
 
-@pytest.mark.skipif(os.name != "nt", reason="repository mutation requires NTFS namespace locks")
 def test_v3_multi_control_publication_loads_and_enforces_both_controls(
     tmp_path, multi_publication
 ):

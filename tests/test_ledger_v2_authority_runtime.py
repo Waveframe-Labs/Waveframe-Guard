@@ -76,7 +76,6 @@ def publication():
     return _publication()
 
 
-@pytest.mark.skipif(os.name != "nt", reason="repository mutation requires NTFS namespace locks")
 def test_public_ledger_v07_repository_publication_executes_exact_contract_once(
     tmp_path, publication
 ):
@@ -639,7 +638,6 @@ def test_cache_refresh_revalidates_before_new_publication_activation(
     assert second.publication_id == "publication-refresh"
 
 
-@pytest.mark.skipif(os.name != "nt", reason="repository mutation requires NTFS namespace locks")
 def test_callback_exception_records_failed_execution_and_unknown_mutation(tmp_path, publication):
     guard = Guard.local(
         repository_root=tmp_path, workspace=tmp_path / "evidence",
@@ -666,7 +664,6 @@ def test_callback_exception_records_failed_execution_and_unknown_mutation(tmp_pa
     assert attestation["mutation_executed"] is None
 
 
-@pytest.mark.skipif(os.name != "nt", reason="repository mutation requires NTFS namespace locks")
 def test_process_interruption_leaves_incomplete_unknown_attestation(tmp_path, publication):
     guard = Guard.local(
         repository_root=tmp_path, workspace=tmp_path / "evidence",
@@ -688,7 +685,6 @@ def test_process_interruption_leaves_incomplete_unknown_attestation(tmp_path, pu
     assert attestation["mutation_executed"] is None
 
 
-@pytest.mark.skipif(os.name != "nt", reason="repository mutation requires NTFS namespace locks")
 def test_attestation_canonical_hash_and_tamper_rejection(tmp_path, publication):
     guard = Guard.local(
         repository_root=tmp_path, workspace=tmp_path / "evidence",
@@ -882,6 +878,71 @@ def test_existing_v1_allowed_and_blocked_behavior_is_unchanged(tmp_path):
     with pytest.raises(GuardExecutionBlocked):
         write("deployment/production.yml")
     assert calls == ["README.md"]
+
+
+def test_verified_routing_rejects_unknown_domain_versions_and_hashes(tmp_path, publication):
+    from waveframe_guard.authority.runtime_facts import resolve_target_domain_v1
+    verified = VerifiedRuntimeAuthority.from_loaded(load_authority(AUTHORITY_REF, resolver=_write_publication(tmp_path, publication)))
+    assert resolve_target_domain_v1(verified) == "repository_path"
+    for section, field in [("domain_pack", "domain_pack_id"), ("domain_pack", "domain_pack_version"),
+                           ("domain_pack", "domain_pack_hash"), ("runtime_fact_schema", "schema_id")]:
+        evidence = verified.evidence()
+        evidence[section][field] = "unknown-future-identity"
+        unsupported = replace(verified, evidence_json=json.dumps(evidence))
+        with pytest.raises(RuntimeFactError, match="unsupported verified target domain"):
+            resolve_target_domain_v1(unsupported)
+
+
+def test_verified_cache_cannot_override_workspace_or_downgrade_to_literal(tmp_path, publication):
+    from guard.sdk import RepositoryBoundaryError
+    resolver = _write_publication(tmp_path, publication)
+    cache = MemoryAuthorityCache()
+    options = dict(authority=AUTHORITY_REF, authority_resolver=resolver, authority_cache=cache,
+                   actor_identity={"id": "agent", "type": "agent", "role": "repository-maintainer"})
+    first = Guard.local(repository_root=tmp_path, workspace=tmp_path / "first", **options)
+    second = Guard.local(repository_root=tmp_path, workspace=tmp_path / "second", **options)
+    literal = Guard.local(target_domain="literal", workspace=tmp_path / "literal", **options)
+    try:
+        one = first.boundary_for().evaluate(_request("README.md"))
+        two = second.boundary_for().evaluate(_request("README.md"))
+        assert one["target_binding_hash"] != two["target_binding_hash"]
+        assert one["target_binding"]["domain_resolver"] == "guard.target-domain-resolver.v1"
+        with pytest.raises(RepositoryBoundaryError, match="repository_root"):
+            literal.boundary_for().evaluate(_request("README.md"))
+        assert len(cache) == 1
+        result = first.boundary_for().execute_repository(lambda target: target.write_bytes(b"bound"),
+                                                        execution_request=_request("README.md"))
+        proof = result["evaluation"]["execution_attestation"]
+        assert proof["target_binding_hash"] == one["target_binding_hash"]
+        changed = copy.deepcopy(proof)
+        changed["target_binding"]["target_domain"] = "literal"
+        with pytest.raises(GuardArtifactError, match="binding hash mismatch"):
+            validate_execution_attestation(changed)
+    finally:
+        first.close()
+        second.close()
+
+
+@pytest.mark.skipif(os.name == "nt", reason="Linux post-callback substitution evidence")
+def test_linux_substitution_after_callback_is_failed_unknown_not_success(tmp_path, publication):
+    from guard.sdk import RepositoryBoundaryError
+    guard = Guard.local(repository_root=tmp_path, workspace=tmp_path / "evidence", authority=AUTHORITY_REF,
+                        authority_resolver=_write_publication(tmp_path, publication),
+                        actor_identity={"id": "agent", "type": "agent", "role": "repository-maintainer"})
+    calls = []
+    def mutate(target):
+        calls.append(target.write_bytes(b"already-written"))
+        (tmp_path / "README.md").rename(tmp_path / "moved.md")
+    try:
+        with pytest.raises(RepositoryBoundaryError) as error:
+            guard.boundary_for().execute_repository(mutate, execution_request=_request("README.md"))
+        proof = error.value.evaluation["execution_attestation"]
+        assert proof["callback_invoked"] is True and proof["execution_status"] == "failed"
+        assert proof["callback_completed"] is True
+        assert proof["mutation_executed"] is None and proof["mutation_status"] == "unknown"
+        assert calls == [15] and (tmp_path / "moved.md").read_bytes() == b"already-written"
+    finally:
+        guard.close()
 
 
 def _publication(*, publication_id="publication-1"):

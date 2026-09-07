@@ -15,7 +15,7 @@ from waveframe_guard import Guard, RepositoryTarget
 
 guard = Guard.local(
     authority="repository-authority@1.0.0",
-    repository_root=Path("C:/work/project"),
+    repository_root=repo_root,  # absolute existing directory on supported Windows or Linux
     workspace=".guard-local",
 )
 
@@ -24,7 +24,7 @@ def write_file(path: RepositoryTarget, content: bytes):
     return path.write_bytes(content)
 
 try:
-    write_file("docs/guide.md", b"Updated guide\n")  # existing file, local NTFS
+    write_file("docs/guide.md", b"Updated guide\n")  # existing regular file
 finally:
     guard.close()
 ```
@@ -63,8 +63,11 @@ callback exits. Callbacks must not retain it or use private attributes.
 and performs an evaluation without mutation. An admissible evaluation is not a
 reusable filesystem capability or a promise that mutation is supported.
 
-V2 and v3 publications retain their existing verified repository domain identity
-and require `repository_root` at use. V1 compiled contracts have **no domain
+Verified domain routing uses `guard.target-domain-resolver.v1`, an explicit mapping
+of the verified domain-pack ID/version/hash AND runtime-fact-schema ID/version/hash.
+The current repository-changes/1.0.0 mapping requires `repository_root`; unknown
+future domain identities fail closed. The contract schema version alone never
+selects repository semantics. V1 compiled contracts have **no domain
 identity**: Guard cannot infer one from a contract name or target spelling.
 For v1 target-scoped SDK authorities, an omitted binding now raises
 `RepositoryBoundaryError` with a migration diagnostic. Repository integrations
@@ -77,6 +80,38 @@ bound to a repository. Applications must declare those repository uses too.
 The pure `evaluate_runtime` contract evaluator retains literal semantics. It
 does not execute callbacks or attest to filesystem safety. Saved replay also
 reproduces the logical decision, not the historical filesystem state.
+
+## Target binding and technical proof
+
+Every target-scoped SDK decision includes frozen `guard_target_binding.v1`
+provenance: `target_domain` (`repository_path` or `literal`),
+`workspace_binding_id`, `adapter_version`, `assurance_class`,
+`authority_contract_hash` and `domain_resolver`. `boundary.target_binding` is a
+frozen object. Returned evidence dictionaries are copies; changing a copy cannot
+change the boundary. Runtime configuration or scoped-contract substitution after
+activation fails closed. An execution request or context cannot supply reserved
+binding fields to override or impersonate trusted provenance.
+
+The workspace ID is a random opaque identifier for one workspace activation. It
+does not encode or hash the absolute path. Boundaries from the same Guard share
+it; reinitializing Guard creates a new activation ID, even for the same root.
+Repository assurance is `guard.repository-file.v2` with
+`ntfs-sharing-locks.v1` or `linux-openat2-descriptor.v1`. Literal semantics use
+`guard.literal-target.v1` and `literal-comparison.v1`, with no workspace ID.
+
+Binding data and its canonical hash accompany the evaluation. The binding is
+included in runtime evidence, saved inputs, receipt hashes, run identity,
+lineage/replay basis, and v2/v3 execution attestations. Thus the same v1 authority
+and request used with literal semantics have different technical proof from a
+repository-bound decision. Normative authority caches never store the runtime
+binding: sharing a verified authority cache cannot reuse a workspace or change
+target semantics. No generated binding evidence contains the absolute root.
+
+Replay reports `replay_scope="logical_decision_only"`,
+`filesystem_state_recreated=false` and (when a binding was recorded)
+`binding_assurance="recorded_not_revalidated"`. It retains the original binding
+and verifies its receipt integrity; it does not reopen the workspace, recreate
+historical filesystem state, authorize a fresh mutation or execute a callback.
 
 ## Accepted paths and filesystem identities
 
@@ -109,55 +144,74 @@ The generic `tool`, `protect`, and `execute` callbacks cannot establish this
 boundary because their arguments can describe a different target from the
 evaluated request. Repository mutation through them fails closed.
 
-The repository adapter performs a nonpersisted preflight. On supported Windows
-NTFS, it then acquires file and complete ancestor handles without write/delete
-sharing, rejects reparse points, verifies the pinned workspace identity, and
-evaluates again while holding those handles. Only that locked evaluation
-authorizes the callback. The callback uses the already opened file handle.
-The entire absolute ancestor chain is held until the callback exits; sharing
-conflicts fail closed. This can conflict with editors or other applications
-holding incompatible handles. Writes replace file contents in place; they are
-not atomic content transactions and may partially complete on an I/O error.
+The repository adapter performs a nonpersisted preflight, securely opens the
+existing target without truncation, and evaluates again against that bound target.
+The callback mutates through this already opened file descriptor, not a reopened
+request string. Guard revalidates workspace and target identity immediately
+before and after the callback and before capability reads/writes, and expires
+the capability in a `finally` block. An allowed callback runs exactly once;
+rejected requests run zero callbacks.
+
+On Windows NTFS, Guard additionally holds the entire absolute ancestor chain and
+target without write/delete sharing until the callback exits. Sharing conflicts
+fail closed, which can conflict with editors holding incompatible handles.
+Writes replace contents in place, not as an atomic transaction, and can partially
+complete on I/O errors. A post-callback substitution failure reports failure with
+unknown mutation outcome; it cannot undo bytes already written. An admissible
+authorization result must never be read as proof of successful mutation.
 
 | Platform/form | Evaluation | Mutation |
 | --- | --- | --- |
 | Local Windows NTFS with verifiable directory case behavior | Supported | Existing regular files through the bound capability |
-| Linux 5.6+ x86-64/aarch64, ext4 without casefold, XFS, Btrfs, tmpfs | Supported using `openat2` | Fails closed |
+| Linux 5.6+ x86-64/aarch64, case-sensitive ext4/XFS/Btrfs without casefold, tmpfs | Supported using `openat2` | Existing regular files through the opened descriptor |
 | Network/unknown filesystems, other OSes, Linux without required syscall | Fails closed | Fails closed |
 | File/directory creation, rename, deletion | Missing paths may be evaluated | Fails closed |
 
-Linux resolution uses `RESOLVE_BENEATH | RESOLVE_NO_SYMLINKS | RESOLVE_NO_XDEV`;
-the last flag rejects same-device bind mounts as well. It does not solve the
-subsequent rename/link race for mutation: an open descriptor pins an object but
-does not keep that object inside the authorized pathname. The current adapter
-therefore refuses **all POSIX repository mutation**. Adding it requires an
-enforceable namespace-isolation mechanism or a separate native adapter with a
-demonstrated guarantee. There is no `Path.resolve()` fallback, trusted boolean
-claim of isolation, or unsafe opt-in.
+Linux uses `RESOLVE_BENEATH | RESOLVE_NO_SYMLINKS | RESOLVE_NO_XDEV`; the last flag
+also rejects same-device bind mounts. Mutation uses the descriptor returned by
+that lookup. Revalidation compares the pinned identities and repeats secure
+resolution to detect namespace replacement and newly introduced mounts. An open
+descriptor does not freeze the namespace: these checks detect changes but are
+not an OS-level sandbox or a guarantee against an independently authorized writer.
 
-The attacker may control request values and attempt filesystem substitution
-using ordinary filesystem operations. Initialization, authority selection,
-Guard's process, callback implementation, kernel and filesystem driver are
-trusted. A callback must use the capability for every governed mutation. Guard
-does not sandbox Python, control direct filesystem access, defend against an
-administrator/kernel bypass, or prevent other programs from modifying files
-outside this adapter. Evidence preserves the accepted relative target; rejected
-path values produce an exception before an evaluation artifact is saved. OS
-binding failures are not authority denials and do not create a success attestation.
+The agent controls request values. Guard, configuration, authority selection,
+callback, adapter, kernel and filesystem driver are trusted. A callback must
+use the capability for every governed mutation. Direct filesystem access outside
+the adapter, and concurrent untrusted processes with independent repository-write
+authority, are outside this in-process SDK guarantee. Accidental or detected
+substitution still fails closed wherever detectable, including after a callback;
+that does not establish rollback. Guard does not control direct bypass, sandbox
+Python, or require a broker, FUSE layer, container or privileged service.
+
+Evidence preserves the accepted canonical target. Rejected path values fail
+before authority evaluation; binding failures do not become success attestations.
+Acceptance outputs separate `authorization_evaluation=admissible|blocked` from
+`mutation_execution=executed|blocked|unsupported`. Evaluation-only acceptance runs
+no callbacks and explicitly reports `mutation_not_requested=true`. Mutation
+acceptance requires both exactly-once invocation and changed file bytes, on
+Windows and Linux; refusal alone cannot pass it.
 
 These OS choices follow the documented behavior of
 [Windows CreateFile sharing and reparse flags](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew)
 and [Linux openat2 resolution restrictions](https://www.man7.org/linux/man-pages/man2/openat2.2.html).
+XFS's legacy ASCII case-insensitive mode is rejected using its
+[filesystem geometry flags](https://man7.org/linux/man-pages/man2/ioctl_xfs_fsgeometry.2.html).
 
 ## Compatibility and release recommendation
 
 Recommend **0.18.0**, not a silent 0.17.x behavior change. Repository integrations
 must supply a root and replace generic path callbacks; v1 target-scoped literal
-integrations must declare their domain. POSIX repository mutation is deliberately
-unavailable until its isolation contract is implemented and reviewed. V1/v2/v3
+integrations must declare their domain. Existing-file mutation is supported on
+the Windows and Linux platforms above under the trusted adapter boundary. V1/v2/v3
 authority verification, caches, compiled contracts, capability catalogs, Ledger
 schemas, unrelated domain matching, and Cloud-resolution protocols are unchanged.
 
 This PR does not prepare that release: package version, citation, tags, release
 metadata and dependency conventions remain at the current main baseline. Cloud
 integration migration is a separate coordinated change after review.
+
+Remaining operations stay fail closed and have focused follow-ups:
+[macOS existing-file support #35](https://github.com/Waveframe-Labs/Waveframe-Guard/issues/35),
+[creation #36](https://github.com/Waveframe-Labs/Waveframe-Guard/issues/36),
+[rename #37](https://github.com/Waveframe-Labs/Waveframe-Guard/issues/37), and
+[deletion #38](https://github.com/Waveframe-Labs/Waveframe-Guard/issues/38).

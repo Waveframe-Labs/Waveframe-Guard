@@ -195,11 +195,6 @@ def test_adapter_uses_bound_target_once_and_expires_it(guard, repository):
         calls.append(path)
         return path.write_bytes(content)
 
-    if os.name != "nt":
-        with pytest.raises(RepositoryBoundaryError, match="unsupported on POSIX"):
-            write("safe/file.txt", b"after")
-        assert not calls and (repository / "safe/file.txt").read_bytes() == b"before"
-        return
     result = write("safe/file.txt", b"after")
     assert result["executed"] and result["value"] == 5 and len(calls) == 1
     assert (repository / "safe/file.txt").read_bytes() == b"after"
@@ -338,3 +333,62 @@ finally:
         pytest.skip("unprivileged mount namespaces unavailable")
     assert result.returncode == 0, result.stderr
     assert "mount-boundary-rejected" in result.stdout
+
+
+@pytest.mark.skipif(not sys.platform.startswith("linux"), reason="Linux detected namespace substitution")
+@pytest.mark.parametrize("substitution", ["file", "root", "hardlink"])
+def test_linux_revalidation_before_callback_prevents_mutation(guard, repository, monkeypatch, substitution):
+    boundary = guard.boundary_for()
+    evaluate = boundary._evaluate
+    evaluations = 0
+    calls = []
+
+    def substitute(*args, **kwargs):
+        nonlocal evaluations
+        result = evaluate(*args, **kwargs)
+        evaluations += 1
+        if evaluations == 2:  # After authorization of the securely opened descriptor.
+            if substitution == "file":
+                (repository / "safe/file.txt").rename(repository / "safe/moved.txt")
+            elif substitution == "root":
+                repository.rename(repository.with_name("moved-root"))
+            else:
+                os.link(repository / "safe/file.txt", repository / "safe/alias.txt")
+        return result
+
+    monkeypatch.setattr(boundary, "_evaluate", substitute)
+    with pytest.raises(RepositoryBoundaryError):
+        boundary.execute_repository(lambda target: calls.append(target.write_bytes(b"bad")),
+                                    execution_request=request("safe/file.txt"))
+    assert calls == []
+
+
+@pytest.mark.skipif(not sys.platform.startswith("linux"), reason="Linux post-callback namespace check")
+def test_linux_post_callback_substitution_reports_failure_without_undo(guard, repository):
+    calls = []
+    retained = []
+    def mutate(target):
+        retained.append(target)
+        calls.append(target.write_bytes(b"written"))
+        # Simulate an accidental direct namespace operation outside the adapter.
+        (repository / "safe/file.txt").rename(repository / "safe/moved.txt")
+    with pytest.raises(RepositoryBoundaryError) as error:
+        guard.boundary_for().execute_repository(mutate, execution_request=request("safe/file.txt"))
+    assert calls == [7]
+    assert error.value.evaluation["status"] == "admissible"  # Authorization, not execution success.
+    assert (repository / "safe/moved.txt").read_bytes() == b"written"
+    with pytest.raises(RepositoryBoundaryError, match="not active"):
+        retained[0].write_bytes(b"late")
+
+
+def test_substituted_capability_descriptor_cannot_mutate_another_file(guard, repository):
+    fd = os.open(repository / "crypto/key.txt", os.O_RDWR)
+    try:
+        def substitute(target):
+            target._fd = fd  # Simulate accidental corruption within trusted code.
+            target.write_bytes(b"bypass")
+        with pytest.raises(RepositoryBoundaryError, match="capability was substituted"):
+            guard.boundary_for().execute_repository(substitute, execution_request=request("safe/file.txt"))
+    finally:
+        os.close(fd)
+    assert (repository / "crypto/key.txt").read_bytes() == b"secret"

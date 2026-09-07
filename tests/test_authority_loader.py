@@ -514,11 +514,41 @@ def test_authority_loading_invariant_is_documented():
     assert "`LoadedAuthority.contract`" in source
 
 
+def test_v1_cache_reuse_does_not_cache_or_hide_target_semantics(tmp_path):
+    from guard.sdk import Guard
+    from test_repository_workspace import request
+
+    registry = _write_authority_fixture(tmp_path, target_requirements={
+        "allow": [], "deny": [{"match": "prefix", "value": "crypto/"}],
+    })
+    resolver = LocalRegistryResolver(registry, workspace_root=tmp_path)
+    cache = MemoryAuthorityCache()
+    options = dict(authority="finance-policy@1.2.0", authority_resolver=resolver,
+                   authority_cache=cache, actor_identity={"id": "actor", "role": "manager"},
+                   evaluation_time_source=lambda: "2026-09-07T00:00:00Z")
+    literal = Guard.local(workspace=tmp_path / "literal", target_domain="literal", **options)
+    repo = Guard.local(workspace=tmp_path / "repository-evidence", repository_root=tmp_path, **options)
+    try:
+        first = literal.boundary_for().evaluate(request("safe/new.txt"))
+        second = repo.boundary_for().evaluate(request("safe/new.txt"))
+        assert first["status"] == second["status"] == "admissible"
+        assert first["target_binding_hash"] != second["target_binding_hash"]
+        assert first["run_id"] != second["run_id"]
+        assert len(cache) == 1
+        loaded = load_authority("finance-policy@1.2.0", resolver=resolver, cache=cache)
+        assert "target_binding" not in loaded.contract
+        assert repo.boundary_for().target_binding.target_domain == "repository_path"
+        assert literal.boundary_for().target_binding.target_domain == "literal"
+    finally:
+        repo.close()
+
+
 def _write_authority_fixture(
     tmp_path: Path,
     *,
     registry_overrides=None,
     write_raw_contract=False,
+    target_requirements=None,
 ) -> Path:
     contracts_dir = tmp_path / "contracts"
     contracts_dir.mkdir()
@@ -532,6 +562,8 @@ def _write_authority_fixture(
         "stage_requirements": {},
         "invariants": {},
     }
+    if target_requirements is not None:
+        contract["target_requirements"] = target_requirements
     contract["contract_hash"] = _contract_hash(contract)
     raw_contract_path = contracts_dir / "finance-policy-1.2.0.contract.json"
     if write_raw_contract:

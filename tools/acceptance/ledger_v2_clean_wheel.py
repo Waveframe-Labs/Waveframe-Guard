@@ -120,20 +120,7 @@ def write_file(path):
     return path.relative_path
 
 Path("README.md").write_bytes(b"original")
-if os.name == "nt":
-    allowed = write_file("README.md")
-else:
-    from guard.sdk import RepositoryBoundaryError
-    try:
-        write_file("README.md")
-    except RepositoryBoundaryError as exc:
-        assert "unsupported on POSIX" in str(exc)
-    else:
-        raise AssertionError("unsupported POSIX mutation ran")
-    allowed = {"executed": False, "evaluation": guard.boundary_for().evaluate({
-        "schema_version": "normalized_execution_request.v1", "request_id": "wheel-eval",
-        "action": "modify", "target": "README.md", "arguments": {}, "artifacts": [],
-    })}
+allowed = write_file("README.md")
 try:
     write_file("deployment/production.yml")
 except GuardExecutionBlocked as blocked:
@@ -141,9 +128,10 @@ except GuardExecutionBlocked as blocked:
 else:
     raise AssertionError("deployment proposal was not blocked")
 
-assert allowed["executed"] is (os.name == "nt")
+assert allowed["executed"] is True
 assert blocked_evaluation["status"] == "blocked"
-assert mutations == (["README.md"] if os.name == "nt" else [])
+assert mutations == ["README.md"]
+assert Path("README.md").read_bytes() == b"updated"
 for evaluation in (allowed["evaluation"], blocked_evaluation):
     evidence = evaluation["authority_evidence"]
     for key in (
@@ -151,9 +139,10 @@ for evaluation in (allowed["evaluation"], blocked_evaluation):
         "domain_pack", "runtime_fact_schema", "constraint_ir", "runtime_facts",
     ):
         assert key in evidence
-print("allowed=README.md")
-print("blocked=deployment/production.yml")
-print(f"mutation_count={len(mutations)}")
+print("authorization_evaluation=admissible target=README.md")
+print("mutation_execution=executed target=README.md callback_count=1")
+print("authorization_evaluation=blocked target=deployment/production.yml")
+print("mutation_execution=blocked target=deployment/production.yml callback_count=0")
 print("manual_runtime_facts=False")
 print("repository_imports=False")
 '''
