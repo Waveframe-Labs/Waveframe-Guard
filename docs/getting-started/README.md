@@ -131,6 +131,15 @@ fresh virtual environment there, and performs a normal `pip install` of the
 wheel. It does not use an editable install or add the repository to Python's
 import path. The quickstart subprocess runs from that external directory.
 
+## SDK license
+
+Waveframe Guard Core SDK is open source under [Apache-2.0](../../LICENSE),
+which permits commercial use, modification and redistribution under its terms.
+Waveframe names and trademarks are not licensed beyond Apache-2.0's stated
+exceptions. Separately distributed hosted services and commercial products are
+outside this repository's scope; see the [commercial boundary](../../README.md#license-and-commercial-boundary)
+and [licensing details](../LICENSING.md).
+
 ## Dependency Compatibility Matrix
 
 These bounds apply to the issue #31 development change, planned for Guard

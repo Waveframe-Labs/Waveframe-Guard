@@ -38,6 +38,27 @@ No Ollama installation or Waveframe repository checkout is required. Keep the
 customer's existing model, agent framework, and tool functions; Guard wraps the
 tool that can cause a real-world change.
 
+## License and commercial boundary
+
+The Waveframe Guard Core SDK in this repository is open source under
+[Apache License 2.0](LICENSE). Commercial use, modification, and redistribution
+are permitted under that license, including use of the local SDK without a
+Waveframe subscription. Retain the applicable license and attribution notices.
+
+Apache-2.0 does not grant rights to Waveframe names or trademarks, except for
+the license's customary origin-identification and NOTICE exceptions.
+
+Waveframe Cloud, Console, hosted translation, managed evidence operations,
+Guard Inspector, Ledger Workspace, enterprise identity/integrations, support,
+and other separately distributed services and products remain separate
+commercial offerings; this repository does not relicense them. These product
+boundaries do not restrict Apache-2.0 rights to any SDK code included here,
+including its Cloud client integrations.
+
+See [contributing](CONTRIBUTING.md) and the
+[licensing scope and dependency notices](docs/LICENSING.md). This change is
+planned for Guard 0.18.0; it does not change already published package artifacts.
+
 ## 30-second integration
 
 With the Cloud environment variables from the next section configured, wrap an

@@ -19,6 +19,13 @@ except ModuleNotFoundError:  # Python 3.10
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+if __package__ in (None, ""):
+    sys.path.insert(0, str(REPO_ROOT))
+
+from tools.license_contract import (
+    APACHE_SHA256, LICENSE_FILES, NOTICE_TEXT, validate_license_metadata, validate_notices,
+)
+
 REQUIRED_WHEEL_FILES = {
     "guard/sdk/repository_evidence.py",
     "guard/sdk/target_binding.py",
@@ -36,6 +43,7 @@ REQUIRED_SDIST_FILES = {
     "guard/sdk/target_binding.py",
     "guard/sdk/repository_boundary.py",
     "LICENSE",
+    "NOTICE",
     "PKG-INFO",
     "README.md",
     "guard/sdk/__init__.py",
@@ -119,9 +127,15 @@ def _inspect_wheel(wheel: Path, expected_version: str) -> int:
         if missing:
             raise AssertionError(f"wheel is missing required public files: {sorted(missing)}")
         metadata_names = [name for name in names if name.name == "METADATA" and name.parent.name.endswith(".dist-info")]
-        license_names = [name for name in names if name.name == "LICENSE" and ".dist-info" in name.as_posix()]
-        if len(metadata_names) != 1 or not license_names:
-            raise AssertionError("wheel must contain one METADATA file and the packaged LICENSE")
+        if len(metadata_names) != 1:
+            raise AssertionError("wheel must contain one METADATA file")
+        license_root = metadata_names[0].parent / "licenses"
+        if any((license_root / name).as_posix() not in name_set for name in LICENSE_FILES):
+            raise AssertionError("wheel must contain LICENSE and NOTICE under .dist-info/licenses")
+        validate_notices(
+            archive.read((license_root / "LICENSE").as_posix()).decode("utf-8"),
+            archive.read((license_root / "NOTICE").as_posix()).decode("utf-8"),
+        )
         metadata = email.message_from_bytes(archive.read(metadata_names[0].as_posix()))
         _validate_metadata(metadata, expected_version, "wheel")
         _validate_archive_members(names, "wheel")
@@ -158,6 +172,10 @@ def _inspect_sdist(sdist: Path, expected_version: str) -> int:
         if extracted is None:
             raise AssertionError("could not read sdist PKG-INFO")
         _validate_metadata(email.message_from_bytes(extracted.read()), expected_version, "sdist")
+        license_file = archive.extractfile(f"{expected_root}/LICENSE")
+        notice_file = archive.extractfile(f"{expected_root}/NOTICE")
+        assert license_file is not None and notice_file is not None
+        validate_notices(license_file.read().decode("utf-8"), notice_file.read().decode("utf-8"))
         _validate_archive_members(relative_names, "sdist")
 
         def contents():
@@ -193,6 +211,7 @@ def _validate_metadata(metadata: email.message.Message, expected_version: str, l
             f"{label} runtime dependency metadata differs: "
             f"expected {sorted(expected_runtime)}, found {sorted(set(runtime_requirements))}"
         )
+    validate_license_metadata(metadata, label)
 
 
 def _normalize_requirement(requirement: str) -> str:
@@ -304,6 +323,22 @@ assert any(part in {"site-packages", "dist-packages"} for part in module_path.pa
 assert waveframe_guard.__version__ == expected_version
 assert version("waveframe-guard") == expected_version
 
+from importlib.metadata import distribution
+import hashlib
+installed = distribution("waveframe-guard")
+assert installed.metadata["License-Expression"] == "Apache-2.0"
+assert installed.metadata.get("License") is None
+assert sorted(installed.metadata.get_all("License-File", [])) == ["LICENSE", "NOTICE"]
+for name in ("LICENSE", "NOTICE"):
+    paths = [p for p in installed.files if str(p).endswith(".dist-info/licenses/" + name)]
+    assert len(paths) == 1, paths
+    text = installed.locate_file(paths[0]).read_text(encoding="utf-8")
+    if name == "LICENSE":
+        assert hashlib.sha256(text.encode("utf-8")).hexdigest() == "__APACHE_SHA256__"
+    else:
+        assert text == __NOTICE_TEXT__
+print("Installed license verified: Apache-2.0; canonical LICENSE and Waveframe NOTICE")
+
 # Legacy symbols survive installation but can never grant execution permission.
 from waveframe_guard import LegacyExecutionError, GovernanceError, GuardRuntime, GovernedRuntime
 assert GuardRuntime is GovernedRuntime
@@ -364,6 +399,9 @@ print(f"Clean wheel literal-target smoke passed from {module_path}: "
       "authorization_evaluation=admissible callback_execution=executed callback_count=1; "
       "denied_authorization_evaluation=blocked denied_callback_execution=blocked denied_callback_count=0")
 '''
+
+
+SMOKE_SCRIPT = SMOKE_SCRIPT.replace("__APACHE_SHA256__", APACHE_SHA256).replace("__NOTICE_TEXT__", repr(NOTICE_TEXT))
 
 
 REPOSITORY_SMOKE_SCRIPT = r'''

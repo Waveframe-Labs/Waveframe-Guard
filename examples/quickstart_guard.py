@@ -7,7 +7,7 @@
 # status: "Active"
 # author:
 #   name: "Waveframe Labs"
-# license: "Proprietary"
+# license: "Apache-2.0"
 # ai_assisted: "partial"
 # ---
 

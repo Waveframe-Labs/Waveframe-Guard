@@ -14,6 +14,11 @@ except ModuleNotFoundError:  # Python 3.10
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+if __package__ in (None, ""):
+    sys.path.insert(0, str(REPO_ROOT))
+
+from tools.license_contract import validate_document, validate_notices
+
 FORBIDDEN_PARTS = {
     ".guard-local",
     ".pytest_cache",
@@ -31,6 +36,7 @@ REQUIRED_FILES = {
     "CHANGELOG.md",
     "CITATION.cff",
     "LICENSE",
+    "NOTICE",
     "README.md",
     "SECURITY.md",
     "docs/getting-started/README.md",
@@ -80,6 +86,7 @@ def main() -> int:
     _validate_paths(tracked, failures)
     json_count = _validate_json(tracked, failures)
     _validate_secrets(tracked, failures)
+    _validate_licensing(tracked, failures)
     dependency_count = _validate_metadata(failures)
     _validate_diff(args.diff_base, failures)
 
@@ -169,6 +176,10 @@ def _validate_metadata(failures: list[str]) -> int:
         return 0
 
     project = pyproject.get("project", {})
+    if project.get("license") != "Apache-2.0":
+        failures.append("project.license must be Apache-2.0")
+    if project.get("license-files") != ["LICENSE", "NOTICE"]:
+        failures.append("project.license-files must include LICENSE and NOTICE")
     if project.get("name") != "waveframe-guard":
         failures.append("project.name must remain waveframe-guard")
     if project.get("requires-python") != ">=3.10":
@@ -197,6 +208,25 @@ def _validate_metadata(failures: list[str]) -> int:
             f"waveframe_guard={public_match.group(1) if public_match else None!r}"
         )
     return len(dependencies)
+
+
+def _validate_licensing(tracked: list[PurePosixPath], failures: list[str]) -> None:
+    try:
+        validate_notices(
+            (REPO_ROOT / "LICENSE").read_text(encoding="utf-8"),
+            (REPO_ROOT / "NOTICE").read_text(encoding="utf-8"),
+        )
+        citation = (REPO_ROOT / "CITATION.cff").read_text(encoding="utf-8")
+        if 'license: "Apache-2.0"' not in citation:
+            failures.append("citation license must be Apache-2.0")
+    except (OSError, AssertionError) as exc:
+        failures.append(str(exc))
+    for path in tracked:
+        if path.suffix.lower() in {".md", ".cff"} or path.name == "pyproject.toml":
+            try:
+                validate_document((REPO_ROOT / path).read_text(encoding="utf-8"), str(path))
+            except (OSError, AssertionError) as exc:
+                failures.append(str(exc))
 
 
 def _validate_diff(diff_base: str, failures: list[str]) -> None:
