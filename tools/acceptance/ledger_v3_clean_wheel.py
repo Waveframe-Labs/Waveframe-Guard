@@ -221,7 +221,12 @@ def modify(path):
 
 for path in ("README.md", "CHANGELOG.md"):
     Path(path).write_bytes(b"original")
-    assert modify(path)["executed"] is True
+    result = modify(path)
+    assert result["executed"] is True
+    proof = result["evaluation"]["execution_attestation"]
+    assert proof["schema_version"] == "guard_execution_attestation.v2"
+    assert proof["authority_basis"]["kind"] == "published_authority"
+    assert guard.store.load_execution_attestation(proof["run_id"]) == proof
     assert Path(path).read_bytes() == b"updated"
 try:
     modify("src/unpublished.py")
@@ -243,6 +248,7 @@ print("mutation_execution=blocked target=src/unpublished.py callback_count=0")
 print("private_evidence_required=False")
 print("bundle=authority_bundle.v3")
 print("receipt=publication_receipt.v3")
+print("execution_attestation=guard_execution_attestation.v2 authority_basis=published_authority reload_validated=true")
 '''
 
 

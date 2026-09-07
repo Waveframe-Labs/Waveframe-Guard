@@ -178,7 +178,20 @@ class LocalEvaluationStore:
             payload = json.loads(path.read_text(encoding="utf-8"))
         except json.JSONDecodeError as exc:
             raise GuardArtifactError(f"unreadable execution attestation: {exc.msg}") from exc
-        return validate_execution_attestation(payload)
+        validated = validate_execution_attestation(payload)
+        if validated["schema_version"] == "guard_execution_attestation.v2":
+            from .repository_evidence import validate_repository_attestation
+
+            if validated["run_id"] != run_id:
+                raise GuardArtifactError("repository execution attestation file/run identity mismatch")
+            try:
+                record = self.load_run(run_id)
+            except FileNotFoundError:
+                if validated["decision"] != "not_evaluated":
+                    raise GuardArtifactError("repository execution attestation decision receipt is missing") from None
+            else:
+                return validate_repository_attestation(validated, record=record)
+        return validated
 
     def replay(self, run_id: str) -> dict[str, Any]:
         record = self.load_run(run_id)
@@ -312,6 +325,10 @@ def build_execution_attestation(
 def validate_execution_attestation(attestation: Any) -> dict[str, Any]:
     if not isinstance(attestation, dict):
         raise GuardArtifactError("execution attestation must be a JSON object")
+    if attestation.get("schema_version") == "guard_execution_attestation.v2":
+        from .repository_evidence import validate_repository_attestation
+
+        return validate_repository_attestation(attestation)
     if attestation.get("schema_version") != GUARD_EXECUTION_ATTESTATION_V1:
         raise UnsupportedArtifactSchemaError(
             f"unsupported execution attestation schema: {attestation.get('schema_version')}"

@@ -133,6 +133,10 @@ assert blocked_evaluation["status"] == "blocked"
 assert mutations == ["README.md"]
 assert Path("README.md").read_bytes() == b"updated"
 for evaluation in (allowed["evaluation"], blocked_evaluation):
+    proof = evaluation["execution_attestation"]
+    assert proof["schema_version"] == "guard_execution_attestation.v2"
+    assert proof["authority_basis"]["kind"] == "published_authority"
+    assert guard.store.load_execution_attestation(proof["run_id"]) == proof
     evidence = evaluation["authority_evidence"]
     for key in (
         "authority", "authority_bundle", "publication_receipt", "compiled_contract",
@@ -145,6 +149,7 @@ print("authorization_evaluation=blocked target=deployment/production.yml")
 print("mutation_execution=blocked target=deployment/production.yml callback_count=0")
 print("manual_runtime_facts=False")
 print("repository_imports=False")
+print("execution_attestation=guard_execution_attestation.v2 authority_basis=published_authority reload_validated=true")
 '''
 
 

@@ -5,6 +5,7 @@ from __future__ import annotations
 import ctypes
 import os
 import platform
+import re
 import stat
 import struct
 from contextlib import contextmanager
@@ -14,6 +15,24 @@ from uuid import uuid4
 
 class RepositoryBoundaryError(ValueError):
     """Repository binding failed, possibly after a callback partially wrote bytes."""
+
+
+def validate_repository_request(request):
+    """Closed, exact request projection. Never echo rejected caller values."""
+    fields = {"schema_version", "request_id", "action", "target", "arguments", "artifacts"}
+    if type(request) is not dict or set(request) != fields:
+        raise RepositoryBoundaryError("repository request requires exactly the closed request fields")
+    if request["schema_version"] != "normalized_execution_request.v1":
+        raise RepositoryBoundaryError("repository request has an unsupported schema")
+    for field in ("request_id", "action"):
+        value = request[field]
+        if type(value) is not str or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.:-]{0,255}", value) is None:
+            raise RepositoryBoundaryError("repository request identifiers must be nonempty ASCII tokens")
+    if type(request["arguments"]) is not dict or request["arguments"]:
+        raise RepositoryBoundaryError("repository request arguments must be an empty object")
+    if type(request["artifacts"]) is not list or request["artifacts"]:
+        raise RepositoryBoundaryError("repository request artifacts must be an empty list")
+    canonical_repository_path(request["target"])
 
 
 def canonical_repository_path(value: object) -> str:
@@ -212,7 +231,7 @@ class RepositoryWorkspace:
                     if leaf_fd is not None and os.fstat(leaf_fd).st_nlink != 1:
                         raise RepositoryBoundaryError("repository target acquired a hard-link alias")
                 except OSError as exc:
-                    raise RepositoryBoundaryError("repository identity revalidation failed") from exc
+                    raise RepositoryBoundaryError("repository identity revalidation failed") from None
 
             validate()
             if mutation:
@@ -226,7 +245,7 @@ class RepositoryWorkspace:
         except OSError as exc:
             raise RepositoryBoundaryError(
                 "repository filesystem binding failed; inaccessible, indirect, replaced, or unsupported target"
-            ) from exc
+            ) from None
         finally:
             for fd in reversed(fds):
                 os.close(fd)

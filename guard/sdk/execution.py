@@ -4,6 +4,8 @@ from datetime import datetime, timezone
 from dataclasses import asdict
 from copy import deepcopy
 from functools import wraps
+from contextlib import ExitStack
+from uuid import uuid4
 from time import perf_counter_ns
 from typing import Any, Callable
 
@@ -19,7 +21,8 @@ from waveframe_guard.authority.runtime_facts import (
 from waveframe_guard.authority.types import LoadedAuthority
 from waveframe_guard.authority.exceptions import AuthorityVerificationError
 from .local_persistence import build_execution_attestation
-from .repository_boundary import RepositoryBoundaryError, RepositoryWorkspace
+from .repository_boundary import RepositoryBoundaryError, RepositoryWorkspace, validate_repository_request
+from .repository_evidence import build_repository_attestation
 from .target_binding import TargetBinding, reject_binding_override
 
 
@@ -152,6 +155,8 @@ class GuardRuntimeBoundary:
         return self._repository_workspace
 
     def evaluate(self, execution_request: dict[str, Any], **kwargs: Any) -> dict[str, Any]:
+        if self._repository_required():
+            validate_repository_request(execution_request)
         request = deepcopy(execution_request)
         if self._repository_required():
             with self._require_workspace().bind(
@@ -177,6 +182,8 @@ class GuardRuntimeBoundary:
         save: bool = True,
     ) -> dict[str, Any]:
         self._check_target_binding()
+        if self._repository_required():
+            validate_repository_request(execution_request)
         original_request = deepcopy(execution_request)
         selected_context = deepcopy(execution_context if execution_context is not None else self.execution_context)
         if self._target_binding is not None:
@@ -233,44 +240,12 @@ class GuardRuntimeBoundary:
         if self._target_binding is not None:
             result["target_binding"] = self._target_binding.evidence()
             result["target_binding_hash"] = self._target_binding.canonical_hash
+        if self._repository_required():
+            result["accepted_execution_request"] = deepcopy(original_request)
+            result["cloud_preservation_scope"] = "decision_only_not_final_execution"
         validate_guard_enforcement_outcome(result["enforcement_outcome"])
         if save and self.store is not None:
-            saved_inputs = {
-                "compiled_authority": deepcopy(evaluated_contract),
-                "execution_request": original_request,
-                "runtime_evidence": result["runtime_evidence"],
-            }
-            if self._target_binding is not None:
-                saved_inputs["target_binding"] = self._target_binding.evidence()
-            if authority_evidence is not None:
-                saved_inputs.update(
-                    {
-                        "evaluated_execution_request": deepcopy(evaluation_request),
-                        "authority_evidence": deepcopy(authority_evidence),
-                        "runtime_facts": deepcopy(dict(v2_facts.facts)),
-                    }
-                )
-            saved_record = self.store.save_evaluation(
-                inputs=saved_inputs,
-                evaluation=result,
-            )
-            result["run_id"] = saved_record["run_id"]
-            if self.cloud_preservation_client is not None:
-                replay_result = self.store.replay(saved_record["run_id"])
-                preservation_result = self.cloud_preservation_client.preserve(
-                    _build_cloud_preservation_package(
-                        saved_record=saved_record,
-                        replay_result=replay_result,
-                    )
-                )
-                result["cloud_preservation"] = asdict(preservation_result)
-                if preservation_result.ok:
-                    updated_record = self.store.append_cloud_preservation(
-                        saved_record["run_id"],
-                        _cloud_preservation_metadata(result["cloud_preservation"]),
-                        record_hash=saved_record["record_hash"],
-                    )
-                    saved_record["cloud_preservation"] = updated_record["cloud_preservation"]
+            self._persist_evaluation(result, original_request)
         if verified_v2:
             if result["status"] == "admissible":
                 self._record_execution_evidence(
@@ -292,6 +267,46 @@ class GuardRuntimeBoundary:
                 )
         return result
 
+    def _persist_evaluation(self, result, original_request):
+        saved_inputs = {
+            "compiled_authority": deepcopy(self.compiled_authority),
+            "execution_request": original_request,
+            "runtime_evidence": result["runtime_evidence"],
+        }
+        if self._target_binding is not None:
+            saved_inputs["target_binding"] = self._target_binding.evidence()
+        if "authority_evidence" in result:
+            saved_inputs.update(
+                {
+                    "evaluated_execution_request": deepcopy(original_request),
+                    "authority_evidence": deepcopy(result["authority_evidence"]),
+                    "runtime_facts": deepcopy(result["runtime_facts"]),
+                }
+            )
+        decision = deepcopy(result)
+        decision.pop("execution_attestation", None)  # Preservation is decision-only.
+        saved_record = self.store.save_evaluation(
+            inputs=saved_inputs,
+            evaluation=decision,
+        )
+        result["run_id"] = saved_record["run_id"]
+        if self.cloud_preservation_client is not None:
+            replay_result = self.store.replay(saved_record["run_id"])
+            preservation_result = self.cloud_preservation_client.preserve(
+                _build_cloud_preservation_package(
+                    saved_record=saved_record,
+                    replay_result=replay_result,
+                )
+            )
+            result["cloud_preservation"] = asdict(preservation_result)
+            if preservation_result.ok:
+                updated_record = self.store.append_cloud_preservation(
+                    saved_record["run_id"],
+                    _cloud_preservation_metadata(result["cloud_preservation"]),
+                    record_hash=saved_record["record_hash"],
+                )
+                saved_record["cloud_preservation"] = updated_record["cloud_preservation"]
+
     def enforce(self, execution_request: dict[str, Any], **kwargs: Any) -> dict[str, Any]:
         evaluation = self.evaluate(execution_request, **kwargs)
         status = evaluation["status"]
@@ -305,32 +320,56 @@ class GuardRuntimeBoundary:
         self, fn: Callable[..., Any], *, execution_request: dict[str, Any], **kwargs: Any,
     ) -> dict[str, Any]:
         if self._repository_required():
-            # Retain authority/fact diagnostics, but never run the generic callback.
-            self.enforce(execution_request, save=False)
-            raise RepositoryBoundaryError(
+            validate_repository_request(execution_request)
+            try:
+                evaluation = self.evaluate(execution_request, save=False)
+            except RepositoryBoundaryError as exc:
+                self._record_repository_refusal(exc, execution_request, save=kwargs.get("save", True))
+                raise
+            if evaluation["status"] != "admissible":
+                if kwargs.get("save", True) and self.store is not None:
+                    self._persist_evaluation(evaluation, execution_request)
+                return self._execute(fn, execution_request=execution_request, _evaluation=evaluation,
+                                     raise_on_block=kwargs.get("raise_on_block", True))
+            error = RepositoryBoundaryError(
                 "repository mutation requires repository_tool() or execute_repository(); "
                 "generic tool/protect/execute callbacks cannot bind the mutation target"
             )
+            self._record_repository_refusal(error, execution_request, evaluation, save=kwargs.get("save", True))
+            raise error
         return self._execute(fn, execution_request=execution_request, **kwargs)
 
     def execute_repository(
         self, fn: Callable[..., Any], *, execution_request: dict[str, Any],
         raise_on_block: bool = True, **evaluation_kwargs: Any,
     ) -> dict[str, Any]:
+        # Malformed/unclosed requests are not admitted executions: no artifacts,
+        # authority comparison, filesystem access or preservation is permitted.
+        validate_repository_request(execution_request)
         request = deepcopy(execution_request)
         workspace = self._require_workspace()
         # Evaluate before acquiring a writable capability so a denial never opens
         # a mutation handle, and unsupported forms cannot hide authority errors.
         preflight_kwargs = {**evaluation_kwargs, "save": False}
-        evaluation = self.evaluate(request, **preflight_kwargs)
+        try:
+            evaluation = self.evaluate(request, **preflight_kwargs)
+        except RepositoryBoundaryError as exc:
+            self._record_repository_refusal(exc, request, save=evaluation_kwargs.get("save", True))
+            raise
         if evaluation["status"] != "admissible":
             evaluation = self.evaluate(request, **evaluation_kwargs)
             return self._execute(fn, execution_request=request, raise_on_block=raise_on_block,
                                  _evaluation=evaluation)
-        with workspace.bind(
-            request.get("target"), mutation=True,
-            requirements=self.compiled_authority.get("target_requirements"),
-        ) as target:
+        with ExitStack() as stack:
+            try:
+                target = stack.enter_context(workspace.bind(
+                    request.get("target"), mutation=True,
+                    requirements=self.compiled_authority.get("target_requirements"),
+                ))
+            except RepositoryBoundaryError as exc:
+                self._record_repository_refusal(exc, request, evaluation,
+                                                save=evaluation_kwargs.get("save", True))
+                raise
             # The opened descriptor is the mutation target. Windows also holds
             # namespace locks; Linux relies on the trusted in-process adapter.
             locked = self._evaluate(request, **evaluation_kwargs)
@@ -357,6 +396,22 @@ class GuardRuntimeBoundary:
 
             return self._execute(invoke, execution_request=request, raise_on_block=raise_on_block,
                                  _evaluation=locked, _before_callback=before_callback)
+
+    def _record_repository_refusal(self, error, request, evaluation=None, *, save=True):
+        if evaluation is None:
+            evaluation = {
+                "status": "not_evaluated", "accepted_execution_request": deepcopy(request),
+                "target_binding": self._target_binding.evidence(),
+                "target_binding_hash": self._target_binding.canonical_hash,
+            }
+        elif save and self.store is not None and not evaluation.get("run_id"):
+            self._persist_evaluation(evaluation, request)
+        self._record_execution_evidence(
+            evaluation, callback_invoked=False, callback_completed=False,
+            execution_status="not_run", mutation_status="not_performed", mutation_executed=False,
+            persist=save,
+        )
+        error.evaluation = evaluation
 
     def _execute(
         self,
@@ -477,32 +532,42 @@ class GuardRuntimeBoundary:
         execution_status: str,
         mutation_status: str,
         mutation_executed: bool | None,
+        persist: bool = True,
     ) -> dict[str, Any] | None:
         authority_evidence = evaluation.get("authority_evidence")
-        if not isinstance(authority_evidence, dict):
+        repository = evaluation.get("target_binding", {}).get("target_domain") == "repository_path"
+        if not repository and not isinstance(authority_evidence, dict):
             return None
-        run_id = evaluation.get("run_id") or evaluation["enforcement_outcome"]["outcome_id"]
+        run_id = evaluation.get("run_id") or evaluation.get("enforcement_outcome", {}).get("outcome_id") or "guard_attempt_" + uuid4().hex
         receipt_hash = None
         if self.store is not None and evaluation.get("run_id"):
             try:
                 receipt_hash = self.store.load_run(evaluation["run_id"])["receipt"]["receipt_hash"]
             except (FileNotFoundError, KeyError, TypeError):
+                if repository:
+                    from .local_persistence import GuardArtifactError
+
+                    raise GuardArtifactError("repository execution decision receipt is unavailable") from None
                 receipt_hash = None
-        attestation = build_execution_attestation(
-            run_id=run_id,
-            guard_receipt_hash=receipt_hash,
-            authority_evidence_hash=stable_hash(authority_evidence),
-            runtime_facts_hash=evaluation["runtime_facts_hash"],
-            decision=evaluation["status"],
-            callback_invoked=callback_invoked,
-            callback_completed=callback_completed,
-            execution_status=execution_status,
-            mutation_status=mutation_status,
+        state = dict(
+            callback_invoked=callback_invoked, callback_completed=callback_completed,
+            execution_status=execution_status, mutation_status=mutation_status,
             mutation_executed=mutation_executed,
-            target_binding=evaluation.get("target_binding"),
         )
+        if repository:
+            attestation = build_repository_attestation(
+                run_id=run_id, receipt_hash=receipt_hash, contract=self.compiled_authority,
+                evaluation=evaluation, **state,
+            )
+        else:
+            attestation = build_execution_attestation(
+                run_id=run_id, guard_receipt_hash=receipt_hash,
+                authority_evidence_hash=stable_hash(authority_evidence),
+                runtime_facts_hash=evaluation["runtime_facts_hash"],
+                decision=evaluation["status"], target_binding=evaluation.get("target_binding"), **state,
+            )
         evaluation["execution_attestation"] = attestation
-        if self.store is not None and evaluation.get("run_id"):
+        if persist and self.store is not None and (evaluation.get("run_id") or evaluation["status"] == "not_evaluated"):
             self.store.export_execution_attestation(attestation)
         return attestation
 

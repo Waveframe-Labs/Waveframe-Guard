@@ -59,6 +59,34 @@ the callback receives exactly one `RepositoryTarget`. Its read-only
 `__fspath__` implementation, cannot select another path, and expires when the
 callback exits. Callbacks must not retain it or use private attributes.
 
+Repository-bound `evaluate` and `execute_repository` accept exactly this closed
+request projection, with all six fields required:
+
+```python
+request = {
+    "schema_version": "normalized_execution_request.v1",
+    "request_id": "edit-1",
+    "action": "modify",
+    "target": "docs/guide.md",
+    "arguments": {},
+    "artifacts": [],
+}
+content = b"Updated guide\n"  # stays outside execution_request and evidence
+guard.boundary_for().execute_repository(
+    lambda target: target.write_bytes(content), execution_request=request,
+)
+```
+
+Nonempty arguments/artifacts, extra fields (including nested provider, binding,
+path or content metadata), incorrect container types and noncanonical targets
+are rejected, never silently redacted. Request IDs and actions must be ASCII
+tokens matching `[A-Za-z0-9][A-Za-z0-9_.:-]{0,255}`; they cannot carry paths.
+Validation precedes authority comparison, filesystem binding, all local artifact
+writes, Cloud preservation and callbacks. Diagnostics never echo rejected values.
+Mutation content and other parameters must travel only through trusted callback
+closures or decorator arguments, not request metadata. Literal v1 requests retain
+their existing non-repository behavior.
+
 `boundary_for().evaluate(request, save=False)` validates the filesystem binding
 and performs an evaluation without mutation. An admissible evaluation is not a
 reusable filesystem capability or a promise that mutation is supported.
@@ -112,6 +140,46 @@ Replay reports `replay_scope="logical_decision_only"`,
 `binding_assurance="recorded_not_revalidated"`. It retains the original binding
 and verifies its receipt integrity; it does not reopen the workspace, recreate
 historical filesystem state, authorize a fresh mutation or execute a callback.
+
+## Authority-version-neutral execution evidence
+
+Admitted repository execution attempts emit `guard_execution_attestation.v2`
+for v1, v2 and v3 authorities. The additive artifact has a discriminated
+`authority_basis`: `compiled_contract` records the contract ID/version, declared
+contract hash and full canonical contract hash; `published_authority` additionally
+records real authority-evidence and runtime-facts hashes. V1 does not fabricate
+publication evidence or use those fields to mean something else. Validation of
+existing `guard_execution_attestation.v1` artifacts is unchanged.
+
+V2 attestations bind the accepted closed request and its hash, captured target
+binding and its hash, authority basis, decision outcome hash, decision receipt
+hash (when saved), and execution state into a canonical attestation hash. Reload
+validates those links against the saved decision. These are integrity hashes,
+not signatures against someone authorized to rewrite every local artifact.
+
+| Result | Callback invoked / completed | Execution | Mutation / executed |
+| --- | --- | --- | --- |
+| Blocked or unsupported before callback | false / false | not_run | not_performed / false |
+| Callback succeeds | true / true | succeeded | executed / true |
+| Callback fails before completion | true / false | failed | unknown / null |
+| Post-callback validation fails | true / true | failed | unknown / null |
+
+The failure attestation is attached to the `RepositoryBoundaryError.evaluation`
+and saved locally when enabled. An incomplete marker precedes invocation so an
+interrupted process does not leave a success claim. A malformed/unclosed request
+is rejected before admission and emits **no artifacts at all**. A valid request
+refused by filesystem binding before authority comparison emits a standalone
+`not_evaluated`/`not_run` attestation with null decision/receipt hashes: no logical
+decision is fabricated. Missing trusted configuration or invalid authority
+activation cannot produce a trusted execution proof. `save=False` returns proof
+without writing it. No failure evidence claims rollback of written bytes.
+
+Cloud preservation continues to capture the **decision only**, before execution;
+repository evaluations label this `cloud_preservation_scope =
+"decision_only_not_final_execution"`. Final execution attestations are local and
+are not claimed to have been uploaded by that preservation call. Existing Cloud
+runtime attestation calls for v2/v3 remain unchanged and separate. This PR changes
+no Cloud API or protocol; Cloud integration migration remains pending.
 
 ## Accepted paths and filesystem identities
 

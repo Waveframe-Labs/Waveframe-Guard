@@ -350,12 +350,15 @@ def test_missing_or_incorrect_runtime_facts_fail_before_callback(
         actor_identity=actor,
     )
     calls = []
-    with pytest.raises(RuntimeFactError, match=error):
+    from guard.sdk import RepositoryBoundaryError
+    expected = RuntimeFactError if isinstance(proposal["action"], str) else RepositoryBoundaryError
+    diagnostic = error if expected is RuntimeFactError else "repository request identifiers"
+    with pytest.raises(expected, match=diagnostic):
         guard.boundary_for().execute(lambda: calls.append(True), execution_request=proposal)
     assert calls == []
 
 
-def test_unrelated_proposal_metadata_is_ignored_and_not_fact_hashed(tmp_path, publication):
+def test_repository_proposal_metadata_is_rejected_before_persistence(tmp_path, publication):
     resolver = _write_publication(tmp_path, publication)
     guard = Guard.local(
         repository_root=tmp_path, workspace=tmp_path / "evidence",
@@ -370,10 +373,10 @@ def test_unrelated_proposal_metadata_is_ignored_and_not_fact_hashed(tmp_path, pu
         "metadata": {"customer_trace": "not-an-enforcement-fact"},
         "unknown": {"decision": "blocked", "number": 7},
     }
-    extra = guard.boundary_for().evaluate(request, save=False)
-    assert extra["status"] == baseline["status"] == "admissible"
-    assert extra["runtime_facts"] == baseline["runtime_facts"]
-    assert extra["runtime_facts_hash"] == baseline["runtime_facts_hash"]
+    from guard.sdk import RepositoryBoundaryError
+    with pytest.raises(RepositoryBoundaryError, match="closed request fields"):
+        guard.boundary_for().evaluate(request)
+    assert baseline["status"] == "admissible" and guard.store.history() == []
 
 
 @pytest.mark.parametrize(
@@ -398,7 +401,8 @@ def test_caller_fact_injection_and_override_interfaces_fail_closed(
         actor_identity={"id": "repo-agent", "type": "agent", "role": "repository-maintainer"},
     )
     calls = []
-    with pytest.raises(RuntimeFactError, match="caller-supplied enforcement facts"):
+    from guard.sdk import RepositoryBoundaryError
+    with pytest.raises(RepositoryBoundaryError, match="repository request"):
         guard.boundary_for().execute(
             lambda: calls.append(True),
             execution_request={**_request("README.md"), **injection},
@@ -709,7 +713,8 @@ def test_validation_failure_has_no_callback_or_success_attestation(tmp_path, pub
         actor_identity={"id": "repo-agent", "type": "agent", "role": "repository-maintainer"},
     )
     calls = []
-    with pytest.raises(RuntimeFactError):
+    from guard.sdk import RepositoryBoundaryError
+    with pytest.raises(RepositoryBoundaryError):
         guard.boundary_for().execute(
             lambda: calls.append(True),
             execution_request={**_request("README.md"), "runtime_facts": {}},
@@ -916,7 +921,7 @@ def test_verified_cache_cannot_override_workspace_or_downgrade_to_literal(tmp_pa
         assert proof["target_binding_hash"] == one["target_binding_hash"]
         changed = copy.deepcopy(proof)
         changed["target_binding"]["target_domain"] = "literal"
-        with pytest.raises(GuardArtifactError, match="binding hash mismatch"):
+        with pytest.raises(GuardArtifactError, match="binding"):
             validate_execution_attestation(changed)
     finally:
         first.close()

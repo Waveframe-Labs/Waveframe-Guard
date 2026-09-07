@@ -20,6 +20,7 @@ except ModuleNotFoundError:  # Python 3.10
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 REQUIRED_WHEEL_FILES = {
+    "guard/sdk/repository_evidence.py",
     "guard/sdk/target_binding.py",
     "guard/sdk/repository_boundary.py",
     "guard/sdk/__init__.py",
@@ -31,6 +32,7 @@ REQUIRED_WHEEL_FILES = {
     "waveframe_guard/schemas.py",
 }
 REQUIRED_SDIST_FILES = {
+    "guard/sdk/repository_evidence.py",
     "guard/sdk/target_binding.py",
     "guard/sdk/repository_boundary.py",
     "LICENSE",
@@ -384,6 +386,10 @@ try:
         result = write("safe/file.txt", b"after")
         assert result["executed"] is True and result["evaluation"]["status"] == "admissible"
         assert calls == ["safe/file.txt"] and (root / "safe/file.txt").read_bytes() == b"after"
+        proof = result["evaluation"]["execution_attestation"]
+        assert proof["schema_version"] == "guard_execution_attestation.v2"
+        assert proof["authority_basis"]["kind"] == "compiled_contract"
+        assert guard.store.load_execution_attestation(proof["run_id"]) == proof
         print("authorization_evaluation=admissible mutation_execution=executed target=safe/file.txt callback_count=1")
         try:
             write("crypto/key.txt", b"blocked")
@@ -397,10 +403,14 @@ try:
             write("safe/new.txt", b"unsupported")
         except RepositoryBoundaryError as error:
             assert "creation is unsupported" in str(error)
+            proof = error.evaluation["execution_attestation"]
+            assert proof["callback_invoked"] is False and proof["mutation_status"] == "not_performed"
+            assert guard.store.load_execution_attestation(proof["run_id"]) == proof
         else:
             raise AssertionError("unsupported creation ran")
         assert calls == ["safe/file.txt"] and not (root / "safe/new.txt").exists()
         print("authorization_evaluation=admissible mutation_execution=unsupported target=safe/new.txt callback_count=0")
+        print("execution_attestation=guard_execution_attestation.v2 authority_basis=compiled_contract reload_validated=true")
 finally:
     guard.close()
 '''

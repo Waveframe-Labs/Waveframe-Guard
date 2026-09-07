@@ -529,7 +529,8 @@ def test_v3_runtime_fact_incompatibility_fails_closed(tmp_path, multi_publicatio
         authority_resolver=_write_artifacts(tmp_path / "publication", multi_publication),
         actor_identity={"id": "agent", "type": "agent"},
     )
-    with pytest.raises(RuntimeFactError):
+    from guard.sdk import RepositoryBoundaryError
+    with pytest.raises(RepositoryBoundaryError):
         guard.boundary_for().evaluate(
             {**_request("README.md"), "runtime_facts": {"proposal.resource.path": 42}},
             save=False,

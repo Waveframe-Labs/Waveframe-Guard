@@ -39,7 +39,7 @@ def test_request_cannot_supply_binding(bound, field, nested, monkeypatch):
     payload = request("safe/file.txt")
     payload.update({"arguments": {field: "literal"}} if nested else {field: "literal"})
     monkeypatch.setattr("guard.sdk.execution.evaluate_runtime", lambda **k: pytest.fail("authority evaluated"))
-    with pytest.raises(RepositoryBoundaryError, match="caller-supplied target binding"):
+    with pytest.raises(RepositoryBoundaryError, match="repository request"):
         bound.boundary_for().evaluate(payload)
     assert bound.store.history() == []
 
