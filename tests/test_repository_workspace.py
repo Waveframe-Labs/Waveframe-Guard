@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+import sys
+import shutil
 from pathlib import Path
 
 import pytest
@@ -228,6 +230,8 @@ def test_authorization_and_callback_cannot_replace_target(guard, repository, mon
     original_request = request("safe/file.txt")
     def mutate(target):
         original_request["target"] = "crypto/key.txt"
+        with pytest.raises(OSError):
+            os.link(repository / "safe/file.txt", repository.parent / "external-alias.txt")
         return target.write_bytes(b"bound")
     result = boundary.execute_repository(mutate, execution_request=original_request)
     assert result["executed"] and attempts
@@ -280,3 +284,49 @@ def test_repository_rules_cannot_introduce_unsupported_aliases(repository, tmp_p
             instance.boundary_for().evaluate(request("safe/file.txt"), save=False)
     finally:
         instance.close()
+
+
+def test_generic_tool_cannot_authorize_a_different_mutation_argument(guard, repository):
+    calls = []
+    @guard.tool(target=lambda path: "safe/file.txt", action="modify")
+    def unsafe_write(path):
+        calls.append(path)
+        (repository / path).write_bytes(b"bypass")
+    with pytest.raises(RepositoryBoundaryError, match="generic"):
+        unsafe_write("crypto/key.txt")
+    assert not calls and (repository / "crypto/key.txt").read_bytes() == b"secret"
+
+
+@pytest.mark.skipif(not sys.platform.startswith("linux"), reason="Linux mount namespace")
+def test_same_device_bind_mount_rejected_where_namespaces_available(repository, tmp_path):
+    if not shutil.which("unshare") or not shutil.which("mount"):
+        pytest.skip("mount namespace tools unavailable")
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (outside / "file.txt").write_bytes(b"outside")
+    mountpoint = repository / "safe/mount"
+    mountpoint.mkdir()
+    # The mount exists only in this child namespace and disappears on exit.
+    script = """
+import subprocess, sys
+from pathlib import Path
+from guard.sdk.repository_boundary import RepositoryWorkspace, RepositoryBoundaryError
+root, source, target = map(Path, sys.argv[1:])
+if subprocess.run(['mount', '--bind', str(source), str(target)], capture_output=True).returncode:
+    raise SystemExit(77)
+workspace = RepositoryWorkspace(root)
+try:
+    with workspace.bind('safe/mount/file.txt'):
+        raise AssertionError('same-device mount crossed the workspace boundary')
+except RepositoryBoundaryError:
+    print('mount-boundary-rejected')
+finally:
+    workspace.close()
+"""
+    result = subprocess.run(["unshare", "--user", "--map-root-user", "--mount", sys.executable,
+                             "-c", script, str(repository), str(outside), str(mountpoint)],
+                            text=True, capture_output=True)
+    if result.returncode == 77 or "unshare:" in result.stderr:
+        pytest.skip("unprivileged mount namespaces unavailable")
+    assert result.returncode == 0, result.stderr
+    assert "mount-boundary-rejected" in result.stdout
