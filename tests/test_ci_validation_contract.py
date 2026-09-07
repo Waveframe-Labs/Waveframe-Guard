@@ -11,10 +11,10 @@ from tools.acceptance import package_acceptance
 
 
 APPROVED_RUNTIME_DEPENDENCIES = [
-    "cricore",
-    "cricore-proposal-normalizer",
+    "cricore>=0.13.0,<0.15.0",
+    "cricore-proposal-normalizer>=0.2.0,<0.3.0",
     "governance-ledger>=0.7.0,<0.9.0",
-    "requests",
+    "requests>=2.33.0,<3.0.0",
 ]
 
 
@@ -34,10 +34,10 @@ def test_repository_contract_accepts_exact_ledger_runtime_dependencies():
     [
         [*APPROVED_RUNTIME_DEPENDENCIES, "unapproved-package>=1"],
         [
-            "cricore",
-            "cricore-proposal-normalizer",
+            "cricore>=0.13.0,<0.15.0",
+            "cricore-proposal-normalizer>=0.2.0,<0.3.0",
             "governance-ledger[guard]>=0.7.0,<0.9.0",
-            "requests",
+            "requests>=2.33.0,<3.0.0",
         ],
     ],
 )
@@ -93,8 +93,34 @@ def test_package_metadata_contract_rejects_injected_dependency():
         package_acceptance._validate_metadata(metadata, "0.15.0", "test package")
 
 
-def test_ci_binds_v3_acceptance_to_merged_ledger_commit():
+def test_ci_binds_compatibility_to_exact_cri_candidate():
     workflow = Path(".github/workflows/guard-validation.yml").read_text(encoding="utf-8")
+    runner = Path("tools/acceptance/dependency_matrix.py").read_text(encoding="utf-8")
 
-    assert "2b9a6b0a239d0e834d1bb42cd2efa30abe299e70" in workflow
-    assert "tools/acceptance/ledger_v3_clean_wheel.py" in workflow
+    assert "411dfaa976fd4b37efc5fd3e39076edcd3603e1b" in workflow
+    assert "411dfaa976fd4b37efc5fd3e39076edcd3603e1b" in runner
+    assert "--profile minimum" in workflow and "--profile candidate" in workflow
+    assert "ledger_v3_clean_wheel.RUNNER" in runner
+
+
+@pytest.mark.parametrize("position", range(4))
+@pytest.mark.parametrize("change", ["unbounded", "no_lower", "no_upper", "widened"])
+def test_repository_contract_rejects_dependency_bound_removal_or_widening(position, change):
+    dependencies = APPROVED_RUNTIME_DEPENDENCIES.copy()
+    name, bounds = dependencies[position].split(">=", 1)
+    lower, upper = bounds.split(",<")
+    dependencies[position] = {
+        "unbounded": name,
+        "no_lower": f"{name}<{upper}",
+        "no_upper": f"{name}>={lower}",
+        "widened": f"{name}>={lower},<99.0.0",
+    }[change]
+    failures = []
+    validate_repository._validate_runtime_dependencies(dependencies, failures)
+    assert any("dependency contract changed unexpectedly" in failure for failure in failures)
+    metadata = email.message_from_string("\n".join([
+        "Name: waveframe-guard", "Version: 0.17.0", "Requires-Python: >=3.10",
+        *(f"Requires-Dist: {dependency}" for dependency in dependencies), "",
+    ]))
+    with pytest.raises(AssertionError, match="runtime dependency metadata differs"):
+        package_acceptance._validate_metadata(metadata, "0.17.0", "test package")

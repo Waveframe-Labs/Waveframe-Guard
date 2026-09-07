@@ -27,6 +27,13 @@ Guard decides whether this action may run now.
 pip install waveframe-guard==0.17.0
 ```
 
+Published Guard 0.17.0 has an unbounded CRI dependency and must not be paired
+with CRI 0.14. Guard 0.18 is the planned supported release for CRI 0.14 and
+must be published first; it is not yet published. This branch adds dependency
+bounds without changing version metadata. See the
+[compatibility matrix](docs/getting-started/README.md#dependency-compatibility-matrix).
+
+
 No Ollama installation or Waveframe repository checkout is required. Keep the
 customer's existing model, agent framework, and tool functions; Guard wraps the
 tool that can cause a real-world change.

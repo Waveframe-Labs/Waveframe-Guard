@@ -131,21 +131,51 @@ fresh virtual environment there, and performs a normal `pip install` of the
 wheel. It does not use an editable install or add the repository to Python's
 import path. The quickstart subprocess runs from that external directory.
 
-## Release Compatibility Matrix
+## Dependency Compatibility Matrix
 
-This is the authoritative compatibility matrix for Guard releases. “Not
-declared” means Guard does not impose a package minimum and the tested pairing
-is the evidence available for this release.
+These bounds apply to the issue #31 development change, planned for Guard
+0.18. Guard 0.18 is **not published**; this dependency-only change keeps the
+current package version metadata unchanged.
 
-| Component | Minimum supported version | Recommended paired version | Actually tested for Guard 0.17.0 | Notes |
-| --- | --- | --- | --- | --- |
-| Waveframe Guard | 0.17.0 for native Ledger v3 verification | 0.17.0 | 0.17.0 release candidate | Public package and runtime version agree. Existing v1/v2 behavior remains compatible. |
-| Waveframe Cloud | Not declared | Not declared for the complete hosted v2/v3 publication path | Existing v1 and finance integration behavior | Guard 0.17.0 can parse and verify matching v2 and v3 publication envelopes. Current released/hosted Cloud does not yet serve the complete atomic v2 or v3 publication path. Cloud PR #133 remains the pending v2 server implementation. Hosted v3 serving requires an additional Cloud update. |
-| CRI-CORE | Not declared | 0.13.0 | 0.13.0 | Guard intentionally leaves the runtime dependency unpinned. |
-| CRI-CORE proposal normalizer | Not declared | 0.2.0 | 0.2.0 | Guard intentionally leaves the runtime dependency unpinned. |
-| Waveframe Ledger | 0.7.0 for v1/v2; 0.8.0 or later for v3 | 0.8.x after release | Published `governance-ledger==0.7.0` plus exact merged Ledger candidate `2b9a6b0a239d0e834d1bb42cd2efa30abe299e70`; `>=0.7.0,<0.9.0` metadata boundary | Ledger 0.7 supports existing v1/v2 authority. Native `authority_bundle.v3` and `publication_receipt.v3` verification requires Ledger 0.8 or later; v3 supplied with Ledger 0.7 fails closed. Guard evaluates `compiled_authority_contract.v2` only after the complete publication verifies and never requires translation proposals or private provider evidence. |
-| CRI-CORE contract compiler | 0.4.0 | 0.4.0 | 0.4.0 | Defines deterministic target requirements; pinned only in release test extras, not Guard runtime dependencies. |
-| Python | 3.10 | 3.10 or newer | 3.10 minimum dependencies and 3.14.4 | Declared by package metadata as `Requires-Python: >=3.10`. |
+| Component | Declared runtime range | Python 3.10 minimum matrix | Python 3.14 candidate matrix |
+| --- | --- | --- | --- |
+| Guard | Issue #31 checkout; planned 0.18 release | Built and installed wheel | Built and installed wheel |
+| CRI-CORE | `>=0.13.0,<0.15.0` | Published 0.13.0 | Unpublished 0.14.0 candidate at `411dfaa976fd4b37efc5fd3e39076edcd3603e1b` |
+| Proposal Normalizer | `>=0.2.0,<0.3.0` | 0.2.0 | 0.2.0 |
+| Governance Ledger | `>=0.7.0,<0.9.0` | Published 0.7.0 (v1/v2; v3 fails closed) | Published 0.8.0 (v1/v2/v3) |
+| requests | `>=2.33.0,<3.0.0` | 2.33.0 | 2.34.2 |
+
+The tested endpoints establish the supported release lines; they do not claim
+that every future patch has already been tested. Upper bounds are widened only
+in a future Guard change after compatibility review, complete behavioral tests,
+and installed-package/resolver acceptance. Installation success alone is not
+compatibility evidence. Public dependencies use ranges; exact CI constraints
+are environment-specific and do not pin transitive dependencies in the library.
+
+Published **Guard 0.17.0 has unbounded CRI, Normalizer, and requests metadata**
+and **must not be paired with CRI 0.14**. Its artifacts cannot acquire these
+bounds retroactively. Guard 0.18 is the planned supported release for CRI 0.14
+and must be published **before** CRI 0.14 to avoid an incompatible resolver
+window. Keep Guard #31/#39 and CRI #2/#4 open pending the coordinated work.
+
+Requests 2.32.0 was considered but is
+[yanked on PyPI](https://pypi.org/project/requests/2.32.0/).
+The chosen 2.33.0 minimum also includes the upstream fixes for
+[credential disclosure](https://github.com/psf/requests/security/advisories/GHSA-9hjg-9r4m-mvj7)
+and [predictable temporary extraction paths](https://github.com/psf/requests/security/advisories/GHSA-gc5v-m9x4-r6x2).
+It passes the complete minimum matrix, including the real HTTP Cloud fixture.
+
+The contract compiler remains `0.4.0` in test/dev extras only. Python remains
+`>=3.10`. Cloud acceptance uses a local HTTP publication fixture.
+Guard 0.17.0 can parse and verify matching v2 and v3 publication envelopes.
+Current released/hosted Cloud does not yet serve the complete atomic v2 or v3 publication path.
+Cloud PR #133 remains the pending v2 server implementation.
+Hosted v3 serving requires an additional Cloud update. Guard
+verifies the complete publication before evaluating its compiled contract;
+translation proposals and private provider evidence are not required.
+
+See the [dependency inventory and validation record](../security/ISSUE_31.md)
+for the reproducible matrix and historical resolver reproduction.
 
 ## Basic Usage
 
