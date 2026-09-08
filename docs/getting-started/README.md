@@ -74,7 +74,7 @@ From an empty directory:
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install waveframe-guard==0.18.0
-Invoke-WebRequest https://raw.githubusercontent.com/Waveframe-Labs/Waveframe-Guard/main/examples/external_agent_quickstart.py -OutFile quickstart.py
+Invoke-WebRequest https://raw.githubusercontent.com/Waveframe-Labs/Waveframe-Guard/v0.18.0/examples/external_agent_quickstart.py -OutFile quickstart.py
 ```
 
 Configure the hosted boundary:

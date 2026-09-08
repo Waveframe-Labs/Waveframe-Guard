@@ -155,8 +155,13 @@ def _inspect_wheel(wheel: Path, expected_version: str) -> int:
             path = doc_root + document
             if path not in name_set:
                 raise AssertionError(f"wheel is missing mediated-boundary documentation: {document}")
-            validate_mediation_document(archive.read(path).decode("utf-8"), document)
+            text = archive.read(path).decode("utf-8")
+            validate_mediation_document(text, document)
+            _validate_quickstart_downloads(text, expected_version, document,
+                                          require_example=document.endswith("README.md"))
         validate_mediation_document(metadata.get_payload(), "README.md")
+        _validate_quickstart_downloads(metadata.get_payload(), expected_version,
+                                      "wheel long description", require_example=True)
         _validate_archive_members(names, "wheel")
         _validate_archive_secrets(
             ((name, archive.read(name.as_posix())) for name in names),
@@ -191,7 +196,10 @@ def _inspect_sdist(sdist: Path, expected_version: str) -> int:
         extracted = archive.extractfile(pkg_info)
         if extracted is None:
             raise AssertionError("could not read sdist PKG-INFO")
-        _validate_metadata(email.message_from_bytes(extracted.read()), expected_version, "sdist")
+        metadata = email.message_from_bytes(extracted.read())
+        _validate_metadata(metadata, expected_version, "sdist")
+        _validate_quickstart_downloads(metadata.get_payload(), expected_version,
+                                      "sdist long description", require_example=True)
         license_file = archive.extractfile(f"{expected_root}/LICENSE")
         notice_file = archive.extractfile(f"{expected_root}/NOTICE")
         assert license_file is not None and notice_file is not None
@@ -199,9 +207,10 @@ def _inspect_sdist(sdist: Path, expected_version: str) -> int:
         for document in PACKAGED_DOCS:
             if document not in relative_set:
                 raise AssertionError(f"sdist is missing mediated-boundary documentation: {document}")
-            validate_mediation_document(
-                archive.extractfile(f"{expected_root}/{document}").read().decode("utf-8"), document,
-            )
+            text = archive.extractfile(f"{expected_root}/{document}").read().decode("utf-8")
+            validate_mediation_document(text, document)
+            _validate_quickstart_downloads(text, expected_version, document,
+                                          require_example=document.endswith("README.md"))
         _validate_archive_members(relative_names, "sdist")
 
         def contents():
@@ -212,6 +221,22 @@ def _inspect_sdist(sdist: Path, expected_version: str) -> int:
 
         _validate_archive_secrets(contents(), "sdist")
         return len(names)
+
+
+def _validate_quickstart_downloads(text: str, expected_version: str, label: str,
+                                  *, require_example: bool = False) -> None:
+    # Release instructions must pair the installed SDK with its own tagged
+    # executable example. This checks known raw URLs, not prose or Markdown
+    # semantics. Non-executable branding assets are outside this contract.
+    prefix = "https://raw.githubusercontent.com/Waveframe-Labs/Waveframe-Guard/"
+    downloads = re.findall(re.escape(prefix) + r"([^/\s]+)/examples/([A-Za-z0-9_./-]+\.py)", text)
+    for ref, example in downloads:
+        if ref != f"v{expected_version}":
+            raise AssertionError(f"{label}: executable example {example} must use v{expected_version}, found {ref}")
+    if require_example:
+        expected_url = prefix + f"v{expected_version}/examples/external_agent_quickstart.py"
+        if expected_url not in text or f"pip install waveframe-guard=={expected_version}" not in text:
+            raise AssertionError(f"{label}: release quickstart must include matching package and tagged example")
 
 
 def _validate_metadata(metadata: email.message.Message, expected_version: str, label: str) -> None:

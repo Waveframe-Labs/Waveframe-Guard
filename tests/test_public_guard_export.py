@@ -12,6 +12,11 @@
 # ---
 
 import re
+import subprocess
+
+import pytest
+
+from tools.acceptance import package_acceptance
 from pathlib import Path
 
 from waveframe_guard import Guard, __version__
@@ -131,3 +136,80 @@ def test_v0180_ledger_extra_requires_direct_guard_installation():
             r"(?:already )?(?:installs|supplies) (?:Guard|waveframe-guard==) ?0\.18(?:\.0)?",
             text, re.IGNORECASE,
         ) is None, path
+
+
+def test_release_quickstart_urls_match_package_and_example_versions():
+    project = package_acceptance.tomllib.loads((REPO_ROOT / "pyproject.toml").read_text())["project"]
+    release = project["version"]
+    assert release == __version__ == "0.18.0"
+    assert f"## [{release}]" in (REPO_ROOT / "CHANGELOG.md").read_text()
+    prefix = "https://raw.githubusercontent.com/Waveframe-Labs/Waveframe-Guard/"
+    # Audit tracked customer surfaces only, preserving ignored/user-owned files.
+    # No development-only executable downloads are retained. Adding such a flow
+    # requires a separately reviewed development surface, never this release path.
+    paths = subprocess.check_output(
+        ["git", "ls-files", "*.md", "examples/*.py", "tools/acceptance/*.py", "*.toml", "*.cff"],
+        cwd=REPO_ROOT, text=True,
+    ).splitlines()
+    for name in paths:
+        text = (REPO_ROOT / name).read_text(encoding="utf-8")
+        required = name in ("README.md", "docs/getting-started/README.md")
+        package_acceptance._validate_quickstart_downloads(text, release, name, require_example=required)
+        for ref, example in re.findall(re.escape(prefix) + r"([^/\s]+)/examples/([A-Za-z0-9_./-]+\.py)", text):
+            assert ref == f"v{release}", name
+            version = re.search(r'^# version: "([^"]+)"$',
+                                (REPO_ROOT / "examples" / example).read_text(), re.MULTILINE)
+            assert version and version.group(1) == release, (name, example)
+        # The branding image is a non-executable display asset, not a download
+        # paired with a pinned SDK. No raw main-branch script URL is allowed.
+        assert re.search(r"https://raw\.githubusercontent\.com/[^\s]+/main/[^\s]+\.(?:py|ps1|sh)\b",
+                         text) is None, name
+
+
+@pytest.mark.parametrize("ref", ["main", "v0.17.0", "v0.18.0"])
+def test_release_download_contract_rejects_mutable_or_mismatched_examples(ref):
+    text = (
+        "pip install waveframe-guard==0.18.0\n"
+        "https://raw.githubusercontent.com/Waveframe-Labs/Waveframe-Guard/"
+        f"{ref}/examples/external_agent_quickstart.py"
+    )
+    if ref == "v0.18.0":
+        package_acceptance._validate_quickstart_downloads(text, "0.18.0", "release", require_example=True)
+    else:
+        with pytest.raises(AssertionError, match="must use v0.18.0"):
+            package_acceptance._validate_quickstart_downloads(text, "0.18.0", "release", require_example=True)
+
+
+@pytest.mark.parametrize("kind", ["wheel", "sdist"])
+@pytest.mark.parametrize("surface", ["README.md", "docs/getting-started/README.md", "metadata"])
+def test_packaged_quickstart_rejects_main_example_in_docs_and_long_description(tmp_path, kind, surface):
+    import io
+    import tarfile
+    import zipfile
+    from test_licensing import archive_files
+
+    files, _ = archive_files(kind)
+    if surface == "metadata":
+        name = "waveframe_guard-0.18.0.dist-info/METADATA" if kind == "wheel" else "PKG-INFO"
+    else:
+        prefix = "waveframe_guard-0.18.0.data/data/share/doc/waveframe-guard/" if kind == "wheel" else ""
+        name = prefix + surface
+    old = b"Waveframe-Guard/v0.18.0/examples/external_agent_quickstart.py"
+    assert old in files[name]
+    files[name] = files[name].replace(old, b"Waveframe-Guard/main/examples/external_agent_quickstart.py")
+    if kind == "wheel":
+        path = tmp_path / "bad.whl"
+        with zipfile.ZipFile(path, "w") as archive:
+            for member, value in files.items():
+                archive.writestr(member, value)
+        inspect = package_acceptance._inspect_wheel
+    else:
+        path = tmp_path / "bad.tar.gz"
+        with tarfile.open(path, "w:gz") as archive:
+            for member, value in files.items():
+                info = tarfile.TarInfo("waveframe_guard-0.18.0/" + member)
+                info.size = len(value)
+                archive.addfile(info, io.BytesIO(value))
+        inspect = package_acceptance._inspect_sdist
+    with pytest.raises(AssertionError, match="must use v0.18.0"):
+        inspect(path, "0.18.0")
