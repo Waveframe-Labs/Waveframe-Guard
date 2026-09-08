@@ -232,18 +232,22 @@ def _validate_licensing(tracked: list[PurePosixPath], failures: list[str]) -> No
 
 
 def _validate_mediation(tracked, failures):
+    remaining = set(PACKAGED_DOCS)
     for path in tracked:
         if path.suffix.lower() != ".md":
             continue
+        document = path.as_posix()
         try:
-            validate_claims((REPO_ROOT / path).read_text(encoding="utf-8"), str(path))
+            text = (REPO_ROOT / path).read_text(encoding="utf-8")
+            if document in remaining:
+                validate_mediation_document(text, document)
+            else:
+                validate_claims(text, document)
         except (OSError, AssertionError) as exc:
             failures.append(str(exc))
-    for document in PACKAGED_DOCS:
-        try:
-            validate_mediation_document((REPO_ROOT / document).read_text(encoding="utf-8"), document)
-        except (OSError, AssertionError) as exc:
-            failures.append(str(exc))
+        remaining.discard(document)
+    for document in sorted(remaining):
+        failures.append(f"{document}: missing tracked canonical documentation")
 
 
 def _validate_diff(diff_base: str, failures: list[str]) -> None:

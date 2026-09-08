@@ -81,18 +81,96 @@ ACTION_SCOPE = re.compile(
 )
 
 
+def _link_labels(text):
+    """Reduce simple [label](destination) links in O(n) time/output memory.
+
+    One forward cursor visits each character once. Completed links replace a
+    disjoint output suffix with their label; no failed delimiter search restarts.
+    Malformed links remain literal. Nested/escaped Markdown is not parsed.
+    """
+    output = []
+    state = "plain"
+    start = label_start = label_end = 0
+    for index, char in enumerate(text):
+        output.append(char)
+        if state == "plain":
+            if char == "[":
+                start, label_start = len(output) - 1, index + 1
+                state = "label"
+        elif state == "label":
+            if char == "]":
+                label_end = index
+                state = "open-destination" if index > label_start else "plain"
+        elif state == "open-destination":
+            state = "destination" if char == "(" else "plain"
+            if char == "[":
+                start, label_start = len(output) - 1, index + 1
+                state = "label"
+        elif char == ")":
+            del output[start:]
+            output.extend(text[label_start:label_end])
+            state = "plain"
+        elif char == "\n":
+            state = "plain"
+    return "".join(output)
+
+
+def _emphasis_markers(text):
+    """Strip boundary underscore runs, stars and backticks in one O(n) pass.
+
+    Internal underscore runs between identifier characters are preserved.
+    Unmatched boundary markers are stripped too: this deliberately limited
+    normalizer neither pairs delimiters nor reconstructs/validates Markdown.
+    Output memory is O(n); each underscore run advances the cursor once.
+    """
+    output = []
+    index = 0
+    while index < len(text):
+        char = text[index]
+        if char == "_":
+            start = index
+            while index < len(text) and text[index] == "_":
+                index += 1
+            if start > 0 and index < len(text) and text[start - 1].isalnum() and text[index].isalnum():
+                output.append(text[start:index])
+        else:
+            if char not in "`*":
+                output.append(char)
+            index += 1
+    return "".join(output)
+
+
 def normalized(text):
+    # Fixed linear passes, O(n) time and memory even with unmatched delimiters.
     text = text.translate(str.maketrans({"\u201c": '"', "\u201d": '"', "\u2019": "'", "\u2011": "-"}))
-    text = re.sub(r"\[([^\]]+)\]\([^\n)]*\)", r"\1", text)
-    text = text.replace("`", "").replace("*", "").replace("__", "")
-    text = re.sub(r"(?<!\w)_(\S(?:.*?\S)?)_(?!\w)", r"\1", text, flags=re.DOTALL)
-    return " ".join(text.split())
+    return " ".join(_emphasis_markers(_link_labels(text)).split())
+
+
+def _structural_markers(text):
+    # Work line by line: multiline ^\s* searches can repeatedly traverse a
+    # suffix of blank lines. Keep the existing heading/list/quote boundaries.
+    output = []
+    for line in text.splitlines(keepends=True):
+        index = 0
+        quoted = False
+        while index < len(line) and line[index].isspace():
+            index += 1
+        while index < len(line) and line[index] == ">":
+            quoted = True
+            index += 1
+            while index < len(line) and line[index].isspace():
+                index += 1
+        marker = re.match(r"(?:#{1,6}|[-+*]|\d+[.)])\s+", line[index:])
+        if marker:
+            output.append("\n\n" + line[index + marker.end():])
+        else:
+            output.append(line[index:] if quoted else line)
+    return "".join(output)
 
 
 def claim_clauses(text):
     # Preserve structural breaks before whitespace/Markdown normalization.
-    text = re.sub(r"(?m)^\s*(?:>\s*)*(?:#{1,6}\s+|[-+*]\s+|\d+[.)]\s+)", "\n\n", text)
-    text = re.sub(r"(?m)^\s*>\s?", "", text)
+    text = _structural_markers(text)
     for paragraph in re.split(r"\n\s*\n", text):
         for sentence in SENTENCE_BREAK.split(normalized(paragraph)):
             guard_active = False

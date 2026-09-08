@@ -7,6 +7,7 @@ import ast
 import io
 from pathlib import Path
 import subprocess
+import sys
 import tarfile
 import zipfile
 
@@ -21,6 +22,74 @@ from test_licensing import archive_files
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+MALFORMED_MARKDOWN_UNITS = (
+    "_a ", "[a ", "[", "[label](", "(", "`", "*", '"', "x", "text\n", " \n",
+)
+
+
+@pytest.mark.parametrize("unit", MALFORMED_MARKDOWN_UNITS)
+@pytest.mark.parametrize("size", [96_000, 384_000])
+def test_malformed_markdown_has_bounded_completion(unit, size):
+    # A separate interpreter makes a regression fail rather than hang pytest.
+    # Eight seconds allows slow Windows/Linux CI ample margin; the original
+    # 96 KB '_a ' * 32000 failure takes >10 seconds on the review machine.
+    # The larger case guards scaling without flaky wall-clock ratio assertions.
+    script = (
+        "from tools.mediation_contract import normalized, validate_claims\n"
+        f"text = ({unit!r} * ({size} // {len(unit)} + 1))[:{size}]\n"
+        "result = normalized(text)\n"
+        "assert len(result) <= len(text)\n"
+        "validate_claims(text, 'malformed Markdown stress regression')\n"
+    )
+    subprocess.run([sys.executable, "-B", "-c", script], cwd=ROOT,
+                   check=True, capture_output=True, text=True, timeout=8)
+
+
+@pytest.mark.parametrize("identifier", [
+    "execution_request", "target_binding", "repository_tool",
+    "guard_execution_attestation", "ordinary_snake_case", "snake__case", "v2_field_3",
+])
+def test_normalization_preserves_identifier_underscores(identifier):
+    assert normalized(identifier) == identifier
+    for marker in ("_", "__", "*", "**", "`"):
+        assert normalized(marker + identifier + marker) == identifier
+
+
+@pytest.mark.parametrize("marker", ["_", "__", "*", "**"])
+def test_valid_emphasis_wrapping_and_lists_normalize(marker):
+    text = marker + "Guard\n  evaluates mediated actions." + marker
+    assert normalized(text) == "Guard evaluates mediated actions."
+    assert normalized("- " + text) == "- Guard evaluates mediated actions."
+    validate_claims("- " + text, "wrapped valid emphasis")
+
+
+@pytest.mark.parametrize("text, expected", [
+    ("[Guard](https://example.com) evaluates [actions](local).", "Guard evaluates actions."),
+    ("[wrapped\nlabel](target)", "wrapped label"),
+    ("[label]", "[label]"), ("[label](unfinished", "[label](unfinished"),
+    ("[label](unfinished\nnext", "[label](unfinished next"),
+    ("[label](url) [second](url)", "label second"),
+])
+def test_bounded_link_normalization(text, expected):
+    assert normalized(text) == expected
+
+
+def test_repository_mediation_checks_each_document_once(monkeypatch):
+    from pathlib import PurePosixPath
+    from tools import validate_repository
+    documents = [*PACKAGED_DOCS, "docs/README.md"]
+    observed = []
+    def record(text, label):
+        observed.append(label)
+    monkeypatch.setattr(validate_repository, "validate_claims", record)
+    monkeypatch.setattr(validate_repository, "validate_mediation_document", record)
+    failures = []
+    validate_repository._validate_mediation([PurePosixPath(p) for p in documents], failures)
+    assert not failures
+    assert sorted(observed) == sorted(documents)
+    validate_repository._validate_mediation([], failures)
+    assert len(failures) == len(PACKAGED_DOCS)
 
 ACCEPT_CLAIMS = (
     "Guard controls all actions that pass through its wrapped tool boundary.",
