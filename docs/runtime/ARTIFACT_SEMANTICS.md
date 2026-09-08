@@ -8,6 +8,12 @@ Guard never derives governance meaning from raw policy text.
 Artifact semantics exist to make Guard's runtime artifacts replayable,
 auditable, and deterministic. They do not define governance meaning.
 
+Evidence describes a mediated decision and, when an execution attestation is
+present, that callback attempt. It does not prove that no alternate path was
+used. For repository v1/v2/v3 authorities, the existing
+`guard_execution_attestation.v2` and `guard_target_binding.v1` identify the
+mediated action and adapter; see the [evidence field mapping and limits](../architecture/REPOSITORY_WORKSPACE.md#operator-verification).
+
 ## Persisted artifacts
 
 A saved Guard run persists `guard_saved_evaluation.v1`.

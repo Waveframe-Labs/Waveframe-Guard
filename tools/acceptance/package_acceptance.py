@@ -25,6 +25,18 @@ if __package__ in (None, ""):
 from tools.license_contract import (
     APACHE_SHA256, LICENSE_FILES, NOTICE_TEXT, validate_license_metadata, validate_notices,
 )
+from tools.mediation_contract import PACKAGED_DOCS, validate_mediation_document
+
+# The same bounded validator checks installed files in the external interpreter.
+# Embed review-owned tooling, rather than importing the checkout or shipping
+# validation code in the public runtime package.
+DOCUMENTATION_VALIDATION_SCRIPT = (
+    "mediation_checks = {}\n"
+    "exec(" + repr((REPO_ROOT / "tools/mediation_contract.py").read_text(encoding="utf-8")) + ", mediation_checks)\n"
+    "for document in " + repr(PACKAGED_DOCS) + ":\n"
+    "    mediation_checks['validate_mediation_document'](\n"
+    "        (documentation / document).read_text(encoding='utf-8'), document)\n"
+)
 
 REQUIRED_WHEEL_FILES = {
     "guard/sdk/repository_evidence.py",
@@ -138,6 +150,13 @@ def _inspect_wheel(wheel: Path, expected_version: str) -> int:
         )
         metadata = email.message_from_bytes(archive.read(metadata_names[0].as_posix()))
         _validate_metadata(metadata, expected_version, "wheel")
+        doc_root = f"waveframe_guard-{expected_version}.data/data/share/doc/waveframe-guard/"
+        for document in PACKAGED_DOCS:
+            path = doc_root + document
+            if path not in name_set:
+                raise AssertionError(f"wheel is missing mediated-boundary documentation: {document}")
+            validate_mediation_document(archive.read(path).decode("utf-8"), document)
+        validate_mediation_document(metadata.get_payload(), "README.md")
         _validate_archive_members(names, "wheel")
         _validate_archive_secrets(
             ((name, archive.read(name.as_posix())) for name in names),
@@ -148,6 +167,7 @@ def _inspect_wheel(wheel: Path, expected_version: str) -> int:
             name.as_posix()
             for name in names
             if name.parts[0] not in allowed_roots and not name.parts[0].endswith(".dist-info")
+            and name.as_posix() not in {doc_root + document for document in PACKAGED_DOCS}
         ]
         if unrelated:
             raise AssertionError(f"wheel contains unrelated top-level files: {unrelated}")
@@ -176,6 +196,12 @@ def _inspect_sdist(sdist: Path, expected_version: str) -> int:
         notice_file = archive.extractfile(f"{expected_root}/NOTICE")
         assert license_file is not None and notice_file is not None
         validate_notices(license_file.read().decode("utf-8"), notice_file.read().decode("utf-8"))
+        for document in PACKAGED_DOCS:
+            if document not in relative_set:
+                raise AssertionError(f"sdist is missing mediated-boundary documentation: {document}")
+            validate_mediation_document(
+                archive.extractfile(f"{expected_root}/{document}").read().decode("utf-8"), document,
+            )
         _validate_archive_members(relative_names, "sdist")
 
         def contents():
@@ -339,6 +365,12 @@ for name in ("LICENSE", "NOTICE"):
         assert text == __NOTICE_TEXT__
 print("Installed license verified: Apache-2.0; canonical LICENSE and Waveframe NOTICE")
 
+# Inspect the installed documentation, without importing repository validators.
+import sysconfig
+documentation = Path(sysconfig.get_path("data")) / "share/doc/waveframe-guard"
+__DOCUMENTATION_VALIDATION__
+print("Installed mediation documentation verified: wrapped boundary and alternate-path limits")
+
 # Legacy symbols survive installation but can never grant execution permission.
 from waveframe_guard import LegacyExecutionError, GovernanceError, GuardRuntime, GovernedRuntime
 assert GuardRuntime is GovernedRuntime
@@ -402,6 +434,7 @@ print(f"Clean wheel literal-target smoke passed from {module_path}: "
 
 
 SMOKE_SCRIPT = SMOKE_SCRIPT.replace("__APACHE_SHA256__", APACHE_SHA256).replace("__NOTICE_TEXT__", repr(NOTICE_TEXT))
+SMOKE_SCRIPT = SMOKE_SCRIPT.replace("__DOCUMENTATION_VALIDATION__", DOCUMENTATION_VALIDATION_SCRIPT)
 
 
 REPOSITORY_SMOKE_SCRIPT = r'''

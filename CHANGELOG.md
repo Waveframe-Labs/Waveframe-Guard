@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+- Security documentation (#32): qualify enforcement as applying to wrapped
+  callable paths, consolidate the repository bypass threat model, and document
+  least-privilege deployment, connection-status limits and operator checks.
+  Retain existing execution evidence schemas with boundary regressions and
+  package the canonical boundary documentation. No enforcement, dependency-range
+  or version change; keep #32 open pending review and Guard 0.18.0 publication.
+
 - Licensing (#30): License the repository's Waveframe Guard Core SDK under
   Apache-2.0, with canonical LICENSE, Waveframe Labs NOTICE, matching package
   metadata and contribution terms. Commercial use, modification and

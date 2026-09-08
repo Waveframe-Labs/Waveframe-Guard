@@ -5,12 +5,16 @@
 # Waveframe Guard
 
 Repository integrations: see the unreleased
-[protected workspace boundary and migration guide](docs/architecture/REPOSITORY_WORKSPACE.md)
+[repository adapter boundary and migration guide](docs/architecture/REPOSITORY_WORKSPACE.md)
 for issue #33, supported platforms, and the `repository_tool` API.
 
-Stop unsafe AI and automated actions **before they execute**.
+Allow or block mediated AI actions **before their callbacks execute**.
 
 Waveframe Guard is an execution-boundary SDK. It wraps sensitive actions, resolves compiled authority, enforces the decision at the tool boundary, and only runs the action when the outcome is allowed.
+
+Guard enforces actions that pass through its wrapped tool boundary. Actions
+that reach the same capability through another function, tool, process,
+credential, or API path are outside that enforcement guarantee.
 
 Current release: `0.17.0`.
 
@@ -85,11 +89,15 @@ guarded_allocate = guard.tool(
     target="account_id",
     include_arguments=("amount",),
 )(your_existing_allocate_budget)
+# Calling guarded_allocate evaluates authority immediately before invoking
+# your_existing_allocate_budget, which performs the mediated mutation.
 ```
 
-Call or register `guarded_allocate` wherever the original function was used.
-Guard evaluates immediately before the existing mutation and remains separate
-from model calls and agent orchestration.
+Expose `guarded_allocate` to the agent. The exact wrapped mutation callable is
+`your_existing_allocate_budget`; this protects that callable path, not the
+entire machine or repository globally. Direct calls to the original function
+bypass this wrapper. For repository writes use `repository_tool` and its bound
+file capability; see the [bypass threat model and operator checks](docs/architecture/REPOSITORY_WORKSPACE.md#mediation-and-bypass-threat-model).
 
 ## Five-minute Cloud quickstart
 
@@ -140,9 +148,18 @@ blocked_receipt_id=<Cloud receipt identifier>
 blocked_proof_sha256=<Cloud proof digest>
 ```
 
+The quickstart wraps `run_quickstart`'s `allocate_budget` with `@guard.tool`;
+its mediated mutation is `mutations.append(mutation)`, an in-memory example.
+Evaluation occurs immediately before invoking that callback. It does not
+protect the entire machine or repository globally.
+
 The allowed callback mutates once. The blocked callback never runs. Open
 Console Activity or Executions to verify both decisions under the same runtime,
 actor, and bound authority.
+
+A connected Guard runtime means a specific Guard integration is reporting.
+It does not establish global control of the repository, machine, agent, or
+organization, or establish that no alternate mutation path is available.
 
 The integration inside the quickstart is the same wrapper used around an
 existing agent tool:
@@ -238,9 +255,13 @@ guarded_tool = guard.tool(action="publish_release", target="repository")(publish
 agent_tools.register(name="publish_release", callable=guarded_tool)
 ```
 
-`agent_tools` represents the customer's existing registry. It may call the
-model and choose tools, but only `guarded_tool` can reach `publish_release`, so
-Guard remains the enforcement boundary rather than becoming the agent framework.
+`agent_tools` represents the customer's existing registry. For this integration,
+the registry exposes `guarded_tool`. Calls routed through that registry entry
+are evaluated before `guarded_tool` invokes `publish_release`. Direct access to
+`publish_release` or another release API bypasses the wrapper; registration alone
+does not remove those paths. Restrict alternate paths using the linked
+[least-privilege deployment guidance](docs/architecture/REPOSITORY_WORKSPACE.md#least-privilege-deployment).
+Guard remains framework-neutral and does not become the agent framework.
 
 The wrapper derives a normalized proposal from the real function call, asks
 Guard to evaluate it against the selected authority, and invokes the original

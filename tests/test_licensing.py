@@ -24,7 +24,7 @@ def metadata_text():
         "Requires-Python: >=3.10", "License-Expression: Apache-2.0",
         "License-File: LICENSE", "License-File: NOTICE",
         *(f"Requires-Dist: {r}" for r in package_acceptance.EXPECTED_RUNTIME_REQUIREMENTS),
-        "", "",
+        "", (ROOT / "README.md").read_text(encoding="utf-8"), "",
     ])
 
 
@@ -102,6 +102,10 @@ def archive_files(kind):
     license_prefix = prefix + "licenses/" if kind == "wheel" else ""
     for name in ("LICENSE", "NOTICE"):
         files[license_prefix + name] = (ROOT / name).read_bytes()
+    from tools.mediation_contract import PACKAGED_DOCS
+    doc_prefix = "waveframe_guard-0.17.0.data/data/share/doc/waveframe-guard/" if kind == "wheel" else ""
+    for document in PACKAGED_DOCS:
+        files[doc_prefix + document] = (ROOT / document).read_bytes()
     return files, license_prefix
 
 

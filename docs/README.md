@@ -10,6 +10,7 @@ The public docs are tiered by purpose.
 
 ## Architecture
 
+- [Repository adapter, bypass threat model, deployment and operator checks](architecture/REPOSITORY_WORKSPACE.md)
 - `architecture/SYSTEM_BOUNDARIES.md`
 - `architecture/ENFORCEMENT_MODEL.md`
 - `architecture/RUNTIME_EVALUATION_FLOW.md`

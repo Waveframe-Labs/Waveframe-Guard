@@ -50,3 +50,9 @@ dev = [
 where = ["."]
 include = ["waveframe_guard*", "guard*"]
 exclude = ["temp*", "benchmarks*", "docs*", "examples*", "tests*"]
+
+# Ship the canonical documentation from its existing source locations.
+[tool.setuptools.data-files]
+"share/doc/waveframe-guard" = ["README.md", "SECURITY.md"]
+"share/doc/waveframe-guard/docs/architecture" = ["docs/architecture/REPOSITORY_WORKSPACE.md"]
+"share/doc/waveframe-guard/docs/getting-started" = ["docs/getting-started/README.md"]
