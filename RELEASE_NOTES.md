@@ -1,8 +1,7 @@
 # Waveframe Guard v0.18.0 Release Notes
 
-Release date: **2026-09-08**. **Prepared release; publication is pending.**
-This release collects already merged work from #30, #31, #32, #33 and #39.
-Release preparation adds no enforcement behavior, public API or schema change.
+Release date: **2026-09-08**.
+This release includes the work from #30, #31, #32, #33 and #39.
 
 ## Highlights
 
@@ -84,7 +83,7 @@ credential, or API path are outside that enforcement guarantee.
 
 | Component | Declared range | Supported validation baseline |
 | --- | --- | --- |
-| Guard | 0.18.0 release candidate | Python 3.10 minimum; Python 3.14 current, native Linux/Windows |
+| Guard | 0.18.0 | Python 3.10 minimum; Python 3.14 current, native Linux/Windows |
 | CRI-CORE | `>=0.13.0,<0.15.0` | Published 0.13.0; exact 0.14.0 candidate from [CRI PR #5](https://github.com/Waveframe-Labs/CRI-CORE/pull/5), commit `411dfaa976fd4b37efc5fd3e39076edcd3603e1b` |
 | Proposal Normalizer | `>=0.2.0,<0.3.0` | Published 0.2.0 |
 | Governance Ledger | `>=0.7.0,<0.9.0` | Published 0.7.0: existing v1/v2; published 0.8.0: v1/v2 plus native v3 |
@@ -95,31 +94,34 @@ uses published dependencies and works with CRI 0.13.0; the unpublished exact
 CRI candidate is a separate compatibility test, not an installation requirement.
 Ledger 0.7 rejects native v3 with an explicit Ledger 0.8 requirement.
 
-**Guard 0.18 must be publishable and published before CRI-CORE 0.14.0.**
+**Upgrade/install Guard 0.18.0 before CRI-CORE 0.14.0.**
 Published Guard 0.17.0 has an unbounded CRI dependency and must not be paired
-with CRI 0.14. No CRI implementation change or publication is part of this PR.
+with CRI 0.14. Guard 0.18.0 supports `cricore>=0.13.0,<0.15.0`.
 
-After 0.18.0 publication:
+Install Guard directly:
 
 ```text
 pip install waveframe-guard==0.18.0
 ```
 
-During release review, install the built 0.18.0 wheel instead. See the
+Published `governance-ledger==0.8.0` has a `[guard]` extra pinned to
+`waveframe-guard==0.17.0`. Ledger's base package remains compatible with
+Guard 0.18.0 through `governance-ledger>=0.7.0,<0.9.0`. Install
+`waveframe-guard==0.18.0` directly for this release rather than relying on
+`governance-ledger[guard]==0.8.0`; that extra does not install Guard 0.18.0.
+
+See the
 [getting-started compatibility matrix](docs/getting-started/README.md#dependency-compatibility-matrix).
 
-## Cloud availability and release gates
+## Cloud availability at the release date
 
-Guard 0.18.0 can parse and verify matching v2 and v3 publication envelopes.
-Current released/hosted Cloud does not yet serve the complete atomic v2 or v3
-publication path. Cloud PR #133 remains the pending v2 server implementation.
-Hosted v3 serving requires an additional Cloud update. Cloud status-copy
-follow-up remains Cloud #122; a connection reports one integration.
+Guard 0.18.0 can verify matching Ledger v2 and v3 publication envelopes.
+Waveframe Cloud source support for atomic v2/v3 publication serving merged
+in Cloud PR #135. Hosted translation backend and Console workflow source
+merged in PRs #136 and #140. At the Guard 0.18.0 release date, those Cloud
+changes had not yet been released or deployed to the hosted service.
+Guard does not claim hosted translation availability at that date. Cloud
+status-copy follow-up remains Cloud #122; a connection reports one integration.
 
-Guard #30, #31, #32 and #39 remain open until the release is merged and PyPI
-publication plus external-install verification pass. Guard #33 additionally
-requires real-repository end-to-end acceptance. All five issues remain open
-during this release preparation.
-
-This draft PR does not merge, tag, create a GitHub release, upload to PyPI,
-deploy Cloud or modify another repository.
+Real-repository end-to-end acceptance and hosted workflow acceptance are
+separate operator checks; disposable installed-wheel tests do not establish them.

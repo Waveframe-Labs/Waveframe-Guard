@@ -17,7 +17,7 @@ listed there; generic callable examples do not establish filesystem semantics.
 
 Security updates are applied to the latest release line only.
 
-Prepared security release line (publication pending):
+Current supported security release line:
 
 - `v0.18.x`
 

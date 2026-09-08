@@ -14,8 +14,7 @@ credential, or API path are outside that enforcement guarantee.
 
 ## Installation
 
-For application use after 0.18.0 publication (pending); during release review,
-install the built 0.18.0 wheel:
+For application use:
 
 ```bash
 pip install waveframe-guard==0.18.0
@@ -155,13 +154,13 @@ and [licensing details](../LICENSING.md).
 
 ## Dependency Compatibility Matrix
 
-These bounds apply to Guard 0.18.0, prepared for 2026-09-08 and **not yet
-published**. Ordinary installation resolves published dependencies; the CRI
-0.14.0 source candidate is used only for compatibility validation.
+These bounds apply to Guard 0.18.0 (2026-09-08). Ordinary installation resolves
+published dependencies; the CRI 0.14.0 source candidate is used only for
+compatibility validation.
 
 | Component | Declared runtime range | Python 3.10 minimum matrix | Python 3.14 candidate matrix |
 | --- | --- | --- | --- |
-| Guard | 0.18.0 release candidate | Built and installed wheel | Built and installed wheel |
+| Guard | 0.18.0 | Built and installed wheel | Built and installed wheel |
 | CRI-CORE | `>=0.13.0,<0.15.0` | Published 0.13.0 | Unpublished 0.14.0 candidate at `411dfaa976fd4b37efc5fd3e39076edcd3603e1b` |
 | Proposal Normalizer | `>=0.2.0,<0.3.0` | 0.2.0 | 0.2.0 |
 | Governance Ledger | `>=0.7.0,<0.9.0` | Published 0.7.0 (v1/v2; v3 fails closed) | Published 0.8.0 (v1/v2/v3) |
@@ -177,8 +176,14 @@ are environment-specific and do not pin transitive dependencies in the library.
 Published **Guard 0.17.0 has unbounded CRI, Normalizer, and requests metadata**
 and **must not be paired with CRI 0.14**. Its artifacts cannot acquire these
 bounds retroactively. Guard 0.18.0 supports CRI 0.13.0 and the exact CRI 0.14.0
-candidate, and must be published **before** CRI 0.14.0 to avoid an incompatible resolver
-window. Keep Guard #31/#39 and CRI #2/#4 open pending the coordinated work.
+candidate. Upgrade/install Guard 0.18.0 **before** CRI 0.14.0 to avoid an
+incompatible resolver window. Ordinary installation works with published CRI 0.13.0.
+
+Published `governance-ledger==0.8.0` has a `[guard]` extra pinned to
+`waveframe-guard==0.17.0`. Ledger's base package remains compatible with
+Guard 0.18.0 through `governance-ledger>=0.7.0,<0.9.0`. Install
+`waveframe-guard==0.18.0` directly for this release rather than relying on
+`governance-ledger[guard]==0.8.0`; that extra does not install Guard 0.18.0.
 
 Requests 2.32.0 was considered but is
 [yanked on PyPI](https://pypi.org/project/requests/2.32.0/).
@@ -189,10 +194,12 @@ It passes the complete minimum matrix, including the real HTTP Cloud fixture.
 
 The contract compiler remains `0.4.0` in test/dev extras only. Python remains
 `>=3.10`. Cloud acceptance uses a local HTTP publication fixture.
-Guard 0.18.0 can parse and verify matching v2 and v3 publication envelopes.
-Current released/hosted Cloud does not yet serve the complete atomic v2 or v3 publication path.
-Cloud PR #133 remains the pending v2 server implementation.
-Hosted v3 serving requires an additional Cloud update. Guard
+Guard 0.18.0 can verify matching Ledger v2 and v3 publication envelopes.
+Waveframe Cloud source support for atomic v2/v3 publication serving merged
+in Cloud PR #135. Hosted translation backend and Console workflow source
+merged in PRs #136 and #140. At the Guard 0.18.0 release date, those Cloud
+changes had not yet been released or deployed to the hosted service.
+Guard does not claim hosted translation availability at that date. Guard
 verifies the complete publication before evaluating its compiled contract;
 translation proposals and private provider evidence are not required.
 

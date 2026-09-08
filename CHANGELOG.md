@@ -4,8 +4,7 @@
 
 ## [0.18.0] - 2026-09-08 - Repository-Bound Mediated Mutation
 
-Prepared release; publication is pending. This entry collects the already
-merged changes in #30, #31, #32, #33 and #39. See the
+This release collects the merged changes in #30, #31, #32, #33 and #39. See the
 [release notes](RELEASE_NOTES.md) for migration, compatibility and limitations.
 
 ### Highlights
@@ -42,17 +41,19 @@ merged changes in #30, #31, #32, #33 and #39. See the
 
 - Published CRI 0.13.0 and the exact CRI 0.14.0 candidate
   `411dfaa976fd4b37efc5fd3e39076edcd3603e1b` are supported. Ordinary installation
-  does not require an unpublished dependency. Guard 0.18 must be published
-  before CRI 0.14; published Guard 0.17.0 has an unbounded CRI dependency and
+  does not require an unpublished dependency. Upgrade/install Guard 0.18.0
+  before CRI 0.14.0; published Guard 0.17.0 has an unbounded CRI dependency and
   must not be paired with CRI 0.14.
 - Ledger 0.7 supports existing v1/v2 authority; Ledger 0.8 adds native v3.
-  Guard 0.18.0 can parse and verify matching v2 and v3 publication envelopes.
-  Current released/hosted Cloud does not yet serve the complete atomic v2 or v3
-  publication path. Cloud PR #133 remains the pending v2 server implementation.
-  Hosted v3 serving requires an additional Cloud update.
-- Publication, external-install verification and real-repository end-to-end
-  acceptance remain pending. This release preparation changes versions and
-  release documentation; it adds no runtime behavior or schema change.
+
+Guard 0.18.0 can verify matching Ledger v2 and v3 publication envelopes.
+Waveframe Cloud source support for atomic v2/v3 publication serving merged
+in Cloud PR #135. Hosted translation backend and Console workflow source
+merged in PRs #136 and #140. At the Guard 0.18.0 release date, those Cloud
+changes had not yet been released or deployed to the hosted service.
+Guard does not claim hosted translation availability at that date.
+
+Real-repository end-to-end acceptance is a separate operator check.
 
 ## [0.17.0] - 2026-09-04 - Native Ledger v3 Authority Verification
 

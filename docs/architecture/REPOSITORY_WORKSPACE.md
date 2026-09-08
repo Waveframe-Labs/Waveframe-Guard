@@ -1,8 +1,8 @@
 # Repository workspace boundary
 
 The Guard 0.18.0 repository boundary addresses [Guard #33](https://github.com/Waveframe-Labs/Waveframe-Guard/issues/33).
-The release is prepared; publication and real-repository end-to-end acceptance
-remain pending. See the [release notes](../../RELEASE_NOTES.md).
+See the [release notes](../../RELEASE_NOTES.md). Real-repository end-to-end
+acceptance remains a separate operator check.
 One Guard runtime binds its repository adapter to one explicitly selected root;
 it mediates only calls through that adapter. `workspace` continues to name the
 evidence store; `repository_root` names the adapter's filesystem root.
@@ -311,8 +311,9 @@ Cloud preservation continues to capture the **decision only**, before execution;
 repository evaluations label this `cloud_preservation_scope =
 "decision_only_not_final_execution"`. Final execution attestations are local and
 are not claimed to have been uploaded by that preservation call. Existing Cloud
-runtime attestation calls for v2/v3 remain unchanged and separate. This PR changes
-no Cloud API or protocol; Cloud integration migration remains pending.
+runtime attestation calls for v2/v3 remain unchanged and separate. This
+integration changes no Cloud API or protocol. Cloud callers use the same repository adapter
+migration; hosted workflow acceptance is a separate operator check.
 
 ## Accepted paths and filesystem identities
 
@@ -407,10 +408,9 @@ the Windows and Linux platforms above under the trusted adapter boundary. V1/v2/
 authority verification, caches, compiled contracts, capability catalogs, Ledger
 schemas, unrelated domain matching, and Cloud-resolution protocols are unchanged.
 
-The 0.18.0 release candidate updates package version, citation and release
-documentation only; the repository boundary is already merged. Publication,
-external-install verification and real-repository end-to-end acceptance remain
-pending. Cloud integration migration is separate coordinated work.
+External-install verification and real-repository end-to-end acceptance are
+separate operator checks. Cloud callers follow the same repository adapter
+migration.
 
 Remaining operations stay fail closed and have focused follow-ups:
 [macOS existing-file support #35](https://github.com/Waveframe-Labs/Waveframe-Guard/issues/35),

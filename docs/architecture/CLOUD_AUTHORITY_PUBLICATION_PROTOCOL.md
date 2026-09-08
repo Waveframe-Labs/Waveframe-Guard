@@ -1,6 +1,7 @@
 # Cloud Authority Publication Protocol
 
-Status: public Guard client contract; Cloud implementation not yet shipped.
+Status: public Guard client contract; Cloud source serving support merged in
+Cloud PR #135. Hosted availability at the 0.18.0 release date is described below.
 
 Guard resolves the complete published authority from Cloud and verifies it
 before enforcing any action. Applications continue to call `Guard.cloud(...)`;
@@ -137,18 +138,17 @@ Exceptions expose stable status categories only. Credentials, response bodies,
 policy bytes, bundles, and receipts are not placed in exception strings or
 logs.
 
-## Cloud implementation requirement
+## Cloud source and hosted availability
 
-Current hosted Cloud and Waveframe-Cloud PR #133 do not implement this route.
-Cloud support is unavailable until a Cloud release persists the exact Ledger
-0.7 bundle and Ledger receipt together, constructs the public registry binding,
-serves the tenant-scoped atomic response above, and reproduces the golden
-fixture in its own protocol tests. Guard's client capability remains dormant
-and uses the legacy v1 contract endpoint when the current Cloud route reports
-that the publication endpoint is unavailable.
+Guard 0.18.0 can verify matching Ledger v2 and v3 publication envelopes.
+Waveframe Cloud source support for atomic v2/v3 publication serving merged
+in Cloud PR #135. Hosted translation backend and Console workflow source
+merged in PRs #136 and #140. At the Guard 0.18.0 release date, those Cloud
+changes had not yet been released or deployed to the hosted service.
+Guard does not claim hosted translation availability at that date. Guard uses
+the legacy v1 contract endpoint through its narrow publication-not-found
+fallback when the server reports the publication endpoint unavailable.
 
-Serving v3 requires a separately reviewed Cloud change that persists and
-returns the exact v3 bundle and receipt as one tenant-scoped snapshot while
-preserving the existing envelope, registry, size, authentication, and
-canonical-hash rules. No proposal or private translation evidence belongs in
-that response.
+The v2/v3 serving implementation preserves the existing envelope, registry,
+size, authentication and canonical-hash rules. No proposal or private
+translation evidence belongs in that response.

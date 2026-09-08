@@ -16,7 +16,7 @@ Guard enforces actions that pass through its wrapped tool boundary. Actions
 that reach the same capability through another function, tool, process,
 credential, or API path are outside that enforcement guarantee.
 
-Prepared release: `0.18.0` (2026-09-08). Publication is pending.
+Current release: 0.18.0.
 
 ```text
 Guard does not generate actions.
@@ -27,17 +27,14 @@ Guard decides whether this action may run now.
 
 ## Install
 
-The versioned install commands below apply after 0.18.0 publication. During
-release review, install the built 0.18.0 wheel instead.
-
 ```powershell
 pip install waveframe-guard==0.18.0
 ```
 
 Published Guard 0.17.0 has an unbounded CRI dependency and must not be paired
-with CRI 0.14. Guard 0.18.0 supports published CRI 0.13.0 and the reviewed
-0.14.0 candidate, and must be published before CRI 0.14.0. It is not yet
-published. Ordinary installation needs no unpublished dependency. See the
+with CRI 0.14. Guard 0.18.0 supports `cricore>=0.13.0,<0.15.0`.
+Upgrade/install Guard 0.18.0 before CRI 0.14.0. Ordinary installation works
+with published CRI 0.13.0 and needs no unpublished dependency. See the
 [compatibility matrix](docs/getting-started/README.md#dependency-compatibility-matrix).
 
 
@@ -66,8 +63,7 @@ including its Cloud client integrations.
 See [contributing](CONTRIBUTING.md) and the
 [licensing scope and dependency notices](docs/LICENSING.md). This change is
 included in Guard 0.18.0, the first package release under Apache-2.0. Prior
-tagged and PyPI releases are not retroactively relicensed; publication of
-0.18.0 is pending.
+tagged and PyPI releases are not retroactively relicensed.
 
 ## 30-second integration
 
@@ -198,13 +194,18 @@ The three choices are intentionally independent:
 - `authority` selects the explicit, versioned policy Guard will enforce.
 - `agent` records optional framework and model metadata for Console and audit evidence.
 
-Guard 0.18.0 can parse and verify matching v2 and v3 publication envelopes
-returned by `GET /v1/authorities/{authority_ref}/publication`. The
-`cloud_authority_publication.v1` response binds the bundle, receipt, logical
-references, registry, and envelope as one tenant-scoped publication. Current
-released/hosted Cloud does not yet serve the complete atomic v2 or v3
-publication path. Cloud PR #133 remains the pending v2 server implementation.
-Hosted v3 serving requires an additional Cloud update. Existing
+### Cloud availability
+
+Guard 0.18.0 can verify matching Ledger v2 and v3 publication envelopes.
+Waveframe Cloud source support for atomic v2/v3 publication serving merged
+in Cloud PR #135. Hosted translation backend and Console workflow source
+merged in PRs #136 and #140. At the Guard 0.18.0 release date, those Cloud
+changes had not yet been released or deployed to the hosted service.
+Guard does not claim hosted translation availability at that date.
+
+The `GET /v1/authorities/{authority_ref}/publication` response uses
+`cloud_authority_publication.v1` to bind the bundle, receipt, logical
+references, registry, and envelope as one tenant-scoped publication. Existing
 organization/API-key authentication is unchanged. Legacy v1 authorities retain
 their existing contract endpoint through a narrow publication-not-found
 fallback; a contract-only v2 response still fails closed. Guard uses
@@ -359,17 +360,15 @@ Guard does not interpret policy prose and contains no AI or model-provider
 integration, heuristic policy interpretation, or runtime inference. Ledger and
 a trusted domain pack produce authority. Only the repository-change fact
 provider is native in this release; other domains require separately trusted
-domain packs and deterministic fact providers. Guard 0.18.0 can parse and
-verify matching v2 and v3 publication envelopes. Current released/hosted Cloud
-does not yet serve the complete atomic v2 or v3 publication path. Cloud PR #133
-remains the pending v2 server implementation. Hosted v3 serving requires an
-additional Cloud update.
+domain packs and deterministic fact providers. For the distinction between
+merged Cloud source and hosted availability at this release date, see
+[Cloud availability](#cloud-availability).
 
-Ledger's published `governance-ledger[guard]==0.7.0` extra still represents its
-previously released Guard 0.15 compatibility pairing. Install
-`waveframe-guard==0.18.0` directly for this release. Guard itself depends only
-on the public Ledger base package through
-`governance-ledger>=0.7.0,<0.9.0`, never on the `guard` extra.
+Published `governance-ledger==0.8.0` has a `[guard]` extra pinned to
+`waveframe-guard==0.17.0`. Ledger's base package remains compatible with
+Guard 0.18.0 through `governance-ledger>=0.7.0,<0.9.0`. Install
+`waveframe-guard==0.18.0` directly for this release rather than relying on
+`governance-ledger[guard]==0.8.0`; that extra does not install Guard 0.18.0.
 
 ## Local development path
 
@@ -434,11 +433,9 @@ Ledger translates policy with a trusted domain pack and publishes authority
 For v3, Guard verifies the complete bundle and mandatory receipt, then evaluates
 the unchanged `compiled_authority_contract.v2` runtime payload. Translation
 proposals and private provider evidence are not runtime inputs. Existing
-Cloud-facing v1/v2 and finance client behavior remains compatible. Guard 0.18.0
-can parse and verify matching v2 and v3 publication envelopes. Current
-released/hosted Cloud does not yet serve the complete atomic v2 or v3
-publication path. Cloud PR #133 remains the pending v2 server implementation.
-Hosted v3 serving requires an additional Cloud update.
+Cloud-facing v1/v2 and finance client behavior remains compatible. See
+[Cloud availability](#cloud-availability) for the source and hosted availability
+distinction at this release date.
 
 Cloud can publish lifecycle metadata such as `active`, `superseded`, or `revoked`, but Cloud does not decide runtime admissibility. Guard evaluates locally against compiled authority.
 

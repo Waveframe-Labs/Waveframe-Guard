@@ -3,8 +3,8 @@
 This historical dependency-boundary audit starts at `2c4a77f89bb234fbde32937435535cffec4dc905`.
 After fetching origin, `origin/main` matched that commit and the tracked
 worktree was clean. Package and public version metadata remained 0.17.0 during that change.
-The bounded contract is included in the prepared Guard 0.18.0 release; see
-[release status](../../RELEASE_NOTES.md). Publication remains pending.
+The bounded contract is included in Guard 0.18.0; see
+[release notes](../../RELEASE_NOTES.md).
 
 ## Dependency inventory
 
@@ -54,7 +54,7 @@ python tools/acceptance/resolver_boundaries.py --historical --wheel historical/w
 ```
 
 Published Guard 0.17.0 cannot be retroactively bounded and must not be paired
-with CRI 0.14. Guard 0.18 must be published first. The dependency-boundary PR did not prepare or
+with CRI 0.14. Upgrade/install Guard 0.18.0 before CRI 0.14.0. The dependency-boundary PR did not prepare or
 publish that release; Guard #31/#39 and CRI #2/#4 remain open. CRI PR #5 has
 the coordination status comment; no CRI implementation correction is required.
 
@@ -100,4 +100,4 @@ run links are recorded in the draft PR.
 At the dependency-boundary change, runtime source, authority/policy/evidence/cache
 semantics, repository protection, legacy rejection behavior, licenses and release
 metadata were unchanged. Licensing (#30) and mediation claims (#32) were separate
-changes, now collected with these bounds in the prepared 0.18.0 release.
+changes, now collected with these bounds in the 0.18.0 release.
