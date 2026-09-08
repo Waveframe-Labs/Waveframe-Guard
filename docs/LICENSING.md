@@ -94,7 +94,5 @@ is used; existing non-license classifiers remain unchanged. This follows
 [PEP 639](https://peps.python.org/pep-0639/) and the
 [setuptools packaging guidance](https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html).
 
-This repository change is intended for the coordinated Guard 0.18.0
-publication. Issue #30 remains open until that publication. Package version
-and release date are unchanged, and existing published artifacts are not
-retroactively replaced by this change.
+Guard 0.18.0 (2026-09-08) is the first package release under Apache-2.0.
+Prior tagged and PyPI releases are not retroactively relicensed or replaced.

@@ -488,7 +488,7 @@ def _guard_version() -> str:
     try:
         return version("waveframe-guard")
     except PackageNotFoundError:
-        return "0.17.0"
+        return "0.18.0"
 
 
 def _normalized_request_from_call(args: tuple[Any, ...], kwargs: dict[str, Any]) -> dict[str, Any]:

@@ -119,8 +119,8 @@ def test_repository_contract_rejects_dependency_bound_removal_or_widening(positi
     validate_repository._validate_runtime_dependencies(dependencies, failures)
     assert any("dependency contract changed unexpectedly" in failure for failure in failures)
     metadata = email.message_from_string("\n".join([
-        "Name: waveframe-guard", "Version: 0.17.0", "Requires-Python: >=3.10",
+        "Name: waveframe-guard", "Version: 0.18.0", "Requires-Python: >=3.10",
         *(f"Requires-Dist: {dependency}" for dependency in dependencies), "",
     ]))
     with pytest.raises(AssertionError, match="runtime dependency metadata differs"):
-        package_acceptance._validate_metadata(metadata, "0.17.0", "test package")
+        package_acceptance._validate_metadata(metadata, "0.18.0", "test package")

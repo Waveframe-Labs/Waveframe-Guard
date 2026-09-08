@@ -1,70 +1,127 @@
-# Waveframe Guard v0.17.0 Release Notes
+# Waveframe Guard v0.18.0 Release Notes
 
-## Native Ledger v3 Authority Verification
+Release date: **2026-09-08**.
+This release includes the work from #30, #31, #32, #33 and #39.
 
-Waveframe Guard v0.17.0 adds native verification of Ledger's additive
-`authority_bundle.v3` and mandatory matching `publication_receipt.v3`.
-Guard delegates normative reconstruction to Ledger's version-dispatched public
-validators and requires provenance-complete results before using any runtime
-projection.
+## Highlights
 
-The verified envelope binds the registry, authority, publication, manifest,
-domain pack, runtime-fact schema, Constraint IR, compiled contract, bundle, and
-receipt identities and hashes. Verification evidence identifies v3 artifacts
-truthfully. Cache insertion, reuse, revalidation, drift detection, and
-substitution rejection cover v3 without changing the existing v1/v2 paths.
+- **Repository-bound mediated mutation.** `Guard.local()` and `Guard.cloud()`
+  with `repository_root` support `repository_tool` callbacks receiving an
+  expiring `RepositoryTarget`. Canonical repository-relative paths, target
+  identity and adapter provenance bind the supported existing-file operation.
+  Noncanonical paths, aliases, indirection and workspace escapes are rejected.
+- **Verifiable decision and execution/mutation attestations.** Existing
+  `guard_execution_attestation.v2` records identify the mediated action, target
+  binding, adapter/assurance class, authority basis, decision and callback or
+  mutation outcome. Evidence reload and integrity verification retain their
+  existing meanings; schema identifiers are unchanged.
+- **Fail-closed legacy API migration.** All 11 retained legacy execution and
+  permission entrypoints reject before callbacks, with zero allowed events.
+  Modern local and Cloud APIs remain supported.
+- **Bounded runtime dependencies.** Every direct runtime dependency has a
+  reviewed lower and upper bound. Widening an upper bound requires a future
+  Guard change and compatibility evidence.
+- **Apache-2.0 Guard Core distribution.** 0.18.0 is the first package release
+  under Apache License 2.0. Commercial use, modification, redistribution, and
+  hosting of the Guard Core SDK are permitted under Apache-2.0. Prior tagged
+  and PyPI releases are not retroactively relicensed. The license grants no
+  rights to Waveframe trademarks. Separately distributed Waveframe Cloud,
+  Console, hosted translation, managed evidence operations, Guard Inspector,
+  Ledger Workspace, enterprise identity/integrations, support and other
+  commercial products/services are not relicensed by this repository. See
+  [licensing scope](docs/LICENSING.md).
+- **Explicit mediation and bypass boundary.** Canonical packaged documentation
+  includes the threat model, least-privilege deployment and operator checks.
+  A connected runtime means a specific Guard integration is reporting.
+  Connection does not establish global control of the repository or machine,
+  or of the agent or organization.
 
-Multi-control v3 authority can enforce every published control from one source
-clause. Partial-coverage authority enforces only its published controls;
-acknowledged residual meaning remains public provenance and never becomes
-executable behavior. Guard evaluates the unchanged
-`compiled_authority_contract.v2` only after the complete v3 bundle and receipt
-pass validation.
+## Migration requirements
 
-## Compatibility
+1. Repository callers use `Guard.local()` / `Guard.cloud()` with
+   `repository_root`, and wrap their mutation callable with `repository_tool`.
+   Use the documented `RepositoryTarget` operations during the callback;
+   retained targets expire when that callback ends.
+2. Untyped v1 literal-target callers explicitly select `target_domain="literal"`.
+   Generic callbacks do not provide repository mutation assurance.
+3. Retained legacy `execute`, `@guard`, `evaluate_admissibility`, and
+   `GovernedRuntime` / `GuardRuntime` execution or permission entrypoints no
+   longer execute. They raise `LegacyExecutionError` with code
+   `GUARD_LEGACY_EXECUTION_UNSUPPORTED`; `fail_mode="open"` does not enable them.
 
-The public Ledger dependency remains:
+Follow the [strict-execution migration guide](docs/getting-started/STRICT_EXECUTION_MIGRATION.md)
+and [repository-workspace migration guide](docs/architecture/REPOSITORY_WORKSPACE.md).
+The [quickstart](docs/getting-started/README.md) shows the modern integration.
+
+## Truthful limitations
+
+Guard enforces actions that pass through its wrapped tool boundary. Actions
+that reach the same capability through another function, tool, process,
+credential, or API path are outside that enforcement guarantee.
+
+- Registration does not remove access to the original callable. Direct
+  filesystem/API/shell/subprocess paths and underlying credentials can bypass
+  Guard. Expose wrapped tools and independently restrict alternate paths using
+  the [deployment and operator guidance](docs/architecture/REPOSITORY_WORKSPACE.md#least-privilege-deployment).
+- Guard is trusted in-process mediation, not a sandbox or tamper-resistant
+  reference monitor. Privileged operators, in-process tampering and independent
+  concurrent writers remain outside its isolation guarantee. Evidence of a
+  mediated call does not prove that no alternate path was used.
+- Repository mutation is limited to the documented Linux descriptor and local
+  Windows NTFS handle implementations and supported existing-file operations.
+  Creation, rename, deletion, macOS mutation and unsupported filesystems fail
+  closed. See the canonical guide for the exact OS/filesystem prerequisites.
+- Post-callback substitution detection cannot undo bytes already written.
+  Failed post-checks can leave an unknown physical mutation outcome.
+- Replay reproduces the logical decision, not physical mutation. Cloud decision
+  preservation is not the local final mutation attestation.
+- This release does not claim the hosted Cloud translation workflow or
+  real-repository end-to-end acceptance is released or deployed. Disposable
+  installed-wheel acceptance does not substitute for that operator acceptance.
+
+## Dependency compatibility matrix
+
+| Component | Declared range | Supported validation baseline |
+| --- | --- | --- |
+| Guard | 0.18.0 | Python 3.10 minimum; Python 3.14 current, native Linux/Windows |
+| CRI-CORE | `>=0.13.0,<0.15.0` | Published 0.13.0; exact 0.14.0 candidate from [CRI PR #5](https://github.com/Waveframe-Labs/CRI-CORE/pull/5), commit `411dfaa976fd4b37efc5fd3e39076edcd3603e1b` |
+| Proposal Normalizer | `>=0.2.0,<0.3.0` | Published 0.2.0 |
+| Governance Ledger | `>=0.7.0,<0.9.0` | Published 0.7.0: existing v1/v2; published 0.8.0: v1/v2 plus native v3 |
+| requests | `>=2.33.0,<3.0.0` | Published 2.33.0 minimum; 2.34.2 current validation |
+
+The public package does not pin transitive dependencies. Ordinary installation
+uses published dependencies and works with CRI 0.13.0; the unpublished exact
+CRI candidate is a separate compatibility test, not an installation requirement.
+Ledger 0.7 rejects native v3 with an explicit Ledger 0.8 requirement.
+
+**Upgrade/install Guard 0.18.0 before CRI-CORE 0.14.0.**
+Published Guard 0.17.0 has an unbounded CRI dependency and must not be paired
+with CRI 0.14. Guard 0.18.0 supports `cricore>=0.13.0,<0.15.0`.
+
+Install Guard directly:
 
 ```text
-governance-ledger>=0.7.0,<0.9.0
+pip install waveframe-guard==0.18.0
 ```
 
-- Ledger 0.7 supports existing v1 and v2 authority unchanged.
-- Native v3 verification requires Ledger 0.8 or later.
-- Supplying a v3 artifact with Ledger 0.7 fails closed with a clear Ledger 0.8
-  requirement; Guard does not partially verify or downgrade the publication.
-- Existing v1/v2 loading, caching, Cloud-envelope, runtime-fact, and
-  enforcement behavior remains compatible.
+Published `governance-ledger==0.8.0` has a `[guard]` extra pinned to
+`waveframe-guard==0.17.0`. Ledger's base package remains compatible with
+Guard 0.18.0 through `governance-ledger>=0.7.0,<0.9.0`. Install
+`waveframe-guard==0.18.0` directly for this release rather than relying on
+`governance-ledger[guard]==0.8.0`; that extra does not install Guard 0.18.0.
 
-Primary installation after publication:
+See the
+[getting-started compatibility matrix](docs/getting-started/README.md#dependency-compatibility-matrix).
 
-```text
-pip install waveframe-guard==0.17.0
-```
+## Cloud availability at the release date
 
-## Evidence and Provider Boundaries
+Guard 0.18.0 can verify matching Ledger v2 and v3 publication envelopes.
+Waveframe Cloud source support for atomic v2/v3 publication serving merged
+in Cloud PR #135. Hosted translation backend and Console workflow source
+merged in PRs #136 and #140. At the Guard 0.18.0 release date, those Cloud
+changes had not yet been released or deployed to the hosted service.
+Guard does not claim hosted translation availability at that date. Cloud
+status-copy follow-up remains Cloud #122; a connection reports one integration.
 
-Runtime verification requires the published authority bundle and receipt. It
-does not require a translation proposal or retained private provider evidence.
-Private model details, prompts, requests, responses, retries, failures, token
-usage, and explanations can remain absent without changing authority or Guard
-verification.
-
-Guard contains no AI or model-provider integration. It does not call a model,
-interpret policy prose, or trust provider explanations. Ledger publishes the
-normative authority; Guard verifies and deterministically enforces the compiled
-runtime payload without a model.
-
-## Availability
-
-Guard 0.17.0 can parse and verify matching v2 and v3 publication envelopes.
-Current released/hosted Cloud does not yet serve the complete atomic v2 or v3
-publication path. Cloud PR #133 remains the pending v2 server implementation.
-Hosted v3 serving requires an additional Cloud update. This release does not
-modify or deploy Cloud.
-
-The authoritative compatibility matrix is in
-[`docs/getting-started/README.md`](docs/getting-started/README.md#release-compatibility-matrix).
-
-This is release preparation only. It does not merge this release branch,
-create a tag or GitHub release, upload to PyPI, publish, or deploy any service.
+Real-repository end-to-end acceptance and hosted workflow acceptance are
+separate operator checks; disposable installed-wheel tests do not establish them.
