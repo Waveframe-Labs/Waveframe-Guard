@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+- Licensing (#30): License the repository's Waveframe Guard Core SDK under
+  Apache-2.0, with canonical LICENSE, Waveframe Labs NOTICE, matching package
+  metadata and contribution terms. Commercial use, modification and
+  redistribution are permitted under the license. Separately distributed
+  Cloud, Console, Inspector, Workspace and other commercial services/products
+  are outside this repository's licensing scope. Add source, distribution and
+  installed-license regression checks. Package version remains unchanged;
+  keep #30 open pending the coordinated Guard 0.18.0 publication.
+
 - Security/migration (#39): Guard execution is never advisory. Local/cloud
   controls authority resolution, not enforcement strength; advisory CRI
   evaluation is not permission to execute. Legacy `execute`, `@guard`,
