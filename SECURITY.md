@@ -2,9 +2,14 @@
 
 ## Overview
 
-Waveframe Guard enforces deterministic execution control for AI-initiated actions before they reach downstream systems.
+Waveframe Guard evaluates and enforces mediated actions before invoking their
+wrapped callbacks. Actions reaching the same capability through alternate
+functions, tools, processes, credentials or API paths are outside its guarantee.
 
-Because it sits at the execution boundary for sensitive operations such as writes, deletes, deployments, transfers, and other state-changing actions, security is a core concern.
+The canonical [mediation and bypass threat model](docs/architecture/REPOSITORY_WORKSPACE.md#mediation-and-bypass-threat-model)
+defines trusted components, deployment guidance and operator verification.
+Repository mutation supports only the OS/filesystem and existing-file operations
+listed there; generic callable examples do not establish filesystem semantics.
 
 ---
 
@@ -44,7 +49,8 @@ Waveframe Guard is responsible for:
 
 Waveframe Guard is **not responsible for**:
 
-- executing downstream actions
+- implementing the customer's downstream mutation logic (the SDK invokes the
+  trusted callback when its mediated decision permits it)
 - managing authentication or identity proofing systems
 - storing customer system data beyond audit metadata
 - handling secrets or credentials for integrating platforms
@@ -73,11 +79,12 @@ Bypassing this check defeats the purpose of enforcement.
 
 ### 2. Protect the execution path
 
-Ensure that:
-
-- all state-changing actions pass through Guard
-- no alternative execution paths exist
-- no fallback logic bypasses policy enforcement
+Identify the exact wrapped callable and verify one allowed and one blocked
+mediated action, including zero callback invocations for the blocked action.
+Separately verify the agent's tools, credentials and effective permissions do
+not provide an alternate mutation path. A passing Guard test or connected runtime
+does not establish this. Follow the [least-privilege deployment and operator
+procedure](docs/architecture/REPOSITORY_WORKSPACE.md#operator-verification).
 
 ---
 
@@ -108,12 +115,14 @@ Ensure that:
 
 For production systems, it is recommended to log and review:
 
-- all blocked actions
-- all pending actions awaiting authorization
-- all allowed actions affecting sensitive systems or data
+- observed blocked mediated actions
+- observed pending mediated actions awaiting authorization
+- observed allowed mediated actions affecting sensitive systems or data
 - actor, role-resolution, and policy-version context
 
-This supports auditability, incident response, and change review.
+This supports auditability, incident response, and change review. Guard evidence
+is not a complete inventory of unmediated actions; monitor alternate paths using
+independent infrastructure records.
 
 ---
 

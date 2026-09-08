@@ -6,7 +6,9 @@ permission APIs now raise an actionable migration error. Use `Guard.local()` /
 `Guard.cloud()` with guarded tools; see [strict execution migration](STRICT_EXECUTION_MIGRATION.md).
 
 
-Waveframe Guard enforces governance rules at execution time. It blocks actions that violate published authority before they happen.
+Guard enforces actions that pass through its wrapped tool boundary. Actions
+that reach the same capability through another function, tool, process,
+credential, or API path are outside that enforcement guarantee.
 
 ---
 
@@ -49,11 +51,15 @@ allocate_budget = guard.tool(
     target="account_id",
     include_arguments=("amount",),
 )(existing_allocate_budget)
+# Calling allocate_budget evaluates authority immediately before invoking
+# existing_allocate_budget, which performs the mediated mutation.
 ```
 
-The wrapped callable keeps its normal Python interface. Guard resolves the
-complete published authority from Cloud, verifies it, evaluates before
-mutation, and reports the execution to Cloud.
+The exact mutation callable being wrapped is `existing_allocate_budget`.
+Expose only `allocate_budget` to the agent. This protects that callable path,
+not the entire machine or repository globally. The wrapper keeps the normal
+Python interface and evaluates immediately before invoking the mutation
+callback. See the [bypass threat model and operator checks](../architecture/REPOSITORY_WORKSPACE.md#mediation-and-bypass-threat-model).
 
 ## Five-Minute Cloud Quickstart
 
@@ -91,7 +97,11 @@ one allowed action and one blocked action, asserts that the underlying mutation
 runs exactly once, and prints the runtime, actor, authority, both Guard-owned
 decisions, and both Cloud package, receipt, and proof identifiers. Console
 Activity or Executions then provides server-side proof under the configured
-runtime and authority.
+runtime and authority. The executable quickstart wraps `run_quickstart`'s
+`allocate_budget`; its mediated mutation is `mutations.append(mutation)`.
+A connected Guard runtime means a specific Guard integration is reporting.
+It does not establish global control of the repository, machine, agent, or
+organization, or the absence of alternate mutation paths.
 
 `@guard.tool(...)` wraps an ordinary callable. Register that callable with a
 custom agent, LangGraph, CrewAI, an OpenAI tool loop, or another framework in the
@@ -106,9 +116,11 @@ guarded_tool = guard.tool(action="publish_release", target="repository")(publish
 agent_tools.register(name="publish_release", callable=guarded_tool)
 ```
 
-The registry and model may select the tool, but only the guarded callable can
-reach `publish_release`. Guard remains the enforcement boundary and does not
-become the agent framework.
+The registry exposes the guarded callable for this integration. Direct access
+to `publish_release` or another release API bypasses it; registration alone
+does not remove those paths. Restrict them using the deployment guidance below
+the linked threat model. This generic API example does not establish repository
+filesystem semantics; repository writes require `repository_tool`.
 
 Exactly-once means that the allowed 500-unit callback executes once and the
 blocked 12,500-unit callback never executes. The quickstart rejects any other

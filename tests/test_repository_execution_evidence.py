@@ -66,6 +66,59 @@ class Capture:
         return PreservationResult()
 
 
+def test_mediated_action_proof_identifies_boundary_but_does_not_cover_bypass(runtime):
+    guard, root, version = runtime
+    denied = root / "deployment" / "production.yml"
+    denied.parent.mkdir()
+    denied.write_bytes(b"original denied bytes")
+    calls = []
+
+    @guard.repository_tool(action="modify", target="path", return_result=True, raise_on_block=False)
+    def write_file(path, content):
+        calls.append(path.relative_path)
+        return path.write_bytes(content)
+
+    allowed = write_file("README.md", b"allowed mediated bytes")
+    blocked = write_file("deployment/production.yml", b"blocked mediated bytes")
+    assert calls == ["README.md"]
+    assert (root / "README.md").read_bytes() == b"allowed mediated bytes"
+    assert denied.read_bytes() == b"original denied bytes"
+    for result, target, decision, invoked in (
+        (allowed, "README.md", "admissible", True),
+        (blocked, "deployment/production.yml", "blocked", False),
+    ):
+        proof = result["evaluation"]["execution_attestation"]
+        assert proof["schema_version"] == "guard_execution_attestation.v2"
+        assert proof["execution_request"]["action"] == "modify"
+        assert proof["execution_request"]["target"] == target
+        binding = proof["target_binding"]
+        assert binding["schema_version"] == "guard_target_binding.v1"
+        assert binding["target_domain"] == "repository_path"
+        assert binding["adapter_version"] == "guard.repository-file.v2"
+        assert binding["assurance_class"] in {"ntfs-sharing-locks.v1", "linux-openat2-descriptor.v1"}
+        assert binding["workspace_binding_id"] == guard.boundary_for().target_binding.workspace_binding_id
+        assert binding["domain_resolver"] == (
+            "trusted-sdk-configuration.v1" if version == 1 else "guard.target-domain-resolver.v1"
+        )
+        basis = proof["authority_basis"]
+        assert basis["contract_id"] and basis["contract_version"]
+        assert basis["compiled_contract_hash"] == binding["authority_contract_hash"]
+        assert proof["decision"] == decision and proof["callback_invoked"] is invoked
+        assert proof["execution_status"] == ("succeeded" if invoked else "not_run")
+        assert proof["mutation_status"] == ("executed" if invoked else "not_performed")
+        assert proof["mutation_executed"] is invoked
+        assert guard.store.load_execution_attestation(proof["run_id"]) == proof
+
+    # Independent permissions permit a real bypass; existing decision evidence
+    # cannot assert it did not happen. No new schema or enforcement claim is added.
+    history_count = len(guard.store.history())
+    denied.write_bytes(b"unmediated alternate path")
+    assert denied.read_bytes() == b"unmediated alternate path"
+    assert calls == ["README.md"] and len(guard.store.history()) == history_count
+    proof = blocked["evaluation"]["execution_attestation"]
+    assert guard.store.load_execution_attestation(proof["run_id"]) == proof
+
+
 @pytest.mark.parametrize("method", ["evaluate", "execute_repository"])
 @pytest.mark.parametrize("injection", ["text", "bytes", "workspace", "nested", "artifact_path",
                                        "artifact_content", "extra", "binding", "provider",

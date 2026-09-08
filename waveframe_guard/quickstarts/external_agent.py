@@ -6,6 +6,18 @@ domain: "guard-sdk"
 status: "preview"
 ai_assisted: "partial"
 ---
+
+Guard enforces actions that pass through its wrapped tool boundary. Actions
+that reach the same capability through another function, tool, process,
+credential, or API path are outside that enforcement guarantee.
+
+run_quickstart wraps allocate_budget with @guard.tool. Guard evaluates
+immediately before invoking allocate_budget; mutations.append(mutation) is
+the mediated mutation. This example protects that callable path, not the
+entire machine or repository globally. A connected runtime means this Guard
+integration is reporting, not that alternate mutation paths are unavailable.
+Threat model and operator verification:
+https://github.com/Waveframe-Labs/Waveframe-Guard/blob/main/docs/architecture/REPOSITORY_WORKSPACE.md#mediation-and-bypass-threat-model
 """
 
 from __future__ import annotations
@@ -76,6 +88,7 @@ def run_quickstart(
         return_result=True,
     )
     def allocate_budget(account_id: str, amount: int) -> dict[str, Any]:
+        # The wrapper evaluates before entering this callback.
         mutation = {"account_id": account_id, "amount": amount}
         mutations.append(mutation)
         return mutation

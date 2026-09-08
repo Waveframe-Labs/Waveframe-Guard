@@ -1,8 +1,9 @@
 # Repository workspace boundary
 
 This unreleased boundary addresses [Guard #33](https://github.com/Waveframe-Labs/Waveframe-Guard/issues/33).
-One Guard runtime protects one explicitly bound repository. `workspace` continues
-to name the evidence store; `repository_root` names the protected filesystem root.
+One Guard runtime binds its repository adapter to one explicitly selected root;
+it mediates only calls through that adapter. `workspace` continues to name the
+evidence store; `repository_root` names the adapter's filesystem root.
 These are separate settings. Initialization is trusted and requires an absolute,
 existing repository directory. It resolves the supplied root once and retains an
 open handle and filesystem identity until `guard.close()` or object destruction.
@@ -21,6 +22,8 @@ guard = Guard.local(
 
 @guard.repository_tool(target="path", action="modify")
 def write_file(path: RepositoryTarget, content: bytes):
+    # Guard evaluates immediately before invoking this callback; the bound
+    # capability below performs the mediated existing-file mutation.
     return path.write_bytes(content)
 
 try:
@@ -108,6 +111,134 @@ bound to a repository. Applications must declare those repository uses too.
 The pure `evaluate_runtime` contract evaluator retains literal semantics. It
 does not execute callbacks or attest to filesystem safety. Saved replay also
 reproduces the logical decision, not the historical filesystem state.
+
+## Mediation and bypass threat model
+
+Guard enforces actions that pass through its wrapped tool boundary. Actions
+that reach the same capability through another function, tool, process,
+credential, or API path are outside that enforcement guarantee.
+
+The exact callable in the example above is `write_file`, wrapped by
+`@guard.repository_tool`. The trusted callback mutates through
+`RepositoryTarget.write_bytes`; Guard evaluates immediately before invoking it.
+This is a trusted integration rather than an isolation boundary. The agent may
+choose request values, but Guard, its configuration, selected authority, adapter,
+callback, kernel and filesystem driver are trusted. This does not grant control
+over the whole repository, host, agent or organization.
+
+| Bypass or limitation | Boundary and consequence |
+| --- | --- |
+| Direct function or API bypass | Calling the original function, unwrapping a decorator, or using a separate API client avoids Guard evaluation. |
+| Alternate tools and plugins | Another editing tool or plugin can reach the same capability without using the registered wrapper. |
+| Subprocess and shell execution | A shell, subprocess, script, or child process with write access can mutate independently of the wrapped callable. |
+| Filesystem access outside the repository adapter | `Path.write_bytes`, raw file handles, editors and unrelated filesystem APIs are unmediated. A generic `guard.tool` path string does not provide repository binding. |
+| Credential reuse or theft | Reusing or stealing the underlying repository, cloud or service credentials enables direct access if the service accepts them. Guard does not broker or isolate those credentials. |
+| Privileged operator or administrator bypass | An operator/admin with independent permissions can change files, credentials, configuration, authority or the running process. |
+| In-process tampering | Code executing in the same Python process can replace functions, access private attributes or alter evidence. Guard is not a tamper-resistant boundary; hash checks do not protect against an actor able to rewrite all inputs and hashes. |
+| Independent concurrent writers | Another authorized writer can change bytes outside the callback. Linux descriptors do not freeze the namespace; Windows sharing locks constrain compatible file operations only while held. Neither establishes always-invoked mediation for all writers. |
+| Post-callback substitution detection | Revalidation can detect target/ancestor replacement and report failure with unknown mutation outcome. Detection after a callback does not roll back already-written bytes or undo external side effects. |
+| Unsupported operating systems and mutation types | Unsupported OS/filesystem combinations and creation, rename or deletion fail closed through the adapter. See the supported-platform table below; this refusal does not stop another tool from attempting them. |
+| Decision replay versus physical mutation | Replay checks the recorded logical decision and integrity links. It neither revalidates the historical workspace nor reproduces physical mutation, executes callbacks, or authorizes a fresh write. |
+
+An attestation records a mediated attempt, not an exhaustive account of actions
+on the capability. Decision evidence does not prove that no alternate path was
+used. Successful callback evidence records completion under the trusted callback
+contract; it is not an independent byte-level audit of every possible side
+effect. An infrastructure-enforced choke point is a separate, stronger assurance
+class requiring its own verification; the current adapter assurance labels do
+not claim that class. Guard is not a filesystem sandbox, OS reference monitor,
+universal gateway, or credential broker.
+
+### Least-privilege deployment
+
+Expose only Guard-wrapped mutation tools to the agent. Keep the original
+callables and raw repository/cloud/service credentials out of the agent's tool
+catalog, prompts and accessible environment. Merely hiding a function name is
+insufficient when the agent can execute arbitrary code with the same privileges.
+
+Remove or restrict alternate shell, subprocess, filesystem and API paths. Use a
+dedicated least-privileged service identity for the mediated capability and
+scope its credentials and filesystem permissions to that capability. Separate
+agent identity from operator/admin identity; an `actor_identity` string in
+evidence does not itself enforce this separation. The trusted integration may
+need credentials, but the agent must not be able to retrieve or reuse them.
+
+Monitor for use of alternate paths using independent service, identity and
+filesystem audit records. Recheck exposure when tools, plugins, credentials or
+deployment permissions change. These integration steps can make the wrapper the
+practical choke point; they do not make the SDK tamper resistant. Any stronger
+infrastructure guarantee needs separately verified permissions and isolation,
+not a new interpretation of Guard's existing assurance class.
+
+### Runtime connection status
+
+A connected Guard runtime means a specific Guard integration is reporting.
+Registration, a heartbeat, or a successful allowed/blocked demonstration does
+not establish global control of a repository, machine, agent or organization.
+Display the integration/runtime identity, authority, observed event and time;
+verify the actual mediated callable and alternate-path exposure separately.
+
+Cloud status follow-up is tracked in
+[Cloud #122](https://github.com/Waveframe-Labs/Waveframe-Cloud/issues/122).
+At Cloud commit `67ab18d7e02a59d0d03495dfd5cb52cad28f796c`,
+`ui/app.js:2995-2996` renders "All runtimes connected" / "No action required"
+from registry/health observations, and `runtimeConnectionState` at
+`ui/app.js:6897-6905` can label registration alone "Heartbeat received".
+Those observations do not verify mediated coverage. Correcting these Cloud
+surfaces is separate work; this Guard change makes no claim about deployed UI.
+
+## Operator verification
+
+Use a disposable repository and the deployment's actual identity/permissions.
+Select an authority that permits an existing `README.md` and denies an existing
+`deployment/production.yml`, then use the `write_file` example above with
+`return_result=True, raise_on_block=False` on `repository_tool`.
+Replace the demonstration call inside `try` with these checks and run them
+before `guard.close()`.
+
+1. Identify the exact wrapped mutation callable: `write_file`, its
+   `@guard.repository_tool` registration, `repository_root`, and the trusted
+   `RepositoryTarget.write_bytes` operation. Count callback entries in the
+   disposable test and retain the files' original bytes outside the agent.
+2. Run one expected-allowed mediated action: call
+   `write_file("README.md", b"allowed test")`. Check an admissible decision,
+   one callback invocation and the expected changed bytes.
+3. Run one expected-blocked mediated action: call
+   `write_file("deployment/production.yml", b"must not be written")` through
+   the same wrapper. Check the blocked decision and unchanged bytes.
+4. Verify the blocked callback was not invoked: its counter must not increase,
+   and its attestation must record `callback_invoked=false`,
+   `execution_status="not_run"`, and `mutation_status="not_performed"`.
+5. Inspect `result["evaluation"]["execution_attestation"]` for the fields
+   below and reload saved evidence with `guard.store.load_execution_attestation`
+   using its `run_id`. Compare the authority and adapter to the deployment you
+   selected, rather than treating any successful receipt as the intended scope.
+6. Independently confirm the agent lacks a usable alternate mutation path.
+   Inventory its tools/plugins and test raw file, shell/subprocess and service
+   API access with the agent identity on disposable targets. Inspect effective
+   permissions and credential visibility. A bypass succeeding means the
+   integration is not a practical choke point, even if both Guard tests pass.
+
+The existing `guard_execution_attestation.v2` needs no new schema for #32:
+
+| Operator question | Existing evidence field |
+| --- | --- |
+| What mediated action and target? | `execution_request.action`, `execution_request.target`, `execution_request_hash` |
+| Which adapter/enforcement boundary? | `target_binding.adapter_version`, `target_binding.assurance_class`, `target_binding.workspace_binding_id`, `target_binding_hash` |
+| Which target semantics? | `target_binding.target_domain`, `target_binding.domain_resolver` |
+| Which authority? | `authority_basis.contract_id`, `authority_basis.contract_version`, `authority_basis.compiled_contract_hash`; published-authority basis additionally binds authority evidence and runtime facts |
+| What decision? | `decision`, `decision_outcome_hash`, `guard_receipt_hash` when saved |
+| What execution/mutation outcome? | `callback_invoked`, `callback_completed`, `execution_status`, `mutation_status`, `mutation_executed` |
+
+The opaque workspace binding identifies one adapter activation, not an absolute
+path, credential or globally protected repository. It does not identify arbitrary
+Python callback code; the operator verifies callable registration in step 1.
+Malformed requests rejected before admission produce no evidence. Cloud's
+decision preservation does not attest final repository mutation; inspect the
+local final attestation as described below.
+
+This scope follows [Guard #32](https://github.com/Waveframe-Labs/Waveframe-Guard/issues/32)
+and [Ledger #16](https://github.com/Waveframe-Labs/Waveframe-Ledger/issues/16).
 
 ## Target binding and technical proof
 

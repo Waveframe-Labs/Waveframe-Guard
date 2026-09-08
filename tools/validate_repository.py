@@ -18,6 +18,7 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(REPO_ROOT))
 
 from tools.license_contract import validate_document, validate_notices
+from tools.mediation_contract import PACKAGED_DOCS, validate_claims, validate_mediation_document
 
 FORBIDDEN_PARTS = {
     ".guard-local",
@@ -87,6 +88,7 @@ def main() -> int:
     json_count = _validate_json(tracked, failures)
     _validate_secrets(tracked, failures)
     _validate_licensing(tracked, failures)
+    _validate_mediation(tracked, failures)
     dependency_count = _validate_metadata(failures)
     _validate_diff(args.diff_base, failures)
 
@@ -227,6 +229,21 @@ def _validate_licensing(tracked: list[PurePosixPath], failures: list[str]) -> No
                 validate_document((REPO_ROOT / path).read_text(encoding="utf-8"), str(path))
             except (OSError, AssertionError) as exc:
                 failures.append(str(exc))
+
+
+def _validate_mediation(tracked, failures):
+    for path in tracked:
+        if path.suffix.lower() != ".md":
+            continue
+        try:
+            validate_claims((REPO_ROOT / path).read_text(encoding="utf-8"), str(path))
+        except (OSError, AssertionError) as exc:
+            failures.append(str(exc))
+    for document in PACKAGED_DOCS:
+        try:
+            validate_mediation_document((REPO_ROOT / document).read_text(encoding="utf-8"), document)
+        except (OSError, AssertionError) as exc:
+            failures.append(str(exc))
 
 
 def _validate_diff(diff_base: str, failures: list[str]) -> None:

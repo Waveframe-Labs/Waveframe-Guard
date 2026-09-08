@@ -324,7 +324,10 @@ class Guard:
         raise_on_block: bool = True,
         return_result: bool = False,
     ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
-        """Protect an existing agent tool without requiring Guard-shaped arguments.
+        """Mediate calls through this wrapper without Guard-shaped arguments.
+
+        Direct calls to the original function or alternate capability paths are
+        outside this guarantee. This is a trusted integration, not isolation.
 
         ``target`` may name one function argument or be a callable receiving the
         original tool arguments. Function arguments are excluded from preserved
@@ -423,6 +426,8 @@ class Guard:
         Trusted callbacks must use its read_bytes/write_bytes methods. The current
         adapter supports existing regular files on local Windows NTFS and
         supported Linux filesystems through securely opened descriptors.
+        Only calls through this wrapper are mediated; independent filesystem
+        writers and in-process tampering are outside this trusted boundary.
         """
         boundary = self.boundary_for(authority)
 
