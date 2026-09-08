@@ -1,4 +1,8 @@
-"""Customer claims and installed documentation must describe actual mediation."""
+"""Regressions for known public-documentation claims, not arbitrary English truth.
+
+Explicit positive/negative examples define the deterministic contract. Passing
+these checks never substitutes for reviewing new claims against implementation.
+"""
 import ast
 import io
 from pathlib import Path
@@ -17,6 +21,133 @@ from test_licensing import archive_files
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+ACCEPT_CLAIMS = (
+    "Guard controls all actions that pass through its wrapped tool boundary.",
+    "Do not claim that Guard is a filesystem sandbox.",
+    "Guard is not a filesystem sandbox.",
+    "Guard does not guarantee that bypass cannot occur.",
+    MEDIATION_STATEMENT,
+)
+REJECT_CLAIMS = (
+    "Guard controls all agent actions.",
+    "Guard protects the entire repository, including direct filesystem writes.",
+    "Guard guarantees that bypass cannot occur.",
+    "Guard is a filesystem sandbox.",
+    "Guard provides tamper-resistant mediation.",
+    "A connected runtime means the repository is globally protected.",
+    "Decision evidence proves no alternate path was used.",
+    "Replay reproduces the physical mutation.",
+    "Detection after a callback rolls back already-written bytes.",
+)
+
+
+@pytest.mark.parametrize("claim", ACCEPT_CLAIMS)
+def test_required_accurate_claims_pass(claim):
+    validate_claims(claim, "required ACCEPT example")
+
+
+@pytest.mark.parametrize("claim", REJECT_CLAIMS)
+def test_required_overclaims_fail(claim):
+    with pytest.raises(AssertionError, match="prohibited"):
+        validate_claims(claim, "required REJECT example")
+
+
+@pytest.mark.parametrize("claim", (
+    "Guard controls all mediated actions.",
+    "Guard controls all actions that pass through the wrapped boundary.",
+    "Guard controls all actions on the wrapped callable path.",
+    "Must not claim that Guard is a filesystem sandbox.",
+    "Never claim: Guard provides tamper-resistant mediation.",
+    "A connected runtime does not establish that the repository is globally protected.",
+    "Guard does not guarantee that bypass is impossible.",
+    'Historical wording (no longer accurate): "Guard is a filesystem sandbox."',
+    'Previously, the README claimed "Guard controls all agent actions."',
+))
+def test_known_scoped_negated_and_historical_forms_pass(claim):
+    validate_claims(claim, "accurate scope or attributed historical wording")
+
+
+@pytest.mark.parametrize("claim", REJECT_CLAIMS)
+@pytest.mark.parametrize("warning", ["Do not claim that ", "Must not claim that ", "Never claim: "])
+def test_explicit_warning_applies_to_the_known_assertion_only(claim, warning):
+    validate_claims(warning + claim, "explicit warning")
+    with pytest.raises(AssertionError, match="prohibited"):
+        validate_claims(warning + claim + " " + claim, "warning followed by assertion")
+
+
+def test_historical_quote_does_not_exempt_current_claim():
+    history = 'Historical wording (no longer accurate): "Guard is a filesystem sandbox."'
+    validate_claims(history, "historical quotation")
+    with pytest.raises(AssertionError, match="prohibited"):
+        validate_claims(history + " Guard is a filesystem sandbox.", "history followed by current claim")
+    with pytest.raises(AssertionError, match="prohibited"):
+        validate_claims('"Guard is a filesystem sandbox."', "unattributed quoted claim")
+
+
+@pytest.mark.parametrize("document", PACKAGED_DOCS)
+@pytest.mark.parametrize("claim", REJECT_CLAIMS)
+def test_safe_document_does_not_exempt_appended_contradiction(document, claim):
+    text = (ROOT / document).read_text(encoding="utf-8")
+    with pytest.raises(AssertionError, match="prohibited"):
+        validate_mediation_document(text + "\n\n" + claim, document)
+
+
+@pytest.mark.parametrize("document", PACKAGED_DOCS)
+def test_valid_document_with_scoped_and_negated_warnings_passes(document):
+    text = (ROOT / document).read_text(encoding="utf-8")
+    validate_mediation_document(text + "\n\n" + "\n".join(ACCEPT_CLAIMS), document)
+
+
+@pytest.mark.parametrize("separator", [". ", "; ", ", but ", ", and ", "\n\n", "\n- ", "\n## "])
+def test_negation_does_not_exempt_an_independent_assertion(separator):
+    text = "Do not claim that Guard is a filesystem sandbox" + separator + "Guard controls all agent actions."
+    with pytest.raises(AssertionError, match="prohibited"):
+        validate_claims(text, "independent assertions")
+
+
+def test_later_qualifier_does_not_excuse_earlier_global_claim():
+    with pytest.raises(AssertionError, match="prohibited"):
+        validate_claims(REJECT_CLAIMS[0] + " " + ACCEPT_CLAIMS[0], "global then scoped")
+    with pytest.raises(AssertionError, match="prohibited"):
+        validate_claims(ACCEPT_CLAIMS[0] + " But " + REJECT_CLAIMS[0], "scoped then global")
+
+
+@pytest.mark.parametrize("claim", REJECT_CLAIMS)
+@pytest.mark.parametrize("formatting", ["emphasis", "inline-code", "wrapped", "heading", "list", "blockquote", "links", "normalized", "underscore"])
+def test_markdown_formatting_does_not_hide_affirmative_claim(claim, formatting):
+    # A blockquote or inline quote alone is not a historical/disclaimed assertion.
+    formats = {
+        "emphasis": "**" + claim + "**", "inline-code": "`" + claim + "`",
+        "wrapped": claim.replace(" ", "\n"), "heading": "### " + claim,
+        "list": "1. " + claim, "blockquote": "> " + claim,
+        "links": "[" + claim + "](https://example.com)",
+        "normalized": "__" + claim.upper().replace(" ", "\u00a0") + "__",
+        "underscore": "_" + claim.replace(" ", "\n") + "_",
+    }
+    with pytest.raises(AssertionError, match="prohibited"):
+        validate_claims(formats[formatting], "formatted assertion")
+
+
+@pytest.mark.parametrize("claim", ACCEPT_CLAIMS)
+@pytest.mark.parametrize("marker", ["**", "_", "__", "`"])
+def test_formatting_preserves_relevant_qualifier_and_negation(claim, marker):
+    validate_claims("- " + marker + claim.replace(" ", "\n  ") + marker, "wrapped scoped list item")
+
+
+@pytest.mark.parametrize("document", PACKAGED_DOCS)
+def test_installed_documentation_checks_use_the_same_claim_contract(tmp_path, document):
+    for name in PACKAGED_DOCS:
+        path = tmp_path / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        text = (ROOT / name).read_text(encoding="utf-8")
+        path.write_text(text + "\n\n" + "\n".join(ACCEPT_CLAIMS), encoding="utf-8")
+    # This is the exact independent-interpreter check used by clean installation.
+    exec(package_acceptance.DOCUMENTATION_VALIDATION_SCRIPT, {"documentation": tmp_path})
+    with (tmp_path / document).open("a", encoding="utf-8") as output:
+        output.write("\n\n" + REJECT_CLAIMS[1])
+    with pytest.raises(AssertionError, match="prohibited"):
+        exec(package_acceptance.DOCUMENTATION_VALIDATION_SCRIPT, {"documentation": tmp_path})
 
 
 def test_customer_documents_retain_mediation_contract():
@@ -62,7 +193,7 @@ def test_prohibited_claims_are_rejected(claim):
         validate_claims(claim, "customer copy")
 
 
-@pytest.mark.parametrize("name", ["README.md", "docs/getting-started/README.md"])
+@pytest.mark.parametrize("name", ["README.md", "docs/getting-started/README.md", GUIDE])
 def test_alternate_path_statement_cannot_be_removed(name):
     text = normalized((ROOT / name).read_text(encoding="utf-8"))
     with pytest.raises(AssertionError, match="mediated-action"):
@@ -77,15 +208,17 @@ def test_each_bypass_class_is_required(topic):
 
 
 @pytest.mark.parametrize("kind", ["wheel", "sdist"])
-@pytest.mark.parametrize("failure", ["missing", "weakened"])
+@pytest.mark.parametrize("failure", ["missing", "weakened", "appended"])
 @pytest.mark.parametrize("document", PACKAGED_DOCS)
 def test_packaged_boundary_documentation_cannot_disappear(tmp_path, kind, failure, document):
     files, _ = archive_files(kind)
     prefix = "waveframe_guard-0.17.0.data/data/share/doc/waveframe-guard/" if kind == "wheel" else ""
     if failure == "missing":
         del files[prefix + document]
-    else:
+    elif failure == "weakened":
         files[prefix + document] = b"Guard controls all agent actions."
+    else:
+        files[prefix + document] += b"\n\nGuard protects the entire repository, including direct filesystem writes."
     if kind == "wheel":
         path = tmp_path / "test.whl"
         with zipfile.ZipFile(path, "w") as archive:

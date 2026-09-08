@@ -25,7 +25,18 @@ if __package__ in (None, ""):
 from tools.license_contract import (
     APACHE_SHA256, LICENSE_FILES, NOTICE_TEXT, validate_license_metadata, validate_notices,
 )
-from tools.mediation_contract import MEDIATION_STATEMENT, PACKAGED_DOCS, validate_mediation_document
+from tools.mediation_contract import PACKAGED_DOCS, validate_mediation_document
+
+# The same bounded validator checks installed files in the external interpreter.
+# Embed review-owned tooling, rather than importing the checkout or shipping
+# validation code in the public runtime package.
+DOCUMENTATION_VALIDATION_SCRIPT = (
+    "mediation_checks = {}\n"
+    "exec(" + repr((REPO_ROOT / "tools/mediation_contract.py").read_text(encoding="utf-8")) + ", mediation_checks)\n"
+    "for document in " + repr(PACKAGED_DOCS) + ":\n"
+    "    mediation_checks['validate_mediation_document'](\n"
+    "        (documentation / document).read_text(encoding='utf-8'), document)\n"
+)
 
 REQUIRED_WHEEL_FILES = {
     "guard/sdk/repository_evidence.py",
@@ -357,10 +368,7 @@ print("Installed license verified: Apache-2.0; canonical LICENSE and Waveframe N
 # Inspect the installed documentation, without importing repository validators.
 import sysconfig
 documentation = Path(sysconfig.get_path("data")) / "share/doc/waveframe-guard"
-for document in __PACKAGED_DOCS__:
-    text = " ".join((documentation / document).read_text(encoding="utf-8").split())
-    if document != "SECURITY.md":
-        assert __MEDIATION_STATEMENT__ in text, document
+__DOCUMENTATION_VALIDATION__
 print("Installed mediation documentation verified: wrapped boundary and alternate-path limits")
 
 # Legacy symbols survive installation but can never grant execution permission.
@@ -426,9 +434,7 @@ print(f"Clean wheel literal-target smoke passed from {module_path}: "
 
 
 SMOKE_SCRIPT = SMOKE_SCRIPT.replace("__APACHE_SHA256__", APACHE_SHA256).replace("__NOTICE_TEXT__", repr(NOTICE_TEXT))
-SMOKE_SCRIPT = SMOKE_SCRIPT.replace("__PACKAGED_DOCS__", repr(PACKAGED_DOCS)).replace(
-    "__MEDIATION_STATEMENT__", repr(MEDIATION_STATEMENT),
-)
+SMOKE_SCRIPT = SMOKE_SCRIPT.replace("__DOCUMENTATION_VALIDATION__", DOCUMENTATION_VALIDATION_SCRIPT)
 
 
 REPOSITORY_SMOKE_SCRIPT = r'''
