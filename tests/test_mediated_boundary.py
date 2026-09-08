@@ -42,6 +42,83 @@ REJECT_CLAIMS = (
 )
 
 
+COORDINATED_REJECT_CLAIMS = (
+    "Guard is not a filesystem sandbox, but it controls all agent actions.",
+    "Guard controls mediated actions, and it protects the entire repository.",
+    "Do not claim bypass is impossible; Guard guarantees bypass cannot occur.",
+)
+COORDINATED_ACCEPT_CLAIMS = (
+    "Guard controls all actions that pass through its wrapped tool boundary.",
+    "Guard is not a filesystem sandbox.",
+    "Guard is not a filesystem sandbox, and it controls all actions that pass through its wrapped tool boundary.",
+    "Guard controls mediated actions, and it does not protect the entire repository.",
+    "Guard evaluates mediated actions, and it records their outcomes.",
+)
+
+
+@pytest.mark.parametrize("claim", COORDINATED_REJECT_CLAIMS)
+def test_coordinated_unsafe_claims_fail(claim):
+    with pytest.raises(AssertionError, match="prohibited"):
+        validate_claims(claim, "coordinated REJECT example")
+
+
+@pytest.mark.parametrize("claim", COORDINATED_ACCEPT_CLAIMS)
+def test_coordinated_accurate_claims_pass(claim):
+    validate_claims(claim, "coordinated ACCEPT example")
+
+
+@pytest.mark.parametrize("document", PACKAGED_DOCS)
+@pytest.mark.parametrize("claim", COORDINATED_REJECT_CLAIMS[:2])
+def test_canonical_document_cannot_hide_coordinated_list_claim(document, claim):
+    text = (ROOT / document).read_text(encoding="utf-8")
+    with pytest.raises(AssertionError, match="prohibited"):
+        validate_mediation_document(text + "\n\n- " + claim, document)
+
+
+@pytest.mark.parametrize("subject", ["Guard", "Waveframe Guard", "Guard SDK"])
+@pytest.mark.parametrize("separator", [", but ", ", and ", "; ", " \u2014 "])
+@pytest.mark.parametrize("formatting", ["plain", "list", "emphasis", "inline-code", "wrapped"])
+def test_subject_carry_and_clause_local_limits(subject, separator, formatting):
+    def render(text):
+        return {
+            "plain": text, "list": "- " + text, "emphasis": "**" + text + "**",
+            "inline-code": "`" + text + "`", "wrapped": text.replace(" ", "\n  "),
+        }[formatting]
+
+    # The first clause supplies a subject, never its negation or qualifier.
+    for first, second in (
+        ("is not a filesystem sandbox", "controls all agent actions"),
+        ("controls mediated actions", "protects the entire repository"),
+        ("controls all actions that pass through its wrapped tool boundary", "is a filesystem sandbox"),
+    ):
+        with pytest.raises(AssertionError, match="prohibited"):
+            validate_claims(render(subject + " " + first + separator + "it " + second + "."), "local limits")
+    for claim in COORDINATED_ACCEPT_CLAIMS[2:]:
+        claim = claim.replace("Guard", subject).replace(", and ", separator)
+        validate_claims(render(claim), "local accurate predicate")
+
+
+@pytest.mark.parametrize("separator", [", but ", ", and ", "; ", " \u2014 "])
+@pytest.mark.parametrize("other", ["the sandbox", "Acme", "another tool", "the operator"])
+def test_different_subject_ends_guard_carry(separator, other):
+    text = "Guard evaluates mediated actions" + separator + other + " handles isolation" + separator + "it protects the entire repository."
+    validate_claims(text, "different subject")
+    # A fresh explicit Guard subject starts a fresh carry, even after a reset.
+    with pytest.raises(AssertionError, match="prohibited"):
+        validate_claims(text + " Guard records decisions" + separator + "it controls all agent actions.", "fresh Guard subject")
+
+
+@pytest.mark.parametrize("boundary", [". ", "! ", "? ", ".\n\n", "\n\n", "\n- ", "\n## ", " | "])
+def test_guard_pronoun_is_not_inferred_across_sentence_or_structural_boundaries(boundary):
+    # Out-of-scope unbound pronouns are deliberately not resolved by this
+    # closed documentation heuristic. This is not an English truth validator.
+    validate_claims("Guard evaluates mediated actions" + boundary + "It protects the entire repository.", "no cross-boundary inference")
+
+
+def test_carry_is_not_activated_by_an_object_named_guard():
+    validate_claims("The sandbox contains Guard, and it protects the entire repository.", "Guard object")
+
+
 @pytest.mark.parametrize("claim", ACCEPT_CLAIMS)
 def test_required_accurate_claims_pass(claim):
     validate_claims(claim, "required ACCEPT example")

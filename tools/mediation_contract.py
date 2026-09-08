@@ -4,6 +4,10 @@ These rules recognize known high-risk assertions and a bounded set of scoped,
 negated and historical forms. They are not a natural-language truth validator
 and cannot prove that arbitrary English contains no misleading claims. Review
 new wording against the implementation, then add explicit regression examples.
+
+The closed claim-unit heuristic carries an explicit Guard subject to leading
+"it" clauses only within one sentence. Any other clause resets that subject;
+this deliberately does not attempt general English coreference resolution.
 """
 import re
 
@@ -41,17 +45,19 @@ CLAIM_RULES = (
     ("exclusive-path", r"\bonly\s+the\s+guarded\s+callable\s+can\s+reach\b"),
 )
 
-# Split independent assertions so warnings/qualifiers cannot exempt a later
-# sentence, adversative clause, table cell, heading or list item. Ordinary
-# wrapped prose lines remain together. This is deliberately not an NLP parser.
+# Sentence, paragraph, table-cell and Markdown item boundaries end subject
+# carry. Coordinated clauses retain only a named Guard subject or leading "it".
+# Unknown/non-pronoun clauses clear it, without guessing their subject grammar.
+SENTENCE_BREAK = re.compile(r"(?<=[.!?])\s+|(?<=[.!?][\"'])\s+|\|\s*")
+GUARD_SUBJECT = re.compile(r"\b(?:waveframe\s+guard(?:\s+sdk)?|guard\s+sdk|guard|waveframe)\b", re.IGNORECASE)
 ASSERTION_START = (
-    r"(?:guard\b|waveframe\b|(?:a\s+)?connected\s+runtime\b|"
+    r"(?:it\b|guard\b|waveframe\b|(?:a\s+)?connected\s+runtime\b|"
     r"(?:the\s+|a\s+)?(?:repository|host|machine|agent|organization)\b|"
     r"decision\s+evidence\b|replay\b|detection\s+after\b|bypass\b|only\s+the\s+guarded\b)"
 )
 CLAUSE_BREAK = re.compile(
-    r"(?<=[.!?])\s+|(?<=[.!?][\"'])\s+|[;|]\s*|\s+(?:but|however|yet|nevertheless)\s+|"
-    r"(?:,\s*|\s+(?:and|while)\s+)(?=" + ASSERTION_START + r")",
+    r";\s*|\s*[\u2014\u2013]\s*|,?\s+(?:but|and|while|however|yet|nevertheless)\s+|"
+    r",\s*(?=" + ASSERTION_START + r")",
     re.IGNORECASE,
 )
 NEGATED_INTRO = re.compile(
@@ -88,8 +94,26 @@ def claim_clauses(text):
     text = re.sub(r"(?m)^\s*(?:>\s*)*(?:#{1,6}\s+|[-+*]\s+|\d+[.)]\s+)", "\n\n", text)
     text = re.sub(r"(?m)^\s*>\s?", "", text)
     for paragraph in re.split(r"\n\s*\n", text):
-        paragraph = normalized(paragraph).replace(" — ", "; ").replace(" – ", "; ")
-        yield from filter(None, CLAUSE_BREAK.split(paragraph))
+        for sentence in SENTENCE_BREAK.split(normalized(paragraph)):
+            guard_active = False
+            for clause in filter(None, CLAUSE_BREAK.split(sentence)):
+                clause = clause.strip()
+                # Canonicalize only the finite supported names, retaining the
+                # warning/quotation prefix for assertion-local checks below.
+                subject = GUARD_SUBJECT.search(clause)
+                named_guard = subject is not None and (
+                    subject.start() == 0
+                    or NEGATED_INTRO.search(clause[:subject.start()].rstrip())
+                )
+                if named_guard:
+                    guard_active = True
+                    clause = clause[:subject.start()] + "Guard" + clause[subject.end():]
+                elif re.match(r"^it\b", clause, re.IGNORECASE):
+                    if guard_active:
+                        clause = re.sub(r"^it\b", "Guard", clause, count=1, flags=re.IGNORECASE)
+                else:
+                    guard_active = False
+                yield clause
 
 
 def _qualified_or_disclaimed(clause, match, rule):
