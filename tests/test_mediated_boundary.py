@@ -108,7 +108,74 @@ REJECT_CLAIMS = (
     "Decision evidence proves no alternate path was used.",
     "Replay reproduces the physical mutation.",
     "Detection after a callback rolls back already-written bytes.",
+    "only guarded_tool can reach publish_release",
 )
+
+
+LEGACY_REGISTRY_PARAGRAPH = (
+    "`agent_tools` represents the customer's existing registry. It may call the\n"
+    "model and choose tools, but only `guarded_tool` can reach `publish_release`, so\n"
+    "Guard remains the enforcement boundary rather than becoming the agent framework."
+)
+SCOPED_REGISTRY_PARAGRAPH = (
+    "`agent_tools` represents the customer's existing registry. For this integration, "
+    "the registry exposes `guarded_tool`. Calls routed through that registry entry "
+    "are evaluated before `guarded_tool` invokes `publish_release`. Direct access to "
+    "`publish_release` or another release API bypasses the wrapper; registration alone "
+    "does not remove those paths. Restrict alternate paths using the linked "
+    "least-privilege deployment guidance. "
+    "Guard remains framework-neutral and does not become the agent framework."
+)
+
+
+def test_readme_registry_explanation_is_scoped_and_framework_neutral():
+    validate_claims(SCOPED_REGISTRY_PARAGRAPH, "scoped registry explanation")
+    assert normalized(SCOPED_REGISTRY_PARAGRAPH) in normalized((ROOT / "README.md").read_text(encoding="utf-8"))
+
+
+@pytest.mark.parametrize("surface", ["source", "wheel", "sdist", "installed"])
+@pytest.mark.parametrize("document", PACKAGED_DOCS)
+@pytest.mark.parametrize("paragraph, rejected", [
+    ("only guarded_tool can reach publish_release", True),
+    (LEGACY_REGISTRY_PARAGRAPH, True), (SCOPED_REGISTRY_PARAGRAPH, False),
+])
+def test_registry_claim_contract_across_distributions(tmp_path, surface, document, paragraph, rejected):
+    # Append after complete canonical content so a correct opening cannot hide
+    # the real historical defect. Each distribution uses its production checker.
+    def inspect():
+        if surface == "source":
+            text = (ROOT / document).read_text(encoding="utf-8")
+            validate_mediation_document(text + "\n\n" + paragraph, document)
+        elif surface == "installed":
+            for name in PACKAGED_DOCS:
+                path = tmp_path / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                text = (ROOT / name).read_text(encoding="utf-8")
+                path.write_text(text + ("\n\n" + paragraph if name == document else ""), encoding="utf-8")
+            exec(package_acceptance.DOCUMENTATION_VALIDATION_SCRIPT, {"documentation": tmp_path})
+        else:
+            files, _ = archive_files(surface)
+            prefix = "waveframe_guard-0.17.0.data/data/share/doc/waveframe-guard/" if surface == "wheel" else ""
+            files[prefix + document] += ("\n\n" + paragraph).encode()
+            if surface == "wheel":
+                path = tmp_path / "test.whl"
+                with zipfile.ZipFile(path, "w") as archive:
+                    for name, content in files.items():
+                        archive.writestr(name, content)
+                package_acceptance._inspect_wheel(path, "0.17.0")
+            else:
+                path = tmp_path / "test.tar.gz"
+                with tarfile.open(path, "w:gz") as archive:
+                    for name, content in files.items():
+                        info = tarfile.TarInfo("waveframe_guard-0.17.0/" + name)
+                        info.size = len(content)
+                        archive.addfile(info, io.BytesIO(content))
+                package_acceptance._inspect_sdist(path, "0.17.0")
+    if rejected:
+        with pytest.raises(AssertionError, match="prohibited"):
+            inspect()
+    else:
+        inspect()
 
 
 COORDINATED_REJECT_CLAIMS = (

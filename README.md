@@ -255,9 +255,13 @@ guarded_tool = guard.tool(action="publish_release", target="repository")(publish
 agent_tools.register(name="publish_release", callable=guarded_tool)
 ```
 
-`agent_tools` represents the customer's existing registry. It may call the
-model and choose tools, but only `guarded_tool` can reach `publish_release`, so
-Guard remains the enforcement boundary rather than becoming the agent framework.
+`agent_tools` represents the customer's existing registry. For this integration,
+the registry exposes `guarded_tool`. Calls routed through that registry entry
+are evaluated before `guarded_tool` invokes `publish_release`. Direct access to
+`publish_release` or another release API bypasses the wrapper; registration alone
+does not remove those paths. Restrict alternate paths using the linked
+[least-privilege deployment guidance](docs/architecture/REPOSITORY_WORKSPACE.md#least-privilege-deployment).
+Guard remains framework-neutral and does not become the agent framework.
 
 The wrapper derives a normalized proposal from the real function call, asks
 Guard to evaluate it against the selected authority, and invokes the original

@@ -43,6 +43,8 @@ CLAIM_RULES = (
     ("physical-replay", r"\breplay\s+reproduces\s+(?:the\s+)?physical\s+mutation\b"),
     ("rollback", r"\bdetection\s+after\s+a\s+callback\s+rolls\s+back\s+already[- ]written\s+bytes\b"),
     ("exclusive-path", r"\bonly\s+the\s+guarded\s+callable\s+can\s+reach\b"),
+    # The actual former README assertion, not general reachability inference.
+    ("registry-exclusive-path", r"\bonly\s+guarded_tool\s+can\s+reach\s+publish_release\b"),
 )
 
 # Sentence, paragraph, table-cell and Markdown item boundaries end subject
