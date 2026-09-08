@@ -1,6 +1,8 @@
 # Repository workspace boundary
 
-This unreleased boundary addresses [Guard #33](https://github.com/Waveframe-Labs/Waveframe-Guard/issues/33).
+The Guard 0.18.0 repository boundary addresses [Guard #33](https://github.com/Waveframe-Labs/Waveframe-Guard/issues/33).
+The release is prepared; publication and real-repository end-to-end acceptance
+remain pending. See the [release notes](../../RELEASE_NOTES.md).
 One Guard runtime binds its repository adapter to one explicitly selected root;
 it mediates only calls through that adapter. `workspace` continues to name the
 evidence store; `repository_root` names the adapter's filesystem root.
@@ -396,18 +398,19 @@ and [Linux openat2 resolution restrictions](https://www.man7.org/linux/man-pages
 XFS's legacy ASCII case-insensitive mode is rejected using its
 [filesystem geometry flags](https://man7.org/linux/man-pages/man2/ioctl_xfs_fsgeometry.2.html).
 
-## Compatibility and release recommendation
+## Guard 0.18.0 compatibility and release status
 
-Recommend **0.18.0**, not a silent 0.17.x behavior change. Repository integrations
+**0.18.0** introduces this integration migration. Repository integrations
 must supply a root and replace generic path callbacks; v1 target-scoped literal
 integrations must declare their domain. Existing-file mutation is supported on
 the Windows and Linux platforms above under the trusted adapter boundary. V1/v2/v3
 authority verification, caches, compiled contracts, capability catalogs, Ledger
 schemas, unrelated domain matching, and Cloud-resolution protocols are unchanged.
 
-This PR does not prepare that release: package version, citation, tags, release
-metadata and dependency conventions remain at the current main baseline. Cloud
-integration migration is a separate coordinated change after review.
+The 0.18.0 release candidate updates package version, citation and release
+documentation only; the repository boundary is already merged. Publication,
+external-install verification and real-repository end-to-end acceptance remain
+pending. Cloud integration migration is separate coordinated work.
 
 Remaining operations stay fail closed and have focused follow-ups:
 [macOS existing-file support #35](https://github.com/Waveframe-Labs/Waveframe-Guard/issues/35),

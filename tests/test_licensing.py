@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def metadata_text():
     return "\n".join([
-        "Metadata-Version: 2.4", "Name: waveframe-guard", "Version: 0.17.0",
+        "Metadata-Version: 2.4", "Name: waveframe-guard", "Version: 0.18.0",
         "Requires-Python: >=3.10", "License-Expression: Apache-2.0",
         "License-File: LICENSE", "License-File: NOTICE",
         *(f"Requires-Dist: {r}" for r in package_acceptance.EXPECTED_RUNTIME_REQUIREMENTS),
@@ -72,7 +72,7 @@ def test_separate_commercial_products_do_not_restrict_sdk_license():
 def test_metadata_rejects_missing_or_incorrect_license(expression):
     metadata = email.message_from_string(metadata_text().replace("Apache-2.0", expression))
     with pytest.raises(AssertionError, match="License-Expression: Apache-2.0"):
-        package_acceptance._validate_metadata(metadata, "0.17.0", "distribution")
+        package_acceptance._validate_metadata(metadata, "0.18.0", "distribution")
 
 
 @pytest.mark.parametrize("name", ["LICENSE", "NOTICE"])
@@ -97,13 +97,13 @@ def archive_files(kind):
         package_acceptance.REQUIRED_WHEEL_FILES if kind == "wheel"
         else package_acceptance.REQUIRED_SDIST_FILES
     )}
-    prefix = "waveframe_guard-0.17.0.dist-info/" if kind == "wheel" else ""
+    prefix = "waveframe_guard-0.18.0.dist-info/" if kind == "wheel" else ""
     files[prefix + ("METADATA" if kind == "wheel" else "PKG-INFO")] = metadata_text().encode()
     license_prefix = prefix + "licenses/" if kind == "wheel" else ""
     for name in ("LICENSE", "NOTICE"):
         files[license_prefix + name] = (ROOT / name).read_bytes()
     from tools.mediation_contract import PACKAGED_DOCS
-    doc_prefix = "waveframe_guard-0.17.0.data/data/share/doc/waveframe-guard/" if kind == "wheel" else ""
+    doc_prefix = "waveframe_guard-0.18.0.data/data/share/doc/waveframe-guard/" if kind == "wheel" else ""
     for document in PACKAGED_DOCS:
         files[doc_prefix + document] = (ROOT / document).read_bytes()
     return files, license_prefix
@@ -125,12 +125,12 @@ def test_archive_checks_require_both_packaged_notices(tmp_path, kind, missing):
         path = tmp_path / "test.tar.gz"
         with tarfile.open(path, "w:gz") as archive:
             for name, value in files.items():
-                info = tarfile.TarInfo("waveframe_guard-0.17.0/" + name)
+                info = tarfile.TarInfo("waveframe_guard-0.18.0/" + name)
                 info.size = len(value)
                 archive.addfile(info, io.BytesIO(value))
         inspect = package_acceptance._inspect_sdist
     if missing:
         with pytest.raises(AssertionError, match="LICENSE|NOTICE"):
-            inspect(path, "0.17.0")
+            inspect(path, "0.18.0")
     else:
-        assert inspect(path, "0.17.0") == len(files)
+        assert inspect(path, "0.18.0") == len(files)

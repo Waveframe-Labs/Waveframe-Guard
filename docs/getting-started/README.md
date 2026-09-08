@@ -1,6 +1,6 @@
 # Getting Started with Waveframe Guard
 
-Unreleased security migration: **Guard execution is never advisory**. Local/cloud
+Guard 0.18.0 security migration: **Guard execution is never advisory**. Local/cloud
 controls authority resolution, not enforcement strength. Legacy execution and
 permission APIs now raise an actionable migration error. Use `Guard.local()` /
 `Guard.cloud()` with guarded tools; see [strict execution migration](STRICT_EXECUTION_MIGRATION.md).
@@ -14,10 +14,11 @@ credential, or API path are outside that enforcement guarantee.
 
 ## Installation
 
-For application use:
+For application use after 0.18.0 publication (pending); during release review,
+install the built 0.18.0 wheel:
 
 ```bash
-pip install waveframe-guard==0.17.0
+pip install waveframe-guard==0.18.0
 ```
 
 For local development and clean-checkout test runs:
@@ -73,7 +74,7 @@ From an empty directory:
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install waveframe-guard==0.17.0
+python -m pip install waveframe-guard==0.18.0
 Invoke-WebRequest https://raw.githubusercontent.com/Waveframe-Labs/Waveframe-Guard/main/examples/external_agent_quickstart.py -OutFile quickstart.py
 ```
 
@@ -134,7 +135,7 @@ acceptance runner:
 
 ```powershell
 python -m build
-$wheel=(Resolve-Path .\dist\waveframe_guard-0.17.0-py3-none-any.whl).Path
+$wheel=(Resolve-Path .\dist\waveframe_guard-0.18.0-py3-none-any.whl).Path
 python .\tools\acceptance\external_agent_clean_machine.py --install-spec $wheel
 ```
 
@@ -154,13 +155,13 @@ and [licensing details](../LICENSING.md).
 
 ## Dependency Compatibility Matrix
 
-These bounds apply to the issue #31 development change, planned for Guard
-0.18. Guard 0.18 is **not published**; this dependency-only change keeps the
-current package version metadata unchanged.
+These bounds apply to Guard 0.18.0, prepared for 2026-09-08 and **not yet
+published**. Ordinary installation resolves published dependencies; the CRI
+0.14.0 source candidate is used only for compatibility validation.
 
 | Component | Declared runtime range | Python 3.10 minimum matrix | Python 3.14 candidate matrix |
 | --- | --- | --- | --- |
-| Guard | Issue #31 checkout; planned 0.18 release | Built and installed wheel | Built and installed wheel |
+| Guard | 0.18.0 release candidate | Built and installed wheel | Built and installed wheel |
 | CRI-CORE | `>=0.13.0,<0.15.0` | Published 0.13.0 | Unpublished 0.14.0 candidate at `411dfaa976fd4b37efc5fd3e39076edcd3603e1b` |
 | Proposal Normalizer | `>=0.2.0,<0.3.0` | 0.2.0 | 0.2.0 |
 | Governance Ledger | `>=0.7.0,<0.9.0` | Published 0.7.0 (v1/v2; v3 fails closed) | Published 0.8.0 (v1/v2/v3) |
@@ -175,8 +176,8 @@ are environment-specific and do not pin transitive dependencies in the library.
 
 Published **Guard 0.17.0 has unbounded CRI, Normalizer, and requests metadata**
 and **must not be paired with CRI 0.14**. Its artifacts cannot acquire these
-bounds retroactively. Guard 0.18 is the planned supported release for CRI 0.14
-and must be published **before** CRI 0.14 to avoid an incompatible resolver
+bounds retroactively. Guard 0.18.0 supports CRI 0.13.0 and the exact CRI 0.14.0
+candidate, and must be published **before** CRI 0.14.0 to avoid an incompatible resolver
 window. Keep Guard #31/#39 and CRI #2/#4 open pending the coordinated work.
 
 Requests 2.32.0 was considered but is
@@ -188,7 +189,7 @@ It passes the complete minimum matrix, including the real HTTP Cloud fixture.
 
 The contract compiler remains `0.4.0` in test/dev extras only. Python remains
 `>=3.10`. Cloud acceptance uses a local HTTP publication fixture.
-Guard 0.17.0 can parse and verify matching v2 and v3 publication envelopes.
+Guard 0.18.0 can parse and verify matching v2 and v3 publication envelopes.
 Current released/hosted Cloud does not yet serve the complete atomic v2 or v3 publication path.
 Cloud PR #133 remains the pending v2 server implementation.
 Hosted v3 serving requires an additional Cloud update. Guard

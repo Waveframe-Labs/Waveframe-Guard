@@ -1,4 +1,4 @@
-# Strict execution migration (Unreleased)
+# Strict execution migration (Guard 0.18.0)
 
 Guard execution is never advisory. Guard local/cloud mode controls authority
 resolution and service connectivity, not enforcement strength. Advisory CRI
@@ -68,7 +68,7 @@ request. See the [repository migration guide](../architecture/REPOSITORY_WORKSPA
 PR #34's existing-file mutation protection is unchanged. V1 literal authority
 and verified Ledger v2/v3 publication paths remain supported by the current API.
 
-This security migration is intended for Guard 0.18.0. It does not prepare a
-release or change package/version metadata. The
+This security migration is included in Guard 0.18.0, whose publication is
+pending. The
 [issue #39 inventory and reproduction](../security/ISSUE_39.md) records the
 affected paths and the evidence behind this change.

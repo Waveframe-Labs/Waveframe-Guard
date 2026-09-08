@@ -3,7 +3,7 @@
 # filetype: "python"
 # type: "test"
 # domain: "guard-sdk"
-# version: "0.17.0"
+# version: "0.18.0"
 # status: "Active"
 # author:
 #   name: "Waveframe Labs"
@@ -25,26 +25,27 @@ def test_public_guard_export_is_sdk_facade():
 
 
 def test_public_version_matches_release():
-    assert __version__ == "0.17.0"
+    assert __version__ == "0.18.0"
 
 
-def test_release_metadata_matches_v0170_release():
+def test_release_metadata_matches_v0180_release():
     pyproject = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
     citation = (REPO_ROOT / "CITATION.cff").read_text(encoding="utf-8")
     changelog = (REPO_ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
 
-    assert 'version = "0.17.0"' in pyproject
-    assert 'version: "0.17.0"' in citation
-    assert 'date-released: "2026-09-04"' in citation
+    assert 'version = "0.18.0"' in pyproject
+    assert 'version: "0.18.0"' in citation
+    assert 'date-released: "2026-09-08"' in citation
+    assert "## [0.18.0] - 2026-09-08" in changelog
     assert "## [0.17.0] - 2026-09-04" in changelog
     assert "## [0.16.1] - 2026-09-01" in changelog
     assert "## [0.16.0] - 2026-09-01" in changelog
     assert "## [0.15.0] - 2026-08-21" in changelog
     assert "## [0.14.0] - 2026-08-10" in changelog
-    assert changelog.index("## [Unreleased]") < changelog.index("## [0.17.0]")
+    assert changelog.index("## [Unreleased]") < changelog.index("## [0.18.0]")
 
 
-def test_v0170_release_content_does_not_claim_hosted_v2_or_v3_availability():
+def test_v0180_release_content_does_not_claim_hosted_v2_or_v3_availability():
     release_surfaces = {
         path: (REPO_ROOT / path).read_text(encoding="utf-8")
         for path in (
@@ -55,7 +56,7 @@ def test_v0170_release_content_does_not_claim_hosted_v2_or_v3_availability():
         )
     }
     required_claims = (
-        "Guard 0.17.0 can parse and verify matching v2 and v3 publication envelopes",
+        "Guard 0.18.0 can parse and verify matching v2 and v3 publication envelopes",
         "Current released/hosted Cloud does not yet serve the complete atomic v2 or v3 publication path",
         "Cloud PR #133 remains the pending v2 server implementation",
         "Hosted v3 serving requires an additional Cloud update",

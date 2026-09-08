@@ -2,46 +2,57 @@
 
 ## [Unreleased]
 
-- Security documentation (#32): qualify enforcement as applying to wrapped
-  callable paths, consolidate the repository bypass threat model, and document
-  least-privilege deployment, connection-status limits and operator checks.
-  Retain existing execution evidence schemas with boundary regressions and
-  package the canonical boundary documentation. No enforcement, dependency-range
-  or version change; keep #32 open pending review and Guard 0.18.0 publication.
+## [0.18.0] - 2026-09-08 - Repository-Bound Mediated Mutation
 
-- Licensing (#30): License the repository's Waveframe Guard Core SDK under
-  Apache-2.0, with canonical LICENSE, Waveframe Labs NOTICE, matching package
-  metadata and contribution terms. Commercial use, modification and
-  redistribution are permitted under the license. Separately distributed
-  Cloud, Console, Inspector, Workspace and other commercial services/products
-  are outside this repository's licensing scope. Add source, distribution and
-  installed-license regression checks. Package version remains unchanged;
-  keep #30 open pending the coordinated Guard 0.18.0 publication.
+Prepared release; publication is pending. This entry collects the already
+merged changes in #30, #31, #32, #33 and #39. See the
+[release notes](RELEASE_NOTES.md) for migration, compatibility and limitations.
 
-- Security/migration (#39): Guard execution is never advisory. Local/cloud
-  controls authority resolution, not enforcement strength; advisory CRI
-  evaluation is not permission to execute. Legacy `execute`, `@guard`,
-  `GovernedRuntime`/`GuardRuntime` execution and permission methods, and
-  `evaluate_admissibility` retain their symbols but raise `LegacyExecutionError`
-  (`GovernanceError`, code `GUARD_LEGACY_EXECUTION_UNSUPPORTED`) before callbacks
-  or execution evidence. Legacy `fail_mode="open"` no longer enables execution.
-  No integrity/publication evidence is fabricated. Migrate to `Guard.local()` /
-  `Guard.cloud()` and guarded tools; see the [migration guide](docs/getting-started/STRICT_EXECUTION_MIGRATION.md).
-  Modern Guard, repository tools, v1 literal and Ledger v2/v3 behavior is unchanged.
-  Intended for 0.18.0; release/version metadata remains unchanged.
+### Highlights
 
-- Add an explicit repository workspace and bound-file adapter for issue #33.
-  Repository paths are validated before authority comparison; generic repository
-  callbacks fail closed. Existing-file mutation uses bound handles on local
-  Windows NTFS and securely opened descriptors on supported Linux filesystems,
-  with pre/post-callback identity checks under the trusted adapter boundary.
-  macOS and creation/rename/deletion remain unsupported. See the
-  [workspace boundary and migration guide](docs/architecture/REPOSITORY_WORKSPACE.md).
-- Recommend 0.18.0 for this integration break, including explicit domain selection
-  for v1 target-scoped callers. This change does not prepare or publish a release.
-- Bind target semantics, opaque workspace activation identity, adapter version
-  and assurance class into SDK evidence, receipts, replay and technical proof.
-  Separate authorization evaluation from mutation execution in acceptance results.
+- Repository-bound mediated mutation (#33): `repository_root` and
+  `repository_tool` bind canonical repository-relative targets to an expiring
+  `RepositoryTarget`. Supported existing-file operations use Linux descriptors
+  or Windows NTFS handles; unsupported paths, platforms and operations fail
+  closed. Existing `guard_execution_attestation.v2` evidence binds the target,
+  adapter, authority, decision and execution/mutation outcome.
+- Fail-closed legacy API migration (#39): all 11 retained execution/permission
+  entrypoints raise `GUARD_LEGACY_EXECUTION_UNSUPPORTED`, with zero callbacks
+  and zero allowed events. Modern `Guard.local()` / `Guard.cloud()` remain
+  supported. Repository callers supply `repository_root` and use
+  `repository_tool`; untyped v1 literal-target callers explicitly select
+  `target_domain="literal"`. See the
+  [strict-execution migration guide](docs/getting-started/STRICT_EXECUTION_MIGRATION.md)
+  and [repository workspace guide](docs/architecture/REPOSITORY_WORKSPACE.md).
+- Bounded runtime dependencies (#31): `cricore>=0.13.0,<0.15.0`,
+  `cricore-proposal-normalizer>=0.2.0,<0.3.0`,
+  `governance-ledger>=0.7.0,<0.9.0`, and `requests>=2.33.0,<3.0.0`.
+  Upper bounds require a future compatibility review to widen.
+- Apache-2.0 Guard Core distribution (#30): 0.18.0 is the first package release
+  under Apache-2.0. Commercial use, modification, redistribution and hosting
+  are permitted under that license. Prior tagged/PyPI releases are not
+  retroactively relicensed. Waveframe trademarks and separately distributed
+  commercial products remain outside this repository's license grant.
+- Explicit mediation and bypass boundary (#32): packaged guidance describes
+  wrapped callable paths, alternate-path limitations, least-privilege
+  deployment and operator verification. A reporting connection does not imply
+  global control. Registration alone does not remove direct callable access.
+
+### Compatibility and availability
+
+- Published CRI 0.13.0 and the exact CRI 0.14.0 candidate
+  `411dfaa976fd4b37efc5fd3e39076edcd3603e1b` are supported. Ordinary installation
+  does not require an unpublished dependency. Guard 0.18 must be published
+  before CRI 0.14; published Guard 0.17.0 has an unbounded CRI dependency and
+  must not be paired with CRI 0.14.
+- Ledger 0.7 supports existing v1/v2 authority; Ledger 0.8 adds native v3.
+  Guard 0.18.0 can parse and verify matching v2 and v3 publication envelopes.
+  Current released/hosted Cloud does not yet serve the complete atomic v2 or v3
+  publication path. Cloud PR #133 remains the pending v2 server implementation.
+  Hosted v3 serving requires an additional Cloud update.
+- Publication, external-install verification and real-repository end-to-end
+  acceptance remain pending. This release preparation changes versions and
+  release documentation; it adds no runtime behavior or schema change.
 
 ## [0.17.0] - 2026-09-04 - Native Ledger v3 Authority Verification
 

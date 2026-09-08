@@ -155,22 +155,22 @@ def test_registry_claim_contract_across_distributions(tmp_path, surface, documen
             exec(package_acceptance.DOCUMENTATION_VALIDATION_SCRIPT, {"documentation": tmp_path})
         else:
             files, _ = archive_files(surface)
-            prefix = "waveframe_guard-0.17.0.data/data/share/doc/waveframe-guard/" if surface == "wheel" else ""
+            prefix = "waveframe_guard-0.18.0.data/data/share/doc/waveframe-guard/" if surface == "wheel" else ""
             files[prefix + document] += ("\n\n" + paragraph).encode()
             if surface == "wheel":
                 path = tmp_path / "test.whl"
                 with zipfile.ZipFile(path, "w") as archive:
                     for name, content in files.items():
                         archive.writestr(name, content)
-                package_acceptance._inspect_wheel(path, "0.17.0")
+                package_acceptance._inspect_wheel(path, "0.18.0")
             else:
                 path = tmp_path / "test.tar.gz"
                 with tarfile.open(path, "w:gz") as archive:
                     for name, content in files.items():
-                        info = tarfile.TarInfo("waveframe_guard-0.17.0/" + name)
+                        info = tarfile.TarInfo("waveframe_guard-0.18.0/" + name)
                         info.size = len(content)
                         archive.addfile(info, io.BytesIO(content))
-                package_acceptance._inspect_sdist(path, "0.17.0")
+                package_acceptance._inspect_sdist(path, "0.18.0")
     if rejected:
         with pytest.raises(AssertionError, match="prohibited"):
             inspect()
@@ -425,7 +425,7 @@ def test_each_bypass_class_is_required(topic):
 @pytest.mark.parametrize("document", PACKAGED_DOCS)
 def test_packaged_boundary_documentation_cannot_disappear(tmp_path, kind, failure, document):
     files, _ = archive_files(kind)
-    prefix = "waveframe_guard-0.17.0.data/data/share/doc/waveframe-guard/" if kind == "wheel" else ""
+    prefix = "waveframe_guard-0.18.0.data/data/share/doc/waveframe-guard/" if kind == "wheel" else ""
     if failure == "missing":
         del files[prefix + document]
     elif failure == "weakened":
@@ -442,9 +442,9 @@ def test_packaged_boundary_documentation_cannot_disappear(tmp_path, kind, failur
         path = tmp_path / "test.tar.gz"
         with tarfile.open(path, "w:gz") as archive:
             for name, content in files.items():
-                info = tarfile.TarInfo("waveframe_guard-0.17.0/" + name)
+                info = tarfile.TarInfo("waveframe_guard-0.18.0/" + name)
                 info.size = len(content)
                 archive.addfile(info, io.BytesIO(content))
         inspect = package_acceptance._inspect_sdist
     with pytest.raises(AssertionError, match="documentation|prohibited|required public files"):
-        inspect(path, "0.17.0")
+        inspect(path, "0.18.0")
