@@ -1,0 +1,47 @@
+name: Action policy development acceptance
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  acceptance:
+    name: Action policy / ${{ matrix.os }} / Python ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.10", "3.14"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install exact development candidates
+        run: python -m pip install -e ".[test]" -r .github/requirements/action-policy-development.txt
+      - name: Verify dependency resolution
+        run: python -m pip check
+      - name: Run default closed-gate suite
+        run: python -m pytest -q --junitxml=acceptance-output/default.xml
+      - name: Run opted-in full suite
+        env:
+          WAVEFRAME_GUARD_ACTION_POLICY_DEV: "1"
+          WAVEFRAME_LEDGER_ACTION_POLICY_DEV: "1"
+        run: python -m pytest -q --junitxml=acceptance-output/development.xml
+      - name: Verify fresh distributions and installed-wheel creation
+        run: python tools/acceptance/action_policy_package.py --output acceptance-output/package
+      - name: Retain exact-run acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: action-policy-${{ matrix.os }}-${{ matrix.python }}
+          path: acceptance-output/

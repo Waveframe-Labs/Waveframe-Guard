@@ -42,6 +42,9 @@ def build_repository_attestation(*, run_id, receipt_hash, contract, evaluation, 
         "target_binding": deepcopy(binding), "target_binding_hash": stable_hash(binding),
         **state,
     }
+    if "repository_operation" in evaluation:
+        proof["schema_version"] = "guard_execution_attestation.v3"
+        proof["repository_operation"] = deepcopy(evaluation["repository_operation"])
     proof["attestation_hash"] = stable_hash(proof)
     return validate_repository_attestation(proof)
 
@@ -54,8 +57,10 @@ def validate_repository_attestation(proof, *, record=None):
         if not condition:
             raise GuardArtifactError("repository execution attestation " + message)
 
+    if type(proof) is dict and proof.get("schema_version") == "guard_execution_attestation.v3":
+        fields.add("repository_operation")
     require(type(proof) is dict and set(proof) == fields, "fields do not match v2")
-    require(proof["schema_version"] == SCHEMA, "schema is not v2")
+    require(proof["schema_version"] in {SCHEMA, "guard_execution_attestation.v3"}, "schema is unsupported")
     require(type(proof["run_id"]) is str and re.fullmatch(r"[A-Za-z0-9_-]+", proof["run_id"]),
             "run identity is invalid")
     for field in ("attestation_hash", "target_binding_hash", "execution_request_hash",
@@ -102,6 +107,26 @@ def validate_repository_attestation(proof, *, record=None):
                       (None, None, "incomplete", "unknown", None),
                       (True, False, "incomplete", "unknown", None)})
     require(state in valid, "contains a contradictory execution state")
+    if "repository_operation" in proof:
+        operation = proof["repository_operation"]
+        require(type(operation) is dict and set(operation) == {
+            "schema_version", "operation", "target", "created", "bytes_written", "status", "error"
+        }, "operation fields are invalid")
+        require(operation["schema_version"] == "guard_repository_operation.v1"
+                and operation["operation"] == proof["execution_request"]["action"] == "create"
+                and operation["target"] == proof["execution_request"]["target"], "operation binding mismatch")
+        require(type(operation["created"]) is bool and type(operation["bytes_written"]) is int
+                and operation["bytes_written"] >= 0, "operation mutation state is invalid")
+        require(operation["created"] or operation["bytes_written"] == 0, "uncreated file cannot contain written bytes")
+        require(operation["status"] in {"not_run", "attempted", "succeeded", "failed"}, "operation status is invalid")
+        require(operation["error"] in {None, "exclusive_create_collision", "creation_or_callback_failed",
+                "post_callback_validation_failed", "operation_precondition_failed"}, "operation error is invalid")
+        if operation["created"]:
+            require(decision == "admissible" and proof["callback_invoked"] is True,
+                    "creation requires allowed callback invocation")
+        if proof["execution_status"] == "succeeded":
+            require(operation["created"] and operation["status"] == "succeeded" and operation["error"] is None,
+                    "successful creation is missing mutation evidence")
     require(proof["attestation_hash"] == stable_hash({k: v for k, v in proof.items() if k != "attestation_hash"}),
             "hash mismatch")
     if record is not None:

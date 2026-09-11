@@ -28,7 +28,7 @@ class MemoryAuthorityCache:
             return deepcopy(authority) if authority is not None else None
 
     def put(self, authority: LoadedAuthority) -> None:
-        if authority.schema_version in {"authority_bundle.v2", "authority_bundle.v3"}:
+        if authority.schema_version in {"authority_bundle.v2", "authority_bundle.v3", "authority_bundle.v4"}:
             from .exceptions import AuthorityVerificationError
             from .verifier import _is_process_verified_v2, _is_process_verified_v3
 

@@ -59,4 +59,5 @@ class LoadedAuthority:
     required_runtime_facts: tuple[str, ...] = ()
     runtime_integrity_hash: Optional[str] = None
     validation_duration_ns: Optional[int] = None
+    publication_integrity_hash: Optional[str] = None
     _verification_marker: Any = None
