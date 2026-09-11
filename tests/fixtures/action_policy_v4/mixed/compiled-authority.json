@@ -1,0 +1,86 @@
+{
+  "schema_version": "compiled_authority_contract.v3",
+  "contract_id": "repository-mixed",
+  "contract_version": "2.0.0",
+  "authority_ref": "repository-mixed@2.0.0",
+  "action_requirements": {
+    "create": {
+      "allow": [
+        {
+          "match": "exact",
+          "value": "generated/new.md"
+        }
+      ],
+      "deny": [
+        {
+          "match": "exact",
+          "value": "README.md"
+        }
+      ],
+      "required_role": "repository-maintainer"
+    },
+    "modify": {
+      "allow": [
+        {
+          "match": "exact",
+          "value": "README.md"
+        }
+      ],
+      "deny": [
+        {
+          "match": "exact",
+          "value": "generated/new.md"
+        }
+      ],
+      "required_role": "security-reviewer"
+    }
+  },
+  "compiler_output": {
+    "action_requirements": {
+      "create": {
+        "allow": [
+          {
+            "match": "exact",
+            "value": "generated/new.md"
+          }
+        ],
+        "deny": [
+          {
+            "match": "exact",
+            "value": "README.md"
+          }
+        ],
+        "required_role": "repository-maintainer"
+      },
+      "modify": {
+        "allow": [
+          {
+            "match": "exact",
+            "value": "README.md"
+          }
+        ],
+        "deny": [
+          {
+            "match": "exact",
+            "value": "generated/new.md"
+          }
+        ],
+        "required_role": "security-reviewer"
+      }
+    },
+    "contract_hash": "862eaafefb6f6ccc72ae4d9542f9a8b961b38a4be97117217d949e7884b962ac",
+    "contract_id": "repository-mixed",
+    "contract_version": "2.0.0",
+    "schema_version": "compiled_action_contract.v1"
+  },
+  "provenance": {
+    "source_snapshot_hash": "sha256:d09939a41b7e335165ecebffc714064c816c6465dc5afee8ee3702946d1d94bf",
+    "policy_translation_commitment_hash": "sha256:6068a8ff84bf533d07b32d850c2c69eecb3bbe97da3ef8d5fd0db19a3312ee29",
+    "constraint_ir_hash": "sha256:3344ebaa4847a22db5fbabcdee4c2650cae6bd9a7af8334f1b01eb3438031428",
+    "domain_pack_hash": "sha256:ec260daef10cdb3f97ca0a5137deb658a0fc997f22997299153cd848a12323a0",
+    "runtime_fact_schema_hash": "sha256:bd79503e01d79583ab564be98890fddaa8124e935e7eb81a8a40786cc6d2c01d",
+    "compiler_binding_hash": "sha256:5bd3a8528d6cde1a095583b973c80421ef2cfdb8b510e99526cdbcf6e02e3d66",
+    "semantic_commit_hash": "sha256:7b9052061fdd8ff7e85e77fb9cacd791af6c9ba2c8be4cf1adb311d972662da1"
+  },
+  "contract_hash": "sha256:2bf39bec56db5a4cbe0cf9056cb83665067ef4694bed0bfe5ed9d16d12966171"
+}

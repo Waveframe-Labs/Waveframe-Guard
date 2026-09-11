@@ -1,0 +1,497 @@
+{
+  "schema_version": "domain_policy_interpretation.v1",
+  "source_policy": {
+    "source_policy_id": "repository-policy",
+    "source_revision": "revision-1",
+    "source_policy_ref": "repository-policy@revision-1",
+    "content_encoding": "base64",
+    "source_bytes_base64": "QWdlbnRzIG11c3QgdXNlIHJvbGUgcmVwb3NpdG9yeS1tYWludGFpbmVyIHRvIGNyZWF0ZSByZXBvc2l0b3J5IGZpbGVzLgpBZ2VudHMgbXVzdCB1c2Ugcm9sZSBzZWN1cml0eS1yZXZpZXdlciB0byBtb2RpZnkgcmVwb3NpdG9yeSBmaWxlcy4KQWdlbnRzIG1heSBjcmVhdGUgZ2VuZXJhdGVkL25ldy5tZCBhbmQgbW9kaWZ5IFJFQURNRS5tZC4KQWdlbnRzIG11c3Qgbm90IG1vZGlmeSBnZW5lcmF0ZWQvbmV3Lm1kIGFuZCBjcmVhdGUgUkVBRE1FLm1kLg==",
+    "snapshot_hash": "sha256:d09939a41b7e335165ecebffc714064c816c6465dc5afee8ee3702946d1d94bf"
+  },
+  "authority": {
+    "authority_id": "repository-mixed",
+    "authority_version": "2.0.0",
+    "authority_ref": "repository-mixed@2.0.0"
+  },
+  "domain_pack": {
+    "domain_pack_id": "repository-changes",
+    "domain_pack_version": "2.0.0",
+    "domain_pack_hash": "sha256:ec260daef10cdb3f97ca0a5137deb658a0fc997f22997299153cd848a12323a0"
+  },
+  "runtime_fact_schema": {
+    "schema_version": "runtime_fact_schema.v1",
+    "schema_id": "repository-changes-runtime",
+    "schema_version_number": "2.0.0",
+    "name": "Repository change proposal facts",
+    "facts": [
+      {
+        "fact_id": "actor.subject_kind",
+        "type": "enum",
+        "enum_values": [
+          "agent"
+        ],
+        "canonical_unit": null,
+        "required": true,
+        "derivation": {
+          "kind": "proposal_field",
+          "field_path": "/actor/subject_kind"
+        },
+        "comparison_operators": [
+          "==",
+          "!="
+        ]
+      },
+      {
+        "fact_id": "actor.principal_id",
+        "type": "string",
+        "enum_values": null,
+        "canonical_unit": null,
+        "required": false,
+        "derivation": {
+          "kind": "proposal_field",
+          "field_path": "/actor/principal_id"
+        },
+        "comparison_operators": [
+          "==",
+          "!="
+        ]
+      },
+      {
+        "fact_id": "actor.role",
+        "type": "enum",
+        "enum_values": [
+          "repository-maintainer",
+          "repository-reviewer",
+          "security-reviewer"
+        ],
+        "canonical_unit": null,
+        "required": false,
+        "derivation": {
+          "kind": "proposal_field",
+          "field_path": "/actor/role"
+        },
+        "comparison_operators": [
+          "==",
+          "!="
+        ]
+      },
+      {
+        "fact_id": "proposal.action",
+        "type": "enum",
+        "enum_values": [
+          "create",
+          "modify"
+        ],
+        "canonical_unit": null,
+        "required": true,
+        "derivation": {
+          "kind": "proposal_field",
+          "field_path": "/action"
+        },
+        "comparison_operators": [
+          "==",
+          "!="
+        ]
+      },
+      {
+        "fact_id": "proposal.resource.kind",
+        "type": "enum",
+        "enum_values": [
+          "repository_change",
+          "repository_path"
+        ],
+        "canonical_unit": null,
+        "required": true,
+        "derivation": {
+          "kind": "proposal_field",
+          "field_path": "/resource/kind"
+        },
+        "comparison_operators": [
+          "==",
+          "!="
+        ]
+      },
+      {
+        "fact_id": "proposal.resource.path",
+        "type": "string",
+        "enum_values": null,
+        "canonical_unit": null,
+        "required": false,
+        "derivation": {
+          "kind": "proposal_field",
+          "field_path": "/resource/path"
+        },
+        "comparison_operators": [
+          "==",
+          "!=",
+          "starts_with"
+        ]
+      }
+    ],
+    "schema_hash": "sha256:bd79503e01d79583ab564be98890fddaa8124e935e7eb81a8a40786cc6d2c01d"
+  },
+  "source_statements": [
+    {
+      "statement_id": "statement-b62c0a69a293de0947d736d65d94477e00e43caa2d9fdb6a179be114b7be289d",
+      "start_byte": 0,
+      "end_byte": 71,
+      "statement_bytes_base64": "QWdlbnRzIG11c3QgdXNlIHJvbGUgcmVwb3NpdG9yeS1tYWludGFpbmVyIHRvIGNyZWF0ZSByZXBvc2l0b3J5IGZpbGVzLgo=",
+      "statement_hash": "sha256:061b27ecadd28facae2e6768910fb8c76e5c09852dee17721dcbcd1eaa80b17f",
+      "classification": "direct",
+      "available_mapping_control_ids": [],
+      "decision_hash": null
+    },
+    {
+      "statement_id": "statement-44685eb0627ef0a3cd639ca18e55c66db311481ee09db06f8242500bd12c861b",
+      "start_byte": 71,
+      "end_byte": 138,
+      "statement_bytes_base64": "QWdlbnRzIG11c3QgdXNlIHJvbGUgc2VjdXJpdHktcmV2aWV3ZXIgdG8gbW9kaWZ5IHJlcG9zaXRvcnkgZmlsZXMuCg==",
+      "statement_hash": "sha256:ae5c2cb7a7cfa48e8ae009fe4d689321a2cac23a556ff0c8b2971f60b756813c",
+      "classification": "direct",
+      "available_mapping_control_ids": [],
+      "decision_hash": null
+    },
+    {
+      "statement_id": "statement-438fdd3583265651373fe9d04068f6230fbc6eb0482144993f6a132a2cad2773",
+      "start_byte": 138,
+      "end_byte": 195,
+      "statement_bytes_base64": "QWdlbnRzIG1heSBjcmVhdGUgZ2VuZXJhdGVkL25ldy5tZCBhbmQgbW9kaWZ5IFJFQURNRS5tZC4K",
+      "statement_hash": "sha256:ef7d7e6bbae50024ab05587f162aa4338210eb52e00c6f9cd57c8f43014c1f8e",
+      "classification": "direct",
+      "available_mapping_control_ids": [],
+      "decision_hash": null
+    },
+    {
+      "statement_id": "statement-40c4de55d6be15f956066d7908f4def972843e8e196caacd2242f8022ec8c799",
+      "start_byte": 195,
+      "end_byte": 256,
+      "statement_bytes_base64": "QWdlbnRzIG11c3Qgbm90IG1vZGlmeSBnZW5lcmF0ZWQvbmV3Lm1kIGFuZCBjcmVhdGUgUkVBRE1FLm1kLg==",
+      "statement_hash": "sha256:6eb2e2668a8a72c0bc55edc854f4ea810df8d2d2e91a6b7e1d665070cc723ca3",
+      "classification": "direct",
+      "available_mapping_control_ids": [],
+      "decision_hash": null
+    }
+  ],
+  "direct_parses": [
+    {
+      "parse_id": "direct-parse-ead5e3de888232a069baecd581fb2665de5462431148aa5a1e0e4d07370c90ea",
+      "statement_id": "statement-b62c0a69a293de0947d736d65d94477e00e43caa2d9fdb6a179be114b7be289d",
+      "start_byte": 0,
+      "end_byte": 71,
+      "constraint_ids": [
+        "constraint-7eec15c45ae4771aa4db3666fd9671744211f725a1f945fa4ca62b5c86f470e3"
+      ],
+      "compiler_id": "waveframe.repository-changes.grammar.v2",
+      "compiler_version": "2.0.0",
+      "parse_hash": "sha256:ead5e3de888232a069baecd581fb2665de5462431148aa5a1e0e4d07370c90ea"
+    },
+    {
+      "parse_id": "direct-parse-ef2b224dd54ef4a9d9879d9803afb0d4aa3bf64fa16ab38a8395584e44c81ab3",
+      "statement_id": "statement-44685eb0627ef0a3cd639ca18e55c66db311481ee09db06f8242500bd12c861b",
+      "start_byte": 71,
+      "end_byte": 138,
+      "constraint_ids": [
+        "constraint-2bc4ffd17df7108653f60a3ed389157be992bbc97b06ec9f580a62a485b30aba"
+      ],
+      "compiler_id": "waveframe.repository-changes.grammar.v2",
+      "compiler_version": "2.0.0",
+      "parse_hash": "sha256:ef2b224dd54ef4a9d9879d9803afb0d4aa3bf64fa16ab38a8395584e44c81ab3"
+    },
+    {
+      "parse_id": "direct-parse-70660fb1204eea125da946e81d6b308b235dcc5f1a0b8d316e42c23c1b975439",
+      "statement_id": "statement-438fdd3583265651373fe9d04068f6230fbc6eb0482144993f6a132a2cad2773",
+      "start_byte": 138,
+      "end_byte": 195,
+      "constraint_ids": [
+        "constraint-04f0de712cfa68c23b7e02988b19d68693080b72ded577bbac348895b55f7b12",
+        "constraint-5a6048b7d86d30b83332b7b213e3e0751ff9fd079cbc2e308ef168203a1ea965"
+      ],
+      "compiler_id": "waveframe.repository-changes.grammar.v2",
+      "compiler_version": "2.0.0",
+      "parse_hash": "sha256:70660fb1204eea125da946e81d6b308b235dcc5f1a0b8d316e42c23c1b975439"
+    },
+    {
+      "parse_id": "direct-parse-d97fbc326489919d3cfc38db471fa6096342c8501ed6320ca0f780b718717bf0",
+      "statement_id": "statement-40c4de55d6be15f956066d7908f4def972843e8e196caacd2242f8022ec8c799",
+      "start_byte": 195,
+      "end_byte": 256,
+      "constraint_ids": [
+        "constraint-c632723df8f4cce05699cf6730742b7661fae5d1d898f10123db5672c8cc7693",
+        "constraint-4e0cbca500b455ff14b476c9434b88ea5c497d8e86787cc1464a8b015fb197ad"
+      ],
+      "compiler_id": "waveframe.repository-changes.grammar.v2",
+      "compiler_version": "2.0.0",
+      "parse_hash": "sha256:d97fbc326489919d3cfc38db471fa6096342c8501ed6320ca0f780b718717bf0"
+    }
+  ],
+  "statement_decisions": [],
+  "constraint_ir": {
+    "schema_version": "constraint_ir.v1",
+    "domain_pack": {
+      "domain_pack_id": "repository-changes",
+      "domain_pack_version": "2.0.0",
+      "domain_pack_hash": "sha256:ec260daef10cdb3f97ca0a5137deb658a0fc997f22997299153cd848a12323a0"
+    },
+    "runtime_fact_schema_hash": "sha256:bd79503e01d79583ab564be98890fddaa8124e935e7eb81a8a40786cc6d2c01d",
+    "constraints": [
+      {
+        "constraint_id": "constraint-7eec15c45ae4771aa4db3666fd9671744211f725a1f945fa4ca62b5c86f470e3",
+        "subject": {
+          "kind": "subject_kind",
+          "value": "agent"
+        },
+        "acting_role": {
+          "kind": "role",
+          "value": "repository-maintainer"
+        },
+        "action": "create",
+        "resource": {
+          "kind": "repository_change",
+          "match": "any",
+          "value": null
+        },
+        "effect": "require",
+        "condition": null,
+        "obligations": {
+          "approvals": [],
+          "evidence": [],
+          "separation_of_duties": []
+        },
+        "exceptions": [],
+        "required_runtime_facts": [
+          "actor.role",
+          "actor.subject_kind",
+          "proposal.action",
+          "proposal.resource.kind"
+        ]
+      },
+      {
+        "constraint_id": "constraint-2bc4ffd17df7108653f60a3ed389157be992bbc97b06ec9f580a62a485b30aba",
+        "subject": {
+          "kind": "subject_kind",
+          "value": "agent"
+        },
+        "acting_role": {
+          "kind": "role",
+          "value": "security-reviewer"
+        },
+        "action": "modify",
+        "resource": {
+          "kind": "repository_change",
+          "match": "any",
+          "value": null
+        },
+        "effect": "require",
+        "condition": null,
+        "obligations": {
+          "approvals": [],
+          "evidence": [],
+          "separation_of_duties": []
+        },
+        "exceptions": [],
+        "required_runtime_facts": [
+          "actor.role",
+          "actor.subject_kind",
+          "proposal.action",
+          "proposal.resource.kind"
+        ]
+      },
+      {
+        "constraint_id": "constraint-04f0de712cfa68c23b7e02988b19d68693080b72ded577bbac348895b55f7b12",
+        "subject": {
+          "kind": "subject_kind",
+          "value": "agent"
+        },
+        "acting_role": null,
+        "action": "create",
+        "resource": {
+          "kind": "repository_path",
+          "match": "exact",
+          "value": "generated/new.md"
+        },
+        "effect": "allow",
+        "condition": null,
+        "obligations": {
+          "approvals": [],
+          "evidence": [],
+          "separation_of_duties": []
+        },
+        "exceptions": [],
+        "required_runtime_facts": [
+          "actor.subject_kind",
+          "proposal.action",
+          "proposal.resource.kind",
+          "proposal.resource.path"
+        ]
+      },
+      {
+        "constraint_id": "constraint-5a6048b7d86d30b83332b7b213e3e0751ff9fd079cbc2e308ef168203a1ea965",
+        "subject": {
+          "kind": "subject_kind",
+          "value": "agent"
+        },
+        "acting_role": null,
+        "action": "modify",
+        "resource": {
+          "kind": "repository_path",
+          "match": "exact",
+          "value": "README.md"
+        },
+        "effect": "allow",
+        "condition": null,
+        "obligations": {
+          "approvals": [],
+          "evidence": [],
+          "separation_of_duties": []
+        },
+        "exceptions": [],
+        "required_runtime_facts": [
+          "actor.subject_kind",
+          "proposal.action",
+          "proposal.resource.kind",
+          "proposal.resource.path"
+        ]
+      },
+      {
+        "constraint_id": "constraint-c632723df8f4cce05699cf6730742b7661fae5d1d898f10123db5672c8cc7693",
+        "subject": {
+          "kind": "subject_kind",
+          "value": "agent"
+        },
+        "acting_role": null,
+        "action": "modify",
+        "resource": {
+          "kind": "repository_path",
+          "match": "exact",
+          "value": "generated/new.md"
+        },
+        "effect": "deny",
+        "condition": null,
+        "obligations": {
+          "approvals": [],
+          "evidence": [],
+          "separation_of_duties": []
+        },
+        "exceptions": [],
+        "required_runtime_facts": [
+          "actor.subject_kind",
+          "proposal.action",
+          "proposal.resource.kind",
+          "proposal.resource.path"
+        ]
+      },
+      {
+        "constraint_id": "constraint-4e0cbca500b455ff14b476c9434b88ea5c497d8e86787cc1464a8b015fb197ad",
+        "subject": {
+          "kind": "subject_kind",
+          "value": "agent"
+        },
+        "acting_role": null,
+        "action": "create",
+        "resource": {
+          "kind": "repository_path",
+          "match": "exact",
+          "value": "README.md"
+        },
+        "effect": "deny",
+        "condition": null,
+        "obligations": {
+          "approvals": [],
+          "evidence": [],
+          "separation_of_duties": []
+        },
+        "exceptions": [],
+        "required_runtime_facts": [
+          "actor.subject_kind",
+          "proposal.action",
+          "proposal.resource.kind",
+          "proposal.resource.path"
+        ]
+      }
+    ],
+    "ir_hash": "sha256:3344ebaa4847a22db5fbabcdee4c2650cae6bd9a7af8334f1b01eb3438031428"
+  },
+  "canonical_cnl_previews": [
+    {
+      "constraint_id": "constraint-7eec15c45ae4771aa4db3666fd9671744211f725a1f945fa4ca62b5c86f470e3",
+      "preview": "REQUIRE agent ACTING AS repository-maintainer TO create repository_change:any."
+    },
+    {
+      "constraint_id": "constraint-2bc4ffd17df7108653f60a3ed389157be992bbc97b06ec9f580a62a485b30aba",
+      "preview": "REQUIRE agent ACTING AS security-reviewer TO modify repository_change:any."
+    },
+    {
+      "constraint_id": "constraint-04f0de712cfa68c23b7e02988b19d68693080b72ded577bbac348895b55f7b12",
+      "preview": "ALLOW agent TO create repository_path:exact \"generated/new.md\"."
+    },
+    {
+      "constraint_id": "constraint-5a6048b7d86d30b83332b7b213e3e0751ff9fd079cbc2e308ef168203a1ea965",
+      "preview": "ALLOW agent TO modify repository_path:exact \"README.md\"."
+    },
+    {
+      "constraint_id": "constraint-c632723df8f4cce05699cf6730742b7661fae5d1d898f10123db5672c8cc7693",
+      "preview": "DENY agent TO modify repository_path:exact \"generated/new.md\"."
+    },
+    {
+      "constraint_id": "constraint-4e0cbca500b455ff14b476c9434b88ea5c497d8e86787cc1464a8b015fb197ad",
+      "preview": "DENY agent TO create repository_path:exact \"README.md\"."
+    }
+  ],
+  "source_to_constraint_mappings": [
+    {
+      "mapping_id": "constraint-mapping-bb24586f4b41942c1dcecd6213a400be702743d56a863f136a93450dce870d0c",
+      "statement_id": "statement-b62c0a69a293de0947d736d65d94477e00e43caa2d9fdb6a179be114b7be289d",
+      "start_byte": 0,
+      "end_byte": 71,
+      "constraint_ids": [
+        "constraint-7eec15c45ae4771aa4db3666fd9671744211f725a1f945fa4ca62b5c86f470e3"
+      ],
+      "mode": "direct",
+      "statement_decision_hash": null
+    },
+    {
+      "mapping_id": "constraint-mapping-f4f1af8e97cd69af80214885f7dbf332244005816ca2187e259020c32e086800",
+      "statement_id": "statement-44685eb0627ef0a3cd639ca18e55c66db311481ee09db06f8242500bd12c861b",
+      "start_byte": 71,
+      "end_byte": 138,
+      "constraint_ids": [
+        "constraint-2bc4ffd17df7108653f60a3ed389157be992bbc97b06ec9f580a62a485b30aba"
+      ],
+      "mode": "direct",
+      "statement_decision_hash": null
+    },
+    {
+      "mapping_id": "constraint-mapping-4d9ba4728039eccc0256208b5421c26b1904cc3d51df2bdabd306349b85014de",
+      "statement_id": "statement-438fdd3583265651373fe9d04068f6230fbc6eb0482144993f6a132a2cad2773",
+      "start_byte": 138,
+      "end_byte": 195,
+      "constraint_ids": [
+        "constraint-04f0de712cfa68c23b7e02988b19d68693080b72ded577bbac348895b55f7b12",
+        "constraint-5a6048b7d86d30b83332b7b213e3e0751ff9fd079cbc2e308ef168203a1ea965"
+      ],
+      "mode": "direct",
+      "statement_decision_hash": null
+    },
+    {
+      "mapping_id": "constraint-mapping-9f34c17851c2585b54c5b88ec8ca417d9a120786f5b4e1d750bc69fe41a4f641",
+      "statement_id": "statement-40c4de55d6be15f956066d7908f4def972843e8e196caacd2242f8022ec8c799",
+      "start_byte": 195,
+      "end_byte": 256,
+      "constraint_ids": [
+        "constraint-c632723df8f4cce05699cf6730742b7661fae5d1d898f10123db5672c8cc7693",
+        "constraint-4e0cbca500b455ff14b476c9434b88ea5c497d8e86787cc1464a8b015fb197ad"
+      ],
+      "mode": "direct",
+      "statement_decision_hash": null
+    }
+  ],
+  "status": {
+    "statement_classification_complete": true,
+    "pending_statement_count": 0,
+    "enforceable_constraint_count": 6,
+    "ready_for_finalization": true,
+    "publication_ready": false
+  },
+  "interpretation_id": "domain-interpretation-85c52c344c94e05934a859db452c24232fbf0e82fd374f69878b7882a5f7f72a",
+  "draft_hash": "sha256:f852a33fd2124721ce2589318c15d5af768c7d89f8f03dc75e74af1107b685b9"
+}

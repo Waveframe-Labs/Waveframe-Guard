@@ -42,10 +42,12 @@ def evaluate_runtime(
     evaluation_time: str = DEFAULT_EVALUATION_TIME,
     start_sequence: int = 1,
     _verified_v2_authority: bool = False,
+    _verified_runtime_authority: Any = None,
 ) -> dict[str, Any]:
     compiled_authority = intake_compiled_authority(
         compiled_authority,
         _verified_v2_authority=_verified_v2_authority,
+        _verified_runtime_authority=_verified_runtime_authority,
     )
     execution_request = require_normalized_execution_request(execution_request)
     runtime_evidence = build_runtime_evidence_model(

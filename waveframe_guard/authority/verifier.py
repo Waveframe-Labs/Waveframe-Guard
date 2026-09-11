@@ -6,6 +6,7 @@ from copy import deepcopy
 from time import perf_counter_ns
 from typing import Any, Mapping
 
+from .development import require_action_policy_development
 from .exceptions import AuthorityLifecycleError, AuthorityVerificationError
 from .types import Bundle, LoadedAuthority, RegistryEntry
 
@@ -29,12 +30,17 @@ def _is_process_verified_v3(authority: LoadedAuthority) -> bool:
 class AuthorityVerifier:
     def verify(self, bundle: Bundle) -> LoadedAuthority:
         schema_version = bundle.payload.get("schema_version")
+        if schema_version == "authority_bundle.v4":
+            require_action_policy_development()
+            return _verify_publication_authority(bundle, bundle_schema="authority_bundle.v4",
+                receipt_schema="publication_receipt.v4", major="v4")
         if schema_version == "authority_bundle.v3":
             return _verify_v3_authority(bundle)
         if schema_version == "authority_bundle.v2":
             return _verify_v2_authority(bundle)
         registry_entry = bundle.registry_entry
         contract = _bundle_contract(bundle)
+        _reject_legacy_action_contract(contract, schema_version)
         _verify_authority_ref(bundle)
         contract_hash = _verify_contract_hash(bundle, contract)
         _verify_bundle_hash(bundle)
@@ -62,7 +68,10 @@ class AuthorityVerifier:
         _verify_registry_lifecycle_state(registry_entry)
         if registry_entry.authority_ref != authority.authority_ref:
             raise AuthorityVerificationError(f"cached authority_ref mismatch for {registry_entry.authority_ref}")
-        if authority.schema_version in {"authority_bundle.v2", "authority_bundle.v3"}:
+        _reject_legacy_action_contract(authority.contract, authority.schema_version)
+        if authority.schema_version == "authority_bundle.v4":
+            require_action_policy_development()
+        if authority.schema_version in {"authority_bundle.v2", "authority_bundle.v3", "authority_bundle.v4"}:
             if revalidate_publication:
                 return _revalidate_cached_publication(self, registry_entry, authority)
             try:
@@ -223,6 +232,7 @@ def _verify_publication_authority(
 
     authority = _required_mapping(payload, "authority")
     contract = _required_mapping(payload, "compiled_authority_contract")
+    _reject_legacy_action_contract(contract, bundle_schema)
     manifest = _required_mapping(payload, "publication_manifest")
     authority_ref = _required_string(authority, "authority_ref")
     authority_id = _required_string(authority, "authority_id")
@@ -282,7 +292,7 @@ def _verify_publication_authority(
             "logical_ref": bundle.receipt_ref,
         },
         "compiled_contract": {
-            "schema_version": "compiled_authority_contract.v2",
+            "schema_version": contract["schema_version"],
             "contract_id": contract_id,
             "contract_version": contract_version,
             "contract_hash": contract_hash,
@@ -341,6 +351,7 @@ def _verify_publication_authority(
         required_runtime_facts=required_runtime_facts,
         runtime_integrity_hash=runtime_integrity_hash,
         validation_duration_ns=perf_counter_ns() - validation_started_ns,
+        publication_integrity_hash=_publication_integrity_hash(payload, receipt_payload),
         _verification_marker=_PROCESS_VERIFICATION_MARKER,
     )
 
@@ -349,6 +360,14 @@ def _verify_cached_publication_integrity(
     registry_entry: RegistryEntry,
     authority: LoadedAuthority,
 ) -> None:
+    if not _is_process_verified_v3(authority):
+        raise AuthorityVerificationError("cached publication is not process verified")
+    if authority.schema_version == "authority_bundle.v4":
+        require_action_policy_development()
+        if (authority.authority_bundle is None or authority.publication_receipt is None
+            or authority.publication_integrity_hash != _publication_integrity_hash(
+                authority.authority_bundle, authority.publication_receipt)):
+            raise AuthorityVerificationError("cached publication artifacts changed")
     if authority.authority_evidence is None or authority.runtime_fact_schema is None:
         raise AuthorityVerificationError(
             f"cached {authority.schema_version} authority is missing verified runtime state for {registry_entry.authority_ref}"
@@ -544,3 +563,16 @@ def _require_equal(actual: Any, expected: Any, label: str) -> None:
 def _require_hash_equal(actual: str, expected: str | None, label: str) -> None:
     if expected is None or _normalize_hash(actual) != _normalize_hash(expected):
         raise AuthorityVerificationError(f"publication {label} mismatch")
+
+
+def _publication_integrity_hash(bundle, receipt):
+    canonical = json.dumps([bundle, receipt], sort_keys=True, separators=(",", ":"))
+    return "sha256:" + hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
+def _reject_legacy_action_contract(contract, bundle_schema):
+    if bundle_schema != "authority_bundle.v4" and (
+        "action_requirements" in contract or "compiler_output" in contract
+        or contract.get("schema_version") == "compiled_authority_contract.v3"
+    ):
+        raise AuthorityVerificationError("action contracts require the native v4 publication pair")

@@ -66,12 +66,17 @@ class RepositoryTarget:
     independently opening relative_path is outside the protected adapter.
     """
 
-    def __init__(self, relative_path, fd, validate):
+    def __init__(self, relative_path, fd, validate, *, operation="modify", create=None, report=None,
+                 namespace_identity=()):
         self._relative_path = relative_path
         self._fd = fd
         self._file_identity = _identity(os.fstat(fd)) if fd is not None else None
         self._validate = validate
         self._active = False
+        self._operation = operation
+        self._create = create
+        self._report = report
+        self._namespace_identity = namespace_identity
 
     @property
     def relative_path(self) -> str:
@@ -93,6 +98,24 @@ class RepositoryTarget:
         return b"".join(chunks)
 
     def write_bytes(self, content: bytes) -> int:
+        if self._operation != "modify":
+            raise RepositoryBoundaryError("create capability cannot modify files; use create_bytes")
+        return self._write_bytes(content)
+
+    def create_bytes(self, content: bytes) -> int:
+        """Exclusively create one file; failure can leave a new or partially written file."""
+        if type(content) is not bytes:
+            raise TypeError("repository create_bytes requires bytes")
+        if not self._active or self._operation != "create" or self._create is None:
+            raise RepositoryBoundaryError("repository creation capability is not active")
+        if self._report["created"]:
+            raise RepositoryBoundaryError("repository creation capability has already been consumed")
+        self._validate()
+        self._fd = self._create()
+        self._file_identity = _identity(os.fstat(self._fd))
+        return self._write_bytes(content)
+
+    def _write_bytes(self, content: bytes) -> int:
         if type(content) is not bytes:
             raise TypeError("repository write_bytes requires bytes")
         self._check()
@@ -102,6 +125,8 @@ class RepositoryTarget:
             count = os.write(self._fd, view)
             if count <= 0:
                 raise OSError("repository write did not make progress")
+            if self._report is not None:
+                self._report["bytes_written"] += count
             view = view[count:]
         os.ftruncate(self._fd, len(content))
         return len(content)
@@ -159,9 +184,16 @@ class RepositoryWorkspace:
             raise RepositoryBoundaryError("protected repository workspace was substituted")
 
     @contextmanager
-    def bind(self, value, *, mutation=False, requirements=None):
+    def bind(self, value, *, mutation=False, requirements=None, operation="modify"):
+        if operation not in {"create", "modify"}:
+            raise RepositoryBoundaryError("unsupported repository operation")
+        if mutation and operation == "create":
+            from waveframe_guard.authority.development import require_action_policy_development
+
+            require_action_policy_development()
         relative = canonical_repository_path(value)
         fds = []
+        yielded = False
         try:
             self._check_root()
             if os.name == "nt":
@@ -181,17 +213,20 @@ class RepositoryWorkspace:
             leaf_fd = None
             snapshots = []
             components = relative.split("/")
+            parent_fd = fds[-1]
+            parent_missing = False
             for index, component in enumerate(components):
                 if missing:
+                    parent_missing = True
                     continue
                 directory = index < len(components) - 1
                 current = current / component
                 try:
                     if os.name == "nt":
-                        fd = _windows_open(current, directory=directory, writable=mutation and not directory)
+                        fd = _windows_open(current, directory=directory, writable=mutation and operation == "modify" and not directory)
                     else:
                         fd = _linux_open(self._root_fd, "/".join(components[:index + 1]), directory,
-                                         writable=mutation and not directory)
+                                         writable=mutation and operation == "modify" and not directory)
                 except FileNotFoundError:
                     missing = True
                     continue
@@ -202,6 +237,7 @@ class RepositoryWorkspace:
                 if directory:
                     if not stat.S_ISDIR(info.st_mode) or _case_sensitive(fd) != case_sensitive:
                         raise RepositoryBoundaryError("ambiguous or mixed filesystem case behavior")
+                    parent_fd = fd
                 elif not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
                     raise RepositoryBoundaryError("repository target must be a regular file with one link")
                 # Reject Windows short names, case aliases and normalization aliases.
@@ -235,14 +271,52 @@ class RepositoryWorkspace:
 
             validate()
             if mutation:
-                if leaf_fd is None:
+                if operation == "create" and parent_missing:
+                    raise RepositoryBoundaryError("repository creation requires an existing parent")
+                if operation == "modify" and leaf_fd is None:
                     raise RepositoryBoundaryError(
                         "repository mutation requires an existing regular file; creation is unsupported"
                     )
-            yield RepositoryTarget(relative, leaf_fd, validate)
+            report = {"schema_version": "guard_repository_operation.v1", "operation": operation,
+                      "target": relative, "created": False, "bytes_written": 0,
+                      "status": "not_run", "error": None} if operation == "create" else None
+
+            def create():
+                nonlocal leaf_fd
+                validate()
+                report["status"] = "attempted"
+                def created():
+                    report["created"] = True
+                try:
+                    if os.name == "nt":
+                        fd = _windows_open(self._root / relative, directory=False, writable=True,
+                                           create=True, on_created=created)
+                    else:
+                        fd = _linux_open(parent_fd, components[-1], False, writable=True,
+                                         create=True, on_created=created)
+                except FileExistsError:
+                    report["error"] = "exclusive_create_collision"
+                    raise RepositoryBoundaryError("exclusive creation target already exists") from None
+                fds.append(fd)
+                leaf_fd = fd
+                info = os.fstat(fd)
+                if _indirect(info) or not stat.S_ISREG(info.st_mode) or info.st_nlink != 1 or info.st_dev != self._identity[0]:
+                    raise RepositoryBoundaryError("created repository file has unsupported identity")
+                snapshots.append((self._root / relative, _identity(info)))
+                validate()
+                return fd
+
+            yielded = True
+            yield RepositoryTarget(relative, None if operation == "create" else leaf_fd, validate,
+                                   operation=operation, create=create if mutation else None, report=report,
+                                   namespace_identity=(self._identity, tuple(
+                                       (path.relative_to(self._root).as_posix(), identity)
+                                       for path, identity in snapshots if path != self._root / relative)))
         except RepositoryBoundaryError:
             raise
         except OSError as exc:
+            if yielded:
+                raise
             raise RepositoryBoundaryError(
                 "repository filesystem binding failed; inaccessible, indirect, replaced, or unsupported target"
             ) from None
@@ -288,7 +362,7 @@ def _validate_repository_rules(requirements):
             canonical_repository_path(value)
 
 
-def _linux_open(root_fd, relative, directory, *, writable=False):
+def _linux_open(root_fd, relative, directory, *, writable=False, create=False, on_created=None):
     # No resolve()/open() race; openat2 rejects bind mounts as well as symlinks.
     if platform.machine().lower() not in {"x86_64", "aarch64", "amd64"}:
         raise RepositoryBoundaryError("unsupported Linux openat2 architecture")
@@ -297,11 +371,15 @@ def _linux_open(root_fd, relative, directory, *, writable=False):
     libc = ctypes.CDLL(None, use_errno=True)
     libc.syscall.restype = ctypes.c_long
     flags = (os.O_RDWR if writable else os.O_RDONLY) | os.O_NONBLOCK | os.O_CLOEXEC | (os.O_DIRECTORY if directory else 0)
-    how = OpenHow(flags, 0, 0x01 | 0x04 | 0x08)
+    if create:
+        flags |= os.O_CREAT | os.O_EXCL
+    how = OpenHow(flags, 0o600 if create else 0, 0x01 | 0x04 | 0x08)
     fd = libc.syscall(ctypes.c_long(437), ctypes.c_int(root_fd), relative.encode("ascii"), ctypes.byref(how), ctypes.sizeof(how))
     if fd < 0:
         error = ctypes.get_errno()
         raise OSError(error, "secure repository lookup failed")
+    if on_created is not None:
+        on_created()
     return fd
 
 
@@ -360,18 +438,22 @@ def _windows_volume(root):
         raise RepositoryBoundaryError("repository workspace requires a local NTFS volume on Windows")
 
 
-def _windows_open(path, *, directory, writable=False):
+def _windows_open(path, *, directory, writable=False, create=False, on_created=None):
     import msvcrt
     api = _windows_api()
     # Deny write/delete sharing for files and directories, preventing reparse edits,
     # rename, deletion and link substitution while the capability is live.
     access = 0x80000000 | (0x40000000 if writable else 0)
-    handle = api.CreateFileW(str(path), access, 1, None, 3, 0x02200000, None)
+    handle = api.CreateFileW(str(path), access, 1, None, 1 if create else 3, 0x02200000, None)
     if handle == ctypes.c_void_p(-1).value:
         error = ctypes.get_last_error()
         if error in {2, 3}:
             raise FileNotFoundError(error, "repository component does not exist")
+        if error in {80, 183}:
+            raise FileExistsError(error, "repository component already exists")
         raise ctypes.WinError(error)
+    if on_created is not None:
+        on_created()
     try:
         fd = msvcrt.open_osfhandle(handle, os.O_BINARY | (os.O_RDWR if writable else os.O_RDONLY))
     except BaseException:

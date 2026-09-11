@@ -36,9 +36,21 @@ def intake_compiled_authority(
     payload: dict[str, Any],
     *,
     _verified_v2_authority: bool = False,
+    _verified_runtime_authority: Any = None,
 ) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise CompiledAuthorityIntakeError("compiled authority must be an object")
+    if payload.get("schema_version") == "compiled_authority_contract.v3":
+        from waveframe_guard.authority.runtime_facts import VerifiedRuntimeAuthority
+
+        if type(_verified_runtime_authority) is not VerifiedRuntimeAuthority:
+            raise CompiledAuthorityIntakeError("action authority requires a verified native publication")
+        _verified_runtime_authority.verify_candidate_contract(payload)
+        if _verified_runtime_authority.evidence()["authority_bundle"]["schema_version"] != "authority_bundle.v4":
+            raise CompiledAuthorityIntakeError("action authority requires the native v4 publication pair")
+        return dict(payload)
+    if "action_requirements" in payload or "compiler_output" in payload:
+        raise CompiledAuthorityIntakeError("action fields are forbidden in legacy authority")
     _reject_uncompiled_payload(payload, verified_v2_authority=_verified_v2_authority)
     _validate_required_fields(payload)
     return dict(payload)

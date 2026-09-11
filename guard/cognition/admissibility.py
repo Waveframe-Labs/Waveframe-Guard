@@ -22,10 +22,13 @@ def assess_admissibility(
     continuity_requirements = []
     replay_obligations = []
 
-    violated_constraints.extend(
-        _target_scope_constraints(compiled_authority, execution_request)
-    )
-    violated_constraints.extend(_role_constraints(compiled_authority, actor_identity))
+    if compiled_authority.get("schema_version") == "compiled_authority_contract.v3":
+        violated_constraints.extend(_action_constraints(compiled_authority, execution_request, actor_identity))
+    else:
+        if execution_request.get("action") == "create":
+            violated_constraints.append({"constraint": "action_grant", "rationale": "legacy authority cannot authorize creation"})
+        violated_constraints.extend(_target_scope_constraints(compiled_authority, execution_request))
+        violated_constraints.extend(_role_constraints(compiled_authority, actor_identity))
     required_evidence.extend(
         _approval_evidence_requirements(
             compiled_authority=compiled_authority,
@@ -76,6 +79,30 @@ def assess_admissibility(
         "enforcement_consequences": enforcement_consequences,
         "continuation_status": continuation_status,
     }
+
+
+def _action_constraints(authority, request, actor):
+    action = request.get("action")
+    block = authority["action_requirements"].get(action)
+    if block is None:
+        return [{"constraint": "action_grant", "action": action,
+                 "rationale": "selected action has no explicit grant"}]
+    violations = []
+    if block["required_role"] is not None and actor.get("role") != block["required_role"]:
+        violations.append({"constraint": "required_role", "action": action,
+                           "required_role": block["required_role"], "observed_role": actor.get("role"),
+                           "rationale": "actor role is not authorized for this action"})
+    target = request.get("target")
+    if not isinstance(target, str) or not target:
+        violations.append({"constraint": "execution_target", "action": action,
+                           "rationale": "action requires a repository target"})
+    elif any(_target_rule_matches(rule, target) for rule in block["deny"]):
+        violations.append({"constraint": "target_scope_deny", "action": action,
+                           "rationale": "execution target is denied for this action"})
+    elif not any(_target_rule_matches(rule, target) for rule in block["allow"]):
+        violations.append({"constraint": "target_scope_allow", "action": action,
+                           "rationale": "selected action has no matching path allow"})
+    return violations
 
 
 def _target_scope_constraints(
