@@ -63,6 +63,12 @@ three bytes were written records `created=true`, `bytes_written=3`, and
 The new file can remain empty or partially written. Guard performs no rollback
 and makes no durability or transactionality guarantee.
 
+Attestation readers enforce consistency even when a caller recomputes the proof
+hash. Operation success requires successful outer execution and observed creation;
+a collision cannot claim creation or writes. Terminal failures require a matching
+fixed failure code. Incomplete execution may retain a pre-operation snapshot or an
+invoked attempt with unknown final mutation; zero-byte creation remains valid.
+
 Local replay revalidates the retained publication with Ledger and rederives
 runtime facts. It checks only the recorded logical decision; it does not
 recreate filesystem state or refresh the historical registry lifecycle.

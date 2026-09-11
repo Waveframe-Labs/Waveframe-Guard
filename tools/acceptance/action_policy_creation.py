@@ -1,6 +1,7 @@
 """Installed-package acceptance using unchanged Ledger v4 publication fixtures."""
 
 import argparse
+from copy import deepcopy
 import hashlib
 import json
 from importlib.metadata import distribution
@@ -11,6 +12,8 @@ from unittest.mock import patch
 from waveframe_guard import Guard, RepositoryBoundaryError
 from waveframe_guard.authority.adapters import MemoryAuthorityResolver
 from waveframe_guard.authority.types import RegistryEntry
+from guard.runtime.identity import stable_hash
+from guard.sdk.local_persistence import GuardArtifactError, validate_execution_attestation
 
 COMMITS = {
     "cricore-contract-compiler": "3b91fcc03c804804b2ace7302f37340a787496d9",
@@ -113,6 +116,38 @@ def run(fixtures=FIXTURES):
                     "arguments": {}, "artifacts": []}, operation="create", raise_on_block=False)
             assert not denied["executed"] and not (root / "generated/private").exists()
             evidence["denied"] = denied["evaluation"]["execution_attestation"]
+            empty = create("generated/empty.md", b"")["evaluation"]["execution_attestation"]
+            assert (root / "generated/empty.md").read_bytes() == b""
+            assert empty["repository_operation"]["created"] and empty["repository_operation"]["bytes_written"] == 0
+            evidence["zero_byte_creation"] = empty
+            for name in ("creation", "collision", "partial_write", "zero_byte_creation"):
+                proof = evidence[name]
+                assert validate_execution_attestation(proof) == proof
+                assert instance.store.load_execution_attestation(proof["run_id"]) == proof
+            for name in ("collision", "creation"):
+                original = evidence[name]
+                bad = deepcopy(original)
+                if name == "collision":
+                    bad["repository_operation"].update(created=True, bytes_written=3)
+                else:
+                    bad.update(callback_invoked=False, callback_completed=False, execution_status="not_run",
+                               mutation_status="not_performed", mutation_executed=False)
+                    bad["repository_operation"].update(created=False, bytes_written=0)
+                bad["attestation_hash"] = stable_hash({k: v for k, v in bad.items() if k != "attestation_hash"})
+                path = instance.store.execution_attestation_root / (bad["run_id"] + ".json")
+                path.write_text(json.dumps(bad), encoding="utf-8")
+                try:
+                    for read in (lambda: validate_execution_attestation(bad),
+                                 lambda: instance.store.load_execution_attestation(bad["run_id"])):
+                        try:
+                            read()
+                        except GuardArtifactError:
+                            pass
+                        else:
+                            raise AssertionError("rehashed contradictory creation proof was accepted")
+                finally:
+                    path.write_text(json.dumps(original), encoding="utf-8")
+            evidence["rehashed_contradictions_rejected"] = ["collision_created", "success_without_execution"]
         finally:
             instance.close()
     return evidence

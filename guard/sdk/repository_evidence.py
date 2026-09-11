@@ -13,6 +13,20 @@ SCHEMA = "guard_execution_attestation.v2"
 STATE_FIELDS = ("callback_invoked", "callback_completed", "execution_status",
                 "mutation_status", "mutation_executed")
 
+# Outer execution status, observed operation status, fixed error code. An
+# incomplete execution may carry a pre-operation snapshot or an active attempt;
+# neither asserts a terminal result or that later mutation did not occur.
+CREATION_STATES = {
+    ("not_run", "not_run", None),
+    ("not_run", "not_run", "operation_precondition_failed"),
+    ("incomplete", "not_run", None),
+    ("incomplete", "attempted", None),
+    ("succeeded", "succeeded", None),
+    ("failed", "failed", "exclusive_create_collision"),
+    ("failed", "failed", "creation_or_callback_failed"),
+    ("failed", "failed", "post_callback_validation_failed"),
+}
+
 
 def authority_basis(contract, evaluation):
     basis = {
@@ -118,9 +132,18 @@ def validate_repository_attestation(proof, *, record=None):
         require(type(operation["created"]) is bool and type(operation["bytes_written"]) is int
                 and operation["bytes_written"] >= 0, "operation mutation state is invalid")
         require(operation["created"] or operation["bytes_written"] == 0, "uncreated file cannot contain written bytes")
-        require(operation["status"] in {"not_run", "attempted", "succeeded", "failed"}, "operation status is invalid")
-        require(operation["error"] in {None, "exclusive_create_collision", "creation_or_callback_failed",
-                "post_callback_validation_failed", "operation_precondition_failed"}, "operation error is invalid")
+        require(type(operation["status"]) is str, "operation status is invalid")
+        require(operation["error"] is None or type(operation["error"]) is str, "operation error is invalid")
+        require((proof["execution_status"], operation["status"], operation["error"]) in CREATION_STATES,
+                "operation status/error contradicts execution state")
+        if operation["status"] == "not_run":
+            require(not operation["created"] and operation["bytes_written"] == 0,
+                    "operation not_run cannot report creation or writes")
+        if operation["status"] == "attempted":
+            require(proof["callback_invoked"] is True, "operation attempt requires callback invocation")
+        if operation["error"] == "exclusive_create_collision":
+            require(not operation["created"] and operation["bytes_written"] == 0,
+                    "exclusive creation collision cannot report creation or writes")
         if operation["created"]:
             require(decision == "admissible" and proof["callback_invoked"] is True,
                     "creation requires allowed callback invocation")
