@@ -23,7 +23,7 @@ from waveframe_guard.cloud.client import (
 )
 
 from .authority_source import AuthoritySource
-from .execution import GuardRuntimeBoundary
+from .execution import GuardRuntimeBoundary, _bind_cloud_identity
 from .local_persistence import LocalEvaluationStore
 from .repository_boundary import RepositoryWorkspace
 
@@ -62,14 +62,18 @@ class Guard:
         self._target_domain = target_domain
         self._target_configuration = (self._repository_workspace, target_domain)
         self.store = LocalEvaluationStore(self.workspace)
-        authority_source = AuthoritySource.from_inputs(
-            authority=authority,
-            authority_resolver=authority_resolver,
-            authority_cache=authority_cache,
-            contract=contract,
-            authorities=authorities,
-            authority_loader=authority_loader,
-        )
+        try:
+            authority_source = AuthoritySource.from_inputs(
+                authority=authority,
+                authority_resolver=authority_resolver,
+                authority_cache=authority_cache,
+                contract=contract,
+                authorities=authorities,
+                authority_loader=authority_loader,
+            )
+        except BaseException:
+            self.close()
+            raise
         self.authorities = authority_source.authorities
         self.authority_bindings = authority_source.authority_bindings
         self.authority_cache = authority_cache
@@ -100,6 +104,7 @@ class Guard:
         )
         self.cloud_runtime_client = cloud_runtime_client
         self.runtime_connection = None
+        self._cloud_identity = None
 
     @classmethod
     def local(
@@ -197,6 +202,11 @@ class Guard:
             environment,
             "WAVEFRAME_RUNTIME_ENVIRONMENT",
         ) or "development"
+        cloud_identity = (resolved_organization_id, resolved_runtime_id, authority)
+        bound_context = _bind_cloud_identity(
+            execution_context if execution_context is not None else {"surface": "guard_sdk"},
+            cloud_identity,
+        )
         authority_client = CloudAuthorityClient(
             resolved_url,
             organization_id=resolved_organization_id,
@@ -254,6 +264,11 @@ class Guard:
             runtime_version=f"guard-{_guard_version()}",
         )
         guard.cloud_runtime_client = runtime_client
+        if guard.resolve_authority(authority).get("schema_version") == "compiled_authority_contract.v3":
+            guard._cloud_identity = cloud_identity
+            guard.execution_context = bound_context
+            # Validate the connected native boundary before runtime registration.
+            guard.boundary_for()
         guard.runtime_connection = runtime_client.connect()
         return guard
 
@@ -410,6 +425,7 @@ class Guard:
             store=self.store,
             cloud_preservation_client=self.cloud_preservation_client,
             cloud_runtime_client=self.cloud_runtime_client,
+            cloud_identity=self._cloud_identity,
         )
 
     def close(self) -> None:
