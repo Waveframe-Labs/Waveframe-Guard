@@ -201,6 +201,18 @@ def test_native_cloud_gate_off(connected, monkeypatch, gate):
     assert calls == []
 
 
+def test_published_ledger_cannot_activate_native_cloud_even_with_flags(connected, monkeypatch):
+    import importlib.util
+    if importlib.util.find_spec("governance_ledger.action_policy_publication") is not None:
+        pytest.skip("requires the released Ledger installation; covered by released CI")
+    make, state, calls, root = connected
+    monkeypatch.setenv("WAVEFRAME_GUARD_ACTION_POLICY_DEV", "1")
+    monkeypatch.setenv("WAVEFRAME_LEDGER_ACTION_POLICY_DEV", "1")
+    with pytest.raises(AuthorityVerificationError):
+        make()
+    assert calls == []
+
+
 @development
 @pytest.mark.parametrize("change", ["tenant", "authority", "bundle", "receipt", "mixed", "downgrade", "registry",
                                     "revoked", "superseded", "reference", "provenance"])
