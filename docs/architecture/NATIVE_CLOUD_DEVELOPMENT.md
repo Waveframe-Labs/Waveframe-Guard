@@ -120,6 +120,10 @@ The client runs outside the checkout, checks installed paths and PEP 610
 provenance, and uses real `Guard.cloud()` / `repository_tool()` calls.
 `--cloud-source` can reuse an unchanged disposable snapshot at that exact SHA;
 `--server-python` can reuse its isolated candidate environment.
+When the SDK interpreter is Python 3.10, pass
+`--server-base-python <path-to-python-3.14>` to create Cloud's independent
+environment with its supported interpreter. The pinned Cloud source uses syntax
+unavailable on 3.10; SDK 3.10 acceptance does not require Cloud itself to run on 3.10.
 
 `summary.json`, `http.json`, independent local attestations, both `pip check`
 results, and `cloud-source.json` retain sanitized evidence. The HTTP recorder

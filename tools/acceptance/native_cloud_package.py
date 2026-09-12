@@ -29,6 +29,7 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--cloud-source", type=Path)
     parser.add_argument("--server-python", type=Path, help="Optional preinstalled isolated Cloud environment")
+    parser.add_argument("--server-base-python", type=Path, help="Python 3.14 used to create the isolated Cloud environment")
     args = parser.parse_args()
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
@@ -47,7 +48,8 @@ def main():
              ROOT / ".github/requirements/action-policy-development.txt"], scratch)
         server_python = args.server_python.resolve() if args.server_python else python_at(scratch / "server")
         if not args.server_python:
-            venv.EnvBuilder(with_pip=True).create(scratch / "server")
+            server_base = args.server_base_python.resolve() if args.server_base_python else Path(sys.executable)
+            run([server_base, "-m", "venv", scratch / "server"], scratch)
             run([server_python, "-m", "pip", "install", "-r", cloud / "requirements-action-policy-dev.txt"], scratch)
         for name, python in (("client", client_python), ("server", server_python)):
             checked = subprocess.check_output([str(python), "-m", "pip", "check"], cwd=scratch).decode()

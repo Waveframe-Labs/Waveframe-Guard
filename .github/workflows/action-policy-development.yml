@@ -26,6 +26,7 @@ jobs:
           ref: ${{ github.sha }}
           persist-credentials: false
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        id: sdk-python
         with:
           python-version: ${{ matrix.python }}
       - name: Install exact development candidates
@@ -50,9 +51,18 @@ jobs:
           token: ${{ secrets.CLOUD_TEST_READ_TOKEN }}
           path: .cloud-test-source
           persist-credentials: false
+      - name: Set up Cloud's independent server interpreter
+        if: env.CLOUD_TEST_ACCESS == 'true'
+        id: cloud-python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: "3.14"
       - name: Installed SDK against unchanged pinned Cloud server
         if: env.CLOUD_TEST_ACCESS == 'true'
-        run: python tools/acceptance/native_cloud_package.py --wheel acceptance-output/package/waveframe_guard-0.18.0-py3-none-any.whl --output acceptance-output/connected --cloud-source .cloud-test-source
+        env:
+          SDK_PYTHON: ${{ steps.sdk-python.outputs.python-path }}
+          CLOUD_PYTHON: ${{ steps.cloud-python.outputs.python-path }}
+        run: python -c "import os,subprocess; subprocess.run([os.environ['SDK_PYTHON'], 'tools/acceptance/native_cloud_package.py', '--wheel', 'acceptance-output/package/waveframe_guard-0.18.0-py3-none-any.whl', '--output', 'acceptance-output/connected', '--cloud-source', '.cloud-test-source', '--server-base-python', os.environ['CLOUD_PYTHON']], check=True)"
       - name: Record private test dependency availability
         if: env.CLOUD_TEST_ACCESS != 'true'
         run: python -c "from pathlib import Path; Path('acceptance-output/connected-ci-unavailable.txt').write_text('Connected CI requires read-only CLOUD_TEST_READ_TOKEN access to the pinned private Cloud test dependency. Run native_cloud_package.py in an authorized environment. This job does not claim real-server acceptance.\n')"
