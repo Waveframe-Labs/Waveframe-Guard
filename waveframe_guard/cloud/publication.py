@@ -125,11 +125,13 @@ def parse_cloud_authority_publication(
     if not isinstance(bundle, dict) or bundle.get("schema_version") not in {
         "authority_bundle.v2",
         "authority_bundle.v3",
+        "authority_bundle.v4",
     }:
         raise CloudPublicationProtocolError("Cloud publication must contain a supported authority bundle")
     if not isinstance(receipt, dict) or receipt.get("schema_version") not in {
         "publication_receipt.v2",
         "publication_receipt.v3",
+        "publication_receipt.v4",
     }:
         raise CloudPublicationProtocolError("Cloud publication must contain a supported publication receipt")
     if bundle["schema_version"].rsplit(".", 1)[-1] != receipt["schema_version"].rsplit(".", 1)[-1]:

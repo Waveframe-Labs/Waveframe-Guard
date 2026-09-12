@@ -22,7 +22,7 @@ from waveframe_guard.authority.types import LoadedAuthority
 from waveframe_guard.authority.exceptions import AuthorityVerificationError
 from .local_persistence import build_execution_attestation
 from .repository_boundary import RepositoryBoundaryError, RepositoryWorkspace, validate_repository_request
-from .repository_evidence import build_repository_attestation
+from .repository_evidence import build_repository_attestation, validate_repository_attestation
 from .target_binding import TargetBinding, reject_binding_override
 
 
@@ -63,6 +63,7 @@ class GuardRuntimeBoundary:
         store: Any | None = None,
         cloud_preservation_client: CloudPreservationClient | None = None,
         cloud_runtime_client: CloudRuntimeClient | None = None,
+        cloud_identity: tuple[str, str, str] | None = None,
     ):
         self.compiled_authority = deepcopy(compiled_authority)
         self.loaded_authority = deepcopy(loaded_authority)
@@ -77,8 +78,8 @@ class GuardRuntimeBoundary:
         if self.compiled_authority.get("schema_version") in {"compiled_authority_contract.v2", "compiled_authority_contract.v3"}:
             if self.compiled_authority.get("schema_version") == "compiled_authority_contract.v3" and (
                 cloud_preservation_client is not None or cloud_runtime_client is not None
-            ):
-                raise AuthorityVerificationError("action policy development is local only; Cloud activation is unavailable")
+            ) and cloud_identity is None:
+                raise AuthorityVerificationError("action policy development is local only unless connected through Guard.cloud()")
             if self.loaded_authority is None:
                 raise AuthorityVerificationError(
                     "compiled_authority_contract.v2 requires a verified authority bundle and publication receipt"
@@ -116,11 +117,28 @@ class GuardRuntimeBoundary:
         self.approvals = approvals or []
         self.continuity_state = continuity_state or {}
         self.replay_posture = replay_posture or {}
-        self.execution_context = execution_context or {"surface": "sdk"}
+        self._cloud_identity = cloud_identity
+        self.execution_context = _bind_cloud_identity(
+            execution_context if execution_context is not None else {"surface": "sdk"}, cloud_identity
+        )
         self.evaluation_time_source = evaluation_time_source or _utc_now
         self.store = store
         self.cloud_preservation_client = cloud_preservation_client
         self.cloud_runtime_client = cloud_runtime_client
+        self._check_cloud_identity()
+
+    def _check_cloud_identity(self):
+        if self._cloud_identity is None:
+            return
+        organization, _, authority = self._cloud_identity
+        client = self.cloud_runtime_client
+        preservation = self.cloud_preservation_client
+        if (client is None or preservation is None
+                or (client.organization_id, client.runtime_id, client.authority_ref) != self._cloud_identity
+                or preservation.organization_id != organization
+                or self.compiled_authority.get("authority_ref",
+                    f"{self.compiled_authority['contract_id']}@{self.compiled_authority['contract_version']}") != authority):
+            raise AuthorityVerificationError("Cloud runtime, organization or authority identity changed")
 
     def _repository_required(self):
         self._check_target_binding()
@@ -132,6 +150,7 @@ class GuardRuntimeBoundary:
         return self._target_binding
 
     def _check_target_binding(self):
+        self._check_cloud_identity()
         if self._verified_runtime_authority != self._activation_runtime_authority:
             raise AuthorityVerificationError("verified runtime authority changed after activation")
         if self.compiled_authority.get("schema_version") == "compiled_authority_contract.v3":
@@ -202,7 +221,9 @@ class GuardRuntimeBoundary:
         if self._repository_required():
             validate_repository_request(execution_request)
         original_request = deepcopy(execution_request)
-        selected_context = deepcopy(execution_context if execution_context is not None else self.execution_context)
+        selected_context = _bind_cloud_identity(
+            execution_context if execution_context is not None else self.execution_context, self._cloud_identity
+        )
         if self._target_binding is not None:
             reject_binding_override(original_request)
             reject_binding_override(selected_context)
@@ -315,12 +336,18 @@ class GuardRuntimeBoundary:
         result["run_id"] = saved_record["run_id"]
         if self.cloud_preservation_client is not None:
             replay_result = self.store.replay(saved_record["run_id"])
-            preservation_result = self.cloud_preservation_client.preserve(
-                _build_cloud_preservation_package(
-                    saved_record=saved_record,
-                    replay_result=replay_result,
-                )
+            package = _build_cloud_preservation_package(
+                saved_record=saved_record,
+                replay_result=replay_result,
             )
+            try:
+                preservation_result = self.cloud_preservation_client.preserve(deepcopy(package))
+            except Exception:
+                result["cloud_preservation"] = {
+                    "ok": False, "error": "Cloud preservation client failed; preservation is unconfirmed",
+                    "error_type": "client_error", "ambiguous": True,
+                }
+                return
             result["cloud_preservation"] = asdict(preservation_result)
             if preservation_result.ok:
                 updated_record = self.store.append_cloud_preservation(
@@ -345,7 +372,10 @@ class GuardRuntimeBoundary:
         if self._repository_required():
             validate_repository_request(execution_request)
             try:
-                evaluation = self.evaluate(execution_request, save=False)
+                evaluation = self.evaluate(execution_request, save=False, **{
+                    key: value for key, value in kwargs.items()
+                    if key not in {"save", "args", "kwargs", "raise_on_block"}
+                })
             except RepositoryBoundaryError as exc:
                 self._record_repository_refusal(exc, execution_request, save=kwargs.get("save", True))
                 raise
@@ -466,6 +496,11 @@ class GuardRuntimeBoundary:
             persist=save,
         )
         error.evaluation = evaluation
+        attestation = self._attest_execution_result(
+            evaluation, execution_request=request, executed=False, error=error,
+        )
+        if attestation is not None:
+            evaluation["cloud_runtime_attestation"] = attestation
 
     def _execute(
         self,
@@ -521,6 +556,11 @@ class GuardRuntimeBoundary:
                     execution_status="not_run", mutation_status="not_performed", mutation_executed=False,
                 )
                 exc.evaluation = evaluation
+                attestation = self._attest_execution_result(
+                    evaluation, execution_request=execution_request, executed=False, error=exc,
+                )
+                if attestation is not None:
+                    evaluation["cloud_runtime_attestation"] = attestation
                 raise
         self._record_execution_evidence(
             evaluation,
@@ -549,8 +589,7 @@ class GuardRuntimeBoundary:
             )
             if attestation is not None:
                 evaluation["cloud_runtime_attestation"] = attestation
-            if evaluation.get("target_binding", {}).get("target_domain") == "repository_path":
-                exc.evaluation = evaluation
+            exc.evaluation = evaluation
             raise
         self._record_execution_evidence(
             evaluation,
@@ -657,6 +696,25 @@ class GuardRuntimeBoundary:
             summary = f"{action} callback did not run."
 
         try:
+            self._check_cloud_identity()
+            if evaluation.get("target_binding", {}).get("target_domain") == "repository_path":
+                proof = validate_repository_attestation(
+                    evaluation["execution_attestation"], record=self.store.load_run(event_id)
+                )
+                runtime_decision = {"admissible": "ALLOWED", "blocked": "BLOCKED", "escalated": "ESCALATED"}[proof["decision"]]
+                local_status = proof["execution_status"]
+                if local_status == "incomplete":
+                    return None  # No terminal observation: retain absence of a report.
+                execution_status = {"not_run": "blocked" if proof["decision"] == "blocked" else "not_executed",
+                                    "failed": "failed", "succeeded": "succeeded"}[local_status]
+                mutation_executed = proof["mutation_executed"]
+                operation = proof.get("repository_operation")
+                if operation is not None and local_status == "failed":
+                    mutation_executed = (True if operation["created"] else
+                                         False if operation["error"] == "exclusive_create_collision" else None)
+                summary = f"{action} operation {execution_status}."
+                if operation and operation["error"]:
+                    summary += f" {operation['error']}."
             result = self.cloud_runtime_client.attest(
                 event_id=event_id,
                 compiled_contract_hash=self.compiled_authority["contract_hash"],
@@ -704,6 +762,16 @@ def _enforcement_message(evaluation: dict[str, Any]) -> str:
 
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _bind_cloud_identity(context, identity):
+    context = deepcopy(context)
+    if identity is not None:
+        for field, value in zip(("organization_id", "runtime_id"), identity[:2]):
+            if field in context and context[field] != value:
+                raise AuthorityVerificationError(f"execution context {field} conflicts with Cloud identity")
+            context[field] = value
+    return context
 
 
 def _build_cloud_preservation_package(

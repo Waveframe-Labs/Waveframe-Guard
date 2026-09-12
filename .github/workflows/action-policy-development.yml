@@ -2,7 +2,7 @@ name: Action policy development acceptance
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, feat/36-workspace-file-creation]
   workflow_dispatch:
 
 permissions:
@@ -39,6 +39,8 @@ jobs:
         run: python -m pytest -q --junitxml=acceptance-output/development.xml
       - name: Verify fresh distributions and installed-wheel creation
         run: python tools/acceptance/action_policy_package.py --output acceptance-output/package
+      - name: Installed SDK against unchanged pinned Cloud server
+        run: python tools/acceptance/native_cloud_package.py --wheel acceptance-output/package/waveframe_guard-0.18.0-py3-none-any.whl --output acceptance-output/connected
       - name: Retain exact-run acceptance evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

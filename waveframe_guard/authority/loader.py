@@ -27,6 +27,14 @@ def load_authority(
     registry_entry = active_resolver.resolve(authority_ref)
     cached = cache.get(registry_entry.authority_ref, registry_entry.bundle_hash or "") if cache else None
     if cached is not None:
+        if cached.schema_version == "authority_bundle.v4":
+            # A valid cached identity must not conceal a changed native pair
+            # returned by this resolution, even with unchanged registry hashes.
+            current = loader.load(registry_entry)
+            if (current.payload != cached.authority_bundle
+                    or current.receipt_payload != cached.publication_receipt):
+                verifier.verify(current)
+                raise AuthorityVerificationError("resolved native publication differs from cached evidence")
         return verifier.verify_registry_entry(
             registry_entry,
             cached,
