@@ -128,8 +128,13 @@ calls. Each case checks exact submission/retrieval equality, local replay/eviden
 same-run reports and Activity projections. Fault stubs supplement this real-server
 acceptance with rejection, redirect and ambiguous-timeout cases.
 
-The development workflow runs default and opted-in full suites, fresh wheel/sdist,
-and connected installed-wheel acceptance on Windows/Linux × Python 3.10/3.14.
+The development workflow runs default and opted-in full suites and fresh wheel/sdist
+on Windows/Linux × Python 3.10/3.14. Its connected installed-wheel step requires
+the read-only `CLOUD_TEST_READ_TOKEN` repository secret because Cloud is private
+and Guard is public. Without it, CI records that connected acceptance is unavailable;
+run the same harness locally with authorized access. Never upload private Cloud
+source to public artifacts or substitute a broad personal token. Only sanitized
+SDK evidence is retained. Cloud checkout credentials are not persisted.
 The existing released validation workflow remains unchanged. The existing Linux
 mount-namespace test is skipped when the runner lacks that capability; this work
 does not claim new mount-namespace coverage.
