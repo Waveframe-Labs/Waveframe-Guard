@@ -14,6 +14,7 @@ from urllib.parse import urlsplit
 
 import requests
 from waveframe_guard import Guard, RepositoryBoundaryError
+from waveframe_guard.authority.runtime_facts import RuntimeFactError
 import waveframe_guard
 
 
@@ -223,9 +224,17 @@ def main():
             def legacy_create(path):
                 attempts.append(1)
                 return path.create_bytes(b"forbidden")
-            result = legacy_create("README.md")
-            assert attempts == [] and result["evaluation"]["status"] == "blocked" and not (root / "README.md").exists()
-            outcomes["legacy-cannot-create"] = {"callback_count": 0, "decision": "BLOCKED", "mutation_executed": False}
+            before = len(exchanges)
+            try:
+                legacy_create("README.md")
+            except RuntimeFactError:
+                pass  # The released fact schema cannot express creation.
+            else:
+                raise AssertionError("released authority admitted a create request")
+            assert attempts == [] and not (root / "README.md").exists()
+            assert len(exchanges) == before and instance.store.history() == []
+            outcomes["legacy-cannot-create"] = {"callback_count": 0, "decision": "not_evaluated",
+                "authorization_event": False, "report_status": None, "mutation_executed": False}
         finally:
             instance.close()
     evidence = {"platform": platform.platform(), "python": sys.version, "server": {k: v for k, v in server.items() if k != "url"},
