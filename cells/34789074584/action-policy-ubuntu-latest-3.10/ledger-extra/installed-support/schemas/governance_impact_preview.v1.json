@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/governance_impact_preview.v1.json",
+  "title": "Governance Impact Preview",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "authority_ref",
+    "contract_id",
+    "contract_version",
+    "governance_summary",
+    "enforcement_behavior",
+    "operational_consequences",
+    "lifecycle_implications",
+    "example_governed_outcomes"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "governance_impact_preview.v1"
+    },
+    "authority_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contract_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contract_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contract_hash": {
+      "type": ["string", "null"]
+    },
+    "governance_summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "enforcement_behavior": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "operational_consequences": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "lifecycle_implications": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "execution_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "execution_context",
+        "summary",
+        "replay_posture",
+        "resume_posture",
+        "runtime_enforced_by"
+      ],
+      "properties": {
+        "schema_version": { "const": "execution_context_semantics.v1" },
+        "execution_context": { "type": "string", "minLength": 1 },
+        "summary": { "type": "string", "minLength": 1 },
+        "replay_posture": { "type": "string", "minLength": 1 },
+        "resume_posture": { "type": "string", "minLength": 1 },
+        "runtime_enforced_by": { "const": "Guard/Cloud" }
+      }
+    },
+    "example_governed_outcomes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["outcome", "description"],
+        "properties": {
+          "outcome": {
+            "enum": [
+              "allowed_execution",
+              "blocked_execution",
+              "escalation",
+              "continuity_drift"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

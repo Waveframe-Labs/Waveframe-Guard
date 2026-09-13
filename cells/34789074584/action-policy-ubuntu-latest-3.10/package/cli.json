@@ -1,0 +1,3295 @@
+{
+  "command": [
+    "/tmp/guard50-package-uwso5yin/release/bin/waveframe-guard-external-agent"
+  ],
+  "exit_code": 0,
+  "stdout": "runtime_id=budget-agent-runtime\nactor_id=budget-agent\nauthority_ref=budget-quickstart@1.0.0\nallowed_decision=allowed\nblocked_decision=blocked\nmutation_count=1\nexactly_once=True\nallowed_package_id=pkg-1\nallowed_receipt_id=receipt-1\nallowed_proof_sha256=sha256:package-1\nblocked_package_id=pkg-2\nblocked_receipt_id=receipt-2\nblocked_proof_sha256=sha256:package-2\nconsole_check=Open Activity or Executions and verify both decisions by runtime and authority.\n",
+  "stderr": "",
+  "scope": "installed console against HTTP fixture; not native Cloud acceptance",
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/v1/authorities/budget-quickstart@1.0.0/publication",
+      "organization_id": "acme",
+      "api_key": "wf_runtime_secret",
+      "payload": null
+    },
+    {
+      "method": "GET",
+      "path": "/v1/contracts/budget-quickstart/1.0.0",
+      "organization_id": "acme",
+      "api_key": "wf_runtime_secret",
+      "payload": null
+    },
+    {
+      "method": "POST",
+      "path": "/v1/runtimes/register",
+      "organization_id": "acme",
+      "api_key": "wf_runtime_secret",
+      "payload": {
+        "runtime_id": "budget-agent-runtime",
+        "runtime_version": "guard-0.19.0",
+        "status": "registered",
+        "environment": "development",
+        "environment_id": "development",
+        "capabilities": [
+          "agent_tool_boundary",
+          "local_admissibility",
+          "cloud_evidence_preservation",
+          "runtime_result_attestation"
+        ],
+        "authority_refs": [
+          "budget-quickstart@1.0.0"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/v1/runtimes/budget-agent-runtime/heartbeats",
+      "organization_id": "acme",
+      "api_key": "wf_runtime_secret",
+      "payload": {
+        "schema_version": "cloud_runtime_heartbeat.v1",
+        "heartbeat_id": "heartbeat-budget-agent-runtime-acd90c8472184812bc3ac159e169147e",
+        "runtime_id": "budget-agent-runtime",
+        "observed_at": "2026-09-13T23:17:23.640225+00:00",
+        "status": "online",
+        "surface": "guard_sdk",
+        "environment": "development",
+        "environment_id": "development",
+        "authority_refs": [
+          "budget-quickstart@1.0.0"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/v1/preserve",
+      "organization_id": "acme",
+      "api_key": "wf_runtime_secret",
+      "payload": {
+        "schema_version": "guard_cloud_preservation_package.v1",
+        "run_id": "guard_run_c6ea81f0b9eaf9558e7f7078",
+        "saved_evaluation": {
+          "schema_version": "guard_saved_evaluation.v1",
+          "run_id": "guard_run_c6ea81f0b9eaf9558e7f7078",
+          "recorded_at": "2026-09-13T23:17:23.641475+00:00",
+          "inputs": {
+            "compiled_authority": {
+              "schema_version": "compiled_authority_contract.v1",
+              "contract_id": "budget-quickstart",
+              "contract_version": "1.0.0",
+              "authority_requirements": {
+                "required_roles": [
+                  "allocator"
+                ]
+              },
+              "approval_requirements": {
+                "thresholds": [
+                  {
+                    "field": "amount",
+                    "operator": ">=",
+                    "value": 10000,
+                    "requires_role": "finance-approver"
+                  }
+                ]
+              },
+              "artifact_requirements": {},
+              "stage_requirements": {},
+              "invariants": {},
+              "contract_hash": "bdee18b0573a6a94086305dafdb5c3f7a72aecc2f29aca96e1cf14232002cc49"
+            },
+            "execution_request": {
+              "schema_version": "normalized_execution_request.v1",
+              "request_id": "tool_59b7f2a84a3c4efa9f26e6207026d86a",
+              "action": "allocate_budget",
+              "target": "quickstart-account",
+              "arguments": {
+                "amount": 500
+              },
+              "artifacts": []
+            },
+            "runtime_evidence": {
+              "schema_version": "guard_runtime_evidence_model.v1",
+              "actor_identity": {
+                "id": "budget-agent",
+                "type": "agent",
+                "role": "allocator"
+              },
+              "approvals": [],
+              "replay_evidence": {},
+              "continuity_snapshot": {},
+              "timestamp_source": {
+                "source": "caller_supplied",
+                "timestamp": "2026-09-13T23:17:23.641475+00:00"
+              },
+              "execution_context": {
+                "surface": "agent_tool",
+                "agent": {
+                  "framework": "custom-python"
+                }
+              },
+              "runtime_dependencies": []
+            }
+          },
+          "evaluation": {
+            "status": "admissible",
+            "execution_state": "allowed",
+            "runtime_lifecycle_state": "admissible",
+            "admissible": true,
+            "blocked": false,
+            "escalated": false,
+            "rationale": "execution is admissible against compiled authority",
+            "violated_constraints": [],
+            "required_evidence": [],
+            "replay_obligations": [],
+            "continuity_requirements": [],
+            "continuation_status": {
+              "schema_version": "guard_continuation_status.v1",
+              "status": "admissible",
+              "lifecycle_state": "admissible",
+              "admissible": true,
+              "invalidated": false,
+              "expired": false,
+              "revalidation_required": false,
+              "escalation_required": false,
+              "evidence_valid": true,
+              "replay_valid": true,
+              "dependency_valid": true,
+              "continuity_valid": true,
+              "dependency_failures": []
+            },
+            "continuation_requirements": [],
+            "invalidation_reasons": [],
+            "runtime_condition_checks": [
+              {
+                "condition": "evidence_valid",
+                "valid": true,
+                "rationale": "runtime evidence validity checked"
+              },
+              {
+                "condition": "replay_valid",
+                "valid": true,
+                "rationale": "replay posture validity checked"
+              },
+              {
+                "condition": "dependency_valid",
+                "valid": true,
+                "rationale": "runtime dependency validity checked"
+              },
+              {
+                "condition": "continuity_valid",
+                "valid": true,
+                "rationale": "lineage continuity validity checked"
+              },
+              {
+                "condition": "not_expired",
+                "valid": true,
+                "rationale": "continuation did not expire before execution"
+              }
+            ],
+            "runtime_dependency_posture": {
+              "schema_version": "guard_runtime_dependency_posture.v1",
+              "dependencies": [],
+              "valid": true,
+              "expired": false,
+              "failures": []
+            },
+            "enforcement_consequences": [
+              {
+                "consequence": "allow_execution"
+              }
+            ],
+            "admissibility_projection": {
+              "schema_version": "execution_admissibility_projection.v1",
+              "authority_ref": "budget-quickstart@1.0.0",
+              "contract_hash": "bdee18b0573a6a94086305dafdb5c3f7a72aecc2f29aca96e1cf14232002cc49",
+              "execution_request": {
+                "schema_version": "normalized_execution_request.v1",
+                "request_id": "tool_59b7f2a84a3c4efa9f26e6207026d86a",
+                "action": "allocate_budget",
+                "target": "quickstart-account",
+                "arguments": {
+                  "amount": 500
+                },
+                "artifacts": []
+              },
+              "actor_identity": {
+                "id": "budget-agent",
+                "type": "agent",
+                "role": "allocator"
+              },
+              "status": "admissible",
+              "rationale": "execution is admissible against compiled authority",
+              "violated_constraints": [],
+              "required_evidence": [],
+              "replay_obligations": [],
+              "continuity_requirements": [],
+              "continuation_status": {
+                "schema_version": "guard_continuation_status.v1",
+                "status": "admissible",
+                "lifecycle_state": "admissible",
+                "admissible": true,
+                "invalidated": false,
+                "expired": false,
+                "revalidation_required": false,
+                "escalation_required": false,
+                "evidence_valid": true,
+                "replay_valid": true,
+                "dependency_valid": true,
+                "continuity_valid": true,
+                "dependency_failures": []
+              },
+              "enforcement_consequences": [
+                {
+                  "consequence": "allow_execution"
+                }
+              ],
+              "projection_id": "admissibility_projection_1732d912a37cf198b58b34f3",
+              "projection_hash": "sha256:86e0d76ba67b450c7a6fd5d22d8d3c23d61d66d788fd32f95c1039d06b739244"
+            },
+            "runtime_posture": {
+              "schema_version": "execution_runtime_posture.v1",
+              "posture": "admissible",
+              "rationale": "execution is admissible against compiled authority",
+              "authority_ref": "budget-quickstart@1.0.0",
+              "contract_hash": "bdee18b0573a6a94086305dafdb5c3f7a72aecc2f29aca96e1cf14232002cc49",
+              "execution_request": {
+                "schema_version": "normalized_execution_request.v1",
+                "request_id": "tool_59b7f2a84a3c4efa9f26e6207026d86a",
+                "action": "allocate_budget",
+                "target": "quickstart-account",
+                "arguments": {
+                  "amount": 500
+                },
+                "artifacts": []
+              },
+              "actor_identity": {
+                "id": "budget-agent",
+                "type": "agent",
+                "role": "allocator"
+              },
+              "runtime_blockers": [],
+              "continuity_state": {
+                "schema_version": "guard_continuity_posture.v1",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "continuity_state": {},
+                "replay_posture": {},
+                "continuity_requirements": [],
+                "replay_obligations": [],
+                "requires_revalidation": false,
+                "requires_replay": false,
+                "signals": [],
+                "posture_id": "continuity_posture_528e974d906ee1c3e2edaf49",
+                "posture_hash": "sha256:f6b15c2d176e4a76a0e68d3c6657610a23699dd8bef6e72b34dc4ee2df5f04db"
+              },
+              "continuation_status": {
+                "schema_version": "guard_continuation_status.v1",
+                "status": "admissible",
+                "lifecycle_state": "admissible",
+                "admissible": true,
+                "invalidated": false,
+                "expired": false,
+                "revalidation_required": false,
+                "escalation_required": false,
+                "evidence_valid": true,
+                "replay_valid": true,
+                "dependency_valid": true,
+                "continuity_valid": true,
+                "dependency_failures": []
+              },
+              "replay_requirements": [],
+              "enforcement_outcome": {
+                "schema_version": "guard_enforcement_outcome.v1",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "status": "admissible",
+                "execution_state": "allowed",
+                "runtime_lifecycle_state": "admissible",
+                "rationale": "execution is admissible against compiled authority",
+                "consequences": [
+                  {
+                    "consequence": "allow_execution"
+                  }
+                ],
+                "continuation_status": {
+                  "schema_version": "guard_continuation_status.v1",
+                  "status": "admissible",
+                  "lifecycle_state": "admissible",
+                  "admissible": true,
+                  "invalidated": false,
+                  "expired": false,
+                  "revalidation_required": false,
+                  "escalation_required": false,
+                  "evidence_valid": true,
+                  "replay_valid": true,
+                  "dependency_valid": true,
+                  "continuity_valid": true,
+                  "dependency_failures": []
+                },
+                "continuation_requirements": [],
+                "invalidation_reasons": [],
+                "runtime_condition_checks": [
+                  {
+                    "condition": "evidence_valid",
+                    "valid": true,
+                    "rationale": "runtime evidence validity checked"
+                  },
+                  {
+                    "condition": "replay_valid",
+                    "valid": true,
+                    "rationale": "replay posture validity checked"
+                  },
+                  {
+                    "condition": "dependency_valid",
+                    "valid": true,
+                    "rationale": "runtime dependency validity checked"
+                  },
+                  {
+                    "condition": "continuity_valid",
+                    "valid": true,
+                    "rationale": "lineage continuity validity checked"
+                  },
+                  {
+                    "condition": "not_expired",
+                    "valid": true,
+                    "rationale": "continuation did not expire before execution"
+                  }
+                ],
+                "runtime_dependency_posture": {
+                  "schema_version": "guard_runtime_dependency_posture.v1",
+                  "dependencies": [],
+                  "valid": true,
+                  "expired": false,
+                  "failures": []
+                },
+                "outcome_id": "enforcement_outcome_1f95e0dfdba920572fcddfb5",
+                "outcome_hash": "sha256:79f2456333f31fd5224717088475228fe1428cebac602eb5f4be14791de24c9b"
+              },
+              "chronology_event_ids": [
+                "guard_event_82606e35a95fb0370f8426a6",
+                "guard_event_6549cbd79559cd915bf40f45",
+                "guard_event_a38c5deab56025cd3cbe114b",
+                "guard_event_58055724b76b86cf16fe7637",
+                "guard_event_42611305eeaa972f9fa40f46",
+                "guard_event_b7430437606d5be73a099453",
+                "guard_event_41be8d55b8905e184394df91"
+              ],
+              "telemetry_event_types": [
+                "authority_context_resolved",
+                "evaluation_pipeline_started",
+                "runtime_evidence_loaded",
+                "continuity_checked",
+                "replay_validated",
+                "admissibility_evaluated",
+                "enforcement_outcome_recorded"
+              ],
+              "posture_id": "runtime_posture_01bc292871a7cb5a114cf651",
+              "posture_hash": "sha256:15dd327ce360800b7379e5d2eae7218578720c545c5ae71355dac29fda9852a5"
+            },
+            "telemetry_events": [
+              {
+                "schema_version": "guard_runtime_event.v1",
+                "sequence": 1,
+                "event_type": "authority_context_resolved",
+                "timestamp": "2026-09-13T23:17:23.641475+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "details": {
+                  "contract_boundary": "compiled_authority"
+                },
+                "event_id": "guard_event_82606e35a95fb0370f8426a6",
+                "event_hash": "sha256:0a10677bcf82c572647fd8c8dc5e314a5892f93e75879318f71e75c45658e71c"
+              },
+              {
+                "schema_version": "guard_runtime_event.v1",
+                "sequence": 2,
+                "event_type": "evaluation_pipeline_started",
+                "timestamp": "2026-09-13T23:17:23.641475+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "details": {
+                  "status": "started"
+                },
+                "event_id": "guard_event_6549cbd79559cd915bf40f45",
+                "event_hash": "sha256:ca1444431627afef96d20302da313404f48c4e92d8724fbf0f912c278a3a8b4f"
+              },
+              {
+                "schema_version": "guard_runtime_event.v1",
+                "sequence": 3,
+                "event_type": "runtime_evidence_loaded",
+                "timestamp": "2026-09-13T23:17:23.641475+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "details": {
+                  "evidence_boundary": "guard_runtime_evidence_model.v1",
+                  "required_evidence": []
+                },
+                "event_id": "guard_event_a38c5deab56025cd3cbe114b",
+                "event_hash": "sha256:05771a6d3dfe658082a816eeee7c819d0cd8f5959f1ffd98c1b6fd20cafbd97e"
+              },
+              {
+                "schema_version": "guard_runtime_event.v1",
+                "sequence": 4,
+                "event_type": "continuity_checked",
+                "timestamp": "2026-09-13T23:17:23.641475+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "details": {
+                  "continuity_requirements": []
+                },
+                "event_id": "guard_event_58055724b76b86cf16fe7637",
+                "event_hash": "sha256:0fcee57b2ad97cb82c31c3e1570accb5e4e1f7c7a229a0b099b177f7632e7f1c"
+              },
+              {
+                "schema_version": "guard_runtime_event.v1",
+                "sequence": 5,
+                "event_type": "replay_validated",
+                "timestamp": "2026-09-13T23:17:23.641475+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "details": {
+                  "replay_obligations": []
+                },
+                "event_id": "guard_event_42611305eeaa972f9fa40f46",
+                "event_hash": "sha256:e3006a2d270c64cae99603f81979b1aa024e9317ccfe8015f035936f9da49d8d"
+              },
+              {
+                "schema_version": "guard_runtime_event.v1",
+                "sequence": 6,
+                "event_type": "admissibility_evaluated",
+                "timestamp": "2026-09-13T23:17:23.641475+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "details": {
+                  "status": "admissible",
+                  "runtime_lifecycle_state": "admissible",
+                  "violated_constraints": [],
+                  "required_evidence": []
+                },
+                "event_id": "guard_event_b7430437606d5be73a099453",
+                "event_hash": "sha256:23728acef91f30dc91d90a6f093683c2523293fb6554b0f6b45dad54952a308a"
+              },
+              {
+                "schema_version": "guard_runtime_event.v1",
+                "sequence": 7,
+                "event_type": "enforcement_outcome_recorded",
+                "timestamp": "2026-09-13T23:17:23.641475+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "details": {
+                  "status": "admissible",
+                  "runtime_lifecycle_state": "admissible",
+                  "consequences": [
+                    {
+                      "consequence": "allow_execution"
+                    }
+                  ]
+                },
+                "event_id": "guard_event_41be8d55b8905e184394df91",
+                "event_hash": "sha256:1c4169605ec97fc3b07afd8e96a9131ec3dfa51cdafcfec6906f8d4726c4c881"
+              }
+            ],
+            "telemetry_stream": [
+              {
+                "event_id": "guard_event_82606e35a95fb0370f8426a6",
+                "event_type": "authority_context_resolved",
+                "sequence": 1,
+                "timestamp": "2026-09-13T23:17:23.641475+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "event_hash": "sha256:0a10677bcf82c572647fd8c8dc5e314a5892f93e75879318f71e75c45658e71c"
+              },
+              {
+                "event_id": "guard_event_6549cbd79559cd915bf40f45",
+                "event_type": "evaluation_pipeline_started",
+                "sequence": 2,
+                "timestamp": "2026-09-13T23:17:23.641475+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "event_hash": "sha256:ca1444431627afef96d20302da313404f48c4e92d8724fbf0f912c278a3a8b4f"
+              },
+              {
+                "event_id": "guard_event_a38c5deab56025cd3cbe114b",
+                "event_type": "runtime_evidence_loaded",
+                "sequence": 3,
+                "timestamp": "2026-09-13T23:17:23.641475+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "event_hash": "sha256:05771a6d3dfe658082a816eeee7c819d0cd8f5959f1ffd98c1b6fd20cafbd97e"
+              },
+              {
+                "event_id": "guard_event_58055724b76b86cf16fe7637",
+                "event_type": "continuity_checked",
+                "sequence": 4,
+                "timestamp": "2026-09-13T23:17:23.641475+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "event_hash": "sha256:0fcee57b2ad97cb82c31c3e1570accb5e4e1f7c7a229a0b099b177f7632e7f1c"
+              },
+              {
+                "event_id": "guard_event_42611305eeaa972f9fa40f46",
+                "event_type": "replay_validated",
+                "sequence": 5,
+                "timestamp": "2026-09-13T23:17:23.641475+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "event_hash": "sha256:e3006a2d270c64cae99603f81979b1aa024e9317ccfe8015f035936f9da49d8d"
+              },
+              {
+                "event_id": "guard_event_b7430437606d5be73a099453",
+                "event_type": "admissibility_evaluated",
+                "sequence": 6,
+                "timestamp": "2026-09-13T23:17:23.641475+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "event_hash": "sha256:23728acef91f30dc91d90a6f093683c2523293fb6554b0f6b45dad54952a308a"
+              },
+              {
+                "event_id": "guard_event_41be8d55b8905e184394df91",
+                "event_type": "enforcement_outcome_recorded",
+                "sequence": 7,
+                "timestamp": "2026-09-13T23:17:23.641475+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "event_hash": "sha256:1c4169605ec97fc3b07afd8e96a9131ec3dfa51cdafcfec6906f8d4726c4c881"
+              }
+            ],
+            "evaluation_trace": {
+              "schema_version": "guard_evaluation_trace.v1",
+              "authority_ref": "budget-quickstart@1.0.0",
+              "status": "admissible",
+              "rationale": "execution is admissible against compiled authority",
+              "steps": [
+                {
+                  "step": "compiled_authority_loaded",
+                  "status": "completed",
+                  "authority_ref": "budget-quickstart@1.0.0"
+                },
+                {
+                  "step": "execution_request_projected",
+                  "status": "completed",
+                  "target": "quickstart-account"
+                },
+                {
+                  "step": "admissibility_assessed",
+                  "status": "admissible",
+                  "rationale": "execution is admissible against compiled authority"
+                },
+                {
+                  "step": "runtime_posture_materialized",
+                  "status": "completed"
+                }
+              ],
+              "trace_id": "guard_trace_00e0c406f81050c900f287c8",
+              "trace_hash": "sha256:76ce0606657eb818c24d82786ea33bd53c60eb1f21dd359c0e5e2c96f425c51d"
+            },
+            "continuity_posture": {
+              "schema_version": "guard_continuity_posture.v1",
+              "authority_ref": "budget-quickstart@1.0.0",
+              "continuity_state": {},
+              "replay_posture": {},
+              "continuity_requirements": [],
+              "replay_obligations": [],
+              "requires_revalidation": false,
+              "requires_replay": false,
+              "signals": [],
+              "posture_id": "continuity_posture_528e974d906ee1c3e2edaf49",
+              "posture_hash": "sha256:f6b15c2d176e4a76a0e68d3c6657610a23699dd8bef6e72b34dc4ee2df5f04db"
+            },
+            "enforcement_outcome": {
+              "schema_version": "guard_enforcement_outcome.v1",
+              "authority_ref": "budget-quickstart@1.0.0",
+              "status": "admissible",
+              "execution_state": "allowed",
+              "runtime_lifecycle_state": "admissible",
+              "rationale": "execution is admissible against compiled authority",
+              "consequences": [
+                {
+                  "consequence": "allow_execution"
+                }
+              ],
+              "continuation_status": {
+                "schema_version": "guard_continuation_status.v1",
+                "status": "admissible",
+                "lifecycle_state": "admissible",
+                "admissible": true,
+                "invalidated": false,
+                "expired": false,
+                "revalidation_required": false,
+                "escalation_required": false,
+                "evidence_valid": true,
+                "replay_valid": true,
+                "dependency_valid": true,
+                "continuity_valid": true,
+                "dependency_failures": []
+              },
+              "continuation_requirements": [],
+              "invalidation_reasons": [],
+              "runtime_condition_checks": [
+                {
+                  "condition": "evidence_valid",
+                  "valid": true,
+                  "rationale": "runtime evidence validity checked"
+                },
+                {
+                  "condition": "replay_valid",
+                  "valid": true,
+                  "rationale": "replay posture validity checked"
+                },
+                {
+                  "condition": "dependency_valid",
+                  "valid": true,
+                  "rationale": "runtime dependency validity checked"
+                },
+                {
+                  "condition": "continuity_valid",
+                  "valid": true,
+                  "rationale": "lineage continuity validity checked"
+                },
+                {
+                  "condition": "not_expired",
+                  "valid": true,
+                  "rationale": "continuation did not expire before execution"
+                }
+              ],
+              "runtime_dependency_posture": {
+                "schema_version": "guard_runtime_dependency_posture.v1",
+                "dependencies": [],
+                "valid": true,
+                "expired": false,
+                "failures": []
+              },
+              "outcome_id": "enforcement_outcome_1f95e0dfdba920572fcddfb5",
+              "outcome_hash": "sha256:79f2456333f31fd5224717088475228fe1428cebac602eb5f4be14791de24c9b"
+            },
+            "runtime_evidence": {
+              "schema_version": "guard_runtime_evidence_model.v1",
+              "actor_identity": {
+                "id": "budget-agent",
+                "type": "agent",
+                "role": "allocator"
+              },
+              "approvals": [],
+              "replay_evidence": {},
+              "continuity_snapshot": {},
+              "timestamp_source": {
+                "source": "caller_supplied",
+                "timestamp": "2026-09-13T23:17:23.641475+00:00"
+              },
+              "execution_context": {
+                "surface": "agent_tool",
+                "agent": {
+                  "framework": "custom-python"
+                }
+              },
+              "runtime_dependencies": []
+            },
+            "execution_posture_surface": {
+              "schema_version": "execution_posture_surface.v1",
+              "posture": "admissible",
+              "rationale": "execution is admissible against compiled authority",
+              "runtime_blockers": [],
+              "continuity_state": {
+                "schema_version": "guard_continuity_posture.v1",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "continuity_state": {},
+                "replay_posture": {},
+                "continuity_requirements": [],
+                "replay_obligations": [],
+                "requires_revalidation": false,
+                "requires_replay": false,
+                "signals": [],
+                "posture_id": "continuity_posture_528e974d906ee1c3e2edaf49",
+                "posture_hash": "sha256:f6b15c2d176e4a76a0e68d3c6657610a23699dd8bef6e72b34dc4ee2df5f04db"
+              },
+              "replay_requirements": [],
+              "chronology_event_ids": [
+                "guard_event_82606e35a95fb0370f8426a6",
+                "guard_event_6549cbd79559cd915bf40f45",
+                "guard_event_a38c5deab56025cd3cbe114b",
+                "guard_event_58055724b76b86cf16fe7637",
+                "guard_event_42611305eeaa972f9fa40f46",
+                "guard_event_b7430437606d5be73a099453",
+                "guard_event_41be8d55b8905e184394df91"
+              ]
+            }
+          },
+          "guard_enforcement_outcome": {
+            "schema_version": "guard_enforcement_outcome.v1",
+            "authority_ref": "budget-quickstart@1.0.0",
+            "status": "admissible",
+            "execution_state": "allowed",
+            "runtime_lifecycle_state": "admissible",
+            "rationale": "execution is admissible against compiled authority",
+            "consequences": [
+              {
+                "consequence": "allow_execution"
+              }
+            ],
+            "continuation_status": {
+              "schema_version": "guard_continuation_status.v1",
+              "status": "admissible",
+              "lifecycle_state": "admissible",
+              "admissible": true,
+              "invalidated": false,
+              "expired": false,
+              "revalidation_required": false,
+              "escalation_required": false,
+              "evidence_valid": true,
+              "replay_valid": true,
+              "dependency_valid": true,
+              "continuity_valid": true,
+              "dependency_failures": []
+            },
+            "continuation_requirements": [],
+            "invalidation_reasons": [],
+            "runtime_condition_checks": [
+              {
+                "condition": "evidence_valid",
+                "valid": true,
+                "rationale": "runtime evidence validity checked"
+              },
+              {
+                "condition": "replay_valid",
+                "valid": true,
+                "rationale": "replay posture validity checked"
+              },
+              {
+                "condition": "dependency_valid",
+                "valid": true,
+                "rationale": "runtime dependency validity checked"
+              },
+              {
+                "condition": "continuity_valid",
+                "valid": true,
+                "rationale": "lineage continuity validity checked"
+              },
+              {
+                "condition": "not_expired",
+                "valid": true,
+                "rationale": "continuation did not expire before execution"
+              }
+            ],
+            "runtime_dependency_posture": {
+              "schema_version": "guard_runtime_dependency_posture.v1",
+              "dependencies": [],
+              "valid": true,
+              "expired": false,
+              "failures": []
+            },
+            "outcome_id": "enforcement_outcome_1f95e0dfdba920572fcddfb5",
+            "outcome_hash": "sha256:79f2456333f31fd5224717088475228fe1428cebac602eb5f4be14791de24c9b"
+          },
+          "receipt": {
+            "schema_version": "guard_enforcement_receipt.v1",
+            "run_id": "guard_run_c6ea81f0b9eaf9558e7f7078",
+            "recorded_at": "2026-09-13T23:17:23.641475+00:00",
+            "authority_ref": "budget-quickstart@1.0.0",
+            "contract_hash": "bdee18b0573a6a94086305dafdb5c3f7a72aecc2f29aca96e1cf14232002cc49",
+            "outcome_status": "admissible",
+            "outcome_id": "enforcement_outcome_1f95e0dfdba920572fcddfb5",
+            "outcome_hash": "sha256:79f2456333f31fd5224717088475228fe1428cebac602eb5f4be14791de24c9b",
+            "evaluation_trace_hash": "sha256:76ce0606657eb818c24d82786ea33bd53c60eb1f21dd359c0e5e2c96f425c51d",
+            "chronology_event_ids": [
+              "guard_event_82606e35a95fb0370f8426a6",
+              "guard_event_6549cbd79559cd915bf40f45",
+              "guard_event_a38c5deab56025cd3cbe114b",
+              "guard_event_58055724b76b86cf16fe7637",
+              "guard_event_42611305eeaa972f9fa40f46",
+              "guard_event_b7430437606d5be73a099453",
+              "guard_event_41be8d55b8905e184394df91"
+            ],
+            "chronology_hash": "sha256:46b3d572d42602c27126bfe2b0d8ac02efe3170f99b906f54938a39f756a2338",
+            "input_hashes": {
+              "compiled_authority_hash": "sha256:ba62d9b3692b3919f8df8f92506762571af72f3b7a4991ed15ea9aaeeb9eee53",
+              "execution_request_hash": "sha256:41f054834cab6c7968f4b3afd2c6ca97fdf5e287e8f335a379ce1e448a17b640",
+              "runtime_evidence_hash": "sha256:64f433af89acaaaa117f65fcf061eb6621920f8a81bda510ba6c78b911dc71ed",
+              "continuity_posture_hash": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+              "replay_posture_hash": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+              "actor_identity_hash": "sha256:b9b227335119717863bb38861b331e402d0dd309094fd51288fe095969f29e1b",
+              "approval_evidence_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "execution_context_hash": "sha256:323bd8cd00c03faefa52b65b96d1b4da2ca241b05c1034c3d8675cb4ea35b07a",
+              "timestamp_source_hash": "sha256:cb2077fe92fbc8fab59ffaa81fac09afad9d3b28983ba9c770d07fb43470566f",
+              "runtime_dependencies_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+            },
+            "deterministic_identity_hash": "sha256:c6ea81f0b9eaf9558e7f70789ae4b6ca3212ae38a2478c711bacd0dac741035d",
+            "replay_basis_hash": "sha256:81875b5f828f24b86029e8c8b469ad7a0cce4baa61a7ca38b238d58f83c48cf5",
+            "lineage_continuity_hash": "sha256:6ee921ce0301b23babe913c2fb0a2c8f6ec9bfbcd6988b5de5aabc723ea86f18",
+            "receipt_hash": "sha256:b665d61d14b42c6f9f8c8cb8b518291248ebc0541678a7134df0598ada4ff296"
+          },
+          "artifact_manifest": {
+            "schema_version": "guard_artifact_manifest.v1",
+            "run_id": "guard_run_c6ea81f0b9eaf9558e7f7078",
+            "persisted_artifacts": {
+              "inputs": "sha256:8f13aebbaece4c7a1c699406fa3bcd73fb27c81e8b8e8ffdc2c87f7341303659",
+              "evaluation": "sha256:d8ac057679ca5b3589b68aa62e38c990a093ab737e55daa499c5eb5d26ea0a2a",
+              "guard_enforcement_outcome": "sha256:0f5fdda20e56f14cd98ba2f218f89e9b68a46d3e806ebc0a84d0f2f24f92bc96",
+              "receipt": "sha256:b665d61d14b42c6f9f8c8cb8b518291248ebc0541678a7134df0598ada4ff296"
+            },
+            "hashed_inputs": {
+              "compiled_authority_hash": "sha256:ba62d9b3692b3919f8df8f92506762571af72f3b7a4991ed15ea9aaeeb9eee53",
+              "execution_request_hash": "sha256:41f054834cab6c7968f4b3afd2c6ca97fdf5e287e8f335a379ce1e448a17b640",
+              "runtime_evidence_hash": "sha256:64f433af89acaaaa117f65fcf061eb6621920f8a81bda510ba6c78b911dc71ed",
+              "continuity_posture_hash": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+              "replay_posture_hash": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+              "actor_identity_hash": "sha256:b9b227335119717863bb38861b331e402d0dd309094fd51288fe095969f29e1b",
+              "approval_evidence_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "execution_context_hash": "sha256:323bd8cd00c03faefa52b65b96d1b4da2ca241b05c1034c3d8675cb4ea35b07a",
+              "timestamp_source_hash": "sha256:cb2077fe92fbc8fab59ffaa81fac09afad9d3b28983ba9c770d07fb43470566f",
+              "runtime_dependencies_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+            },
+            "deterministic_identity_hash": "sha256:c6ea81f0b9eaf9558e7f70789ae4b6ca3212ae38a2478c711bacd0dac741035d",
+            "replay_basis_hash": "sha256:81875b5f828f24b86029e8c8b469ad7a0cce4baa61a7ca38b238d58f83c48cf5",
+            "lineage_continuity_hash": "sha256:6ee921ce0301b23babe913c2fb0a2c8f6ec9bfbcd6988b5de5aabc723ea86f18",
+            "replayable": true,
+            "replay_basis_fields": [
+              "actor_identity",
+              "compiled_authority",
+              "continuity_state",
+              "evaluation_time",
+              "evidence_posture",
+              "execution_request",
+              "replay_posture",
+              "start_sequence"
+            ],
+            "lineage_continuity_fields": [
+              "authority_ref",
+              "contract_hash",
+              "execution_request_hash",
+              "runtime_evidence_hash",
+              "continuity_posture_hash",
+              "replay_posture_hash",
+              "outcome_hash",
+              "evaluation_trace_hash",
+              "chronology_hash",
+              "runtime_dependencies_hash"
+            ],
+            "manifest_hash": "sha256:5931438a566cc0d6b4f9311a405ded6de311327bb6e81ddca32fb873bc5b1463"
+          },
+          "record_hash": "sha256:22211eee297f0141129bbb78d05735684625c05e2ec196578ccf207887616757"
+        },
+        "receipt": {
+          "schema_version": "guard_enforcement_receipt.v1",
+          "run_id": "guard_run_c6ea81f0b9eaf9558e7f7078",
+          "recorded_at": "2026-09-13T23:17:23.641475+00:00",
+          "authority_ref": "budget-quickstart@1.0.0",
+          "contract_hash": "bdee18b0573a6a94086305dafdb5c3f7a72aecc2f29aca96e1cf14232002cc49",
+          "outcome_status": "admissible",
+          "outcome_id": "enforcement_outcome_1f95e0dfdba920572fcddfb5",
+          "outcome_hash": "sha256:79f2456333f31fd5224717088475228fe1428cebac602eb5f4be14791de24c9b",
+          "evaluation_trace_hash": "sha256:76ce0606657eb818c24d82786ea33bd53c60eb1f21dd359c0e5e2c96f425c51d",
+          "chronology_event_ids": [
+            "guard_event_82606e35a95fb0370f8426a6",
+            "guard_event_6549cbd79559cd915bf40f45",
+            "guard_event_a38c5deab56025cd3cbe114b",
+            "guard_event_58055724b76b86cf16fe7637",
+            "guard_event_42611305eeaa972f9fa40f46",
+            "guard_event_b7430437606d5be73a099453",
+            "guard_event_41be8d55b8905e184394df91"
+          ],
+          "chronology_hash": "sha256:46b3d572d42602c27126bfe2b0d8ac02efe3170f99b906f54938a39f756a2338",
+          "input_hashes": {
+            "compiled_authority_hash": "sha256:ba62d9b3692b3919f8df8f92506762571af72f3b7a4991ed15ea9aaeeb9eee53",
+            "execution_request_hash": "sha256:41f054834cab6c7968f4b3afd2c6ca97fdf5e287e8f335a379ce1e448a17b640",
+            "runtime_evidence_hash": "sha256:64f433af89acaaaa117f65fcf061eb6621920f8a81bda510ba6c78b911dc71ed",
+            "continuity_posture_hash": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+            "replay_posture_hash": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+            "actor_identity_hash": "sha256:b9b227335119717863bb38861b331e402d0dd309094fd51288fe095969f29e1b",
+            "approval_evidence_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "execution_context_hash": "sha256:323bd8cd00c03faefa52b65b96d1b4da2ca241b05c1034c3d8675cb4ea35b07a",
+            "timestamp_source_hash": "sha256:cb2077fe92fbc8fab59ffaa81fac09afad9d3b28983ba9c770d07fb43470566f",
+            "runtime_dependencies_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "deterministic_identity_hash": "sha256:c6ea81f0b9eaf9558e7f70789ae4b6ca3212ae38a2478c711bacd0dac741035d",
+          "replay_basis_hash": "sha256:81875b5f828f24b86029e8c8b469ad7a0cce4baa61a7ca38b238d58f83c48cf5",
+          "lineage_continuity_hash": "sha256:6ee921ce0301b23babe913c2fb0a2c8f6ec9bfbcd6988b5de5aabc723ea86f18",
+          "receipt_hash": "sha256:b665d61d14b42c6f9f8c8cb8b518291248ebc0541678a7134df0598ada4ff296"
+        },
+        "artifact_manifest": {
+          "schema_version": "guard_artifact_manifest.v1",
+          "run_id": "guard_run_c6ea81f0b9eaf9558e7f7078",
+          "persisted_artifacts": {
+            "inputs": "sha256:8f13aebbaece4c7a1c699406fa3bcd73fb27c81e8b8e8ffdc2c87f7341303659",
+            "evaluation": "sha256:d8ac057679ca5b3589b68aa62e38c990a093ab737e55daa499c5eb5d26ea0a2a",
+            "guard_enforcement_outcome": "sha256:0f5fdda20e56f14cd98ba2f218f89e9b68a46d3e806ebc0a84d0f2f24f92bc96",
+            "receipt": "sha256:b665d61d14b42c6f9f8c8cb8b518291248ebc0541678a7134df0598ada4ff296"
+          },
+          "hashed_inputs": {
+            "compiled_authority_hash": "sha256:ba62d9b3692b3919f8df8f92506762571af72f3b7a4991ed15ea9aaeeb9eee53",
+            "execution_request_hash": "sha256:41f054834cab6c7968f4b3afd2c6ca97fdf5e287e8f335a379ce1e448a17b640",
+            "runtime_evidence_hash": "sha256:64f433af89acaaaa117f65fcf061eb6621920f8a81bda510ba6c78b911dc71ed",
+            "continuity_posture_hash": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+            "replay_posture_hash": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+            "actor_identity_hash": "sha256:b9b227335119717863bb38861b331e402d0dd309094fd51288fe095969f29e1b",
+            "approval_evidence_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "execution_context_hash": "sha256:323bd8cd00c03faefa52b65b96d1b4da2ca241b05c1034c3d8675cb4ea35b07a",
+            "timestamp_source_hash": "sha256:cb2077fe92fbc8fab59ffaa81fac09afad9d3b28983ba9c770d07fb43470566f",
+            "runtime_dependencies_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "deterministic_identity_hash": "sha256:c6ea81f0b9eaf9558e7f70789ae4b6ca3212ae38a2478c711bacd0dac741035d",
+          "replay_basis_hash": "sha256:81875b5f828f24b86029e8c8b469ad7a0cce4baa61a7ca38b238d58f83c48cf5",
+          "lineage_continuity_hash": "sha256:6ee921ce0301b23babe913c2fb0a2c8f6ec9bfbcd6988b5de5aabc723ea86f18",
+          "replayable": true,
+          "replay_basis_fields": [
+            "actor_identity",
+            "compiled_authority",
+            "continuity_state",
+            "evaluation_time",
+            "evidence_posture",
+            "execution_request",
+            "replay_posture",
+            "start_sequence"
+          ],
+          "lineage_continuity_fields": [
+            "authority_ref",
+            "contract_hash",
+            "execution_request_hash",
+            "runtime_evidence_hash",
+            "continuity_posture_hash",
+            "replay_posture_hash",
+            "outcome_hash",
+            "evaluation_trace_hash",
+            "chronology_hash",
+            "runtime_dependencies_hash"
+          ],
+          "manifest_hash": "sha256:5931438a566cc0d6b4f9311a405ded6de311327bb6e81ddca32fb873bc5b1463"
+        },
+        "replay_result": {
+          "schema_version": "guard_replay_result.v1",
+          "replay_scope": "logical_decision_only",
+          "filesystem_state_recreated": false,
+          "run_id": "guard_run_c6ea81f0b9eaf9558e7f7078",
+          "matches": true,
+          "outcome_matches": true,
+          "mismatch_classes": [],
+          "replay_failure_reasons": [],
+          "original_outcome_hash": "sha256:79f2456333f31fd5224717088475228fe1428cebac602eb5f4be14791de24c9b",
+          "replayed_outcome_hash": "sha256:79f2456333f31fd5224717088475228fe1428cebac602eb5f4be14791de24c9b",
+          "replayed_evaluation": {
+            "status": "admissible",
+            "execution_state": "allowed",
+            "runtime_lifecycle_state": "admissible",
+            "admissible": true,
+            "blocked": false,
+            "escalated": false,
+            "rationale": "execution is admissible against compiled authority",
+            "violated_constraints": [],
+            "required_evidence": [],
+            "replay_obligations": [],
+            "continuity_requirements": [],
+            "continuation_status": {
+              "schema_version": "guard_continuation_status.v1",
+              "status": "admissible",
+              "lifecycle_state": "admissible",
+              "admissible": true,
+              "invalidated": false,
+              "expired": false,
+              "revalidation_required": false,
+              "escalation_required": false,
+              "evidence_valid": true,
+              "replay_valid": true,
+              "dependency_valid": true,
+              "continuity_valid": true,
+              "dependency_failures": []
+            },
+            "continuation_requirements": [],
+            "invalidation_reasons": [],
+            "runtime_condition_checks": [
+              {
+                "condition": "evidence_valid",
+                "valid": true,
+                "rationale": "runtime evidence validity checked"
+              },
+              {
+                "condition": "replay_valid",
+                "valid": true,
+                "rationale": "replay posture validity checked"
+              },
+              {
+                "condition": "dependency_valid",
+                "valid": true,
+                "rationale": "runtime dependency validity checked"
+              },
+              {
+                "condition": "continuity_valid",
+                "valid": true,
+                "rationale": "lineage continuity validity checked"
+              },
+              {
+                "condition": "not_expired",
+                "valid": true,
+                "rationale": "continuation did not expire before execution"
+              }
+            ],
+            "runtime_dependency_posture": {
+              "schema_version": "guard_runtime_dependency_posture.v1",
+              "dependencies": [],
+              "valid": true,
+              "expired": false,
+              "failures": []
+            },
+            "enforcement_consequences": [
+              {
+                "consequence": "allow_execution"
+              }
+            ],
+            "admissibility_projection": {
+              "schema_version": "execution_admissibility_projection.v1",
+              "authority_ref": "budget-quickstart@1.0.0",
+              "contract_hash": "bdee18b0573a6a94086305dafdb5c3f7a72aecc2f29aca96e1cf14232002cc49",
+              "execution_request": {
+                "action": "allocate_budget",
+                "arguments": {
+                  "amount": 500
+                },
+                "artifacts": [],
+                "request_id": "tool_59b7f2a84a3c4efa9f26e6207026d86a",
+                "schema_version": "normalized_execution_request.v1",
+                "target": "quickstart-account"
+              },
+              "actor_identity": {
+                "id": "budget-agent",
+                "role": "allocator",
+                "type": "agent"
+              },
+              "status": "admissible",
+              "rationale": "execution is admissible against compiled authority",
+              "violated_constraints": [],
+              "required_evidence": [],
+              "replay_obligations": [],
+              "continuity_requirements": [],
+              "continuation_status": {
+                "schema_version": "guard_continuation_status.v1",
+                "status": "admissible",
+                "lifecycle_state": "admissible",
+                "admissible": true,
+                "invalidated": false,
+                "expired": false,
+                "revalidation_required": false,
+                "escalation_required": false,
+                "evidence_valid": true,
+                "replay_valid": true,
+                "dependency_valid": true,
+                "continuity_valid": true,
+                "dependency_failures": []
+              },
+              "enforcement_consequences": [
+                {
+                  "consequence": "allow_execution"
+                }
+              ],
+              "projection_id": "admissibility_projection_1732d912a37cf198b58b34f3",
+              "projection_hash": "sha256:86e0d76ba67b450c7a6fd5d22d8d3c23d61d66d788fd32f95c1039d06b739244"
+            },
+            "runtime_posture": {
+              "schema_version": "execution_runtime_posture.v1",
+              "posture": "admissible",
+              "rationale": "execution is admissible against compiled authority",
+              "authority_ref": "budget-quickstart@1.0.0",
+              "contract_hash": "bdee18b0573a6a94086305dafdb5c3f7a72aecc2f29aca96e1cf14232002cc49",
+              "execution_request": {
+                "action": "allocate_budget",
+                "arguments": {
+                  "amount": 500
+                },
+                "artifacts": [],
+                "request_id": "tool_59b7f2a84a3c4efa9f26e6207026d86a",
+                "schema_version": "normalized_execution_request.v1",
+                "target": "quickstart-account"
+              },
+              "actor_identity": {
+                "id": "budget-agent",
+                "role": "allocator",
+                "type": "agent"
+              },
+              "runtime_blockers": [],
+              "continuity_state": {
+                "schema_version": "guard_continuity_posture.v1",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "continuity_state": {},
+                "replay_posture": {},
+                "continuity_requirements": [],
+                "replay_obligations": [],
+                "requires_revalidation": false,
+                "requires_replay": false,
+                "signals": [],
+                "posture_id": "continuity_posture_528e974d906ee1c3e2edaf49",
+                "posture_hash": "sha256:f6b15c2d176e4a76a0e68d3c6657610a23699dd8bef6e72b34dc4ee2df5f04db"
+              },
+              "continuation_status": {
+                "schema_version": "guard_continuation_status.v1",
+                "status": "admissible",
+                "lifecycle_state": "admissible",
+                "admissible": true,
+                "invalidated": false,
+                "expired": false,
+                "revalidation_required": false,
+                "escalation_required": false,
+                "evidence_valid": true,
+                "replay_valid": true,
+                "dependency_valid": true,
+                "continuity_valid": true,
+                "dependency_failures": []
+              },
+              "replay_requirements": [],
+              "enforcement_outcome": {
+                "schema_version": "guard_enforcement_outcome.v1",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "status": "admissible",
+                "execution_state": "allowed",
+                "runtime_lifecycle_state": "admissible",
+                "rationale": "execution is admissible against compiled authority",
+                "consequences": [
+                  {
+                    "consequence": "allow_execution"
+                  }
+                ],
+                "continuation_status": {
+                  "schema_version": "guard_continuation_status.v1",
+                  "status": "admissible",
+                  "lifecycle_state": "admissible",
+                  "admissible": true,
+                  "invalidated": false,
+                  "expired": false,
+                  "revalidation_required": false,
+                  "escalation_required": false,
+                  "evidence_valid": true,
+                  "replay_valid": true,
+                  "dependency_valid": true,
+                  "continuity_valid": true,
+                  "dependency_failures": []
+                },
+                "continuation_requirements": [],
+                "invalidation_reasons": [],
+                "runtime_condition_checks": [
+                  {
+                    "condition": "evidence_valid",
+                    "valid": true,
+                    "rationale": "runtime evidence validity checked"
+                  },
+                  {
+                    "condition": "replay_valid",
+                    "valid": true,
+                    "rationale": "replay posture validity checked"
+                  },
+                  {
+                    "condition": "dependency_valid",
+                    "valid": true,
+                    "rationale": "runtime dependency validity checked"
+                  },
+                  {
+                    "condition": "continuity_valid",
+                    "valid": true,
+                    "rationale": "lineage continuity validity checked"
+                  },
+                  {
+                    "condition": "not_expired",
+                    "valid": true,
+                    "rationale": "continuation did not expire before execution"
+                  }
+                ],
+                "runtime_dependency_posture": {
+                  "schema_version": "guard_runtime_dependency_posture.v1",
+                  "dependencies": [],
+                  "valid": true,
+                  "expired": false,
+                  "failures": []
+                },
+                "outcome_id": "enforcement_outcome_1f95e0dfdba920572fcddfb5",
+                "outcome_hash": "sha256:79f2456333f31fd5224717088475228fe1428cebac602eb5f4be14791de24c9b"
+              },
+              "chronology_event_ids": [
+                "guard_event_82606e35a95fb0370f8426a6",
+                "guard_event_6549cbd79559cd915bf40f45",
+                "guard_event_a38c5deab56025cd3cbe114b",
+                "guard_event_58055724b76b86cf16fe7637",
+                "guard_event_42611305eeaa972f9fa40f46",
+                "guard_event_b7430437606d5be73a099453",
+                "guard_event_41be8d55b8905e184394df91"
+              ],
+              "telemetry_event_types": [
+                "authority_context_resolved",
+                "evaluation_pipeline_started",
+                "runtime_evidence_loaded",
+                "continuity_checked",
+                "replay_validated",
+                "admissibility_evaluated",
+                "enforcement_outcome_recorded"
+              ],
+              "posture_id": "runtime_posture_01bc292871a7cb5a114cf651",
+              "posture_hash": "sha256:15dd327ce360800b7379e5d2eae7218578720c545c5ae71355dac29fda9852a5"
+            },
+            "telemetry_events": [
+              {
+                "schema_version": "guard_runtime_event.v1",
+                "sequence": 1,
+                "event_type": "authority_context_resolved",
+                "timestamp": "2026-09-13T23:17:23.641475+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "details": {
+                  "contract_boundary": "compiled_authority"
+                },
+                "event_id": "guard_event_82606e35a95fb0370f8426a6",
+                "event_hash": "sha256:0a10677bcf82c572647fd8c8dc5e314a5892f93e75879318f71e75c45658e71c"
+              },
+              {
+                "schema_version": "guard_runtime_event.v1",
+                "sequence": 2,
+                "event_type": "evaluation_pipeline_started",
+                "timestamp": "2026-09-13T23:17:23.641475+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "details": {
+                  "status": "started"
+                },
+                "event_id": "guard_event_6549cbd79559cd915bf40f45",
+                "event_hash": "sha256:ca1444431627afef96d20302da313404f48c4e92d8724fbf0f912c278a3a8b4f"
+              },
+              {
+                "schema_version": "guard_runtime_event.v1",
+                "sequence": 3,
+                "event_type": "runtime_evidence_loaded",
+                "timestamp": "2026-09-13T23:17:23.641475+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "details": {
+                  "evidence_boundary": "guard_runtime_evidence_model.v1",
+                  "required_evidence": []
+                },
+                "event_id": "guard_event_a38c5deab56025cd3cbe114b",
+                "event_hash": "sha256:05771a6d3dfe658082a816eeee7c819d0cd8f5959f1ffd98c1b6fd20cafbd97e"
+              },
+              {
+                "schema_version": "guard_runtime_event.v1",
+                "sequence": 4,
+                "event_type": "continuity_checked",
+                "timestamp": "2026-09-13T23:17:23.641475+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "details": {
+                  "continuity_requirements": []
+                },
+                "event_id": "guard_event_58055724b76b86cf16fe7637",
+                "event_hash": "sha256:0fcee57b2ad97cb82c31c3e1570accb5e4e1f7c7a229a0b099b177f7632e7f1c"
+              },
+              {
+                "schema_version": "guard_runtime_event.v1",
+                "sequence": 5,
+                "event_type": "replay_validated",
+                "timestamp": "2026-09-13T23:17:23.641475+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "details": {
+                  "replay_obligations": []
+                },
+                "event_id": "guard_event_42611305eeaa972f9fa40f46",
+                "event_hash": "sha256:e3006a2d270c64cae99603f81979b1aa024e9317ccfe8015f035936f9da49d8d"
+              },
+              {
+                "schema_version": "guard_runtime_event.v1",
+                "sequence": 6,
+                "event_type": "admissibility_evaluated",
+                "timestamp": "2026-09-13T23:17:23.641475+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "details": {
+                  "status": "admissible",
+                  "runtime_lifecycle_state": "admissible",
+                  "violated_constraints": [],
+                  "required_evidence": []
+                },
+                "event_id": "guard_event_b7430437606d5be73a099453",
+                "event_hash": "sha256:23728acef91f30dc91d90a6f093683c2523293fb6554b0f6b45dad54952a308a"
+              },
+              {
+                "schema_version": "guard_runtime_event.v1",
+                "sequence": 7,
+                "event_type": "enforcement_outcome_recorded",
+                "timestamp": "2026-09-13T23:17:23.641475+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "details": {
+                  "status": "admissible",
+                  "runtime_lifecycle_state": "admissible",
+                  "consequences": [
+                    {
+                      "consequence": "allow_execution"
+                    }
+                  ]
+                },
+                "event_id": "guard_event_41be8d55b8905e184394df91",
+                "event_hash": "sha256:1c4169605ec97fc3b07afd8e96a9131ec3dfa51cdafcfec6906f8d4726c4c881"
+              }
+            ],
+            "telemetry_stream": [
+              {
+                "event_id": "guard_event_82606e35a95fb0370f8426a6",
+                "event_type": "authority_context_resolved",
+                "sequence": 1,
+                "timestamp": "2026-09-13T23:17:23.641475+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "event_hash": "sha256:0a10677bcf82c572647fd8c8dc5e314a5892f93e75879318f71e75c45658e71c"
+              },
+              {
+                "event_id": "guard_event_6549cbd79559cd915bf40f45",
+                "event_type": "evaluation_pipeline_started",
+                "sequence": 2,
+                "timestamp": "2026-09-13T23:17:23.641475+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "event_hash": "sha256:ca1444431627afef96d20302da313404f48c4e92d8724fbf0f912c278a3a8b4f"
+              },
+              {
+                "event_id": "guard_event_a38c5deab56025cd3cbe114b",
+                "event_type": "runtime_evidence_loaded",
+                "sequence": 3,
+                "timestamp": "2026-09-13T23:17:23.641475+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "event_hash": "sha256:05771a6d3dfe658082a816eeee7c819d0cd8f5959f1ffd98c1b6fd20cafbd97e"
+              },
+              {
+                "event_id": "guard_event_58055724b76b86cf16fe7637",
+                "event_type": "continuity_checked",
+                "sequence": 4,
+                "timestamp": "2026-09-13T23:17:23.641475+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "event_hash": "sha256:0fcee57b2ad97cb82c31c3e1570accb5e4e1f7c7a229a0b099b177f7632e7f1c"
+              },
+              {
+                "event_id": "guard_event_42611305eeaa972f9fa40f46",
+                "event_type": "replay_validated",
+                "sequence": 5,
+                "timestamp": "2026-09-13T23:17:23.641475+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "event_hash": "sha256:e3006a2d270c64cae99603f81979b1aa024e9317ccfe8015f035936f9da49d8d"
+              },
+              {
+                "event_id": "guard_event_b7430437606d5be73a099453",
+                "event_type": "admissibility_evaluated",
+                "sequence": 6,
+                "timestamp": "2026-09-13T23:17:23.641475+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "event_hash": "sha256:23728acef91f30dc91d90a6f093683c2523293fb6554b0f6b45dad54952a308a"
+              },
+              {
+                "event_id": "guard_event_41be8d55b8905e184394df91",
+                "event_type": "enforcement_outcome_recorded",
+                "sequence": 7,
+                "timestamp": "2026-09-13T23:17:23.641475+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "event_hash": "sha256:1c4169605ec97fc3b07afd8e96a9131ec3dfa51cdafcfec6906f8d4726c4c881"
+              }
+            ],
+            "evaluation_trace": {
+              "schema_version": "guard_evaluation_trace.v1",
+              "authority_ref": "budget-quickstart@1.0.0",
+              "status": "admissible",
+              "rationale": "execution is admissible against compiled authority",
+              "steps": [
+                {
+                  "step": "compiled_authority_loaded",
+                  "status": "completed",
+                  "authority_ref": "budget-quickstart@1.0.0"
+                },
+                {
+                  "step": "execution_request_projected",
+                  "status": "completed",
+                  "target": "quickstart-account"
+                },
+                {
+                  "step": "admissibility_assessed",
+                  "status": "admissible",
+                  "rationale": "execution is admissible against compiled authority"
+                },
+                {
+                  "step": "runtime_posture_materialized",
+                  "status": "completed"
+                }
+              ],
+              "trace_id": "guard_trace_00e0c406f81050c900f287c8",
+              "trace_hash": "sha256:76ce0606657eb818c24d82786ea33bd53c60eb1f21dd359c0e5e2c96f425c51d"
+            },
+            "continuity_posture": {
+              "schema_version": "guard_continuity_posture.v1",
+              "authority_ref": "budget-quickstart@1.0.0",
+              "continuity_state": {},
+              "replay_posture": {},
+              "continuity_requirements": [],
+              "replay_obligations": [],
+              "requires_revalidation": false,
+              "requires_replay": false,
+              "signals": [],
+              "posture_id": "continuity_posture_528e974d906ee1c3e2edaf49",
+              "posture_hash": "sha256:f6b15c2d176e4a76a0e68d3c6657610a23699dd8bef6e72b34dc4ee2df5f04db"
+            },
+            "enforcement_outcome": {
+              "schema_version": "guard_enforcement_outcome.v1",
+              "authority_ref": "budget-quickstart@1.0.0",
+              "status": "admissible",
+              "execution_state": "allowed",
+              "runtime_lifecycle_state": "admissible",
+              "rationale": "execution is admissible against compiled authority",
+              "consequences": [
+                {
+                  "consequence": "allow_execution"
+                }
+              ],
+              "continuation_status": {
+                "schema_version": "guard_continuation_status.v1",
+                "status": "admissible",
+                "lifecycle_state": "admissible",
+                "admissible": true,
+                "invalidated": false,
+                "expired": false,
+                "revalidation_required": false,
+                "escalation_required": false,
+                "evidence_valid": true,
+                "replay_valid": true,
+                "dependency_valid": true,
+                "continuity_valid": true,
+                "dependency_failures": []
+              },
+              "continuation_requirements": [],
+              "invalidation_reasons": [],
+              "runtime_condition_checks": [
+                {
+                  "condition": "evidence_valid",
+                  "valid": true,
+                  "rationale": "runtime evidence validity checked"
+                },
+                {
+                  "condition": "replay_valid",
+                  "valid": true,
+                  "rationale": "replay posture validity checked"
+                },
+                {
+                  "condition": "dependency_valid",
+                  "valid": true,
+                  "rationale": "runtime dependency validity checked"
+                },
+                {
+                  "condition": "continuity_valid",
+                  "valid": true,
+                  "rationale": "lineage continuity validity checked"
+                },
+                {
+                  "condition": "not_expired",
+                  "valid": true,
+                  "rationale": "continuation did not expire before execution"
+                }
+              ],
+              "runtime_dependency_posture": {
+                "schema_version": "guard_runtime_dependency_posture.v1",
+                "dependencies": [],
+                "valid": true,
+                "expired": false,
+                "failures": []
+              },
+              "outcome_id": "enforcement_outcome_1f95e0dfdba920572fcddfb5",
+              "outcome_hash": "sha256:79f2456333f31fd5224717088475228fe1428cebac602eb5f4be14791de24c9b"
+            },
+            "runtime_evidence": {
+              "schema_version": "guard_runtime_evidence_model.v1",
+              "actor_identity": {
+                "id": "budget-agent",
+                "role": "allocator",
+                "type": "agent"
+              },
+              "approvals": [],
+              "replay_evidence": {},
+              "continuity_snapshot": {},
+              "timestamp_source": {
+                "source": "caller_supplied",
+                "timestamp": "2026-09-13T23:17:23.641475+00:00"
+              },
+              "execution_context": {
+                "agent": {
+                  "framework": "custom-python"
+                },
+                "surface": "agent_tool"
+              },
+              "runtime_dependencies": []
+            },
+            "execution_posture_surface": {
+              "schema_version": "execution_posture_surface.v1",
+              "posture": "admissible",
+              "rationale": "execution is admissible against compiled authority",
+              "runtime_blockers": [],
+              "continuity_state": {
+                "schema_version": "guard_continuity_posture.v1",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "continuity_state": {},
+                "replay_posture": {},
+                "continuity_requirements": [],
+                "replay_obligations": [],
+                "requires_revalidation": false,
+                "requires_replay": false,
+                "signals": [],
+                "posture_id": "continuity_posture_528e974d906ee1c3e2edaf49",
+                "posture_hash": "sha256:f6b15c2d176e4a76a0e68d3c6657610a23699dd8bef6e72b34dc4ee2df5f04db"
+              },
+              "replay_requirements": [],
+              "chronology_event_ids": [
+                "guard_event_82606e35a95fb0370f8426a6",
+                "guard_event_6549cbd79559cd915bf40f45",
+                "guard_event_a38c5deab56025cd3cbe114b",
+                "guard_event_58055724b76b86cf16fe7637",
+                "guard_event_42611305eeaa972f9fa40f46",
+                "guard_event_b7430437606d5be73a099453",
+                "guard_event_41be8d55b8905e184394df91"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/v1/runtime/attestations",
+      "organization_id": "acme",
+      "api_key": "wf_runtime_secret",
+      "payload": {
+        "schema_version": "runtime_execution_attestation.v1",
+        "event_id": "guard_run_c6ea81f0b9eaf9558e7f7078",
+        "runtime_id": "budget-agent-runtime",
+        "authority_ref": "budget-quickstart@1.0.0",
+        "compiled_contract_hash": "bdee18b0573a6a94086305dafdb5c3f7a72aecc2f29aca96e1cf14232002cc49",
+        "runtime_decision": "ALLOWED",
+        "execution_status": "succeeded",
+        "execution_result_summary": "allocate_budget callback completed exactly once.",
+        "mutation_executed": true
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/v1/preserve",
+      "organization_id": "acme",
+      "api_key": "wf_runtime_secret",
+      "payload": {
+        "schema_version": "guard_cloud_preservation_package.v1",
+        "run_id": "guard_run_e993983fd3b8c3e822df637f",
+        "saved_evaluation": {
+          "schema_version": "guard_saved_evaluation.v1",
+          "run_id": "guard_run_e993983fd3b8c3e822df637f",
+          "recorded_at": "2026-09-13T23:17:23.648508+00:00",
+          "inputs": {
+            "compiled_authority": {
+              "schema_version": "compiled_authority_contract.v1",
+              "contract_id": "budget-quickstart",
+              "contract_version": "1.0.0",
+              "authority_requirements": {
+                "required_roles": [
+                  "allocator"
+                ]
+              },
+              "approval_requirements": {
+                "thresholds": [
+                  {
+                    "field": "amount",
+                    "operator": ">=",
+                    "value": 10000,
+                    "requires_role": "finance-approver"
+                  }
+                ]
+              },
+              "artifact_requirements": {},
+              "stage_requirements": {},
+              "invariants": {},
+              "contract_hash": "bdee18b0573a6a94086305dafdb5c3f7a72aecc2f29aca96e1cf14232002cc49"
+            },
+            "execution_request": {
+              "schema_version": "normalized_execution_request.v1",
+              "request_id": "tool_91782bb3502e46c282e76a89098c372d",
+              "action": "allocate_budget",
+              "target": "quickstart-account",
+              "arguments": {
+                "amount": 12500
+              },
+              "artifacts": []
+            },
+            "runtime_evidence": {
+              "schema_version": "guard_runtime_evidence_model.v1",
+              "actor_identity": {
+                "id": "budget-agent",
+                "type": "agent",
+                "role": "allocator"
+              },
+              "approvals": [],
+              "replay_evidence": {},
+              "continuity_snapshot": {},
+              "timestamp_source": {
+                "source": "caller_supplied",
+                "timestamp": "2026-09-13T23:17:23.648508+00:00"
+              },
+              "execution_context": {
+                "surface": "agent_tool",
+                "agent": {
+                  "framework": "custom-python"
+                }
+              },
+              "runtime_dependencies": []
+            }
+          },
+          "evaluation": {
+            "status": "blocked",
+            "execution_state": "blocked",
+            "runtime_lifecycle_state": "blocked",
+            "admissible": false,
+            "blocked": true,
+            "escalated": false,
+            "rationale": "required approval evidence is missing",
+            "violated_constraints": [],
+            "required_evidence": [
+              {
+                "evidence": "approval",
+                "role": "finance-approver",
+                "condition": {
+                  "field": "amount",
+                  "operator": ">=",
+                  "value": 10000
+                },
+                "rationale": "required approval evidence is missing"
+              }
+            ],
+            "replay_obligations": [],
+            "continuity_requirements": [],
+            "continuation_status": {
+              "schema_version": "guard_continuation_status.v1",
+              "status": "admissible",
+              "lifecycle_state": "admissible",
+              "admissible": true,
+              "invalidated": false,
+              "expired": false,
+              "revalidation_required": false,
+              "escalation_required": false,
+              "evidence_valid": true,
+              "replay_valid": true,
+              "dependency_valid": true,
+              "continuity_valid": true,
+              "dependency_failures": []
+            },
+            "continuation_requirements": [],
+            "invalidation_reasons": [],
+            "runtime_condition_checks": [
+              {
+                "condition": "evidence_valid",
+                "valid": true,
+                "rationale": "runtime evidence validity checked"
+              },
+              {
+                "condition": "replay_valid",
+                "valid": true,
+                "rationale": "replay posture validity checked"
+              },
+              {
+                "condition": "dependency_valid",
+                "valid": true,
+                "rationale": "runtime dependency validity checked"
+              },
+              {
+                "condition": "continuity_valid",
+                "valid": true,
+                "rationale": "lineage continuity validity checked"
+              },
+              {
+                "condition": "not_expired",
+                "valid": true,
+                "rationale": "continuation did not expire before execution"
+              }
+            ],
+            "runtime_dependency_posture": {
+              "schema_version": "guard_runtime_dependency_posture.v1",
+              "dependencies": [],
+              "valid": true,
+              "expired": false,
+              "failures": []
+            },
+            "enforcement_consequences": [
+              {
+                "consequence": "block_execution",
+                "violated_constraints": [],
+                "required_evidence": [
+                  {
+                    "evidence": "approval",
+                    "role": "finance-approver",
+                    "condition": {
+                      "field": "amount",
+                      "operator": ">=",
+                      "value": 10000
+                    },
+                    "rationale": "required approval evidence is missing"
+                  }
+                ]
+              }
+            ],
+            "admissibility_projection": {
+              "schema_version": "execution_admissibility_projection.v1",
+              "authority_ref": "budget-quickstart@1.0.0",
+              "contract_hash": "bdee18b0573a6a94086305dafdb5c3f7a72aecc2f29aca96e1cf14232002cc49",
+              "execution_request": {
+                "schema_version": "normalized_execution_request.v1",
+                "request_id": "tool_91782bb3502e46c282e76a89098c372d",
+                "action": "allocate_budget",
+                "target": "quickstart-account",
+                "arguments": {
+                  "amount": 12500
+                },
+                "artifacts": []
+              },
+              "actor_identity": {
+                "id": "budget-agent",
+                "type": "agent",
+                "role": "allocator"
+              },
+              "status": "blocked",
+              "rationale": "required approval evidence is missing",
+              "violated_constraints": [],
+              "required_evidence": [
+                {
+                  "evidence": "approval",
+                  "role": "finance-approver",
+                  "condition": {
+                    "field": "amount",
+                    "operator": ">=",
+                    "value": 10000
+                  },
+                  "rationale": "required approval evidence is missing"
+                }
+              ],
+              "replay_obligations": [],
+              "continuity_requirements": [],
+              "continuation_status": {
+                "schema_version": "guard_continuation_status.v1",
+                "status": "admissible",
+                "lifecycle_state": "admissible",
+                "admissible": true,
+                "invalidated": false,
+                "expired": false,
+                "revalidation_required": false,
+                "escalation_required": false,
+                "evidence_valid": true,
+                "replay_valid": true,
+                "dependency_valid": true,
+                "continuity_valid": true,
+                "dependency_failures": []
+              },
+              "enforcement_consequences": [
+                {
+                  "consequence": "block_execution",
+                  "violated_constraints": [],
+                  "required_evidence": [
+                    {
+                      "evidence": "approval",
+                      "role": "finance-approver",
+                      "condition": {
+                        "field": "amount",
+                        "operator": ">=",
+                        "value": 10000
+                      },
+                      "rationale": "required approval evidence is missing"
+                    }
+                  ]
+                }
+              ],
+              "projection_id": "admissibility_projection_571d2d5373881989074ca601",
+              "projection_hash": "sha256:65562773c924386ab6f31c89b42ab47011c149ecc2c8d198a0ee5e172f9ab58b"
+            },
+            "runtime_posture": {
+              "schema_version": "execution_runtime_posture.v1",
+              "posture": "blocked",
+              "rationale": "required approval evidence is missing",
+              "authority_ref": "budget-quickstart@1.0.0",
+              "contract_hash": "bdee18b0573a6a94086305dafdb5c3f7a72aecc2f29aca96e1cf14232002cc49",
+              "execution_request": {
+                "schema_version": "normalized_execution_request.v1",
+                "request_id": "tool_91782bb3502e46c282e76a89098c372d",
+                "action": "allocate_budget",
+                "target": "quickstart-account",
+                "arguments": {
+                  "amount": 12500
+                },
+                "artifacts": []
+              },
+              "actor_identity": {
+                "id": "budget-agent",
+                "type": "agent",
+                "role": "allocator"
+              },
+              "runtime_blockers": [
+                {
+                  "evidence": "approval",
+                  "role": "finance-approver",
+                  "condition": {
+                    "field": "amount",
+                    "operator": ">=",
+                    "value": 10000
+                  },
+                  "rationale": "required approval evidence is missing"
+                }
+              ],
+              "continuity_state": {
+                "schema_version": "guard_continuity_posture.v1",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "continuity_state": {},
+                "replay_posture": {},
+                "continuity_requirements": [],
+                "replay_obligations": [],
+                "requires_revalidation": false,
+                "requires_replay": false,
+                "signals": [],
+                "posture_id": "continuity_posture_528e974d906ee1c3e2edaf49",
+                "posture_hash": "sha256:f6b15c2d176e4a76a0e68d3c6657610a23699dd8bef6e72b34dc4ee2df5f04db"
+              },
+              "continuation_status": {
+                "schema_version": "guard_continuation_status.v1",
+                "status": "admissible",
+                "lifecycle_state": "admissible",
+                "admissible": true,
+                "invalidated": false,
+                "expired": false,
+                "revalidation_required": false,
+                "escalation_required": false,
+                "evidence_valid": true,
+                "replay_valid": true,
+                "dependency_valid": true,
+                "continuity_valid": true,
+                "dependency_failures": []
+              },
+              "replay_requirements": [],
+              "enforcement_outcome": {
+                "schema_version": "guard_enforcement_outcome.v1",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "status": "blocked",
+                "execution_state": "blocked",
+                "runtime_lifecycle_state": "blocked",
+                "rationale": "required approval evidence is missing",
+                "consequences": [
+                  {
+                    "consequence": "block_execution",
+                    "violated_constraints": [],
+                    "required_evidence": [
+                      {
+                        "evidence": "approval",
+                        "role": "finance-approver",
+                        "condition": {
+                          "field": "amount",
+                          "operator": ">=",
+                          "value": 10000
+                        },
+                        "rationale": "required approval evidence is missing"
+                      }
+                    ]
+                  }
+                ],
+                "continuation_status": {
+                  "schema_version": "guard_continuation_status.v1",
+                  "status": "admissible",
+                  "lifecycle_state": "admissible",
+                  "admissible": true,
+                  "invalidated": false,
+                  "expired": false,
+                  "revalidation_required": false,
+                  "escalation_required": false,
+                  "evidence_valid": true,
+                  "replay_valid": true,
+                  "dependency_valid": true,
+                  "continuity_valid": true,
+                  "dependency_failures": []
+                },
+                "continuation_requirements": [],
+                "invalidation_reasons": [],
+                "runtime_condition_checks": [
+                  {
+                    "condition": "evidence_valid",
+                    "valid": true,
+                    "rationale": "runtime evidence validity checked"
+                  },
+                  {
+                    "condition": "replay_valid",
+                    "valid": true,
+                    "rationale": "replay posture validity checked"
+                  },
+                  {
+                    "condition": "dependency_valid",
+                    "valid": true,
+                    "rationale": "runtime dependency validity checked"
+                  },
+                  {
+                    "condition": "continuity_valid",
+                    "valid": true,
+                    "rationale": "lineage continuity validity checked"
+                  },
+                  {
+                    "condition": "not_expired",
+                    "valid": true,
+                    "rationale": "continuation did not expire before execution"
+                  }
+                ],
+                "runtime_dependency_posture": {
+                  "schema_version": "guard_runtime_dependency_posture.v1",
+                  "dependencies": [],
+                  "valid": true,
+                  "expired": false,
+                  "failures": []
+                },
+                "outcome_id": "enforcement_outcome_2b8be3429f9dd6de6a5d810f",
+                "outcome_hash": "sha256:f9232b42b31022caddcf6e7f65fec80bb6966549a7e568d7fed94f5bd6f24b1a"
+              },
+              "chronology_event_ids": [
+                "guard_event_35c0e8e497e691001999e07e",
+                "guard_event_f5317a3d5c2b0047149bd262",
+                "guard_event_25891a502d3b1271f8cbb96a",
+                "guard_event_c68ba16e885b4a4d952311ef",
+                "guard_event_8a552eccc06762d2830ea04d",
+                "guard_event_810ec23b370485c8aa3bb77f",
+                "guard_event_b47d941b21b23f041365c2b6"
+              ],
+              "telemetry_event_types": [
+                "authority_context_resolved",
+                "evaluation_pipeline_started",
+                "runtime_evidence_loaded",
+                "continuity_checked",
+                "replay_validated",
+                "admissibility_evaluated",
+                "enforcement_outcome_recorded"
+              ],
+              "posture_id": "runtime_posture_d28c461e4a183fc35a32435c",
+              "posture_hash": "sha256:52da593df1b072bcb5fd9d79db4f683a3fd29b499455313ee628bc34adfed37c"
+            },
+            "telemetry_events": [
+              {
+                "schema_version": "guard_runtime_event.v1",
+                "sequence": 1,
+                "event_type": "authority_context_resolved",
+                "timestamp": "2026-09-13T23:17:23.648508+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "details": {
+                  "contract_boundary": "compiled_authority"
+                },
+                "event_id": "guard_event_35c0e8e497e691001999e07e",
+                "event_hash": "sha256:fda95efab0dea94daaeb617dff1b1e9f1ab25d5e6e0e915588f1fa9906897b39"
+              },
+              {
+                "schema_version": "guard_runtime_event.v1",
+                "sequence": 2,
+                "event_type": "evaluation_pipeline_started",
+                "timestamp": "2026-09-13T23:17:23.648508+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "details": {
+                  "status": "started"
+                },
+                "event_id": "guard_event_f5317a3d5c2b0047149bd262",
+                "event_hash": "sha256:557972bc7511455c8ab66eeeb6178b23e137f377c2ca2004fd6bb7a9955d3eb8"
+              },
+              {
+                "schema_version": "guard_runtime_event.v1",
+                "sequence": 3,
+                "event_type": "runtime_evidence_loaded",
+                "timestamp": "2026-09-13T23:17:23.648508+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "details": {
+                  "evidence_boundary": "guard_runtime_evidence_model.v1",
+                  "required_evidence": [
+                    {
+                      "evidence": "approval",
+                      "role": "finance-approver",
+                      "condition": {
+                        "field": "amount",
+                        "operator": ">=",
+                        "value": 10000
+                      },
+                      "rationale": "required approval evidence is missing"
+                    }
+                  ]
+                },
+                "event_id": "guard_event_25891a502d3b1271f8cbb96a",
+                "event_hash": "sha256:9d4393afdba58cbeb3ea6365b8ebbb4a70523ef9c262b785c416a9dd5594da37"
+              },
+              {
+                "schema_version": "guard_runtime_event.v1",
+                "sequence": 4,
+                "event_type": "continuity_checked",
+                "timestamp": "2026-09-13T23:17:23.648508+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "details": {
+                  "continuity_requirements": []
+                },
+                "event_id": "guard_event_c68ba16e885b4a4d952311ef",
+                "event_hash": "sha256:b84a641acca0dfe6a291ce742e41dd46961ebe9fd5e1caaa02736dab3e253b57"
+              },
+              {
+                "schema_version": "guard_runtime_event.v1",
+                "sequence": 5,
+                "event_type": "replay_validated",
+                "timestamp": "2026-09-13T23:17:23.648508+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "details": {
+                  "replay_obligations": []
+                },
+                "event_id": "guard_event_8a552eccc06762d2830ea04d",
+                "event_hash": "sha256:27ba86dde2c5d8657a2bcbe52433712428dfda8e638e2abf7df10d5b3e80a667"
+              },
+              {
+                "schema_version": "guard_runtime_event.v1",
+                "sequence": 6,
+                "event_type": "admissibility_evaluated",
+                "timestamp": "2026-09-13T23:17:23.648508+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "details": {
+                  "status": "blocked",
+                  "runtime_lifecycle_state": "blocked",
+                  "violated_constraints": [],
+                  "required_evidence": [
+                    {
+                      "evidence": "approval",
+                      "role": "finance-approver",
+                      "condition": {
+                        "field": "amount",
+                        "operator": ">=",
+                        "value": 10000
+                      },
+                      "rationale": "required approval evidence is missing"
+                    }
+                  ]
+                },
+                "event_id": "guard_event_810ec23b370485c8aa3bb77f",
+                "event_hash": "sha256:20dc122dbf65439312d60166982fcef37250cb1e971fac799aef2e3bdf9ba53d"
+              },
+              {
+                "schema_version": "guard_runtime_event.v1",
+                "sequence": 7,
+                "event_type": "enforcement_outcome_recorded",
+                "timestamp": "2026-09-13T23:17:23.648508+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "details": {
+                  "status": "blocked",
+                  "runtime_lifecycle_state": "blocked",
+                  "consequences": [
+                    {
+                      "consequence": "block_execution",
+                      "violated_constraints": [],
+                      "required_evidence": [
+                        {
+                          "evidence": "approval",
+                          "role": "finance-approver",
+                          "condition": {
+                            "field": "amount",
+                            "operator": ">=",
+                            "value": 10000
+                          },
+                          "rationale": "required approval evidence is missing"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "event_id": "guard_event_b47d941b21b23f041365c2b6",
+                "event_hash": "sha256:0fc02857dfa2871c78ff1a08af347b2cfe6091dcf28b471b52c0bed2ad47c383"
+              }
+            ],
+            "telemetry_stream": [
+              {
+                "event_id": "guard_event_35c0e8e497e691001999e07e",
+                "event_type": "authority_context_resolved",
+                "sequence": 1,
+                "timestamp": "2026-09-13T23:17:23.648508+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "event_hash": "sha256:fda95efab0dea94daaeb617dff1b1e9f1ab25d5e6e0e915588f1fa9906897b39"
+              },
+              {
+                "event_id": "guard_event_f5317a3d5c2b0047149bd262",
+                "event_type": "evaluation_pipeline_started",
+                "sequence": 2,
+                "timestamp": "2026-09-13T23:17:23.648508+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "event_hash": "sha256:557972bc7511455c8ab66eeeb6178b23e137f377c2ca2004fd6bb7a9955d3eb8"
+              },
+              {
+                "event_id": "guard_event_25891a502d3b1271f8cbb96a",
+                "event_type": "runtime_evidence_loaded",
+                "sequence": 3,
+                "timestamp": "2026-09-13T23:17:23.648508+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "event_hash": "sha256:9d4393afdba58cbeb3ea6365b8ebbb4a70523ef9c262b785c416a9dd5594da37"
+              },
+              {
+                "event_id": "guard_event_c68ba16e885b4a4d952311ef",
+                "event_type": "continuity_checked",
+                "sequence": 4,
+                "timestamp": "2026-09-13T23:17:23.648508+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "event_hash": "sha256:b84a641acca0dfe6a291ce742e41dd46961ebe9fd5e1caaa02736dab3e253b57"
+              },
+              {
+                "event_id": "guard_event_8a552eccc06762d2830ea04d",
+                "event_type": "replay_validated",
+                "sequence": 5,
+                "timestamp": "2026-09-13T23:17:23.648508+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "event_hash": "sha256:27ba86dde2c5d8657a2bcbe52433712428dfda8e638e2abf7df10d5b3e80a667"
+              },
+              {
+                "event_id": "guard_event_810ec23b370485c8aa3bb77f",
+                "event_type": "admissibility_evaluated",
+                "sequence": 6,
+                "timestamp": "2026-09-13T23:17:23.648508+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "event_hash": "sha256:20dc122dbf65439312d60166982fcef37250cb1e971fac799aef2e3bdf9ba53d"
+              },
+              {
+                "event_id": "guard_event_b47d941b21b23f041365c2b6",
+                "event_type": "enforcement_outcome_recorded",
+                "sequence": 7,
+                "timestamp": "2026-09-13T23:17:23.648508+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "event_hash": "sha256:0fc02857dfa2871c78ff1a08af347b2cfe6091dcf28b471b52c0bed2ad47c383"
+              }
+            ],
+            "evaluation_trace": {
+              "schema_version": "guard_evaluation_trace.v1",
+              "authority_ref": "budget-quickstart@1.0.0",
+              "status": "blocked",
+              "rationale": "required approval evidence is missing",
+              "steps": [
+                {
+                  "step": "compiled_authority_loaded",
+                  "status": "completed",
+                  "authority_ref": "budget-quickstart@1.0.0"
+                },
+                {
+                  "step": "execution_request_projected",
+                  "status": "completed",
+                  "target": "quickstart-account"
+                },
+                {
+                  "step": "admissibility_assessed",
+                  "status": "blocked",
+                  "rationale": "required approval evidence is missing"
+                },
+                {
+                  "step": "runtime_posture_materialized",
+                  "status": "completed"
+                }
+              ],
+              "trace_id": "guard_trace_9676d75a5769de5c3dbc0df6",
+              "trace_hash": "sha256:ce91f55be9cea1635884fbbc46c9e1b17c992fb46eee638c5870923dfdfe25ca"
+            },
+            "continuity_posture": {
+              "schema_version": "guard_continuity_posture.v1",
+              "authority_ref": "budget-quickstart@1.0.0",
+              "continuity_state": {},
+              "replay_posture": {},
+              "continuity_requirements": [],
+              "replay_obligations": [],
+              "requires_revalidation": false,
+              "requires_replay": false,
+              "signals": [],
+              "posture_id": "continuity_posture_528e974d906ee1c3e2edaf49",
+              "posture_hash": "sha256:f6b15c2d176e4a76a0e68d3c6657610a23699dd8bef6e72b34dc4ee2df5f04db"
+            },
+            "enforcement_outcome": {
+              "schema_version": "guard_enforcement_outcome.v1",
+              "authority_ref": "budget-quickstart@1.0.0",
+              "status": "blocked",
+              "execution_state": "blocked",
+              "runtime_lifecycle_state": "blocked",
+              "rationale": "required approval evidence is missing",
+              "consequences": [
+                {
+                  "consequence": "block_execution",
+                  "violated_constraints": [],
+                  "required_evidence": [
+                    {
+                      "evidence": "approval",
+                      "role": "finance-approver",
+                      "condition": {
+                        "field": "amount",
+                        "operator": ">=",
+                        "value": 10000
+                      },
+                      "rationale": "required approval evidence is missing"
+                    }
+                  ]
+                }
+              ],
+              "continuation_status": {
+                "schema_version": "guard_continuation_status.v1",
+                "status": "admissible",
+                "lifecycle_state": "admissible",
+                "admissible": true,
+                "invalidated": false,
+                "expired": false,
+                "revalidation_required": false,
+                "escalation_required": false,
+                "evidence_valid": true,
+                "replay_valid": true,
+                "dependency_valid": true,
+                "continuity_valid": true,
+                "dependency_failures": []
+              },
+              "continuation_requirements": [],
+              "invalidation_reasons": [],
+              "runtime_condition_checks": [
+                {
+                  "condition": "evidence_valid",
+                  "valid": true,
+                  "rationale": "runtime evidence validity checked"
+                },
+                {
+                  "condition": "replay_valid",
+                  "valid": true,
+                  "rationale": "replay posture validity checked"
+                },
+                {
+                  "condition": "dependency_valid",
+                  "valid": true,
+                  "rationale": "runtime dependency validity checked"
+                },
+                {
+                  "condition": "continuity_valid",
+                  "valid": true,
+                  "rationale": "lineage continuity validity checked"
+                },
+                {
+                  "condition": "not_expired",
+                  "valid": true,
+                  "rationale": "continuation did not expire before execution"
+                }
+              ],
+              "runtime_dependency_posture": {
+                "schema_version": "guard_runtime_dependency_posture.v1",
+                "dependencies": [],
+                "valid": true,
+                "expired": false,
+                "failures": []
+              },
+              "outcome_id": "enforcement_outcome_2b8be3429f9dd6de6a5d810f",
+              "outcome_hash": "sha256:f9232b42b31022caddcf6e7f65fec80bb6966549a7e568d7fed94f5bd6f24b1a"
+            },
+            "runtime_evidence": {
+              "schema_version": "guard_runtime_evidence_model.v1",
+              "actor_identity": {
+                "id": "budget-agent",
+                "type": "agent",
+                "role": "allocator"
+              },
+              "approvals": [],
+              "replay_evidence": {},
+              "continuity_snapshot": {},
+              "timestamp_source": {
+                "source": "caller_supplied",
+                "timestamp": "2026-09-13T23:17:23.648508+00:00"
+              },
+              "execution_context": {
+                "surface": "agent_tool",
+                "agent": {
+                  "framework": "custom-python"
+                }
+              },
+              "runtime_dependencies": []
+            },
+            "execution_posture_surface": {
+              "schema_version": "execution_posture_surface.v1",
+              "posture": "blocked",
+              "rationale": "required approval evidence is missing",
+              "runtime_blockers": [
+                {
+                  "evidence": "approval",
+                  "role": "finance-approver",
+                  "condition": {
+                    "field": "amount",
+                    "operator": ">=",
+                    "value": 10000
+                  },
+                  "rationale": "required approval evidence is missing"
+                }
+              ],
+              "continuity_state": {
+                "schema_version": "guard_continuity_posture.v1",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "continuity_state": {},
+                "replay_posture": {},
+                "continuity_requirements": [],
+                "replay_obligations": [],
+                "requires_revalidation": false,
+                "requires_replay": false,
+                "signals": [],
+                "posture_id": "continuity_posture_528e974d906ee1c3e2edaf49",
+                "posture_hash": "sha256:f6b15c2d176e4a76a0e68d3c6657610a23699dd8bef6e72b34dc4ee2df5f04db"
+              },
+              "replay_requirements": [],
+              "chronology_event_ids": [
+                "guard_event_35c0e8e497e691001999e07e",
+                "guard_event_f5317a3d5c2b0047149bd262",
+                "guard_event_25891a502d3b1271f8cbb96a",
+                "guard_event_c68ba16e885b4a4d952311ef",
+                "guard_event_8a552eccc06762d2830ea04d",
+                "guard_event_810ec23b370485c8aa3bb77f",
+                "guard_event_b47d941b21b23f041365c2b6"
+              ]
+            }
+          },
+          "guard_enforcement_outcome": {
+            "schema_version": "guard_enforcement_outcome.v1",
+            "authority_ref": "budget-quickstart@1.0.0",
+            "status": "blocked",
+            "execution_state": "blocked",
+            "runtime_lifecycle_state": "blocked",
+            "rationale": "required approval evidence is missing",
+            "consequences": [
+              {
+                "consequence": "block_execution",
+                "violated_constraints": [],
+                "required_evidence": [
+                  {
+                    "evidence": "approval",
+                    "role": "finance-approver",
+                    "condition": {
+                      "field": "amount",
+                      "operator": ">=",
+                      "value": 10000
+                    },
+                    "rationale": "required approval evidence is missing"
+                  }
+                ]
+              }
+            ],
+            "continuation_status": {
+              "schema_version": "guard_continuation_status.v1",
+              "status": "admissible",
+              "lifecycle_state": "admissible",
+              "admissible": true,
+              "invalidated": false,
+              "expired": false,
+              "revalidation_required": false,
+              "escalation_required": false,
+              "evidence_valid": true,
+              "replay_valid": true,
+              "dependency_valid": true,
+              "continuity_valid": true,
+              "dependency_failures": []
+            },
+            "continuation_requirements": [],
+            "invalidation_reasons": [],
+            "runtime_condition_checks": [
+              {
+                "condition": "evidence_valid",
+                "valid": true,
+                "rationale": "runtime evidence validity checked"
+              },
+              {
+                "condition": "replay_valid",
+                "valid": true,
+                "rationale": "replay posture validity checked"
+              },
+              {
+                "condition": "dependency_valid",
+                "valid": true,
+                "rationale": "runtime dependency validity checked"
+              },
+              {
+                "condition": "continuity_valid",
+                "valid": true,
+                "rationale": "lineage continuity validity checked"
+              },
+              {
+                "condition": "not_expired",
+                "valid": true,
+                "rationale": "continuation did not expire before execution"
+              }
+            ],
+            "runtime_dependency_posture": {
+              "schema_version": "guard_runtime_dependency_posture.v1",
+              "dependencies": [],
+              "valid": true,
+              "expired": false,
+              "failures": []
+            },
+            "outcome_id": "enforcement_outcome_2b8be3429f9dd6de6a5d810f",
+            "outcome_hash": "sha256:f9232b42b31022caddcf6e7f65fec80bb6966549a7e568d7fed94f5bd6f24b1a"
+          },
+          "receipt": {
+            "schema_version": "guard_enforcement_receipt.v1",
+            "run_id": "guard_run_e993983fd3b8c3e822df637f",
+            "recorded_at": "2026-09-13T23:17:23.648508+00:00",
+            "authority_ref": "budget-quickstart@1.0.0",
+            "contract_hash": "bdee18b0573a6a94086305dafdb5c3f7a72aecc2f29aca96e1cf14232002cc49",
+            "outcome_status": "blocked",
+            "outcome_id": "enforcement_outcome_2b8be3429f9dd6de6a5d810f",
+            "outcome_hash": "sha256:f9232b42b31022caddcf6e7f65fec80bb6966549a7e568d7fed94f5bd6f24b1a",
+            "evaluation_trace_hash": "sha256:ce91f55be9cea1635884fbbc46c9e1b17c992fb46eee638c5870923dfdfe25ca",
+            "chronology_event_ids": [
+              "guard_event_35c0e8e497e691001999e07e",
+              "guard_event_f5317a3d5c2b0047149bd262",
+              "guard_event_25891a502d3b1271f8cbb96a",
+              "guard_event_c68ba16e885b4a4d952311ef",
+              "guard_event_8a552eccc06762d2830ea04d",
+              "guard_event_810ec23b370485c8aa3bb77f",
+              "guard_event_b47d941b21b23f041365c2b6"
+            ],
+            "chronology_hash": "sha256:7e632b6586b47f0e88c067679735c8a2929fe1a477bd019882ae292e922edf17",
+            "input_hashes": {
+              "compiled_authority_hash": "sha256:ba62d9b3692b3919f8df8f92506762571af72f3b7a4991ed15ea9aaeeb9eee53",
+              "execution_request_hash": "sha256:62a0532fb11729a63cfb135a2f995a2276674f08aa1b29df97fd1d11c2f6829f",
+              "runtime_evidence_hash": "sha256:f2330d28873d040ce65f22f3488d5d2690c834151aad15de0471c57218f81550",
+              "continuity_posture_hash": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+              "replay_posture_hash": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+              "actor_identity_hash": "sha256:b9b227335119717863bb38861b331e402d0dd309094fd51288fe095969f29e1b",
+              "approval_evidence_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "execution_context_hash": "sha256:323bd8cd00c03faefa52b65b96d1b4da2ca241b05c1034c3d8675cb4ea35b07a",
+              "timestamp_source_hash": "sha256:c9850344ba0dcb5b989a2374e2168cb5a00208532061814c01436b69833af6f9",
+              "runtime_dependencies_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+            },
+            "deterministic_identity_hash": "sha256:e993983fd3b8c3e822df637f80b8e085626cbf6ee4e5c85e771c688a089a2c1d",
+            "replay_basis_hash": "sha256:33fb12d80851487c25d378a0bbd3a59e856e7654eb716698b878f407f0614463",
+            "lineage_continuity_hash": "sha256:741dee57b5221d75f02451c863a55a916a10174e47eb1f9e79cc6b575a48bf93",
+            "receipt_hash": "sha256:6befdb2a0baf8c02823b9bc250d867a58288daa6c4e6e10b11c7ffb786f4a2e8"
+          },
+          "artifact_manifest": {
+            "schema_version": "guard_artifact_manifest.v1",
+            "run_id": "guard_run_e993983fd3b8c3e822df637f",
+            "persisted_artifacts": {
+              "inputs": "sha256:614fe93b6752fa7895189d9aa6c8a94737c1c7643e4cb7b8f0d09429dc5b7e08",
+              "evaluation": "sha256:0aafb462f7d531b5aa7e14b2ed1e6db0758e55ac90c724fe825cbed36c6c0577",
+              "guard_enforcement_outcome": "sha256:86f9a5aa8a522cf53684228cf075eb72ada5e413d715886f8cc326be5e275e99",
+              "receipt": "sha256:6befdb2a0baf8c02823b9bc250d867a58288daa6c4e6e10b11c7ffb786f4a2e8"
+            },
+            "hashed_inputs": {
+              "compiled_authority_hash": "sha256:ba62d9b3692b3919f8df8f92506762571af72f3b7a4991ed15ea9aaeeb9eee53",
+              "execution_request_hash": "sha256:62a0532fb11729a63cfb135a2f995a2276674f08aa1b29df97fd1d11c2f6829f",
+              "runtime_evidence_hash": "sha256:f2330d28873d040ce65f22f3488d5d2690c834151aad15de0471c57218f81550",
+              "continuity_posture_hash": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+              "replay_posture_hash": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+              "actor_identity_hash": "sha256:b9b227335119717863bb38861b331e402d0dd309094fd51288fe095969f29e1b",
+              "approval_evidence_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "execution_context_hash": "sha256:323bd8cd00c03faefa52b65b96d1b4da2ca241b05c1034c3d8675cb4ea35b07a",
+              "timestamp_source_hash": "sha256:c9850344ba0dcb5b989a2374e2168cb5a00208532061814c01436b69833af6f9",
+              "runtime_dependencies_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+            },
+            "deterministic_identity_hash": "sha256:e993983fd3b8c3e822df637f80b8e085626cbf6ee4e5c85e771c688a089a2c1d",
+            "replay_basis_hash": "sha256:33fb12d80851487c25d378a0bbd3a59e856e7654eb716698b878f407f0614463",
+            "lineage_continuity_hash": "sha256:741dee57b5221d75f02451c863a55a916a10174e47eb1f9e79cc6b575a48bf93",
+            "replayable": true,
+            "replay_basis_fields": [
+              "actor_identity",
+              "compiled_authority",
+              "continuity_state",
+              "evaluation_time",
+              "evidence_posture",
+              "execution_request",
+              "replay_posture",
+              "start_sequence"
+            ],
+            "lineage_continuity_fields": [
+              "authority_ref",
+              "contract_hash",
+              "execution_request_hash",
+              "runtime_evidence_hash",
+              "continuity_posture_hash",
+              "replay_posture_hash",
+              "outcome_hash",
+              "evaluation_trace_hash",
+              "chronology_hash",
+              "runtime_dependencies_hash"
+            ],
+            "manifest_hash": "sha256:45cbc6c184015e14d1a848ec7d3fad001541e486979fec4c603c436ee2fb1155"
+          },
+          "record_hash": "sha256:d3a5946e764eb90b8d331fe9d2962c80501fec99aadf06994fe67524d59e2161"
+        },
+        "receipt": {
+          "schema_version": "guard_enforcement_receipt.v1",
+          "run_id": "guard_run_e993983fd3b8c3e822df637f",
+          "recorded_at": "2026-09-13T23:17:23.648508+00:00",
+          "authority_ref": "budget-quickstart@1.0.0",
+          "contract_hash": "bdee18b0573a6a94086305dafdb5c3f7a72aecc2f29aca96e1cf14232002cc49",
+          "outcome_status": "blocked",
+          "outcome_id": "enforcement_outcome_2b8be3429f9dd6de6a5d810f",
+          "outcome_hash": "sha256:f9232b42b31022caddcf6e7f65fec80bb6966549a7e568d7fed94f5bd6f24b1a",
+          "evaluation_trace_hash": "sha256:ce91f55be9cea1635884fbbc46c9e1b17c992fb46eee638c5870923dfdfe25ca",
+          "chronology_event_ids": [
+            "guard_event_35c0e8e497e691001999e07e",
+            "guard_event_f5317a3d5c2b0047149bd262",
+            "guard_event_25891a502d3b1271f8cbb96a",
+            "guard_event_c68ba16e885b4a4d952311ef",
+            "guard_event_8a552eccc06762d2830ea04d",
+            "guard_event_810ec23b370485c8aa3bb77f",
+            "guard_event_b47d941b21b23f041365c2b6"
+          ],
+          "chronology_hash": "sha256:7e632b6586b47f0e88c067679735c8a2929fe1a477bd019882ae292e922edf17",
+          "input_hashes": {
+            "compiled_authority_hash": "sha256:ba62d9b3692b3919f8df8f92506762571af72f3b7a4991ed15ea9aaeeb9eee53",
+            "execution_request_hash": "sha256:62a0532fb11729a63cfb135a2f995a2276674f08aa1b29df97fd1d11c2f6829f",
+            "runtime_evidence_hash": "sha256:f2330d28873d040ce65f22f3488d5d2690c834151aad15de0471c57218f81550",
+            "continuity_posture_hash": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+            "replay_posture_hash": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+            "actor_identity_hash": "sha256:b9b227335119717863bb38861b331e402d0dd309094fd51288fe095969f29e1b",
+            "approval_evidence_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "execution_context_hash": "sha256:323bd8cd00c03faefa52b65b96d1b4da2ca241b05c1034c3d8675cb4ea35b07a",
+            "timestamp_source_hash": "sha256:c9850344ba0dcb5b989a2374e2168cb5a00208532061814c01436b69833af6f9",
+            "runtime_dependencies_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "deterministic_identity_hash": "sha256:e993983fd3b8c3e822df637f80b8e085626cbf6ee4e5c85e771c688a089a2c1d",
+          "replay_basis_hash": "sha256:33fb12d80851487c25d378a0bbd3a59e856e7654eb716698b878f407f0614463",
+          "lineage_continuity_hash": "sha256:741dee57b5221d75f02451c863a55a916a10174e47eb1f9e79cc6b575a48bf93",
+          "receipt_hash": "sha256:6befdb2a0baf8c02823b9bc250d867a58288daa6c4e6e10b11c7ffb786f4a2e8"
+        },
+        "artifact_manifest": {
+          "schema_version": "guard_artifact_manifest.v1",
+          "run_id": "guard_run_e993983fd3b8c3e822df637f",
+          "persisted_artifacts": {
+            "inputs": "sha256:614fe93b6752fa7895189d9aa6c8a94737c1c7643e4cb7b8f0d09429dc5b7e08",
+            "evaluation": "sha256:0aafb462f7d531b5aa7e14b2ed1e6db0758e55ac90c724fe825cbed36c6c0577",
+            "guard_enforcement_outcome": "sha256:86f9a5aa8a522cf53684228cf075eb72ada5e413d715886f8cc326be5e275e99",
+            "receipt": "sha256:6befdb2a0baf8c02823b9bc250d867a58288daa6c4e6e10b11c7ffb786f4a2e8"
+          },
+          "hashed_inputs": {
+            "compiled_authority_hash": "sha256:ba62d9b3692b3919f8df8f92506762571af72f3b7a4991ed15ea9aaeeb9eee53",
+            "execution_request_hash": "sha256:62a0532fb11729a63cfb135a2f995a2276674f08aa1b29df97fd1d11c2f6829f",
+            "runtime_evidence_hash": "sha256:f2330d28873d040ce65f22f3488d5d2690c834151aad15de0471c57218f81550",
+            "continuity_posture_hash": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+            "replay_posture_hash": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+            "actor_identity_hash": "sha256:b9b227335119717863bb38861b331e402d0dd309094fd51288fe095969f29e1b",
+            "approval_evidence_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "execution_context_hash": "sha256:323bd8cd00c03faefa52b65b96d1b4da2ca241b05c1034c3d8675cb4ea35b07a",
+            "timestamp_source_hash": "sha256:c9850344ba0dcb5b989a2374e2168cb5a00208532061814c01436b69833af6f9",
+            "runtime_dependencies_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+          },
+          "deterministic_identity_hash": "sha256:e993983fd3b8c3e822df637f80b8e085626cbf6ee4e5c85e771c688a089a2c1d",
+          "replay_basis_hash": "sha256:33fb12d80851487c25d378a0bbd3a59e856e7654eb716698b878f407f0614463",
+          "lineage_continuity_hash": "sha256:741dee57b5221d75f02451c863a55a916a10174e47eb1f9e79cc6b575a48bf93",
+          "replayable": true,
+          "replay_basis_fields": [
+            "actor_identity",
+            "compiled_authority",
+            "continuity_state",
+            "evaluation_time",
+            "evidence_posture",
+            "execution_request",
+            "replay_posture",
+            "start_sequence"
+          ],
+          "lineage_continuity_fields": [
+            "authority_ref",
+            "contract_hash",
+            "execution_request_hash",
+            "runtime_evidence_hash",
+            "continuity_posture_hash",
+            "replay_posture_hash",
+            "outcome_hash",
+            "evaluation_trace_hash",
+            "chronology_hash",
+            "runtime_dependencies_hash"
+          ],
+          "manifest_hash": "sha256:45cbc6c184015e14d1a848ec7d3fad001541e486979fec4c603c436ee2fb1155"
+        },
+        "replay_result": {
+          "schema_version": "guard_replay_result.v1",
+          "replay_scope": "logical_decision_only",
+          "filesystem_state_recreated": false,
+          "run_id": "guard_run_e993983fd3b8c3e822df637f",
+          "matches": true,
+          "outcome_matches": true,
+          "mismatch_classes": [],
+          "replay_failure_reasons": [],
+          "original_outcome_hash": "sha256:f9232b42b31022caddcf6e7f65fec80bb6966549a7e568d7fed94f5bd6f24b1a",
+          "replayed_outcome_hash": "sha256:f9232b42b31022caddcf6e7f65fec80bb6966549a7e568d7fed94f5bd6f24b1a",
+          "replayed_evaluation": {
+            "status": "blocked",
+            "execution_state": "blocked",
+            "runtime_lifecycle_state": "blocked",
+            "admissible": false,
+            "blocked": true,
+            "escalated": false,
+            "rationale": "required approval evidence is missing",
+            "violated_constraints": [],
+            "required_evidence": [
+              {
+                "evidence": "approval",
+                "role": "finance-approver",
+                "condition": {
+                  "field": "amount",
+                  "operator": ">=",
+                  "value": 10000
+                },
+                "rationale": "required approval evidence is missing"
+              }
+            ],
+            "replay_obligations": [],
+            "continuity_requirements": [],
+            "continuation_status": {
+              "schema_version": "guard_continuation_status.v1",
+              "status": "admissible",
+              "lifecycle_state": "admissible",
+              "admissible": true,
+              "invalidated": false,
+              "expired": false,
+              "revalidation_required": false,
+              "escalation_required": false,
+              "evidence_valid": true,
+              "replay_valid": true,
+              "dependency_valid": true,
+              "continuity_valid": true,
+              "dependency_failures": []
+            },
+            "continuation_requirements": [],
+            "invalidation_reasons": [],
+            "runtime_condition_checks": [
+              {
+                "condition": "evidence_valid",
+                "valid": true,
+                "rationale": "runtime evidence validity checked"
+              },
+              {
+                "condition": "replay_valid",
+                "valid": true,
+                "rationale": "replay posture validity checked"
+              },
+              {
+                "condition": "dependency_valid",
+                "valid": true,
+                "rationale": "runtime dependency validity checked"
+              },
+              {
+                "condition": "continuity_valid",
+                "valid": true,
+                "rationale": "lineage continuity validity checked"
+              },
+              {
+                "condition": "not_expired",
+                "valid": true,
+                "rationale": "continuation did not expire before execution"
+              }
+            ],
+            "runtime_dependency_posture": {
+              "schema_version": "guard_runtime_dependency_posture.v1",
+              "dependencies": [],
+              "valid": true,
+              "expired": false,
+              "failures": []
+            },
+            "enforcement_consequences": [
+              {
+                "consequence": "block_execution",
+                "violated_constraints": [],
+                "required_evidence": [
+                  {
+                    "evidence": "approval",
+                    "role": "finance-approver",
+                    "condition": {
+                      "field": "amount",
+                      "operator": ">=",
+                      "value": 10000
+                    },
+                    "rationale": "required approval evidence is missing"
+                  }
+                ]
+              }
+            ],
+            "admissibility_projection": {
+              "schema_version": "execution_admissibility_projection.v1",
+              "authority_ref": "budget-quickstart@1.0.0",
+              "contract_hash": "bdee18b0573a6a94086305dafdb5c3f7a72aecc2f29aca96e1cf14232002cc49",
+              "execution_request": {
+                "action": "allocate_budget",
+                "arguments": {
+                  "amount": 12500
+                },
+                "artifacts": [],
+                "request_id": "tool_91782bb3502e46c282e76a89098c372d",
+                "schema_version": "normalized_execution_request.v1",
+                "target": "quickstart-account"
+              },
+              "actor_identity": {
+                "id": "budget-agent",
+                "role": "allocator",
+                "type": "agent"
+              },
+              "status": "blocked",
+              "rationale": "required approval evidence is missing",
+              "violated_constraints": [],
+              "required_evidence": [
+                {
+                  "evidence": "approval",
+                  "role": "finance-approver",
+                  "condition": {
+                    "field": "amount",
+                    "operator": ">=",
+                    "value": 10000
+                  },
+                  "rationale": "required approval evidence is missing"
+                }
+              ],
+              "replay_obligations": [],
+              "continuity_requirements": [],
+              "continuation_status": {
+                "schema_version": "guard_continuation_status.v1",
+                "status": "admissible",
+                "lifecycle_state": "admissible",
+                "admissible": true,
+                "invalidated": false,
+                "expired": false,
+                "revalidation_required": false,
+                "escalation_required": false,
+                "evidence_valid": true,
+                "replay_valid": true,
+                "dependency_valid": true,
+                "continuity_valid": true,
+                "dependency_failures": []
+              },
+              "enforcement_consequences": [
+                {
+                  "consequence": "block_execution",
+                  "violated_constraints": [],
+                  "required_evidence": [
+                    {
+                      "evidence": "approval",
+                      "role": "finance-approver",
+                      "condition": {
+                        "field": "amount",
+                        "operator": ">=",
+                        "value": 10000
+                      },
+                      "rationale": "required approval evidence is missing"
+                    }
+                  ]
+                }
+              ],
+              "projection_id": "admissibility_projection_571d2d5373881989074ca601",
+              "projection_hash": "sha256:65562773c924386ab6f31c89b42ab47011c149ecc2c8d198a0ee5e172f9ab58b"
+            },
+            "runtime_posture": {
+              "schema_version": "execution_runtime_posture.v1",
+              "posture": "blocked",
+              "rationale": "required approval evidence is missing",
+              "authority_ref": "budget-quickstart@1.0.0",
+              "contract_hash": "bdee18b0573a6a94086305dafdb5c3f7a72aecc2f29aca96e1cf14232002cc49",
+              "execution_request": {
+                "action": "allocate_budget",
+                "arguments": {
+                  "amount": 12500
+                },
+                "artifacts": [],
+                "request_id": "tool_91782bb3502e46c282e76a89098c372d",
+                "schema_version": "normalized_execution_request.v1",
+                "target": "quickstart-account"
+              },
+              "actor_identity": {
+                "id": "budget-agent",
+                "role": "allocator",
+                "type": "agent"
+              },
+              "runtime_blockers": [
+                {
+                  "evidence": "approval",
+                  "role": "finance-approver",
+                  "condition": {
+                    "field": "amount",
+                    "operator": ">=",
+                    "value": 10000
+                  },
+                  "rationale": "required approval evidence is missing"
+                }
+              ],
+              "continuity_state": {
+                "schema_version": "guard_continuity_posture.v1",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "continuity_state": {},
+                "replay_posture": {},
+                "continuity_requirements": [],
+                "replay_obligations": [],
+                "requires_revalidation": false,
+                "requires_replay": false,
+                "signals": [],
+                "posture_id": "continuity_posture_528e974d906ee1c3e2edaf49",
+                "posture_hash": "sha256:f6b15c2d176e4a76a0e68d3c6657610a23699dd8bef6e72b34dc4ee2df5f04db"
+              },
+              "continuation_status": {
+                "schema_version": "guard_continuation_status.v1",
+                "status": "admissible",
+                "lifecycle_state": "admissible",
+                "admissible": true,
+                "invalidated": false,
+                "expired": false,
+                "revalidation_required": false,
+                "escalation_required": false,
+                "evidence_valid": true,
+                "replay_valid": true,
+                "dependency_valid": true,
+                "continuity_valid": true,
+                "dependency_failures": []
+              },
+              "replay_requirements": [],
+              "enforcement_outcome": {
+                "schema_version": "guard_enforcement_outcome.v1",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "status": "blocked",
+                "execution_state": "blocked",
+                "runtime_lifecycle_state": "blocked",
+                "rationale": "required approval evidence is missing",
+                "consequences": [
+                  {
+                    "consequence": "block_execution",
+                    "violated_constraints": [],
+                    "required_evidence": [
+                      {
+                        "evidence": "approval",
+                        "role": "finance-approver",
+                        "condition": {
+                          "field": "amount",
+                          "operator": ">=",
+                          "value": 10000
+                        },
+                        "rationale": "required approval evidence is missing"
+                      }
+                    ]
+                  }
+                ],
+                "continuation_status": {
+                  "schema_version": "guard_continuation_status.v1",
+                  "status": "admissible",
+                  "lifecycle_state": "admissible",
+                  "admissible": true,
+                  "invalidated": false,
+                  "expired": false,
+                  "revalidation_required": false,
+                  "escalation_required": false,
+                  "evidence_valid": true,
+                  "replay_valid": true,
+                  "dependency_valid": true,
+                  "continuity_valid": true,
+                  "dependency_failures": []
+                },
+                "continuation_requirements": [],
+                "invalidation_reasons": [],
+                "runtime_condition_checks": [
+                  {
+                    "condition": "evidence_valid",
+                    "valid": true,
+                    "rationale": "runtime evidence validity checked"
+                  },
+                  {
+                    "condition": "replay_valid",
+                    "valid": true,
+                    "rationale": "replay posture validity checked"
+                  },
+                  {
+                    "condition": "dependency_valid",
+                    "valid": true,
+                    "rationale": "runtime dependency validity checked"
+                  },
+                  {
+                    "condition": "continuity_valid",
+                    "valid": true,
+                    "rationale": "lineage continuity validity checked"
+                  },
+                  {
+                    "condition": "not_expired",
+                    "valid": true,
+                    "rationale": "continuation did not expire before execution"
+                  }
+                ],
+                "runtime_dependency_posture": {
+                  "schema_version": "guard_runtime_dependency_posture.v1",
+                  "dependencies": [],
+                  "valid": true,
+                  "expired": false,
+                  "failures": []
+                },
+                "outcome_id": "enforcement_outcome_2b8be3429f9dd6de6a5d810f",
+                "outcome_hash": "sha256:f9232b42b31022caddcf6e7f65fec80bb6966549a7e568d7fed94f5bd6f24b1a"
+              },
+              "chronology_event_ids": [
+                "guard_event_35c0e8e497e691001999e07e",
+                "guard_event_f5317a3d5c2b0047149bd262",
+                "guard_event_25891a502d3b1271f8cbb96a",
+                "guard_event_c68ba16e885b4a4d952311ef",
+                "guard_event_8a552eccc06762d2830ea04d",
+                "guard_event_810ec23b370485c8aa3bb77f",
+                "guard_event_b47d941b21b23f041365c2b6"
+              ],
+              "telemetry_event_types": [
+                "authority_context_resolved",
+                "evaluation_pipeline_started",
+                "runtime_evidence_loaded",
+                "continuity_checked",
+                "replay_validated",
+                "admissibility_evaluated",
+                "enforcement_outcome_recorded"
+              ],
+              "posture_id": "runtime_posture_d28c461e4a183fc35a32435c",
+              "posture_hash": "sha256:52da593df1b072bcb5fd9d79db4f683a3fd29b499455313ee628bc34adfed37c"
+            },
+            "telemetry_events": [
+              {
+                "schema_version": "guard_runtime_event.v1",
+                "sequence": 1,
+                "event_type": "authority_context_resolved",
+                "timestamp": "2026-09-13T23:17:23.648508+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "details": {
+                  "contract_boundary": "compiled_authority"
+                },
+                "event_id": "guard_event_35c0e8e497e691001999e07e",
+                "event_hash": "sha256:fda95efab0dea94daaeb617dff1b1e9f1ab25d5e6e0e915588f1fa9906897b39"
+              },
+              {
+                "schema_version": "guard_runtime_event.v1",
+                "sequence": 2,
+                "event_type": "evaluation_pipeline_started",
+                "timestamp": "2026-09-13T23:17:23.648508+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "details": {
+                  "status": "started"
+                },
+                "event_id": "guard_event_f5317a3d5c2b0047149bd262",
+                "event_hash": "sha256:557972bc7511455c8ab66eeeb6178b23e137f377c2ca2004fd6bb7a9955d3eb8"
+              },
+              {
+                "schema_version": "guard_runtime_event.v1",
+                "sequence": 3,
+                "event_type": "runtime_evidence_loaded",
+                "timestamp": "2026-09-13T23:17:23.648508+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "details": {
+                  "evidence_boundary": "guard_runtime_evidence_model.v1",
+                  "required_evidence": [
+                    {
+                      "evidence": "approval",
+                      "role": "finance-approver",
+                      "condition": {
+                        "field": "amount",
+                        "operator": ">=",
+                        "value": 10000
+                      },
+                      "rationale": "required approval evidence is missing"
+                    }
+                  ]
+                },
+                "event_id": "guard_event_25891a502d3b1271f8cbb96a",
+                "event_hash": "sha256:9d4393afdba58cbeb3ea6365b8ebbb4a70523ef9c262b785c416a9dd5594da37"
+              },
+              {
+                "schema_version": "guard_runtime_event.v1",
+                "sequence": 4,
+                "event_type": "continuity_checked",
+                "timestamp": "2026-09-13T23:17:23.648508+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "details": {
+                  "continuity_requirements": []
+                },
+                "event_id": "guard_event_c68ba16e885b4a4d952311ef",
+                "event_hash": "sha256:b84a641acca0dfe6a291ce742e41dd46961ebe9fd5e1caaa02736dab3e253b57"
+              },
+              {
+                "schema_version": "guard_runtime_event.v1",
+                "sequence": 5,
+                "event_type": "replay_validated",
+                "timestamp": "2026-09-13T23:17:23.648508+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "details": {
+                  "replay_obligations": []
+                },
+                "event_id": "guard_event_8a552eccc06762d2830ea04d",
+                "event_hash": "sha256:27ba86dde2c5d8657a2bcbe52433712428dfda8e638e2abf7df10d5b3e80a667"
+              },
+              {
+                "schema_version": "guard_runtime_event.v1",
+                "sequence": 6,
+                "event_type": "admissibility_evaluated",
+                "timestamp": "2026-09-13T23:17:23.648508+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "details": {
+                  "status": "blocked",
+                  "runtime_lifecycle_state": "blocked",
+                  "violated_constraints": [],
+                  "required_evidence": [
+                    {
+                      "evidence": "approval",
+                      "role": "finance-approver",
+                      "condition": {
+                        "field": "amount",
+                        "operator": ">=",
+                        "value": 10000
+                      },
+                      "rationale": "required approval evidence is missing"
+                    }
+                  ]
+                },
+                "event_id": "guard_event_810ec23b370485c8aa3bb77f",
+                "event_hash": "sha256:20dc122dbf65439312d60166982fcef37250cb1e971fac799aef2e3bdf9ba53d"
+              },
+              {
+                "schema_version": "guard_runtime_event.v1",
+                "sequence": 7,
+                "event_type": "enforcement_outcome_recorded",
+                "timestamp": "2026-09-13T23:17:23.648508+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "details": {
+                  "status": "blocked",
+                  "runtime_lifecycle_state": "blocked",
+                  "consequences": [
+                    {
+                      "consequence": "block_execution",
+                      "violated_constraints": [],
+                      "required_evidence": [
+                        {
+                          "evidence": "approval",
+                          "role": "finance-approver",
+                          "condition": {
+                            "field": "amount",
+                            "operator": ">=",
+                            "value": 10000
+                          },
+                          "rationale": "required approval evidence is missing"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                "event_id": "guard_event_b47d941b21b23f041365c2b6",
+                "event_hash": "sha256:0fc02857dfa2871c78ff1a08af347b2cfe6091dcf28b471b52c0bed2ad47c383"
+              }
+            ],
+            "telemetry_stream": [
+              {
+                "event_id": "guard_event_35c0e8e497e691001999e07e",
+                "event_type": "authority_context_resolved",
+                "sequence": 1,
+                "timestamp": "2026-09-13T23:17:23.648508+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "event_hash": "sha256:fda95efab0dea94daaeb617dff1b1e9f1ab25d5e6e0e915588f1fa9906897b39"
+              },
+              {
+                "event_id": "guard_event_f5317a3d5c2b0047149bd262",
+                "event_type": "evaluation_pipeline_started",
+                "sequence": 2,
+                "timestamp": "2026-09-13T23:17:23.648508+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "event_hash": "sha256:557972bc7511455c8ab66eeeb6178b23e137f377c2ca2004fd6bb7a9955d3eb8"
+              },
+              {
+                "event_id": "guard_event_25891a502d3b1271f8cbb96a",
+                "event_type": "runtime_evidence_loaded",
+                "sequence": 3,
+                "timestamp": "2026-09-13T23:17:23.648508+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "event_hash": "sha256:9d4393afdba58cbeb3ea6365b8ebbb4a70523ef9c262b785c416a9dd5594da37"
+              },
+              {
+                "event_id": "guard_event_c68ba16e885b4a4d952311ef",
+                "event_type": "continuity_checked",
+                "sequence": 4,
+                "timestamp": "2026-09-13T23:17:23.648508+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "event_hash": "sha256:b84a641acca0dfe6a291ce742e41dd46961ebe9fd5e1caaa02736dab3e253b57"
+              },
+              {
+                "event_id": "guard_event_8a552eccc06762d2830ea04d",
+                "event_type": "replay_validated",
+                "sequence": 5,
+                "timestamp": "2026-09-13T23:17:23.648508+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "event_hash": "sha256:27ba86dde2c5d8657a2bcbe52433712428dfda8e638e2abf7df10d5b3e80a667"
+              },
+              {
+                "event_id": "guard_event_810ec23b370485c8aa3bb77f",
+                "event_type": "admissibility_evaluated",
+                "sequence": 6,
+                "timestamp": "2026-09-13T23:17:23.648508+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "event_hash": "sha256:20dc122dbf65439312d60166982fcef37250cb1e971fac799aef2e3bdf9ba53d"
+              },
+              {
+                "event_id": "guard_event_b47d941b21b23f041365c2b6",
+                "event_type": "enforcement_outcome_recorded",
+                "sequence": 7,
+                "timestamp": "2026-09-13T23:17:23.648508+00:00",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "event_hash": "sha256:0fc02857dfa2871c78ff1a08af347b2cfe6091dcf28b471b52c0bed2ad47c383"
+              }
+            ],
+            "evaluation_trace": {
+              "schema_version": "guard_evaluation_trace.v1",
+              "authority_ref": "budget-quickstart@1.0.0",
+              "status": "blocked",
+              "rationale": "required approval evidence is missing",
+              "steps": [
+                {
+                  "step": "compiled_authority_loaded",
+                  "status": "completed",
+                  "authority_ref": "budget-quickstart@1.0.0"
+                },
+                {
+                  "step": "execution_request_projected",
+                  "status": "completed",
+                  "target": "quickstart-account"
+                },
+                {
+                  "step": "admissibility_assessed",
+                  "status": "blocked",
+                  "rationale": "required approval evidence is missing"
+                },
+                {
+                  "step": "runtime_posture_materialized",
+                  "status": "completed"
+                }
+              ],
+              "trace_id": "guard_trace_9676d75a5769de5c3dbc0df6",
+              "trace_hash": "sha256:ce91f55be9cea1635884fbbc46c9e1b17c992fb46eee638c5870923dfdfe25ca"
+            },
+            "continuity_posture": {
+              "schema_version": "guard_continuity_posture.v1",
+              "authority_ref": "budget-quickstart@1.0.0",
+              "continuity_state": {},
+              "replay_posture": {},
+              "continuity_requirements": [],
+              "replay_obligations": [],
+              "requires_revalidation": false,
+              "requires_replay": false,
+              "signals": [],
+              "posture_id": "continuity_posture_528e974d906ee1c3e2edaf49",
+              "posture_hash": "sha256:f6b15c2d176e4a76a0e68d3c6657610a23699dd8bef6e72b34dc4ee2df5f04db"
+            },
+            "enforcement_outcome": {
+              "schema_version": "guard_enforcement_outcome.v1",
+              "authority_ref": "budget-quickstart@1.0.0",
+              "status": "blocked",
+              "execution_state": "blocked",
+              "runtime_lifecycle_state": "blocked",
+              "rationale": "required approval evidence is missing",
+              "consequences": [
+                {
+                  "consequence": "block_execution",
+                  "violated_constraints": [],
+                  "required_evidence": [
+                    {
+                      "evidence": "approval",
+                      "role": "finance-approver",
+                      "condition": {
+                        "field": "amount",
+                        "operator": ">=",
+                        "value": 10000
+                      },
+                      "rationale": "required approval evidence is missing"
+                    }
+                  ]
+                }
+              ],
+              "continuation_status": {
+                "schema_version": "guard_continuation_status.v1",
+                "status": "admissible",
+                "lifecycle_state": "admissible",
+                "admissible": true,
+                "invalidated": false,
+                "expired": false,
+                "revalidation_required": false,
+                "escalation_required": false,
+                "evidence_valid": true,
+                "replay_valid": true,
+                "dependency_valid": true,
+                "continuity_valid": true,
+                "dependency_failures": []
+              },
+              "continuation_requirements": [],
+              "invalidation_reasons": [],
+              "runtime_condition_checks": [
+                {
+                  "condition": "evidence_valid",
+                  "valid": true,
+                  "rationale": "runtime evidence validity checked"
+                },
+                {
+                  "condition": "replay_valid",
+                  "valid": true,
+                  "rationale": "replay posture validity checked"
+                },
+                {
+                  "condition": "dependency_valid",
+                  "valid": true,
+                  "rationale": "runtime dependency validity checked"
+                },
+                {
+                  "condition": "continuity_valid",
+                  "valid": true,
+                  "rationale": "lineage continuity validity checked"
+                },
+                {
+                  "condition": "not_expired",
+                  "valid": true,
+                  "rationale": "continuation did not expire before execution"
+                }
+              ],
+              "runtime_dependency_posture": {
+                "schema_version": "guard_runtime_dependency_posture.v1",
+                "dependencies": [],
+                "valid": true,
+                "expired": false,
+                "failures": []
+              },
+              "outcome_id": "enforcement_outcome_2b8be3429f9dd6de6a5d810f",
+              "outcome_hash": "sha256:f9232b42b31022caddcf6e7f65fec80bb6966549a7e568d7fed94f5bd6f24b1a"
+            },
+            "runtime_evidence": {
+              "schema_version": "guard_runtime_evidence_model.v1",
+              "actor_identity": {
+                "id": "budget-agent",
+                "role": "allocator",
+                "type": "agent"
+              },
+              "approvals": [],
+              "replay_evidence": {},
+              "continuity_snapshot": {},
+              "timestamp_source": {
+                "source": "caller_supplied",
+                "timestamp": "2026-09-13T23:17:23.648508+00:00"
+              },
+              "execution_context": {
+                "agent": {
+                  "framework": "custom-python"
+                },
+                "surface": "agent_tool"
+              },
+              "runtime_dependencies": []
+            },
+            "execution_posture_surface": {
+              "schema_version": "execution_posture_surface.v1",
+              "posture": "blocked",
+              "rationale": "required approval evidence is missing",
+              "runtime_blockers": [
+                {
+                  "evidence": "approval",
+                  "role": "finance-approver",
+                  "condition": {
+                    "field": "amount",
+                    "operator": ">=",
+                    "value": 10000
+                  },
+                  "rationale": "required approval evidence is missing"
+                }
+              ],
+              "continuity_state": {
+                "schema_version": "guard_continuity_posture.v1",
+                "authority_ref": "budget-quickstart@1.0.0",
+                "continuity_state": {},
+                "replay_posture": {},
+                "continuity_requirements": [],
+                "replay_obligations": [],
+                "requires_revalidation": false,
+                "requires_replay": false,
+                "signals": [],
+                "posture_id": "continuity_posture_528e974d906ee1c3e2edaf49",
+                "posture_hash": "sha256:f6b15c2d176e4a76a0e68d3c6657610a23699dd8bef6e72b34dc4ee2df5f04db"
+              },
+              "replay_requirements": [],
+              "chronology_event_ids": [
+                "guard_event_35c0e8e497e691001999e07e",
+                "guard_event_f5317a3d5c2b0047149bd262",
+                "guard_event_25891a502d3b1271f8cbb96a",
+                "guard_event_c68ba16e885b4a4d952311ef",
+                "guard_event_8a552eccc06762d2830ea04d",
+                "guard_event_810ec23b370485c8aa3bb77f",
+                "guard_event_b47d941b21b23f041365c2b6"
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/v1/runtime/attestations",
+      "organization_id": "acme",
+      "api_key": "wf_runtime_secret",
+      "payload": {
+        "schema_version": "runtime_execution_attestation.v1",
+        "event_id": "guard_run_e993983fd3b8c3e822df637f",
+        "runtime_id": "budget-agent-runtime",
+        "authority_ref": "budget-quickstart@1.0.0",
+        "compiled_contract_hash": "bdee18b0573a6a94086305dafdb5c3f7a72aecc2f29aca96e1cf14232002cc49",
+        "runtime_decision": "BLOCKED",
+        "execution_status": "blocked",
+        "execution_result_summary": "allocate_budget callback did not run.",
+        "mutation_executed": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,186 @@
+{
+  "schema_version": "constraint_ir.v1",
+  "domain_pack": {
+    "domain_pack_id": "repository-changes",
+    "domain_pack_version": "2.0.0",
+    "domain_pack_hash": "sha256:ec260daef10cdb3f97ca0a5137deb658a0fc997f22997299153cd848a12323a0"
+  },
+  "runtime_fact_schema_hash": "sha256:bd79503e01d79583ab564be98890fddaa8124e935e7eb81a8a40786cc6d2c01d",
+  "constraints": [
+    {
+      "constraint_id": "constraint-7eec15c45ae4771aa4db3666fd9671744211f725a1f945fa4ca62b5c86f470e3",
+      "subject": {
+        "kind": "subject_kind",
+        "value": "agent"
+      },
+      "acting_role": {
+        "kind": "role",
+        "value": "repository-maintainer"
+      },
+      "action": "create",
+      "resource": {
+        "kind": "repository_change",
+        "match": "any",
+        "value": null
+      },
+      "effect": "require",
+      "condition": null,
+      "obligations": {
+        "approvals": [],
+        "evidence": [],
+        "separation_of_duties": []
+      },
+      "exceptions": [],
+      "required_runtime_facts": [
+        "actor.role",
+        "actor.subject_kind",
+        "proposal.action",
+        "proposal.resource.kind"
+      ]
+    },
+    {
+      "constraint_id": "constraint-2bc4ffd17df7108653f60a3ed389157be992bbc97b06ec9f580a62a485b30aba",
+      "subject": {
+        "kind": "subject_kind",
+        "value": "agent"
+      },
+      "acting_role": {
+        "kind": "role",
+        "value": "security-reviewer"
+      },
+      "action": "modify",
+      "resource": {
+        "kind": "repository_change",
+        "match": "any",
+        "value": null
+      },
+      "effect": "require",
+      "condition": null,
+      "obligations": {
+        "approvals": [],
+        "evidence": [],
+        "separation_of_duties": []
+      },
+      "exceptions": [],
+      "required_runtime_facts": [
+        "actor.role",
+        "actor.subject_kind",
+        "proposal.action",
+        "proposal.resource.kind"
+      ]
+    },
+    {
+      "constraint_id": "constraint-04f0de712cfa68c23b7e02988b19d68693080b72ded577bbac348895b55f7b12",
+      "subject": {
+        "kind": "subject_kind",
+        "value": "agent"
+      },
+      "acting_role": null,
+      "action": "create",
+      "resource": {
+        "kind": "repository_path",
+        "match": "exact",
+        "value": "generated/new.md"
+      },
+      "effect": "allow",
+      "condition": null,
+      "obligations": {
+        "approvals": [],
+        "evidence": [],
+        "separation_of_duties": []
+      },
+      "exceptions": [],
+      "required_runtime_facts": [
+        "actor.subject_kind",
+        "proposal.action",
+        "proposal.resource.kind",
+        "proposal.resource.path"
+      ]
+    },
+    {
+      "constraint_id": "constraint-5a6048b7d86d30b83332b7b213e3e0751ff9fd079cbc2e308ef168203a1ea965",
+      "subject": {
+        "kind": "subject_kind",
+        "value": "agent"
+      },
+      "acting_role": null,
+      "action": "modify",
+      "resource": {
+        "kind": "repository_path",
+        "match": "exact",
+        "value": "README.md"
+      },
+      "effect": "allow",
+      "condition": null,
+      "obligations": {
+        "approvals": [],
+        "evidence": [],
+        "separation_of_duties": []
+      },
+      "exceptions": [],
+      "required_runtime_facts": [
+        "actor.subject_kind",
+        "proposal.action",
+        "proposal.resource.kind",
+        "proposal.resource.path"
+      ]
+    },
+    {
+      "constraint_id": "constraint-c632723df8f4cce05699cf6730742b7661fae5d1d898f10123db5672c8cc7693",
+      "subject": {
+        "kind": "subject_kind",
+        "value": "agent"
+      },
+      "acting_role": null,
+      "action": "modify",
+      "resource": {
+        "kind": "repository_path",
+        "match": "exact",
+        "value": "generated/new.md"
+      },
+      "effect": "deny",
+      "condition": null,
+      "obligations": {
+        "approvals": [],
+        "evidence": [],
+        "separation_of_duties": []
+      },
+      "exceptions": [],
+      "required_runtime_facts": [
+        "actor.subject_kind",
+        "proposal.action",
+        "proposal.resource.kind",
+        "proposal.resource.path"
+      ]
+    },
+    {
+      "constraint_id": "constraint-4e0cbca500b455ff14b476c9434b88ea5c497d8e86787cc1464a8b015fb197ad",
+      "subject": {
+        "kind": "subject_kind",
+        "value": "agent"
+      },
+      "acting_role": null,
+      "action": "create",
+      "resource": {
+        "kind": "repository_path",
+        "match": "exact",
+        "value": "README.md"
+      },
+      "effect": "deny",
+      "condition": null,
+      "obligations": {
+        "approvals": [],
+        "evidence": [],
+        "separation_of_duties": []
+      },
+      "exceptions": [],
+      "required_runtime_facts": [
+        "actor.subject_kind",
+        "proposal.action",
+        "proposal.resource.kind",
+        "proposal.resource.path"
+      ]
+    }
+  ],
+  "ir_hash": "sha256:3344ebaa4847a22db5fbabcdee4c2650cae6bd9a7af8334f1b01eb3438031428"
+}

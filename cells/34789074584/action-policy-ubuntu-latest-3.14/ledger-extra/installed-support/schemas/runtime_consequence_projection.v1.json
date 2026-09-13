@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/runtime_consequence_projection.v1.json",
+  "title": "Runtime Consequence Projection",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "authority_ref",
+    "compiled_contract_hash",
+    "runtime_consequences",
+    "what_runtime_would_require",
+    "runtime_enforced_by",
+    "non_goals"
+  ],
+  "properties": {
+    "schema_version": { "const": "runtime_consequence_projection.v1" },
+    "authority_ref": { "type": "string" },
+    "compiled_contract_hash": { "type": ["string", "null"] },
+    "runtime_consequences": { "type": "array", "items": { "type": "object" } },
+    "what_runtime_would_require": { "type": "array", "items": { "type": "string" } },
+    "runtime_enforced_by": { "const": "Guard/Cloud" },
+    "non_goals": { "type": "array", "items": { "type": "string" } }
+  }
+}

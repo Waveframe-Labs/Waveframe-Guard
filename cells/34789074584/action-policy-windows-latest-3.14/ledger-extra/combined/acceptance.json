@@ -1,0 +1,316 @@
+{
+  "python": "3.14.7 (tags/v3.14.7:823f032, Aug  5 2026, 10:51:32) [MSC v.1944 64 bit (AMD64)]",
+  "platform": "Windows",
+  "commands": [
+    {
+      "label": "combined-extra-pip",
+      "command": [
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\combined-extra\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "pip==25.3"
+      ],
+      "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "combined-extra-install",
+      "command": [
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\combined-extra\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "-r",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support\\requirements-ci.txt",
+        "--find-links",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\wheelhouse",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\wheelhouse\\governance_ledger-0.9.0-py3-none-any.whl[dev,guard]",
+        "--report",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\combined-extra-install.json"
+      ],
+      "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "combined-extra-check",
+      "command": [
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\combined-extra\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "combined-extra-freeze",
+      "command": [
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\combined-extra\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "freeze",
+        "--all"
+      ],
+      "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "combined-provenance",
+      "command": [
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\combined-extra\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support\\tools\\check_installed_wheel_set.py",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\combined-extra-archive-expectations.json"
+      ],
+      "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "combined-extra-default",
+      "command": [
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\combined-extra\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support\\tools\\acceptance_pytest.py",
+        "-q",
+        "-ra",
+        "--junitxml",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\combined-extra-default.xml",
+        "tests"
+      ],
+      "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "combined-extra-native",
+      "command": [
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\combined-extra\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support\\tools\\acceptance_pytest.py",
+        "-q",
+        "-ra",
+        "--junitxml",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\combined-extra-native.xml",
+        "tests"
+      ],
+      "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "release-package",
+      "command": [
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\combined-extra\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support\\tools\\check_release_catalog_package.py"
+      ],
+      "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "development-package",
+      "command": [
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\combined-extra\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support\\tools\\check_action_policy_package.py"
+      ],
+      "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "legacy-v3-example",
+      "command": [
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\combined-extra\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support\\examples\\native_v3_multi_control.py",
+        "--candidate"
+      ],
+      "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "catalog-3-execution",
+      "command": [
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\combined-extra\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support\\tools\\check_guard_release_execution.py"
+      ],
+      "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "reject-old-ledger-0.7.0",
+      "command": [
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\combined-extra\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "--dry-run",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\wheelhouse\\waveframe_guard-0.19.0-py3-none-any.whl",
+        "governance-ledger==0.7.0",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\wheelhouse\\cricore_contract_compiler-0.5.0-py3-none-any.whl"
+      ],
+      "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support",
+      "exit_code": 1
+    },
+    {
+      "label": "reject-old-ledger-0.8.0",
+      "command": [
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\combined-extra\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "--dry-run",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\wheelhouse\\waveframe_guard-0.19.0-py3-none-any.whl",
+        "governance-ledger==0.8.0",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\wheelhouse\\cricore_contract_compiler-0.5.0-py3-none-any.whl"
+      ],
+      "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support",
+      "exit_code": 1
+    },
+    {
+      "label": "guard-entry-pip",
+      "command": [
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\guard-entry\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "pip==25.3"
+      ],
+      "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "guard-entry-install",
+      "command": [
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\guard-entry\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "-r",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support\\requirements-ci.txt",
+        "governance-ledger==0.8.0",
+        "waveframe-guard==0.18.0",
+        "cricore-contract-compiler==0.4.0",
+        "--report",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\guard-entry-install.json"
+      ],
+      "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "guard-entry-check",
+      "command": [
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\guard-entry\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "guard-entry-freeze",
+      "command": [
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\guard-entry\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "freeze",
+        "--all"
+      ],
+      "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "guard-entry-upgrade",
+      "command": [
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\guard-entry\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "--upgrade",
+        "--find-links",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\wheelhouse",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\wheelhouse\\waveframe_guard-0.19.0-py3-none-any.whl",
+        "--report",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\guard-entry-install.json"
+      ],
+      "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "guard-entry-upgrade-check",
+      "command": [
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\guard-entry\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "guard-entry-provenance",
+      "command": [
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\guard-entry\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support\\tools\\check_installed_wheel_set.py",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\guard-entry-archive-expectations.json"
+      ],
+      "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "guard-entry-catalog-3",
+      "command": [
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\guard-entry\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support\\tools\\check_guard_release_execution.py"
+      ],
+      "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\installed-support",
+      "exit_code": 0
+    }
+  ],
+  "suites": {
+    "combined-extra-default": {
+      "passed": 678,
+      "skipped": 44,
+      "skip_reasons": {
+        "explicit action-policy development opt-in required; see docs/ACTION_POLICY_DEVELOPMENT.md": 44
+      },
+      "release_passed": 70,
+      "native_passed": 0
+    },
+    "combined-extra-native": {
+      "passed": 722,
+      "skipped": 0,
+      "skip_reasons": {},
+      "release_passed": 70,
+      "native_passed": 44
+    }
+  },
+  "gates": {
+    "combined_extra": "passed"
+  },
+  "combined_extra": {
+    "status": "passed",
+    "executed": true
+  },
+  "release_ready": false,
+  "runtime_activation_ready": false,
+  "head": "afe5093e39bdd132bfb4da2a45e3199f1f6eca16",
+  "ledger_head": "a34c11d81b85963794cf28b4adad091fac15e130",
+  "guard_candidate": {
+    "source_url": "https://github.com/Waveframe-Labs/Waveframe-Guard",
+    "source_commit": "afe5093e39bdd132bfb4da2a45e3199f1f6eca16",
+    "provenance_kind": "coordinator-supplied-exact-candidate",
+    "wheel": "waveframe_guard-0.19.0-py3-none-any.whl",
+    "wheel_sha256": "ff321483dd89a8bf9215780e449e99459bf1de7f34297aecba034ecfab4877a3"
+  },
+  "archive_origin": {
+    "url": "https://raw.githubusercontent.com/Waveframe-Labs/Waveframe-Ledger/46cd4c5a9a2c17e2367d64b56803df92de69d8b3/artifacts/issue25-windows-latest-py3.14-a34c11d81b85963794cf28b4adad091fac15e130.zip",
+    "sha256": "3f0321ed7c52ff3542a885aae7f0c854521dd5110dc7809bdbc3059c3a794faa",
+    "cell": "windows-3.14"
+  },
+  "catalog_3_execution_cases": 56,
+  "status": "combined-extra-passed"
+}

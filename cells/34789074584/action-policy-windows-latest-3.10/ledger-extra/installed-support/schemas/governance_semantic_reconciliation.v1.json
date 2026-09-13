@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/governance_semantic_reconciliation.v1.json",
+  "title": "Governance Semantic Reconciliation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "source_id",
+    "source_hash",
+    "extraction_id",
+    "what_was_inferred",
+    "ambiguities",
+    "operator_interpretation_decisions",
+    "normalization_decisions",
+    "rejected_candidates",
+    "semantic_conflicts",
+    "unresolved_ambiguities",
+    "final_normalized_semantic_meaning",
+    "interpretation_completeness_posture",
+    "non_goals"
+  ],
+  "properties": {
+    "schema_version": { "const": "governance_semantic_reconciliation.v1" },
+    "source_id": { "type": "string", "minLength": 1 },
+    "source_hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "extraction_id": { "type": "string", "minLength": 1 },
+    "what_was_inferred": { "type": "array" },
+    "ambiguities": { "type": "array", "items": { "$ref": "semantic_ambiguity.v1.json" } },
+    "operator_interpretation_decisions": { "type": "array", "items": { "$ref": "semantic_interpretation_decision.v1.json" } },
+    "normalization_decisions": { "type": "array", "items": { "type": "string" } },
+    "rejected_candidates": { "type": "array" },
+    "semantic_conflicts": { "type": "array", "items": { "$ref": "semantic_conflict.v1.json" } },
+    "unresolved_ambiguities": { "type": "array", "items": { "$ref": "semantic_ambiguity.v1.json" } },
+    "final_normalized_semantic_meaning": { "type": "object" },
+    "interpretation_completeness_posture": { "enum": ["complete", "operator_required"] },
+    "non_goals": { "type": "array", "items": { "type": "string" } }
+  }
+}

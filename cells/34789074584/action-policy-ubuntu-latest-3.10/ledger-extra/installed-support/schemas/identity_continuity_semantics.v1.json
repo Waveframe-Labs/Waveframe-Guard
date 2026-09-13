@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/identity_continuity_semantics.v1.json",
+  "title": "Identity Continuity Semantics",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "identity_continuity_required",
+    "resume_identity_check",
+    "identity_revocation_effect",
+    "runtime_enforced_by"
+  ],
+  "properties": {
+    "schema_version": { "const": "identity_continuity_semantics.v1" },
+    "identity_continuity_required": { "type": "boolean" },
+    "resume_identity_check": {
+      "enum": ["actor_or_role_binding_must_remain_valid", "not_required", "unspecified"]
+    },
+    "identity_revocation_effect": {
+      "enum": ["revoked_identity_invalidates_resume", "review_required", "not_defined"]
+    },
+    "runtime_enforced_by": { "const": "Guard/Cloud" }
+  }
+}

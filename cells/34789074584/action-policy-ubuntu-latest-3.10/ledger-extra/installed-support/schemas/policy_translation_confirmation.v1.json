@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/policy_translation_confirmation.v1.json",
+  "title": "Waveframe Policy Translation Human Confirmation v1",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "proposal_id", "proposal_hash", "source_snapshot_hash", "authority_ref", "binding_resolutions", "control_confirmations", "clause_coverage_decisions", "coverage", "confirmation_hash"],
+  "properties": {
+    "schema_version": {"const": "policy_translation_confirmation.v1"},
+    "proposal_id": {"type": "string", "minLength": 1}, "proposal_hash": {"$ref": "#/$defs/sha256"}, "source_snapshot_hash": {"$ref": "#/$defs/sha256"}, "authority_ref": {"type": "string", "minLength": 3},
+    "binding_resolutions": {"type": "array", "items": {"$ref": "#/$defs/resolution"}},
+    "control_confirmations": {"type": "array", "items": {"$ref": "#/$defs/controlConfirmation"}},
+    "clause_coverage_decisions": {"type": "array", "items": {"$ref": "#/$defs/clauseCoverageDecision"}},
+    "coverage": {"$ref": "#/$defs/coverage"}, "confirmation_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"}, "utc": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"},
+    "resolution": {"type": "object", "additionalProperties": false, "required": ["binding_id", "binding_type", "value", "confirmed_by", "confirmed_at", "resolution_hash"], "properties": {"binding_id": {"type": "string", "minLength": 1}, "binding_type": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9]*(?:[._-][A-Za-z0-9]+)*$", "maxLength": 256}, "value": {"type": "string", "minLength": 1}, "confirmed_by": {"type": "string", "minLength": 1}, "confirmed_at": {"$ref": "#/$defs/utc"}, "resolution_hash": {"$ref": "#/$defs/sha256"}}},
+    "controlConfirmation": {"type": "object", "additionalProperties": false, "required": ["clause_id", "candidate_control_id", "confirmed_by", "confirmed_at", "confirmation_hash"], "properties": {"clause_id": {"type": "string", "minLength": 1}, "candidate_control_id": {"type": "string", "pattern": "^candidate-control-[a-f0-9]{64}$"}, "confirmed_by": {"type": "string", "minLength": 1}, "confirmed_at": {"$ref": "#/$defs/utc"}, "confirmation_hash": {"$ref": "#/$defs/sha256"}}},
+    "clauseCoverageDecision": {"type": "object", "additionalProperties": false, "required": ["clause_id", "coverage_status", "reason_code", "human_reason", "acknowledged_unrepresented", "confirmed_by", "confirmed_at", "decision_hash"], "properties": {"clause_id": {"type": "string", "minLength": 1}, "coverage_status": {"enum": ["fully_represented", "partially_represented", "entirely_unsupported", "informational"]}, "reason_code": {"enum": ["human-confirmed-complete", "human-confirmed-partial", "context-only", "descriptive", "non-policy", "outside-domain", "not-enforceable", "deferred", "other"]}, "human_reason": {"type": ["string", "null"], "minLength": 1, "maxLength": 1024}, "acknowledged_unrepresented": {"type": "boolean"}, "confirmed_by": {"type": "string", "minLength": 1}, "confirmed_at": {"$ref": "#/$defs/utc"}, "decision_hash": {"$ref": "#/$defs/sha256"}}},
+    "coverage": {
+      "type": "object", "additionalProperties": false,
+      "required": ["total_clause_count", "enforced_clause_count", "unenforced_clause_count", "unresolved_clause_count", "fully_represented_clause_count", "partially_represented_clause_count", "entirely_unsupported_clause_count", "informational_clause_count", "unrepresented_clause_count", "enforced_clause_ids", "unenforced_clause_ids", "acknowledged_unrepresented_clause_ids", "total_control_count", "confirmed_control_count", "unresolved_control_count", "confirmed_control_ids", "unresolved_control_ids"],
+      "properties": {
+        "total_clause_count": {"type": "integer", "minimum": 1}, "enforced_clause_count": {"type": "integer", "minimum": 0}, "unenforced_clause_count": {"type": "integer", "minimum": 0}, "unresolved_clause_count": {"type": "integer", "minimum": 0},
+        "fully_represented_clause_count": {"type": "integer", "minimum": 0}, "partially_represented_clause_count": {"type": "integer", "minimum": 0}, "entirely_unsupported_clause_count": {"type": "integer", "minimum": 0}, "informational_clause_count": {"type": "integer", "minimum": 0}, "unrepresented_clause_count": {"type": "integer", "minimum": 0},
+        "enforced_clause_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string"}}, "unenforced_clause_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string"}}, "acknowledged_unrepresented_clause_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string"}},
+        "total_control_count": {"type": "integer", "minimum": 0}, "confirmed_control_count": {"type": "integer", "minimum": 0}, "unresolved_control_count": {"type": "integer", "minimum": 0}, "confirmed_control_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string"}}, "unresolved_control_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string"}}
+      }
+    }
+  }
+}

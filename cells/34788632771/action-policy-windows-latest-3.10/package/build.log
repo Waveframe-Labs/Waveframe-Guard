@@ -1,0 +1,447 @@
+* Creating isolated environment: venv+pip...
+* Installing packages in isolated environment:
+  - setuptools>=77.0
+* Getting build dependencies for sdist...
+running egg_info
+creating waveframe_guard.egg-info
+writing waveframe_guard.egg-info\PKG-INFO
+writing dependency_links to waveframe_guard.egg-info\dependency_links.txt
+writing entry points to waveframe_guard.egg-info\entry_points.txt
+writing requirements to waveframe_guard.egg-info\requires.txt
+writing top-level names to waveframe_guard.egg-info\top_level.txt
+writing manifest file 'waveframe_guard.egg-info\SOURCES.txt'
+reading manifest file 'waveframe_guard.egg-info\SOURCES.txt'
+adding license file 'LICENSE'
+adding license file 'NOTICE'
+writing manifest file 'waveframe_guard.egg-info\SOURCES.txt'
+* Installed build dependency versions:
+  - setuptools==84.0.0
+* Building sdist...
+running sdist
+running egg_info
+writing waveframe_guard.egg-info\PKG-INFO
+writing dependency_links to waveframe_guard.egg-info\dependency_links.txt
+writing entry points to waveframe_guard.egg-info\entry_points.txt
+writing requirements to waveframe_guard.egg-info\requires.txt
+writing top-level names to waveframe_guard.egg-info\top_level.txt
+reading manifest file 'waveframe_guard.egg-info\SOURCES.txt'
+adding license file 'LICENSE'
+adding license file 'NOTICE'
+writing manifest file 'waveframe_guard.egg-info\SOURCES.txt'
+running check
+creating waveframe_guard-0.19.0
+creating waveframe_guard-0.19.0\docs\architecture
+creating waveframe_guard-0.19.0\docs\getting-started
+creating waveframe_guard-0.19.0\guard
+creating waveframe_guard-0.19.0\guard\adapters
+creating waveframe_guard-0.19.0\guard\cognition
+creating waveframe_guard-0.19.0\guard\enforcement
+creating waveframe_guard-0.19.0\guard\projections
+creating waveframe_guard-0.19.0\guard\runtime
+creating waveframe_guard-0.19.0\guard\sdk
+creating waveframe_guard-0.19.0\guard\telemetry
+creating waveframe_guard-0.19.0\tests
+creating waveframe_guard-0.19.0\waveframe_guard
+creating waveframe_guard-0.19.0\waveframe_guard.egg-info
+creating waveframe_guard-0.19.0\waveframe_guard\authority
+creating waveframe_guard-0.19.0\waveframe_guard\authority\adapters
+creating waveframe_guard-0.19.0\waveframe_guard\cloud
+creating waveframe_guard-0.19.0\waveframe_guard\quickstarts
+creating waveframe_guard-0.19.0\waveframe_guard\server
+copying files to waveframe_guard-0.19.0...
+copying LICENSE -> waveframe_guard-0.19.0
+copying NOTICE -> waveframe_guard-0.19.0
+copying README.md -> waveframe_guard-0.19.0
+copying SECURITY.md -> waveframe_guard-0.19.0
+copying pyproject.toml -> waveframe_guard-0.19.0
+copying docs\architecture\REPOSITORY_WORKSPACE.md -> waveframe_guard-0.19.0\docs\architecture
+copying docs\getting-started\README.md -> waveframe_guard-0.19.0\docs\getting-started
+copying guard\__init__.py -> waveframe_guard-0.19.0\guard
+copying guard\adapters\__init__.py -> waveframe_guard-0.19.0\guard\adapters
+copying guard\adapters\compiled_authority.py -> waveframe_guard-0.19.0\guard\adapters
+copying guard\adapters\proposal_normalizer.py -> waveframe_guard-0.19.0\guard\adapters
+copying guard\adapters\upstream_semantics.py -> waveframe_guard-0.19.0\guard\adapters
+copying guard\cognition\__init__.py -> waveframe_guard-0.19.0\guard\cognition
+copying guard\cognition\admissibility.py -> waveframe_guard-0.19.0\guard\cognition
+copying guard\enforcement\__init__.py -> waveframe_guard-0.19.0\guard\enforcement
+copying guard\enforcement\chronology.py -> waveframe_guard-0.19.0\guard\enforcement
+copying guard\projections\__init__.py -> waveframe_guard-0.19.0\guard\projections
+copying guard\projections\execution.py -> waveframe_guard-0.19.0\guard\projections
+copying guard\runtime\__init__.py -> waveframe_guard-0.19.0\guard\runtime
+copying guard\runtime\builders.py -> waveframe_guard-0.19.0\guard\runtime
+copying guard\runtime\continuation.py -> waveframe_guard-0.19.0\guard\runtime
+copying guard\runtime\dependencies.py -> waveframe_guard-0.19.0\guard\runtime
+copying guard\runtime\evaluation.py -> waveframe_guard-0.19.0\guard\runtime
+copying guard\runtime\evidence.py -> waveframe_guard-0.19.0\guard\runtime
+copying guard\runtime\identity.py -> waveframe_guard-0.19.0\guard\runtime
+copying guard\runtime\organization.py -> waveframe_guard-0.19.0\guard\runtime
+copying guard\sdk\__init__.py -> waveframe_guard-0.19.0\guard\sdk
+copying guard\sdk\adapters.py -> waveframe_guard-0.19.0\guard\sdk
+copying guard\sdk\authority_source.py -> waveframe_guard-0.19.0\guard\sdk
+copying guard\sdk\cleanup_local.py -> waveframe_guard-0.19.0\guard\sdk
+copying guard\sdk\execution.py -> waveframe_guard-0.19.0\guard\sdk
+copying guard\sdk\guard.py -> waveframe_guard-0.19.0\guard\sdk
+copying guard\sdk\local_persistence.py -> waveframe_guard-0.19.0\guard\sdk
+copying guard\sdk\repository_boundary.py -> waveframe_guard-0.19.0\guard\sdk
+copying guard\sdk\repository_evidence.py -> waveframe_guard-0.19.0\guard\sdk
+copying guard\sdk\target_binding.py -> waveframe_guard-0.19.0\guard\sdk
+copying guard\telemetry\__init__.py -> waveframe_guard-0.19.0\guard\telemetry
+copying guard\telemetry\events.py -> waveframe_guard-0.19.0\guard\telemetry
+copying tests\test_action_policy_creation.py -> waveframe_guard-0.19.0\tests
+copying tests\test_authority_loader.py -> waveframe_guard-0.19.0\tests
+copying tests\test_cache_integrity.py -> waveframe_guard-0.19.0\tests
+copying tests\test_ci_validation_contract.py -> waveframe_guard-0.19.0\tests
+copying tests\test_cloud_preservation_client.py -> waveframe_guard-0.19.0\tests
+copying tests\test_cloud_preservation_invariants.py -> waveframe_guard-0.19.0\tests
+copying tests\test_cloud_publication_resolver.py -> waveframe_guard-0.19.0\tests
+copying tests\test_cloud_runtime_client.py -> waveframe_guard-0.19.0\tests
+copying tests\test_creation_attestation_consistency.py -> waveframe_guard-0.19.0\tests
+copying tests\test_dependency_boundaries.py -> waveframe_guard-0.19.0\tests
+copying tests\test_execution.py -> waveframe_guard-0.19.0\tests
+copying tests\test_exports.py -> waveframe_guard-0.19.0\tests
+copying tests\test_external_agent_quickstart.py -> waveframe_guard-0.19.0\tests
+copying tests\test_fail_modes.py -> waveframe_guard-0.19.0\tests
+copying tests\test_finance_policy_to_guard_demo.py -> waveframe_guard-0.19.0\tests
+copying tests\test_guard_approval_evidence.py -> waveframe_guard-0.19.0\tests
+copying tests\test_guard_artifact_semantics.py -> waveframe_guard-0.19.0\tests
+copying tests\test_guard_integration_hardening.py -> waveframe_guard-0.19.0\tests
+copying tests\test_guard_local_api.py -> waveframe_guard-0.19.0\tests
+copying tests\test_guard_persistent_organizational_runtime.py -> waveframe_guard-0.19.0\tests
+copying tests\test_guard_real_integration_scenarios.py -> waveframe_guard-0.19.0\tests
+copying tests\test_guard_runtime_cloud_registry.py -> waveframe_guard-0.19.0\tests
+copying tests\test_guard_runtime_skeleton.py -> waveframe_guard-0.19.0\tests
+copying tests\test_guard_sdk_integration_layer.py -> waveframe_guard-0.19.0\tests
+copying tests\test_guard_ui_layout.py -> waveframe_guard-0.19.0\tests
+copying tests\test_ledger_v2_authority_runtime.py -> waveframe_guard-0.19.0\tests
+copying tests\test_ledger_v3_authority_runtime.py -> waveframe_guard-0.19.0\tests
+copying tests\test_licensing.py -> waveframe_guard-0.19.0\tests
+copying tests\test_mediated_boundary.py -> waveframe_guard-0.19.0\tests
+copying tests\test_native_cloud_connection.py -> waveframe_guard-0.19.0\tests
+copying tests\test_public_guard_export.py -> waveframe_guard-0.19.0\tests
+copying tests\test_quickstart_guard.py -> waveframe_guard-0.19.0\tests
+copying tests\test_release_catalog.py -> waveframe_guard-0.19.0\tests
+copying tests\test_repository_execution_evidence.py -> waveframe_guard-0.19.0\tests
+copying tests\test_repository_workspace.py -> waveframe_guard-0.19.0\tests
+copying tests\test_runtime.py -> waveframe_guard-0.19.0\tests
+copying tests\test_runtime_audit.py -> waveframe_guard-0.19.0\tests
+copying tests\test_runtime_context.py -> waveframe_guard-0.19.0\tests
+copying tests\test_runtime_result.py -> waveframe_guard-0.19.0\tests
+copying tests\test_strict_public_execution.py -> waveframe_guard-0.19.0\tests
+copying tests\test_target_binding.py -> waveframe_guard-0.19.0\tests
+copying tests\test_target_scope_enforcement.py -> waveframe_guard-0.19.0\tests
+copying waveframe_guard\__init__.py -> waveframe_guard-0.19.0\waveframe_guard
+copying waveframe_guard\_client.py -> waveframe_guard-0.19.0\waveframe_guard
+copying waveframe_guard\context.py -> waveframe_guard-0.19.0\waveframe_guard
+copying waveframe_guard\contracts.py -> waveframe_guard-0.19.0\waveframe_guard
+copying waveframe_guard\execute.py -> waveframe_guard-0.19.0\waveframe_guard
+copying waveframe_guard\guard.py -> waveframe_guard-0.19.0\waveframe_guard
+copying waveframe_guard\result.py -> waveframe_guard-0.19.0\waveframe_guard
+copying waveframe_guard\runtime.py -> waveframe_guard-0.19.0\waveframe_guard
+copying waveframe_guard\schemas.py -> waveframe_guard-0.19.0\waveframe_guard
+copying waveframe_guard.egg-info\PKG-INFO -> waveframe_guard-0.19.0\waveframe_guard.egg-info
+copying waveframe_guard.egg-info\SOURCES.txt -> waveframe_guard-0.19.0\waveframe_guard.egg-info
+copying waveframe_guard.egg-info\dependency_links.txt -> waveframe_guard-0.19.0\waveframe_guard.egg-info
+copying waveframe_guard.egg-info\entry_points.txt -> waveframe_guard-0.19.0\waveframe_guard.egg-info
+copying waveframe_guard.egg-info\requires.txt -> waveframe_guard-0.19.0\waveframe_guard.egg-info
+copying waveframe_guard.egg-info\top_level.txt -> waveframe_guard-0.19.0\waveframe_guard.egg-info
+copying waveframe_guard\authority\__init__.py -> waveframe_guard-0.19.0\waveframe_guard\authority
+copying waveframe_guard\authority\cache.py -> waveframe_guard-0.19.0\waveframe_guard\authority
+copying waveframe_guard\authority\development.py -> waveframe_guard-0.19.0\waveframe_guard\authority
+copying waveframe_guard\authority\exceptions.py -> waveframe_guard-0.19.0\waveframe_guard\authority
+copying waveframe_guard\authority\generations.py -> waveframe_guard-0.19.0\waveframe_guard\authority
+copying waveframe_guard\authority\loader.py -> waveframe_guard-0.19.0\waveframe_guard\authority
+copying waveframe_guard\authority\replay.py -> waveframe_guard-0.19.0\waveframe_guard\authority
+copying waveframe_guard\authority\resolver.py -> waveframe_guard-0.19.0\waveframe_guard\authority
+copying waveframe_guard\authority\runtime_facts.py -> waveframe_guard-0.19.0\waveframe_guard\authority
+copying waveframe_guard\authority\types.py -> waveframe_guard-0.19.0\waveframe_guard\authority
+copying waveframe_guard\authority\verifier.py -> waveframe_guard-0.19.0\waveframe_guard\authority
+copying waveframe_guard\authority\adapters\__init__.py -> waveframe_guard-0.19.0\waveframe_guard\authority\adapters
+copying waveframe_guard\authority\adapters\common.py -> waveframe_guard-0.19.0\waveframe_guard\authority\adapters
+copying waveframe_guard\authority\adapters\local_registry.py -> waveframe_guard-0.19.0\waveframe_guard\authority\adapters
+copying waveframe_guard\authority\adapters\memory.py -> waveframe_guard-0.19.0\waveframe_guard\authority\adapters
+copying waveframe_guard\cloud\__init__.py -> waveframe_guard-0.19.0\waveframe_guard\cloud
+copying waveframe_guard\cloud\client.py -> waveframe_guard-0.19.0\waveframe_guard\cloud
+copying waveframe_guard\cloud\publication.py -> waveframe_guard-0.19.0\waveframe_guard\cloud
+copying waveframe_guard\quickstarts\__init__.py -> waveframe_guard-0.19.0\waveframe_guard\quickstarts
+copying waveframe_guard\quickstarts\external_agent.py -> waveframe_guard-0.19.0\waveframe_guard\quickstarts
+copying waveframe_guard\server\__init__.py -> waveframe_guard-0.19.0\waveframe_guard\server
+copying waveframe_guard\server\local_api.py -> waveframe_guard-0.19.0\waveframe_guard\server
+Writing waveframe_guard-0.19.0\setup.cfg
+Creating tar archive
+removing 'waveframe_guard-0.19.0' (and everything under it)
+* Building wheel from sdist
+* Creating isolated environment: venv+pip...
+* Installing packages in isolated environment:
+  - setuptools>=77.0
+* Getting build dependencies for wheel...
+running egg_info
+writing waveframe_guard.egg-info\PKG-INFO
+writing dependency_links to waveframe_guard.egg-info\dependency_links.txt
+writing entry points to waveframe_guard.egg-info\entry_points.txt
+writing requirements to waveframe_guard.egg-info\requires.txt
+writing top-level names to waveframe_guard.egg-info\top_level.txt
+reading manifest file 'waveframe_guard.egg-info\SOURCES.txt'
+adding license file 'LICENSE'
+adding license file 'NOTICE'
+writing manifest file 'waveframe_guard.egg-info\SOURCES.txt'
+* Installed build dependency versions:
+  - setuptools==84.0.0
+* Building wheel...
+running bdist_wheel
+running build
+running build_py
+creating build\lib\guard
+copying guard\__init__.py -> build\lib\guard
+creating build\lib\waveframe_guard
+copying waveframe_guard\context.py -> build\lib\waveframe_guard
+copying waveframe_guard\contracts.py -> build\lib\waveframe_guard
+copying waveframe_guard\execute.py -> build\lib\waveframe_guard
+copying waveframe_guard\guard.py -> build\lib\waveframe_guard
+copying waveframe_guard\result.py -> build\lib\waveframe_guard
+copying waveframe_guard\runtime.py -> build\lib\waveframe_guard
+copying waveframe_guard\schemas.py -> build\lib\waveframe_guard
+copying waveframe_guard\_client.py -> build\lib\waveframe_guard
+copying waveframe_guard\__init__.py -> build\lib\waveframe_guard
+creating build\lib\guard\adapters
+copying guard\adapters\compiled_authority.py -> build\lib\guard\adapters
+copying guard\adapters\proposal_normalizer.py -> build\lib\guard\adapters
+copying guard\adapters\upstream_semantics.py -> build\lib\guard\adapters
+copying guard\adapters\__init__.py -> build\lib\guard\adapters
+creating build\lib\guard\cognition
+copying guard\cognition\admissibility.py -> build\lib\guard\cognition
+copying guard\cognition\__init__.py -> build\lib\guard\cognition
+creating build\lib\guard\enforcement
+copying guard\enforcement\chronology.py -> build\lib\guard\enforcement
+copying guard\enforcement\__init__.py -> build\lib\guard\enforcement
+creating build\lib\guard\projections
+copying guard\projections\execution.py -> build\lib\guard\projections
+copying guard\projections\__init__.py -> build\lib\guard\projections
+creating build\lib\guard\runtime
+copying guard\runtime\builders.py -> build\lib\guard\runtime
+copying guard\runtime\continuation.py -> build\lib\guard\runtime
+copying guard\runtime\dependencies.py -> build\lib\guard\runtime
+copying guard\runtime\evaluation.py -> build\lib\guard\runtime
+copying guard\runtime\evidence.py -> build\lib\guard\runtime
+copying guard\runtime\identity.py -> build\lib\guard\runtime
+copying guard\runtime\organization.py -> build\lib\guard\runtime
+copying guard\runtime\__init__.py -> build\lib\guard\runtime
+creating build\lib\guard\sdk
+copying guard\sdk\adapters.py -> build\lib\guard\sdk
+copying guard\sdk\authority_source.py -> build\lib\guard\sdk
+copying guard\sdk\cleanup_local.py -> build\lib\guard\sdk
+copying guard\sdk\execution.py -> build\lib\guard\sdk
+copying guard\sdk\guard.py -> build\lib\guard\sdk
+copying guard\sdk\local_persistence.py -> build\lib\guard\sdk
+copying guard\sdk\repository_boundary.py -> build\lib\guard\sdk
+copying guard\sdk\repository_evidence.py -> build\lib\guard\sdk
+copying guard\sdk\target_binding.py -> build\lib\guard\sdk
+copying guard\sdk\__init__.py -> build\lib\guard\sdk
+creating build\lib\guard\telemetry
+copying guard\telemetry\events.py -> build\lib\guard\telemetry
+copying guard\telemetry\__init__.py -> build\lib\guard\telemetry
+creating build\lib\waveframe_guard\authority
+copying waveframe_guard\authority\cache.py -> build\lib\waveframe_guard\authority
+copying waveframe_guard\authority\development.py -> build\lib\waveframe_guard\authority
+copying waveframe_guard\authority\exceptions.py -> build\lib\waveframe_guard\authority
+copying waveframe_guard\authority\generations.py -> build\lib\waveframe_guard\authority
+copying waveframe_guard\authority\loader.py -> build\lib\waveframe_guard\authority
+copying waveframe_guard\authority\replay.py -> build\lib\waveframe_guard\authority
+copying waveframe_guard\authority\resolver.py -> build\lib\waveframe_guard\authority
+copying waveframe_guard\authority\runtime_facts.py -> build\lib\waveframe_guard\authority
+copying waveframe_guard\authority\types.py -> build\lib\waveframe_guard\authority
+copying waveframe_guard\authority\verifier.py -> build\lib\waveframe_guard\authority
+copying waveframe_guard\authority\__init__.py -> build\lib\waveframe_guard\authority
+creating build\lib\waveframe_guard\cloud
+copying waveframe_guard\cloud\client.py -> build\lib\waveframe_guard\cloud
+copying waveframe_guard\cloud\publication.py -> build\lib\waveframe_guard\cloud
+copying waveframe_guard\cloud\__init__.py -> build\lib\waveframe_guard\cloud
+creating build\lib\waveframe_guard\quickstarts
+copying waveframe_guard\quickstarts\external_agent.py -> build\lib\waveframe_guard\quickstarts
+copying waveframe_guard\quickstarts\__init__.py -> build\lib\waveframe_guard\quickstarts
+creating build\lib\waveframe_guard\server
+copying waveframe_guard\server\local_api.py -> build\lib\waveframe_guard\server
+copying waveframe_guard\server\__init__.py -> build\lib\waveframe_guard\server
+creating build\lib\waveframe_guard\authority\adapters
+copying waveframe_guard\authority\adapters\common.py -> build\lib\waveframe_guard\authority\adapters
+copying waveframe_guard\authority\adapters\local_registry.py -> build\lib\waveframe_guard\authority\adapters
+copying waveframe_guard\authority\adapters\memory.py -> build\lib\waveframe_guard\authority\adapters
+copying waveframe_guard\authority\adapters\__init__.py -> build\lib\waveframe_guard\authority\adapters
+running egg_info
+writing waveframe_guard.egg-info\PKG-INFO
+writing dependency_links to waveframe_guard.egg-info\dependency_links.txt
+writing entry points to waveframe_guard.egg-info\entry_points.txt
+writing requirements to waveframe_guard.egg-info\requires.txt
+writing top-level names to waveframe_guard.egg-info\top_level.txt
+reading manifest file 'waveframe_guard.egg-info\SOURCES.txt'
+adding license file 'LICENSE'
+adding license file 'NOTICE'
+writing manifest file 'waveframe_guard.egg-info\SOURCES.txt'
+installing to build\bdist.win-amd64\wheel
+running install
+running install_lib
+creating build\bdist.win-amd64\wheel
+creating build\bdist.win-amd64\wheel\guard
+creating build\bdist.win-amd64\wheel\guard\adapters
+copying build\lib\guard\adapters\compiled_authority.py -> build\bdist.win-amd64\wheel\.\guard\adapters
+copying build\lib\guard\adapters\proposal_normalizer.py -> build\bdist.win-amd64\wheel\.\guard\adapters
+copying build\lib\guard\adapters\upstream_semantics.py -> build\bdist.win-amd64\wheel\.\guard\adapters
+copying build\lib\guard\adapters\__init__.py -> build\bdist.win-amd64\wheel\.\guard\adapters
+creating build\bdist.win-amd64\wheel\guard\cognition
+copying build\lib\guard\cognition\admissibility.py -> build\bdist.win-amd64\wheel\.\guard\cognition
+copying build\lib\guard\cognition\__init__.py -> build\bdist.win-amd64\wheel\.\guard\cognition
+creating build\bdist.win-amd64\wheel\guard\enforcement
+copying build\lib\guard\enforcement\chronology.py -> build\bdist.win-amd64\wheel\.\guard\enforcement
+copying build\lib\guard\enforcement\__init__.py -> build\bdist.win-amd64\wheel\.\guard\enforcement
+creating build\bdist.win-amd64\wheel\guard\projections
+copying build\lib\guard\projections\execution.py -> build\bdist.win-amd64\wheel\.\guard\projections
+copying build\lib\guard\projections\__init__.py -> build\bdist.win-amd64\wheel\.\guard\projections
+creating build\bdist.win-amd64\wheel\guard\runtime
+copying build\lib\guard\runtime\builders.py -> build\bdist.win-amd64\wheel\.\guard\runtime
+copying build\lib\guard\runtime\continuation.py -> build\bdist.win-amd64\wheel\.\guard\runtime
+copying build\lib\guard\runtime\dependencies.py -> build\bdist.win-amd64\wheel\.\guard\runtime
+copying build\lib\guard\runtime\evaluation.py -> build\bdist.win-amd64\wheel\.\guard\runtime
+copying build\lib\guard\runtime\evidence.py -> build\bdist.win-amd64\wheel\.\guard\runtime
+copying build\lib\guard\runtime\identity.py -> build\bdist.win-amd64\wheel\.\guard\runtime
+copying build\lib\guard\runtime\organization.py -> build\bdist.win-amd64\wheel\.\guard\runtime
+copying build\lib\guard\runtime\__init__.py -> build\bdist.win-amd64\wheel\.\guard\runtime
+creating build\bdist.win-amd64\wheel\guard\sdk
+copying build\lib\guard\sdk\adapters.py -> build\bdist.win-amd64\wheel\.\guard\sdk
+copying build\lib\guard\sdk\authority_source.py -> build\bdist.win-amd64\wheel\.\guard\sdk
+copying build\lib\guard\sdk\cleanup_local.py -> build\bdist.win-amd64\wheel\.\guard\sdk
+copying build\lib\guard\sdk\execution.py -> build\bdist.win-amd64\wheel\.\guard\sdk
+copying build\lib\guard\sdk\guard.py -> build\bdist.win-amd64\wheel\.\guard\sdk
+copying build\lib\guard\sdk\local_persistence.py -> build\bdist.win-amd64\wheel\.\guard\sdk
+copying build\lib\guard\sdk\repository_boundary.py -> build\bdist.win-amd64\wheel\.\guard\sdk
+copying build\lib\guard\sdk\repository_evidence.py -> build\bdist.win-amd64\wheel\.\guard\sdk
+copying build\lib\guard\sdk\target_binding.py -> build\bdist.win-amd64\wheel\.\guard\sdk
+copying build\lib\guard\sdk\__init__.py -> build\bdist.win-amd64\wheel\.\guard\sdk
+creating build\bdist.win-amd64\wheel\guard\telemetry
+copying build\lib\guard\telemetry\events.py -> build\bdist.win-amd64\wheel\.\guard\telemetry
+copying build\lib\guard\telemetry\__init__.py -> build\bdist.win-amd64\wheel\.\guard\telemetry
+copying build\lib\guard\__init__.py -> build\bdist.win-amd64\wheel\.\guard
+creating build\bdist.win-amd64\wheel\waveframe_guard
+creating build\bdist.win-amd64\wheel\waveframe_guard\authority
+creating build\bdist.win-amd64\wheel\waveframe_guard\authority\adapters
+copying build\lib\waveframe_guard\authority\adapters\common.py -> build\bdist.win-amd64\wheel\.\waveframe_guard\authority\adapters
+copying build\lib\waveframe_guard\authority\adapters\local_registry.py -> build\bdist.win-amd64\wheel\.\waveframe_guard\authority\adapters
+copying build\lib\waveframe_guard\authority\adapters\memory.py -> build\bdist.win-amd64\wheel\.\waveframe_guard\authority\adapters
+copying build\lib\waveframe_guard\authority\adapters\__init__.py -> build\bdist.win-amd64\wheel\.\waveframe_guard\authority\adapters
+copying build\lib\waveframe_guard\authority\cache.py -> build\bdist.win-amd64\wheel\.\waveframe_guard\authority
+copying build\lib\waveframe_guard\authority\development.py -> build\bdist.win-amd64\wheel\.\waveframe_guard\authority
+copying build\lib\waveframe_guard\authority\exceptions.py -> build\bdist.win-amd64\wheel\.\waveframe_guard\authority
+copying build\lib\waveframe_guard\authority\generations.py -> build\bdist.win-amd64\wheel\.\waveframe_guard\authority
+copying build\lib\waveframe_guard\authority\loader.py -> build\bdist.win-amd64\wheel\.\waveframe_guard\authority
+copying build\lib\waveframe_guard\authority\replay.py -> build\bdist.win-amd64\wheel\.\waveframe_guard\authority
+copying build\lib\waveframe_guard\authority\resolver.py -> build\bdist.win-amd64\wheel\.\waveframe_guard\authority
+copying build\lib\waveframe_guard\authority\runtime_facts.py -> build\bdist.win-amd64\wheel\.\waveframe_guard\authority
+copying build\lib\waveframe_guard\authority\types.py -> build\bdist.win-amd64\wheel\.\waveframe_guard\authority
+copying build\lib\waveframe_guard\authority\verifier.py -> build\bdist.win-amd64\wheel\.\waveframe_guard\authority
+copying build\lib\waveframe_guard\authority\__init__.py -> build\bdist.win-amd64\wheel\.\waveframe_guard\authority
+creating build\bdist.win-amd64\wheel\waveframe_guard\cloud
+copying build\lib\waveframe_guard\cloud\client.py -> build\bdist.win-amd64\wheel\.\waveframe_guard\cloud
+copying build\lib\waveframe_guard\cloud\publication.py -> build\bdist.win-amd64\wheel\.\waveframe_guard\cloud
+copying build\lib\waveframe_guard\cloud\__init__.py -> build\bdist.win-amd64\wheel\.\waveframe_guard\cloud
+copying build\lib\waveframe_guard\context.py -> build\bdist.win-amd64\wheel\.\waveframe_guard
+copying build\lib\waveframe_guard\contracts.py -> build\bdist.win-amd64\wheel\.\waveframe_guard
+copying build\lib\waveframe_guard\execute.py -> build\bdist.win-amd64\wheel\.\waveframe_guard
+copying build\lib\waveframe_guard\guard.py -> build\bdist.win-amd64\wheel\.\waveframe_guard
+creating build\bdist.win-amd64\wheel\waveframe_guard\quickstarts
+copying build\lib\waveframe_guard\quickstarts\external_agent.py -> build\bdist.win-amd64\wheel\.\waveframe_guard\quickstarts
+copying build\lib\waveframe_guard\quickstarts\__init__.py -> build\bdist.win-amd64\wheel\.\waveframe_guard\quickstarts
+copying build\lib\waveframe_guard\result.py -> build\bdist.win-amd64\wheel\.\waveframe_guard
+copying build\lib\waveframe_guard\runtime.py -> build\bdist.win-amd64\wheel\.\waveframe_guard
+copying build\lib\waveframe_guard\schemas.py -> build\bdist.win-amd64\wheel\.\waveframe_guard
+creating build\bdist.win-amd64\wheel\waveframe_guard\server
+copying build\lib\waveframe_guard\server\local_api.py -> build\bdist.win-amd64\wheel\.\waveframe_guard\server
+copying build\lib\waveframe_guard\server\__init__.py -> build\bdist.win-amd64\wheel\.\waveframe_guard\server
+copying build\lib\waveframe_guard\_client.py -> build\bdist.win-amd64\wheel\.\waveframe_guard
+copying build\lib\waveframe_guard\__init__.py -> build\bdist.win-amd64\wheel\.\waveframe_guard
+running install_data
+creating build\bdist.win-amd64\wheel\waveframe_guard-0.19.0.data\data
+creating build\bdist.win-amd64\wheel\waveframe_guard-0.19.0.data\data\share\doc\waveframe-guard
+copying README.md -> build\bdist.win-amd64\wheel\waveframe_guard-0.19.0.data\data\share\doc\waveframe-guard
+copying SECURITY.md -> build\bdist.win-amd64\wheel\waveframe_guard-0.19.0.data\data\share\doc\waveframe-guard
+creating build\bdist.win-amd64\wheel\waveframe_guard-0.19.0.data\data\share\doc\waveframe-guard\docs\architecture
+copying docs\architecture\REPOSITORY_WORKSPACE.md -> build\bdist.win-amd64\wheel\waveframe_guard-0.19.0.data\data\share\doc\waveframe-guard\docs\architecture
+creating build\bdist.win-amd64\wheel\waveframe_guard-0.19.0.data\data\share\doc\waveframe-guard\docs\getting-started
+copying docs\getting-started\README.md -> build\bdist.win-amd64\wheel\waveframe_guard-0.19.0.data\data\share\doc\waveframe-guard\docs\getting-started
+running install_egg_info
+Copying waveframe_guard.egg-info to build\bdist.win-amd64\wheel\.\waveframe_guard-0.19.0-py3.10.egg-info
+running install_scripts
+creating build\bdist.win-amd64\wheel\waveframe_guard-0.19.0.dist-info\WHEEL
+creating 'D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\package\\.tmp-2uh4ji1k\\waveframe_guard-0.19.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
+adding 'guard/__init__.py'
+adding 'guard/adapters/__init__.py'
+adding 'guard/adapters/compiled_authority.py'
+adding 'guard/adapters/proposal_normalizer.py'
+adding 'guard/adapters/upstream_semantics.py'
+adding 'guard/cognition/__init__.py'
+adding 'guard/cognition/admissibility.py'
+adding 'guard/enforcement/__init__.py'
+adding 'guard/enforcement/chronology.py'
+adding 'guard/projections/__init__.py'
+adding 'guard/projections/execution.py'
+adding 'guard/runtime/__init__.py'
+adding 'guard/runtime/builders.py'
+adding 'guard/runtime/continuation.py'
+adding 'guard/runtime/dependencies.py'
+adding 'guard/runtime/evaluation.py'
+adding 'guard/runtime/evidence.py'
+adding 'guard/runtime/identity.py'
+adding 'guard/runtime/organization.py'
+adding 'guard/sdk/__init__.py'
+adding 'guard/sdk/adapters.py'
+adding 'guard/sdk/authority_source.py'
+adding 'guard/sdk/cleanup_local.py'
+adding 'guard/sdk/execution.py'
+adding 'guard/sdk/guard.py'
+adding 'guard/sdk/local_persistence.py'
+adding 'guard/sdk/repository_boundary.py'
+adding 'guard/sdk/repository_evidence.py'
+adding 'guard/sdk/target_binding.py'
+adding 'guard/telemetry/__init__.py'
+adding 'guard/telemetry/events.py'
+adding 'waveframe_guard/__init__.py'
+adding 'waveframe_guard/_client.py'
+adding 'waveframe_guard/context.py'
+adding 'waveframe_guard/contracts.py'
+adding 'waveframe_guard/execute.py'
+adding 'waveframe_guard/guard.py'
+adding 'waveframe_guard/result.py'
+adding 'waveframe_guard/runtime.py'
+adding 'waveframe_guard/schemas.py'
+adding 'waveframe_guard/authority/__init__.py'
+adding 'waveframe_guard/authority/cache.py'
+adding 'waveframe_guard/authority/development.py'
+adding 'waveframe_guard/authority/exceptions.py'
+adding 'waveframe_guard/authority/generations.py'
+adding 'waveframe_guard/authority/loader.py'
+adding 'waveframe_guard/authority/replay.py'
+adding 'waveframe_guard/authority/resolver.py'
+adding 'waveframe_guard/authority/runtime_facts.py'
+adding 'waveframe_guard/authority/types.py'
+adding 'waveframe_guard/authority/verifier.py'
+adding 'waveframe_guard/authority/adapters/__init__.py'
+adding 'waveframe_guard/authority/adapters/common.py'
+adding 'waveframe_guard/authority/adapters/local_registry.py'
+adding 'waveframe_guard/authority/adapters/memory.py'
+adding 'waveframe_guard/cloud/__init__.py'
+adding 'waveframe_guard/cloud/client.py'
+adding 'waveframe_guard/cloud/publication.py'
+adding 'waveframe_guard/quickstarts/__init__.py'
+adding 'waveframe_guard/quickstarts/external_agent.py'
+adding 'waveframe_guard/server/__init__.py'
+adding 'waveframe_guard/server/local_api.py'
+adding 'waveframe_guard-0.19.0.data/data/share/doc/waveframe-guard/README.md'
+adding 'waveframe_guard-0.19.0.data/data/share/doc/waveframe-guard/SECURITY.md'
+adding 'waveframe_guard-0.19.0.data/data/share/doc/waveframe-guard/docs/architecture/REPOSITORY_WORKSPACE.md'
+adding 'waveframe_guard-0.19.0.data/data/share/doc/waveframe-guard/docs/getting-started/README.md'
+adding 'waveframe_guard-0.19.0.dist-info/licenses/LICENSE'
+adding 'waveframe_guard-0.19.0.dist-info/licenses/NOTICE'
+adding 'waveframe_guard-0.19.0.dist-info/METADATA'
+adding 'waveframe_guard-0.19.0.dist-info/WHEEL'
+adding 'waveframe_guard-0.19.0.dist-info/entry_points.txt'
+adding 'waveframe_guard-0.19.0.dist-info/top_level.txt'
+adding 'waveframe_guard-0.19.0.dist-info/RECORD'
+removing build\bdist.win-amd64\wheel
+Successfully built waveframe_guard-0.19.0.tar.gz and waveframe_guard-0.19.0-py3-none-any.whl

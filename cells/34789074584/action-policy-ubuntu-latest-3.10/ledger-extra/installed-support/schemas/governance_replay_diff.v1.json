@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://waveframe.ai/schemas/governance_replay_diff.v1.json",
+  "title": "governance_replay_diff.v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "from_cutoff",
+    "to_cutoff",
+    "active_authority_changes",
+    "continuity_changes",
+    "replay_posture_changes",
+    "projection_freshness_changes",
+    "governance_health_changes",
+    "operational_summary_changes"
+  ],
+  "properties": {
+    "schema_version": { "const": "governance_replay_diff.v1" },
+    "from_cutoff": { "type": ["string", "null"] },
+    "to_cutoff": { "type": ["string", "null"] },
+    "active_authority_changes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/change" }
+    },
+    "continuity_changes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/change" }
+    },
+    "replay_posture_changes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/change" }
+    },
+    "projection_freshness_changes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/change" }
+    },
+    "governance_health_changes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/change" }
+    },
+    "operational_summary_changes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/change" }
+    }
+  },
+  "$defs": {
+    "change": {
+      "type": "object",
+      "required": ["change_type", "ref", "from", "to"],
+      "properties": {
+        "change_type": {
+          "enum": ["added", "removed", "changed"]
+        },
+        "ref": { "type": "string", "minLength": 1 },
+        "from": {},
+        "to": {}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

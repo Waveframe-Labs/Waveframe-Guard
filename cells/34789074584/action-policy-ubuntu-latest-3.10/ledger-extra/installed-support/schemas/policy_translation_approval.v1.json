@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/policy_translation_approval.v1.json",
+  "title": "Waveframe Policy Translation Approval v1",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "approval_id", "approval_hash", "proposal_id", "proposal_hash", "confirmation_hash", "review_hash", "source_policy_ref", "source_snapshot_hash", "authority_ref", "capability_catalog", "coverage", "approved_by", "approved_at"],
+  "properties": {
+    "schema_version": {"const": "policy_translation_approval.v1"},
+    "approval_id": {"type": "string", "pattern": "^policy-translation-approval-[a-f0-9]{64}$"}, "approval_hash": {"$ref": "#/$defs/sha256"},
+    "proposal_id": {"type": "string", "minLength": 1}, "proposal_hash": {"$ref": "#/$defs/sha256"}, "confirmation_hash": {"$ref": "#/$defs/sha256"}, "review_hash": {"$ref": "#/$defs/sha256"},
+    "source_policy_ref": {"type": "string", "minLength": 3}, "source_snapshot_hash": {"$ref": "#/$defs/sha256"}, "authority_ref": {"type": "string", "minLength": 3},
+    "capability_catalog": {"$ref": "policy_translation_proposal.v1.json#/$defs/catalogRef"},
+    "coverage": {"$ref": "policy_translation_confirmation.v1.json#/$defs/coverage"},
+    "approved_by": {"type": "string", "minLength": 1}, "approved_at": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"}
+  },
+  "$defs": {"sha256": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"}}
+}

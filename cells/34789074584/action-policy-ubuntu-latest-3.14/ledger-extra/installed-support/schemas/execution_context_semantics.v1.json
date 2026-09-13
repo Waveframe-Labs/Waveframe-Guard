@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/execution_context_semantics.v1.json",
+  "title": "Execution Context Semantics",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "execution_context",
+    "execution_boundary",
+    "requires_replay_evidence",
+    "requires_state_snapshot",
+    "requires_temporal_validation",
+    "resume_behavior",
+    "continuity_risk_profile",
+    "runtime_enforced_by"
+  ],
+  "properties": {
+    "schema_version": { "const": "execution_context_semantics.v1" },
+    "execution_context": {
+      "enum": [
+        "local_interactive",
+        "queued_async",
+        "scheduled_execution",
+        "human_approval_chain",
+        "external_system_execution",
+        "agent_orchestrated",
+        "multi_stage_workflow",
+        "resumed_workflow",
+        "cloud_attested_execution",
+        "unspecified"
+      ]
+    },
+    "execution_boundary": {
+      "enum": [
+        "local_process",
+        "external_worker",
+        "scheduler",
+        "human_review",
+        "external_system",
+        "agent_orchestrator",
+        "cloud_attestation",
+        "unspecified"
+      ]
+    },
+    "requires_replay_evidence": { "type": "boolean" },
+    "requires_state_snapshot": { "type": "boolean" },
+    "requires_temporal_validation": { "type": "boolean" },
+    "resume_behavior": {
+      "enum": [
+        "none",
+        "revalidate_on_resume",
+        "resume_after_approval",
+        "unspecified"
+      ]
+    },
+    "continuity_risk_profile": {
+      "enum": ["low", "medium", "high", "unspecified"]
+    },
+    "runtime_enforced_by": { "const": "Guard/Cloud" }
+  }
+}

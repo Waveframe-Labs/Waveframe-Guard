@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/compiled_authority_contract.v1.json",
+  "title": "Compiled Authority Contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "contract_id",
+    "contract_version",
+    "authority_ref",
+    "compiled_from",
+    "governed_targets",
+    "governed_operations",
+    "mutation_classes",
+    "capability_scope",
+    "approval_requirements",
+    "continuity_requirements",
+    "replay_obligations",
+    "lifecycle_requirements",
+    "escalation_requirements",
+    "delegation_requirements",
+    "identity_bindings",
+    "execution_admissibility_semantics",
+    "determinism",
+    "non_goals",
+    "contract_hash"
+  ],
+  "properties": {
+    "schema_version": { "const": "compiled_authority_contract.v1" },
+    "contract_id": { "type": "string", "minLength": 1 },
+    "contract_version": { "type": "string", "minLength": 1 },
+    "authority_ref": { "type": "string", "minLength": 1 },
+    "compiled_from": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "semantic_commit_id",
+        "semantic_commit_hash",
+        "source_hash",
+        "resolved_interpretation_count"
+      ],
+      "properties": {
+        "schema_version": { "const": "semantic_commit_bundle.v1" },
+        "semantic_commit_id": { "type": ["string", "null"] },
+        "semantic_commit_hash": { "type": ["string", "null"] },
+        "source_hash": { "type": ["string", "null"] },
+        "resolved_interpretation_count": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "governed_targets": { "type": "array", "items": { "type": "string" } },
+    "governed_operations": { "type": "array", "items": { "type": "string" } },
+    "mutation_classes": { "type": "array", "items": { "type": "string" } },
+    "capability_scope": { "type": "array", "items": { "type": "object" } },
+    "approval_requirements": { "type": "object" },
+    "continuity_requirements": { "type": "object" },
+    "replay_obligations": { "type": "array", "items": { "type": "object" } },
+    "lifecycle_requirements": { "type": "object" },
+    "escalation_requirements": { "type": "object" },
+    "delegation_requirements": { "type": "object" },
+    "identity_bindings": { "type": "object" },
+    "execution_admissibility_semantics": { "type": "object" },
+    "determinism": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "input_schema",
+        "output_schema",
+        "same_input_same_output",
+        "runtime_enforced_by"
+      ],
+      "properties": {
+        "input_schema": { "const": "semantic_commit_bundle.v1" },
+        "output_schema": { "const": "compiled_authority_contract.v1" },
+        "same_input_same_output": { "const": true },
+        "runtime_enforced_by": { "const": "Guard/Cloud" }
+      }
+    },
+    "non_goals": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "contract_hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+  }
+}

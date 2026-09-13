@@ -1,0 +1,23 @@
+{
+  "action_requirements": {
+    "create": {
+      "allow": [
+        {
+          "match": "prefix",
+          "value": "generated/"
+        }
+      ],
+      "deny": [
+        {
+          "match": "prefix",
+          "value": "generated/private/"
+        }
+      ],
+      "required_role": "repository-maintainer"
+    }
+  },
+  "contract_hash": "7fe6444ed4b139014072c8107d40d32998ef2f2c87eb3832a4983de5deeb2bd2",
+  "contract_id": "repository-create-only",
+  "contract_version": "3.0.0",
+  "schema_version": "compiled_action_contract.v1"
+}

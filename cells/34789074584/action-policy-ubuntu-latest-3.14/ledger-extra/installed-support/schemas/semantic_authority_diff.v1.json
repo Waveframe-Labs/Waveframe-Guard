@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/semantic_authority_diff.v1.json",
+  "title": "semantic_authority_diff.v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "previous_authority_ref",
+    "current_authority_ref",
+    "semantic_changes",
+    "operational_impact_narratives",
+    "guard_compatibility_projection",
+    "replay_compatibility_warnings",
+    "deterministic_guarantees"
+  ],
+  "properties": {
+    "schema_version": { "const": "semantic_authority_diff.v1" },
+    "previous_authority_ref": { "type": "string", "minLength": 1 },
+    "current_authority_ref": { "type": "string", "minLength": 1 },
+    "semantic_changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "schema_version",
+          "change_class",
+          "semantic_path",
+          "severity",
+          "operational_impact",
+          "guard_enforcement_implications",
+          "replay_compatibility_warnings"
+        ],
+        "properties": {
+          "schema_version": { "const": "semantic_meaning_change.v1" },
+          "change_class": {
+            "enum": [
+              "tightened_control",
+              "relaxed_control",
+              "scope_expansion",
+              "scope_reduction",
+              "scope_change",
+              "identity_change",
+              "continuity_change",
+              "replay_change",
+              "delegation_change",
+              "capability_added",
+              "capability_removed",
+              "approval_strengthened",
+              "approval_weakened"
+            ]
+          },
+          "semantic_path": { "type": "string", "minLength": 1 },
+          "before": {},
+          "after": {},
+          "severity": {
+            "enum": [
+              "informational",
+              "moderate",
+              "high-impact",
+              "breaking-governance-change"
+            ]
+          },
+          "operational_impact": { "type": "array", "items": { "type": "string" } },
+          "guard_enforcement_implications": { "type": "array", "items": { "type": "string" } },
+          "replay_compatibility_warnings": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "operational_impact_narratives": { "type": "array", "items": { "type": "string" } },
+    "guard_compatibility_projection": {
+      "type": "object",
+      "required": ["schema_version", "new_enforcement_obligations", "compatibility_posture", "non_goals"],
+      "properties": {
+        "schema_version": { "const": "guard_compatibility_projection.v1" },
+        "new_enforcement_obligations": { "type": "array", "items": { "type": "string" } },
+        "compatibility_posture": { "enum": ["guard_behavior_changes", "no_new_guard_obligations"] },
+        "non_goals": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "replay_compatibility_warnings": { "type": "array", "items": { "type": "string" } },
+    "deterministic_guarantees": { "type": "array", "items": { "type": "string" } }
+  }
+}

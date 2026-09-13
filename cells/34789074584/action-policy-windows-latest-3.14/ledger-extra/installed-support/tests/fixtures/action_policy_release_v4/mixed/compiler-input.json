@@ -1,0 +1,37 @@
+{
+  "schema_version": "action_policy.v1",
+  "contract_id": "repository-mixed",
+  "contract_version": "3.0.0",
+  "action_requirements": {
+    "create": {
+      "required_role": "repository-maintainer",
+      "allow": [
+        {
+          "match": "exact",
+          "value": "generated/new.md"
+        }
+      ],
+      "deny": [
+        {
+          "match": "exact",
+          "value": "README.md"
+        }
+      ]
+    },
+    "modify": {
+      "required_role": "security-reviewer",
+      "allow": [
+        {
+          "match": "exact",
+          "value": "README.md"
+        }
+      ],
+      "deny": [
+        {
+          "match": "exact",
+          "value": "generated/new.md"
+        }
+      ]
+    }
+  }
+}

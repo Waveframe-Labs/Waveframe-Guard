@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/semantic_stability_projection.v1.json",
+  "title": "Semantic Stability Projection",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "source_hash",
+    "previous_source_hash",
+    "same_source",
+    "previous_extraction_signature",
+    "current_extraction_signature",
+    "extraction_method_changed",
+    "semantic_meaning_changed",
+    "interpretation_decision_changes",
+    "stability_observations",
+    "stability_posture",
+    "non_goals"
+  ],
+  "properties": {
+    "schema_version": { "const": "semantic_stability_projection.v1" },
+    "source_hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "previous_source_hash": { "type": ["string", "null"] },
+    "same_source": { "type": "boolean" },
+    "previous_extraction_signature": { "type": ["object", "null"] },
+    "current_extraction_signature": { "type": "object" },
+    "extraction_method_changed": { "type": "boolean" },
+    "semantic_meaning_changed": { "type": "boolean" },
+    "interpretation_decision_changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["field", "previous_interpretation", "current_interpretation"],
+        "properties": {
+          "field": { "type": "string", "minLength": 1 },
+          "previous_interpretation": {},
+          "current_interpretation": {},
+          "previous_decision_id": { "type": ["string", "null"] },
+          "current_decision_id": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "stability_observations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["observation_type", "severity", "summary", "details"],
+        "properties": {
+          "observation_type": { "type": "string", "minLength": 1 },
+          "severity": { "enum": ["info", "warning"] },
+          "summary": { "type": "string", "minLength": 1 },
+          "details": { "type": "object" }
+        }
+      }
+    },
+    "stability_posture": {
+      "enum": ["stable", "semantic_stability_review", "semantic_drift_detected"]
+    },
+    "non_goals": { "type": "array", "items": { "type": "string" } }
+  }
+}

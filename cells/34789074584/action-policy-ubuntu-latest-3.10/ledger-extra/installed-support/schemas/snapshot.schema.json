@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Waveframe-Labs/Governance-Ledger/schemas/snapshot.schema.json",
+  "title": "Governance-Ledger Snapshot",
+  "type": "object",
+  "required": [
+    "snapshot_id",
+    "created_at",
+    "review_id",
+    "review_status",
+    "snapshot_hash",
+    "review"
+  ],
+  "properties": {
+    "snapshot_id": {
+      "type": "string",
+      "pattern": "^snapshot-[A-Fa-f0-9]{12}$"
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "review_id": {
+      "type": "string"
+    },
+    "review_status": {
+      "type": "string",
+      "enum": ["pending", "reviewed", "approved", "rejected", "compiled", "deployed"]
+    },
+    "snapshot_hash": {
+      "type": "string",
+      "pattern": "^[A-Fa-f0-9]{64}$"
+    },
+    "review": {
+      "$ref": "review.schema.json"
+    }
+  },
+  "additionalProperties": false
+}

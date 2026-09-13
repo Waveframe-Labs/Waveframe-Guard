@@ -1,0 +1,112 @@
+{
+  "schema_version": "runtime_fact_schema.v1",
+  "schema_id": "repository-changes-runtime",
+  "schema_version_number": "3.0.0",
+  "name": "Repository change proposal facts",
+  "facts": [
+    {
+      "fact_id": "actor.subject_kind",
+      "type": "enum",
+      "enum_values": [
+        "agent"
+      ],
+      "canonical_unit": null,
+      "required": true,
+      "derivation": {
+        "kind": "proposal_field",
+        "field_path": "/actor/subject_kind"
+      },
+      "comparison_operators": [
+        "==",
+        "!="
+      ]
+    },
+    {
+      "fact_id": "actor.principal_id",
+      "type": "string",
+      "enum_values": null,
+      "canonical_unit": null,
+      "required": false,
+      "derivation": {
+        "kind": "proposal_field",
+        "field_path": "/actor/principal_id"
+      },
+      "comparison_operators": [
+        "==",
+        "!="
+      ]
+    },
+    {
+      "fact_id": "actor.role",
+      "type": "enum",
+      "enum_values": [
+        "repository-maintainer",
+        "repository-reviewer",
+        "security-reviewer"
+      ],
+      "canonical_unit": null,
+      "required": false,
+      "derivation": {
+        "kind": "proposal_field",
+        "field_path": "/actor/role"
+      },
+      "comparison_operators": [
+        "==",
+        "!="
+      ]
+    },
+    {
+      "fact_id": "proposal.action",
+      "type": "enum",
+      "enum_values": [
+        "create",
+        "modify"
+      ],
+      "canonical_unit": null,
+      "required": true,
+      "derivation": {
+        "kind": "proposal_field",
+        "field_path": "/action"
+      },
+      "comparison_operators": [
+        "==",
+        "!="
+      ]
+    },
+    {
+      "fact_id": "proposal.resource.kind",
+      "type": "enum",
+      "enum_values": [
+        "repository_change",
+        "repository_path"
+      ],
+      "canonical_unit": null,
+      "required": true,
+      "derivation": {
+        "kind": "proposal_field",
+        "field_path": "/resource/kind"
+      },
+      "comparison_operators": [
+        "==",
+        "!="
+      ]
+    },
+    {
+      "fact_id": "proposal.resource.path",
+      "type": "string",
+      "enum_values": null,
+      "canonical_unit": null,
+      "required": false,
+      "derivation": {
+        "kind": "proposal_field",
+        "field_path": "/resource/path"
+      },
+      "comparison_operators": [
+        "==",
+        "!=",
+        "starts_with"
+      ]
+    }
+  ],
+  "schema_hash": "sha256:3fcf3af0a61f91a78b171ccd6247db9f0f908e1baf44aa50ece12349c44bb582"
+}

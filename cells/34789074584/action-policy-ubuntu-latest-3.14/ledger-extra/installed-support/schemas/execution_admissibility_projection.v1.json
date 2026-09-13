@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/execution_admissibility_projection.v1.json",
+  "title": "Execution Admissibility Projection",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "authority_ref",
+    "compiled_contract_hash",
+    "projection_posture",
+    "required_runtime_conditions",
+    "operator_summary",
+    "runtime_enforced_by",
+    "non_goals"
+  ],
+  "properties": {
+    "schema_version": { "const": "execution_admissibility_projection.v1" },
+    "authority_ref": { "type": "string" },
+    "compiled_contract_hash": { "type": ["string", "null"] },
+    "projection_posture": { "enum": ["requirements_projected", "no_requirements_projected"] },
+    "required_runtime_conditions": { "type": "array", "items": { "type": "string" } },
+    "operator_summary": { "type": "array", "items": { "type": "string" } },
+    "runtime_enforced_by": { "const": "Guard/Cloud" },
+    "non_goals": { "type": "array", "items": { "type": "string" } }
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Waveframe-Labs/Governance-Ledger/schemas/review.schema.json",
+  "title": "Governance-Ledger Review",
+  "type": "object",
+  "required": [
+    "review_id",
+    "created_at",
+    "review_status",
+    "detected_constraints",
+    "warnings"
+  ],
+  "properties": {
+    "review_id": {
+      "type": "string",
+      "pattern": "^review-[A-Za-z0-9_-]+$"
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "source_document": {
+      "type": ["string", "null"]
+    },
+    "review_status": {
+      "type": "string",
+      "enum": ["pending", "reviewed", "approved", "rejected", "compiled", "deployed"]
+    },
+    "detected_constraints": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/detected_constraint"
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/warning"
+      }
+    },
+    "lifecycle": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "compiled_contract": {
+      "type": "object",
+      "required": ["contract_id", "contract_version", "contract_hash"],
+      "properties": {
+        "contract_id": {"type": "string"},
+        "contract_version": {"type": "string"},
+        "contract_hash": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "compiled_by": {
+      "type": "string"
+    },
+    "compiled_at": {
+      "type": "string"
+    },
+    "deployment": {
+      "$ref": "deployment.schema.json"
+    },
+    "rollback": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "detected_constraint": {
+      "type": "object",
+      "required": ["type", "value", "source_text"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["required_role", "separation_of_duties", "approval_threshold"]
+        },
+        "value": {},
+        "operation": {
+          "type": "string"
+        },
+        "source_text": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "warning": {
+      "type": "object",
+      "required": ["type", "severity", "text"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["unsupported_constraint", "ambiguous_authority", "extraction_gap"]
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["warning", "error"]
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

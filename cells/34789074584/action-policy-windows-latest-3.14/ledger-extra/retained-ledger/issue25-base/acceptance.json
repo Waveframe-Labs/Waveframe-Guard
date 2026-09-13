@@ -1,0 +1,1064 @@
+{
+  "python": "3.14.7 (tags/v3.14.7:823f032, Aug  5 2026, 10:51:32) [MSC v.1944 64 bit (AMD64)]",
+  "platform": "Windows",
+  "commands": [
+    {
+      "label": "head",
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "stack-base",
+      "command": [
+        "git",
+        "merge-base",
+        "--is-ancestor",
+        "3cc34e7b3cb6efca5102e0e22d559ec0c0fd583f",
+        "a34c11d81b85963794cf28b4adad091fac15e130"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "clean-tracked-checkout",
+      "command": [
+        "git",
+        "diff",
+        "--exit-code",
+        "HEAD"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "preserved-evidence",
+      "command": [
+        "git",
+        "diff",
+        "--exit-code",
+        "4dbdfbaee92d43b888cae751ecaee5d9e4ec20b7",
+        "--",
+        "tests/fixtures/action_policy_v4",
+        "tests/fixtures/golden_path",
+        "tests/fixtures/provenance_complete",
+        "docs/acceptance/issue17",
+        "docs/acceptance/issue19",
+        "examples/native_v4_development.py",
+        "requirements-action-policy-dev.txt"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "preserved-catalog-release",
+      "command": [
+        "git",
+        "diff",
+        "--exit-code",
+        "3cc34e7b3cb6efca5102e0e22d559ec0c0fd583f",
+        "--",
+        "tests/fixtures",
+        "schemas",
+        "examples/native_v4_release.py"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "runtime-diff",
+      "command": [
+        "git",
+        "diff",
+        "--name-only",
+        "3cc34e7b3cb6efca5102e0e22d559ec0c0fd583f",
+        "--",
+        "governance_ledger"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "release-metadata",
+      "command": [
+        "C:\\hostedtoolcache\\windows\\Python\\3.14.7\\x64\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\tools\\check_ledger_release_metadata.py"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "build",
+      "command": [
+        "C:\\hostedtoolcache\\windows\\Python\\3.14.7\\x64\\python.exe",
+        "-m",
+        "build",
+        "--outdir",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\dist"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "twine",
+      "command": [
+        "C:\\hostedtoolcache\\windows\\Python\\3.14.7\\x64\\python.exe",
+        "-m",
+        "twine",
+        "check",
+        "--strict",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\dist\\governance_ledger-0.9.0-py3-none-any.whl",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\dist\\governance_ledger-0.9.0.tar.gz"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "source-pip",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\source\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "pip==25.3"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "source-install",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\source\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "-r",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\requirements-ci.txt",
+        "-e",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger[dev]",
+        "-r",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\requirements-action-policy-dev.txt",
+        "--report",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\source-install.json"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "source-check",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\source\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "source-freeze",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\source\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "freeze",
+        "--all"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "source-provenance",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\source\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\tools\\check_compiler_provenance.py"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "source-default",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\source\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\tools\\acceptance_pytest.py",
+        "-q",
+        "-ra",
+        "--junitxml",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\source-default.xml",
+        "tests"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "source-native",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\source\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\tools\\acceptance_pytest.py",
+        "-q",
+        "-ra",
+        "--junitxml",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\source-native.xml",
+        "tests"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "installed-pip",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "pip==25.3"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "installed-install",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "-r",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\requirements-ci.txt",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\dist\\governance_ledger-0.9.0-py3-none-any.whl[dev]",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-inputs\\windows-3.14\\ledger-extra\\retained-base\\cricore_contract_compiler-0.5.0-py3-none-any.whl",
+        "--report",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-install.json"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "installed-check",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "installed-freeze",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "freeze",
+        "--all"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "installed-provenance",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-support\\tools\\check_compiler_provenance.py"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "installed-default",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-support\\tools\\acceptance_pytest.py",
+        "-q",
+        "-ra",
+        "--junitxml",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-default.xml",
+        "tests"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "installed-native",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-support\\tools\\acceptance_pytest.py",
+        "-q",
+        "-ra",
+        "--junitxml",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-native.xml",
+        "tests"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "package",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-support\\tools\\check_action_policy_package.py"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "release-package",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-support\\tools\\check_release_catalog_package.py"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "installed-release-example",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-support\\examples\\native_v4_release.py"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "installed-cli",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed\\Scripts\\governance-ledger.exe",
+        "--help"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "candidate-history",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-support\\tools\\check_action_policy_history.py"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "resolver-negative-pip",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\resolver-negative\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "pip==25.3"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "resolver-negative-install",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\resolver-negative\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "-r",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\requirements-ci.txt",
+        "--report",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\resolver-negative-install.json"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "resolver-negative-check",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\resolver-negative\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "resolver-negative-freeze",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\resolver-negative\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "freeze",
+        "--all"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "reject-compiler-040",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\resolver-negative\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "--dry-run",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\dist\\governance_ledger-0.9.0-py3-none-any.whl",
+        "cricore-contract-compiler==0.4.0"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 1
+    },
+    {
+      "label": "historical-extra-pip",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\historical-extra\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "pip==25.3"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "historical-extra-install",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\historical-extra\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "-r",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\requirements-ci.txt",
+        "governance-ledger[guard]==0.8.0",
+        "waveframe-guard==0.17.0",
+        "cricore-contract-compiler==0.4.0",
+        "--report",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\historical-extra-install.json"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "historical-extra-check",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\historical-extra\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "historical-extra-freeze",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\historical-extra\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "freeze",
+        "--all"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "historical-v3-example",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\historical-extra\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-support\\examples\\native_v3_multi_control.py"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "published-0.7.0-pip",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\published-0.7.0\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "pip==25.3"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "published-0.7.0-install",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\published-0.7.0\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "-r",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\requirements-ci.txt",
+        "governance-ledger==0.7.0",
+        "waveframe-guard==0.18.0",
+        "cricore-contract-compiler==0.4.0",
+        "--report",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\published-0.7.0-install.json"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "published-0.7.0-check",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\published-0.7.0\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "published-0.7.0-freeze",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\published-0.7.0\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "freeze",
+        "--all"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "published-0.7.0-rejections",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\published-0.7.0\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-support\\tools\\check_action_policy_old_runtime.py"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "published-0.7.0-release-rejections",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\published-0.7.0\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-support\\tools\\check_action_policy_old_runtime.py",
+        "--fixtures",
+        "action_policy_release_v4"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "published-0.8.0-pip",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\published-0.8.0\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "pip==25.3"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "published-0.8.0-install",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\published-0.8.0\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "-r",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\requirements-ci.txt",
+        "governance-ledger==0.8.0",
+        "waveframe-guard==0.18.0",
+        "cricore-contract-compiler==0.4.0",
+        "--report",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\published-0.8.0-install.json"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "published-0.8.0-check",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\published-0.8.0\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "published-0.8.0-freeze",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\published-0.8.0\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "freeze",
+        "--all"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "published-0.8.0-rejections",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\published-0.8.0\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-support\\tools\\check_action_policy_old_runtime.py"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "published-0.8.0-release-rejections",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\published-0.8.0\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-support\\tools\\check_action_policy_old_runtime.py",
+        "--fixtures",
+        "action_policy_release_v4"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "published-history",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\published-0.8.0\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-support\\tools\\check_action_policy_history.py"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "legacy-operations",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\published-0.8.0\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-support\\tools\\check_action_policy_legacy_operations.py"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-base\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "final-head",
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "final-clean-tracked-checkout",
+      "command": [
+        "git",
+        "diff",
+        "--exit-code",
+        "HEAD"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    }
+  ],
+  "suites": {
+    "source-default": {
+      "passed": 674,
+      "skipped": 47,
+      "skip_reasons": {
+        "collection skipped": 1,
+        "explicit action-policy development opt-in required; see docs/ACTION_POLICY_DEVELOPMENT.md": 44,
+        "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+      },
+      "release_passed": 70,
+      "native_passed": 0
+    },
+    "source-native": {
+      "passed": 718,
+      "skipped": 3,
+      "skip_reasons": {
+        "collection skipped": 1,
+        "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+      },
+      "release_passed": 70,
+      "native_passed": 44
+    },
+    "installed-default": {
+      "passed": 674,
+      "skipped": 47,
+      "skip_reasons": {
+        "collection skipped": 1,
+        "explicit action-policy development opt-in required; see docs/ACTION_POLICY_DEVELOPMENT.md": 44,
+        "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+      },
+      "release_passed": 70,
+      "native_passed": 0
+    },
+    "installed-native": {
+      "passed": 718,
+      "skipped": 3,
+      "skip_reasons": {
+        "collection skipped": 1,
+        "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+      },
+      "release_passed": 70,
+      "native_passed": 44
+    }
+  },
+  "gates": {
+    "base": "passed",
+    "combined_extra": "pending"
+  },
+  "combined_extra": {
+    "status": "pending",
+    "executed": false,
+    "reason": "Separate Guard 0.19.0 candidate required",
+    "ledger": "0.9.0",
+    "guard": "0.19.0"
+  },
+  "release_ready": false,
+  "runtime_activation_ready": false,
+  "head": "a34c11d81b85963794cf28b4adad091fac15e130",
+  "expected_head": "a34c11d81b85963794cf28b4adad091fac15e130",
+  "base": "3cc34e7b3cb6efca5102e0e22d559ec0c0fd583f",
+  "package_sha256": {
+    "governance_ledger-0.9.0-py3-none-any.whl": "d7710160038b107bc2aae83680b84c85cb11b149927c60c171a3ff6bb2059d82",
+    "governance_ledger-0.9.0.tar.gz": "f6cd4491c6ed97d322c80c129794ea7ef69f03f93370990952cc600c03f2b8b3"
+  },
+  "wheel_metadata": {
+    "Metadata-Version": "2.4",
+    "Name": "governance-ledger",
+    "Version": "0.9.0",
+    "Summary": "Governance compiler and semantic derivation infrastructure for deterministic governance operationalization.",
+    "Author": "Waveframe Labs",
+    "License-Expression": "Apache-2.0",
+    "Requires-Python": ">=3.10",
+    "Description-Content-Type": "text/markdown",
+    "License-File": "LICENSE",
+    "Requires-Dist": "tomli>=2; python_version < \"3.11\" and extra == \"dev\"",
+    "Provides-Extra": "dev",
+    "Dynamic": "license-file"
+  },
+  "sdist_resource_sha256": {
+    "docs/ACTION_POLICY_DEVELOPMENT.md": "13c90717d5e9f84ebf8bdc6e94dda2e3e19925b4de9947718d4b411e1b3fb4f7",
+    "docs/DOMAIN_PACK_COMPILER.md": "8ec1c0a304c63bc2730e8a65421ef068238ee2e801001a6150b369a1983782af",
+    "docs/LEDGER_090_ACCEPTANCE.md": "7a3cdb2e39a0966b95f76b7be861d03644f38dfbd683a5d26bd9fe18d4f2b583",
+    "docs/PUBLISHED_AUTHORITY_SPEC.md": "4d6dff119b1e82fb37dd38dba330a5ff451f0f34487c5bf228e8f7a0d860a122",
+    "docs/RELEASE_CATALOG_3.md": "77229b828d8545eed92e27bf9ea1ab002e59358ed95e01d248ff9723665f6ee7",
+    "docs/UNTRUSTED_POLICY_TRANSLATION.md": "0f236bcd99ff52860c05b272dbc0d8ff19a150aad944ae393eeedd5aa0ffc660",
+    "docs/acceptance/issue17/README.md": "a8061f2ad6b0e295ca0451e02c4387cf8638317a528e6c6c45e3265920143831",
+    "docs/acceptance/issue17/compiler-provenance.json": "64b7d7f3ae63b8a6120677915a1c23e31502fcd4a9c8663cc61190eeab0c2764",
+    "docs/acceptance/issue17/guard018-ledger07.json": "578d950f68dc5c810c172028ccc3ea9bc451c9de7ae1844e702c673470aff35f",
+    "docs/acceptance/issue17/guard018-ledger08.json": "e83a376af4ffc2b82d77427b7d3cf851d5f66fff75c655891a6ae5beb528a83d",
+    "docs/acceptance/issue17/historical-hash-comparison.json": "14ea2645542910cb2a3dfcef55c5ae4d3f6733a95897ac5095051aace7baa081",
+    "docs/acceptance/issue17/legacy-operations.json": "40d8029d6a9dcd14fc3c36cf71b89585a9498c949d3b307c2b9894cdf510d1bf",
+    "docs/acceptance/issue17/package-acceptance.json": "ca1530e8cfa9f2bbe149a25e5c20285648a3fa7ac34156e7abd9a47881fe3fed",
+    "docs/acceptance/issue19/README.md": "02a146abb6571d3ee5d20762219d4662755328a4b9a7790e53162d4612cc5dfe",
+    "examples/native_v3_multi_control.py": "8a6e9f202523fe20e09d32820eaa4c2c167c094f5c2659fe711a85f407cda0b8",
+    "examples/native_v4_development.py": "aa431b8ec4f32fb4eeb2a9d0d3adbeb9f3abfae4a5af9e188cac8a6e46467b81",
+    "examples/native_v4_release.py": "460664a8dd7287dbcfb05e7a636a74296e320925956fe9b3ea83fefe550fe388",
+    "schemas/approval_chain_semantics.v1.json": "d525252570f72090a06ca20a4cbb1da355ca1bb52bc861debba9792f15ab5b6d",
+    "schemas/authority_bundle.v1.json": "57e250f55e99581c07bba655e094748f888d7d0048f9a4b24e102291ae5586cd",
+    "schemas/authority_bundle.v2.json": "eae39d9b737894ec59fb17d4f2ea90e343890cba71b246ad8feab42b8baab270",
+    "schemas/authority_bundle.v3.json": "ff7f900a56fcc1586cff52ed3c0d145b4c932102123355236ea749a866178277",
+    "schemas/authority_bundle.v4.json": "855d49db56fcc86582f83e4b68cf566e30b70c511276c0ad06c20e944a653ab1",
+    "schemas/authority_diff_impact.v1.json": "25a5fca956b41a2ade4afca58be343208221da240cbfe3faa26aa2aa2c45d059",
+    "schemas/authority_execution_projection.v1.json": "5bbb6ef6ff5d9339990903fe7e929b787b2f7ce50944d63a06fdcf78c0d50948",
+    "schemas/authority_lifecycle_event.v1.json": "f2a8c530685bde507dabb5c6ef8de5df18c08820fa91473e951233f2512c4e86",
+    "schemas/authority_role_binding.v1.json": "2b8916a68bfcc7091727053ac2b99316c0ae9066ccf03760975f63034cb3fdc2",
+    "schemas/capability_continuity_semantics.v1.json": "9c6ea6b60ac73a5b8ef0c3c266f126466bb58eb9cbbd4c32cd42519be3fa11c5",
+    "schemas/capability_evidence_requirement.v1.json": "39511c34b08d4ef70090a625c8e94418998fcaa06d906dc8359d115192b56ed5",
+    "schemas/capability_execution_constraint.v1.json": "75bb3798e2d50201cbee80b9a2901c05f9a6c8a4278fcde848a34e8865d7ae0a",
+    "schemas/capability_identity_requirement.v1.json": "c4b2d9ea8c806d308fe541a7f7a8ad68dbadc81ca17e09ed0e4870c8315a0d71",
+    "schemas/capability_requirement.v1.json": "713045db44409c313d400fa1015a0f86d51ca67668606832377f12f23c000580",
+    "schemas/compiled_authority_contract.v1.json": "f54a6b33f277681fd63607123b71065a57d522c86f2e08c638eec8b4c1e004db",
+    "schemas/compiled_authority_contract.v2.json": "4262c7a49c7fbc89c3dce0b4476da4c1e51c91cf070287847d4593ad46ce0e96",
+    "schemas/compiled_authority_contract.v3.json": "ebe707784015e58c5b66fce0aa5586d21b677058423e9149d82736c56efadc34",
+    "schemas/constraint_ir.v1.json": "137c34453934d843f25310c752272927648f5b1342b99420335dde70e064b358",
+    "schemas/continuity_transition_event.v1.json": "f730b25d1f0f34d86a583d923c4756a172381f9eee039234e14dcae073d45ac1",
+    "schemas/contract_registry.schema.json": "17a8a7d41ad10bde2c7382336acc4782d44ac26e9c8b0c8bb1c9df50a1f1400d",
+    "schemas/cricore_policy.schema.json": "1c22d093352d3aa73f33bc11ceb2bf4ce2c20ec378bd5d5cfcb28f52910fb181",
+    "schemas/deployment.schema.json": "7f031bdee5fb1c6635ee0d8aa32dd4db7d93d14c0ed3c14d00d295cdca1f403e",
+    "schemas/domain_pack.v1.json": "3ff190f1a520271dbeff61276391b4b2d4892d433407399885af5f1e6639ab1a",
+    "schemas/execution_admissibility_projection.v1.json": "ffeadf5eff885889334058bb238b12560f2068c25df21de63222b54c29515db8",
+    "schemas/execution_context_semantics.v1.json": "8f84c5b070af0278cd8714d8e9e79286ba512af648feb3c17fc8cdeb83d2ed89",
+    "schemas/execution_requirement_projection.v1.json": "cba34c31a9fec91f21760ca0e20cb69f478a4c52e39052ace07c3f146bf3b89f",
+    "schemas/governance_actor.v1.json": "a317386bdb3cf035d5cefeefc485454e3ae1a94d5edade9f048dac8dea9fc190",
+    "schemas/governance_capability.v1.json": "923b991a47f89e8ef5e9e2667450d29ab370cd3bf106d97f678235e6129f926f",
+    "schemas/governance_compilation_report.v1.json": "e819fc864f978b5590673dc9f53a0f1cb5b2742d83ca42612ec6210f62c9f89d",
+    "schemas/governance_diagnostic.v1.json": "6b25c86086aa2414ba80cf056168ff740b444e105784bf5564333569a6be8b9a",
+    "schemas/governance_event.v1.json": "b83c5a8f39cb2d653c0f1e2465801a88ee494dd88bb7800a2f99ba5bcb537ece",
+    "schemas/governance_impact_preview.v1.json": "00672c5c2e0cfc0ab09c640e1c714a8543433b3dcfc13b5bb1b61cc0880688bd",
+    "schemas/governance_lineage_verification.v1.json": "b6ddd1c54de24a2527d24f1201bce9be4c9f63fd9dfa66841274b105a453fed6",
+    "schemas/governance_quality_diagnostic.v1.json": "47a3e051c22ce4b45808d32b47e1bd91a968c358630d838f3d3bb8e3ac49676f",
+    "schemas/governance_replay_diff.v1.json": "bc489ae89593154981a13e8dac8a743eeb2fe5ce3fcf5127d6f718813a0b1ee2",
+    "schemas/governance_replay_state.v1.json": "10ab601a28f24c3c2b54f3b01f997cafa14337ee08df11fdc2466f3432e1c55b",
+    "schemas/governance_review_packet.v1.json": "8fdafe477ce45ff2202853736dd3d021f5be8667f8dbdfe68f285f818f8fb6ce",
+    "schemas/governance_semantic_extraction.v1.json": "05e47e1dedaef99abc43f3ba8f1c1c70ec7dfa0ce4a97df2300c1e1afecaecff",
+    "schemas/governance_semantic_provenance.v1.json": "e651b85f5441ffc549baef5a7b249714d7f464ff929c29b66390358c04c95c21",
+    "schemas/governance_semantic_reconciliation.v1.json": "9453671f11a217aaa6bcb30d41efd91b13f5afa1d0151d8b0e805efa90122dc9",
+    "schemas/governance_source.v1.json": "e124c7867a4a2d3ea7a9142f9b563a7c4d7ef7b701e5975529e5b64e53737493",
+    "schemas/guard_enforcement_projection.v1.json": "aa0084f6564804cfdb662d31a368c11f49ae27270f8579a05cbca7b487fd4494",
+    "schemas/identity_continuity_semantics.v1.json": "5721b6a5cac139488c7c2859524147139dd1a1bf745101966bc308edf0e02add",
+    "schemas/policy_mapping_decision.v1.json": "34e1c2172fc91f821451c9db4aaf0c92c54e0c18dfd4e5c59f39f85c4b9d36f5",
+    "schemas/policy_translation_approval.v1.json": "8dae65ae0d952eab3775654e8f00fdca8de27eb64557f97919eee6234f7f25c2",
+    "schemas/policy_translation_capability_catalog.v1.json": "75c83a2051a1d9ce39ff6266e6c062972ae02374b533a76fccadd018056b8772",
+    "schemas/policy_translation_capability_catalog.v2.json": "ababdfc246873abb531740e324d30a831c87204bbee8489721eedb888cd4346b",
+    "schemas/policy_translation_commitment.v1.json": "e2e11cab279289fc3657a9836eb8bc6e5d3ddd17f14838e211a0235a8f04d180",
+    "schemas/policy_translation_confirmation.v1.json": "de2b4e9c7c9736e3ee1b0e19fe4884cfd4ee4cec1f1d1c8afa49ad9c26dc0669",
+    "schemas/policy_translation_proposal.v1.json": "2819196a5a93fc9d6c3322e7f3eb103b459be36c93408bb277de94728c890ae7",
+    "schemas/policy_translation_review.v1.json": "8e3f346523d5f5c497ea35bce57674a40372a04d9d3c989104c109a795af794f",
+    "schemas/policy_translation_run_evidence.v1.json": "88c318f3d00d416b390741b0896045b8a0d6323ac3a9942fbc078a0e409024fb",
+    "schemas/projection_generation_event.v1.json": "d611b434ffbf87160ba4176bbd1363fdfd6efd61222190878a059f6d8ee12b3c",
+    "schemas/projection_invalidation_event.v1.json": "6e0e48b559f1b709b802dc5dbf65e5e68d66a1d0490dda0d8bd7c4736b3ec862",
+    "schemas/publication_manifest.schema.json": "7a711930af369c19fd089de7d40b990ce94bf8199589c6d998934ac1d815b80a",
+    "schemas/publication_manifest.v1.json": "a1af75e2accf9ce8b844f4ed8376ddf87d7c66726bde907d180e714af02c8928",
+    "schemas/publication_receipt.v1.json": "442a655c486eb325461b056a7af4e8b49bbbccbe0592c384a53322666f0486d0",
+    "schemas/publication_receipt.v2.json": "40bd0325d7170f39a717a369b928ec913c9c340177a957fd5dbfd7fe752183b6",
+    "schemas/publication_receipt.v3.json": "2e9486a593e84cb9976169bc50bc9fff9469083d83eb425ffb199c3ba531f737",
+    "schemas/publication_receipt.v4.json": "bdea930ae98332f2a111c64c069059db6710df49bea66af47a4a6c784926a16f",
+    "schemas/replay_authority_request.v1.json": "24581f0ebda59f1465d4abaf710706a20053acf5b2de0dae54a02baa0eb49e5c",
+    "schemas/replay_execution_request.v1.json": "e2b38c1b0294f08c0868a6cddae3f972f3f6bf124fdb728b0e6e922d270526b6",
+    "schemas/review.schema.json": "78113c2015dda229822eb456feba9ee171de78a639b33493cf11aa6dd77d4963",
+    "schemas/runtime_consequence_projection.v1.json": "37cb936be2c720e6a0c5e3d3df11de779965e5af2c241c5442f607cf8224b411",
+    "schemas/runtime_fact_schema.v1.json": "061d3fb2bd1e146bc2dea427209818395708b48b998e09d8779b9cc5fe9c2e53",
+    "schemas/semantic_ambiguity.v1.json": "09b2ab67efe455f576213b2e8ba6b1db2744cf1affce50151a036f60b1adbff2",
+    "schemas/semantic_authority_diff.v1.json": "b1384da16190c9cb9153c6c3d306332dd5f506b4549d3457c646e974397abfaf",
+    "schemas/semantic_commit_bundle.v1.json": "f230010047f73a1ffb9c3884a9e3239bc8cbeec8c203ff3499dc09e559171d42",
+    "schemas/semantic_conflict.v1.json": "157bc1641fcadfad7320c7c27ac978f24ace8cf86ee373d04ba73d52d05a5d6f",
+    "schemas/semantic_interpretation_decision.v1.json": "10bbf0ee94fe9abda3f10f553555f3684c40a1230c4acb670a3cb197570884e5",
+    "schemas/semantic_lifecycle_enforcement_projection.v1.json": "c26809079607495a1080a93e0fa92e8aa07f15720baeb206be1d6850afb42ceb",
+    "schemas/semantic_reconciliation_projection.v1.json": "4c90cd0fc61dbba49436b9eb67eda3f3cd8fe6d905bf7e5d27cc5c456e769b28",
+    "schemas/semantic_stability_projection.v1.json": "6dfa9e65a052b80b54de6049fedb5093dcfe87a502ac7d034a95e177a9597e1f",
+    "schemas/snapshot.schema.json": "2e1d030a4221eb8c91eb1e2785c9c03b87c4bfea9015701ee80d698f30ecdeb7",
+    "schemas/state_posture_snapshot_semantics.v1.json": "27b1baaadaee790b96393b3ce514e48302bc3b344065ab4228dc048a7f31129d",
+    "schemas/temporal_authority_semantics.v1.json": "26fa341533f19b3f882af5510fe6dc1e707c50888cc5aadb0b925bb627e81545",
+    "tests/fixtures/action_policy_release_v4/catalog.json": "942128829f41fc1309c8f35d63b478c5adb5149f7f2b87871d7463ec3a7cf090",
+    "tests/fixtures/action_policy_release_v4/create-only/approval.json": "a4cbbd36b725dd8c0b983af7838f97a4716d904d0f3539a9658b155cde046730",
+    "tests/fixtures/action_policy_release_v4/create-only/authority-bundle.json": "3e73f341b58ec6e414f861e9011c0dee5b0390af609ad7d81acdee126a5d61d6",
+    "tests/fixtures/action_policy_release_v4/create-only/compiled-authority.json": "d49bedb69e71ba09c66f042ab5e96c08bdb164461f48ad4ac7eafccfe1747f92",
+    "tests/fixtures/action_policy_release_v4/create-only/compiler-input.json": "db90dd00fa7ebf11e6adbcfc857e38dec645f06e727b0c4124c932b3de8a40e4",
+    "tests/fixtures/action_policy_release_v4/create-only/compiler-output.json": "8ca17493e27e015ec13c35082ab8a3592fd1cb867b3289c87a1a548871326864",
+    "tests/fixtures/action_policy_release_v4/create-only/confirmation.json": "e64de5e70dddbfdec292dd67a3794fab29af7dbc2a2489987ebc28a72b73bcc9",
+    "tests/fixtures/action_policy_release_v4/create-only/constraint-ir.json": "6177016ed82cb0901380f2d633cc77c8aa54b646227a945611ae1683df842eb9",
+    "tests/fixtures/action_policy_release_v4/create-only/proposal.json": "8b126f4452d1e7954a63d4451e0778d27a80e6cc311a4bf2420b9d510304b92f",
+    "tests/fixtures/action_policy_release_v4/create-only/publication-receipt.json": "bb8b99a4ce44eb7ea4ae0a03130445ad2ae226a8f0f062359103ce99d0b2ecb2",
+    "tests/fixtures/action_policy_release_v4/create-only/review.json": "d130381a036daa0be516d641305ef7625d63d594a721dd183faa5434bedfebf1",
+    "tests/fixtures/action_policy_release_v4/create-only/source-interpretation.json": "62dd847316aac460238a3773af338f7f0ad27b0eb1b793c5c448793951bbaeb6",
+    "tests/fixtures/action_policy_release_v4/create-only/source.txt": "d8d4172c1ec486db09fea4227b69fd705aada0fcdce4311912dee53edfef75ea",
+    "tests/fixtures/action_policy_release_v4/domain-pack.json": "7f15e670358c9a85b0702fdaeb63f2a49c20132f84d8090f91c9374874d5c886",
+    "tests/fixtures/action_policy_release_v4/mixed/approval.json": "7bcc010f704e0906b833227b238610c05dc60a79c794a9ad1b830b49bdd60572",
+    "tests/fixtures/action_policy_release_v4/mixed/authority-bundle.json": "5bba2d5b1b3ce058f0dacb4113407e639385387f381f4ba98b4377d422dd473c",
+    "tests/fixtures/action_policy_release_v4/mixed/compiled-authority.json": "f1295392b1c5b5a2f32c3601f76a228f7af5e4874c9b95b75a3099624d51be75",
+    "tests/fixtures/action_policy_release_v4/mixed/compiler-input.json": "4209d8777b4525238ac436c9fcd1caa55d693d187302df364affe2412070c699",
+    "tests/fixtures/action_policy_release_v4/mixed/compiler-output.json": "bfba01fdf1533a3aa5e30e466764c84642c105b1e55ad22eb85593f1ec5d55f5",
+    "tests/fixtures/action_policy_release_v4/mixed/confirmation.json": "9a30139b1bc875f3b3ea64a5e5ede50a33c8580b746ba2c52b8303eb04c8e8db",
+    "tests/fixtures/action_policy_release_v4/mixed/constraint-ir.json": "bd9a4eed415bcbac668a9914749ad5faf5bf621ec051f8397d6529400470ef98",
+    "tests/fixtures/action_policy_release_v4/mixed/proposal.json": "e5f704c2577c48debda40de28647aee8b9a2d5519aaafe7f80ef63d85e99e343",
+    "tests/fixtures/action_policy_release_v4/mixed/publication-receipt.json": "e6b332193e4ea66b362986fa8271e4e787d12d2e57cd39a6d0e10726b8f265e4",
+    "tests/fixtures/action_policy_release_v4/mixed/review.json": "be78ae8a9ddc88b6fa81a46fdfbb1dedc6d8c61262a550509278de1709567616",
+    "tests/fixtures/action_policy_release_v4/mixed/source-interpretation.json": "c3ba3c3cb90d30e47cc2ceddeee759e88d7724d5f62feaaf5b58cc9bcf7f3446",
+    "tests/fixtures/action_policy_release_v4/mixed/source.txt": "0d9eb38ee881616f709e95f6c1ac1f278342dfb96d1eb00379dc7060a9711221",
+    "tests/fixtures/action_policy_release_v4/modify-only/approval.json": "3734f965620d3e96b922c5ccc0d6adaf4941877b3101e2a5be34c7e217de7ed2",
+    "tests/fixtures/action_policy_release_v4/modify-only/authority-bundle.json": "6649b44a2b4943d23dda015197230745922263d1de309ee437659dcff82de022",
+    "tests/fixtures/action_policy_release_v4/modify-only/compiled-authority.json": "dd701db30b8e052a62899ece0dcc5d91ea9bdbb005be60dbf37b25508ea009da",
+    "tests/fixtures/action_policy_release_v4/modify-only/compiler-input.json": "557426ee4f16da22f1e0be59290a818715613a5ed3804fad312aff189e45e320",
+    "tests/fixtures/action_policy_release_v4/modify-only/compiler-output.json": "0aa5a3b1b43f2b8dec75d534dd70a77cdbc7bbe84b29fed50cf3bf09ef7cc2a2",
+    "tests/fixtures/action_policy_release_v4/modify-only/confirmation.json": "53dd7d76a925301a1b6138f87748b4dbc06c74f00a101a828971f27c08919022",
+    "tests/fixtures/action_policy_release_v4/modify-only/constraint-ir.json": "5c82142f5ccb28fda065f99a9d945410fe6bd61438ef803b96a66048ea361c09",
+    "tests/fixtures/action_policy_release_v4/modify-only/proposal.json": "8855254085a5030f65b8b58317f41572886617ce5a4fd2916241185b687c5010",
+    "tests/fixtures/action_policy_release_v4/modify-only/publication-receipt.json": "2c60ac3230c79237c3f1d531f5bfc3ccc4dc5527acb45b70e602f28da1d2fb10",
+    "tests/fixtures/action_policy_release_v4/modify-only/review.json": "3207c3e19670311ebf49abd9dc9a3fd0a9f927277ab69cf0b5b98d802c7384d1",
+    "tests/fixtures/action_policy_release_v4/modify-only/source-interpretation.json": "d98767f5db7dbb8afa55ba67a2bc43cdcb8b9ade1f82b030a26c82b8d20f3499",
+    "tests/fixtures/action_policy_release_v4/modify-only/source.txt": "5ca420ad3a71138b58aea3e3035bcd7d818eb71d3bf504c5b7cd9f5c05b6eb31",
+    "tests/fixtures/action_policy_release_v4/runtime-fact-schema.json": "0b2087cbd1d3fdbb654d99c4cf9a88a67aa0479f32dcdface59942a74e76843a",
+    "tests/fixtures/action_policy_v4/create-only/approval.json": "1002a55d8e3fff34919ddaf410619959372a45e7b0dfe4fd5b77bfd81098d652",
+    "tests/fixtures/action_policy_v4/create-only/authority-bundle.json": "0169b851961dbbd121756fa45695ecebde1ab2cc94a6addb2318ecb807965222",
+    "tests/fixtures/action_policy_v4/create-only/compiled-authority.json": "914eb0f086d1b5f7fcb37bbaeb47c06ae49ee38aad91db8d1ac44415ac8c048b",
+    "tests/fixtures/action_policy_v4/create-only/compiler-input.json": "e707c0047bbc4799491d74e8c254007144ecc367b7d6ad8b98ca3e37ce5dd4f9",
+    "tests/fixtures/action_policy_v4/create-only/compiler-output.json": "1c8c7ead43c9f2ba4f026456db6abd216181d8432056e3ef6157d6523c3e5824",
+    "tests/fixtures/action_policy_v4/create-only/confirmation.json": "5837540c2a04852cfdae685ea2db5faa1ce3ac9459d6dcf21d6c2db6e69356bb",
+    "tests/fixtures/action_policy_v4/create-only/constraint-ir.json": "c0375e50a909ebef790b1c7fa7f0bfab53c85248f849fda997659e77263d26e0",
+    "tests/fixtures/action_policy_v4/create-only/proposal.json": "529668136f93dc71fa16cc77084d16836158ed3127b1d38d54e7a67771054298",
+    "tests/fixtures/action_policy_v4/create-only/publication-receipt.json": "2ad12801a71a8dc01eff71ef6e82a6e54b68d365e2e2eebc9158472de3a44ba2",
+    "tests/fixtures/action_policy_v4/create-only/review.json": "a8a76e86fea0f5a6141c9d18dd89114a5e9d957e25d0c9857a53971b7b419555",
+    "tests/fixtures/action_policy_v4/create-only/source-interpretation.json": "d1b41a8f8f62c12c5df0efb15f84dd8609a86af900ae51b438a05d8487b3b12f",
+    "tests/fixtures/action_policy_v4/create-only/source.txt": "d8d4172c1ec486db09fea4227b69fd705aada0fcdce4311912dee53edfef75ea",
+    "tests/fixtures/action_policy_v4/mixed/approval.json": "e1a651892e40be533e2dc1ffa7b17191acaf2dacb8acb2885efc35e34d4ee273",
+    "tests/fixtures/action_policy_v4/mixed/authority-bundle.json": "fef0cc8f282e91a99e3e34265e593ac24468168e5f1abbffb9c5d6050e47d7d1",
+    "tests/fixtures/action_policy_v4/mixed/compiled-authority.json": "ed4efa1d7bf005a07c3fbacb34aac369befa50a4e50533111f5dd89e3a591e06",
+    "tests/fixtures/action_policy_v4/mixed/compiler-input.json": "f4fb377c4cf43572dcf296ae0e2428216424998c54dd620d98f35cc04b5b4833",
+    "tests/fixtures/action_policy_v4/mixed/compiler-output.json": "8a6e90a758e82c9e214e0c1fa9b656d5dc8958772b363864d8d58a77a7d8c35e",
+    "tests/fixtures/action_policy_v4/mixed/confirmation.json": "0f3aa414ba4f6e197bdd7111e0463f69c10bb75b4b481e564769b82f82746033",
+    "tests/fixtures/action_policy_v4/mixed/constraint-ir.json": "316d7b815f82ee60b99363d574946022c9469f90ac1b75916e3e2a3ef68e9c98",
+    "tests/fixtures/action_policy_v4/mixed/proposal.json": "3d91e42816f005627ea94be0e335448c12e63636a781ddab05e72ef128bfae15",
+    "tests/fixtures/action_policy_v4/mixed/publication-receipt.json": "4c0570cfb2984473ad6fc4ee1158db14cadd45092cc8f915c2d9bdca978cb5e9",
+    "tests/fixtures/action_policy_v4/mixed/review.json": "3f58b0e215538e54dc249ffd944bb8545cd695eef96599aef994c213b3f56c8d",
+    "tests/fixtures/action_policy_v4/mixed/source-interpretation.json": "c47a191a521aafdb8d0764f1753b3a89953341ad11a587221842757bffe3eab3",
+    "tests/fixtures/action_policy_v4/mixed/source.txt": "0d9eb38ee881616f709e95f6c1ac1f278342dfb96d1eb00379dc7060a9711221",
+    "tests/fixtures/action_policy_v4/modify-only/approval.json": "05b32a0875ad3ce89e53abe66ac7fc198c8c71fecd56f673bed9d99aa392bd57",
+    "tests/fixtures/action_policy_v4/modify-only/authority-bundle.json": "8f76c75bf1353ce4d2aef6e70cb059a8c1d796babc8c02e29f0c2ec2b720a5a8",
+    "tests/fixtures/action_policy_v4/modify-only/compiled-authority.json": "28fc6531120859e0667eb9ee201701915bb7da71e7110bbf916d834c746974dc",
+    "tests/fixtures/action_policy_v4/modify-only/compiler-input.json": "c04a4c5e3e541765b4d6f7d89ba90535a783a2fd5c4a4f252f2444555a26e9d6",
+    "tests/fixtures/action_policy_v4/modify-only/compiler-output.json": "7d620ae8ccc7d5f6056dbe677fcef26a2c62288f73685535a3f4ce2ce424ec17",
+    "tests/fixtures/action_policy_v4/modify-only/confirmation.json": "efef2d22b06046e0764bcec74f3d2a597bc02b1e1089aeca475c20577740c79d",
+    "tests/fixtures/action_policy_v4/modify-only/constraint-ir.json": "151765410fc7650850af577dd8ba94d381aa42680961a64b6d2c12f3bd79eb85",
+    "tests/fixtures/action_policy_v4/modify-only/proposal.json": "ac5fe325a1e8a0e4b40d30a1e6815c67344070ed0bb98ad3b1830fdc7c0a9ced",
+    "tests/fixtures/action_policy_v4/modify-only/publication-receipt.json": "e98b185cb5b6ce7ac453c4eddce8d8df3222c8e16a519faafe3b4d36040fdf3e",
+    "tests/fixtures/action_policy_v4/modify-only/review.json": "54e9a2440eb7492dd86a71b76d8db01e91c53b2738ee22db9e8e9bbef0278a95",
+    "tests/fixtures/action_policy_v4/modify-only/source-interpretation.json": "e641b1d97ded88e6666daa9aa05cfc65ff005fd2c3497d13c18983bf1343c238",
+    "tests/fixtures/action_policy_v4/modify-only/source.txt": "5ca420ad3a71138b58aea3e3035bcd7d818eb71d3bf504c5b7cd9f5c05b6eb31",
+    "tests/fixtures/golden_path/README.md": "890b1fa8cd2ca8070aada3c08ddbf4704bfdef987712723644fed79e310a763f",
+    "tests/fixtures/golden_path/contracts/finance-policy-1.0.0.authority-bundle.json": "0ff32258801718c1393d75328d1d81b0580432aa5bf1b2c9e16ce0d3ef14a5bf",
+    "tests/fixtures/golden_path/contracts/finance-policy-1.0.0.contract.json": "9daa8c40abfb7efa6451b7e5ac8abf2574d6b24f7e40b4fb6055ad5dd4925e05",
+    "tests/fixtures/golden_path/contracts/finance-policy-1.0.0.publication-receipt.json": "de9a05196f43d617b57b878e82b85956a371d2ab5273d89f06a49a0d9f0cf18c",
+    "tests/fixtures/golden_path/contracts/index.json": "0ce8680b708dd94f5a0c8fb60ada05341257b98326b0ccedee99d7c9c9899004",
+    "tests/fixtures/provenance_complete/publication-inputs.json": "eb8c19b2d42af7fb9cd835df4682dd73edbd4c972160bbfeaef883ede3626bf6",
+    "tests/fixtures/provenance_complete/repository-change-policy.base64": "86e8ec1aaebdc506725a6d3528cfb0d8c8044356e67339861b7d02566df958b5",
+    "tests/normalization_corpus/policies/access-control/production-access.json": "f26ddf02b01a2db39bdd92314479c126bb4b5393f7ca4ba1b227c35dcb7dca15",
+    "tests/normalization_corpus/policies/compliance/ambiguous-retention.json": "38aeb949dfd167599e3edf2e1e673724376565e35acf5379f3ba8a97d4c9e5d7",
+    "tests/normalization_corpus/policies/finance/transfer-approval.json": "b10259282f6bdabeb18aaf162d49f514287657ab28605418ac17d6d322d05589",
+    "tests/normalization_corpus/policies/healthcare/patient-access.json": "bf8a338f4934efdda0d5db14fee450a548306698fa729c04f6bc5d37906e5d52",
+    "tests/normalization_corpus/policies/procurement/purchase-approval.json": "abac23bf5cc2a3441605ff5f4f8307c648b3dcd7daf54d8318a1a618cbfa00a2",
+    "tests/test_action_policy_v4.py": "cc1bb7191107e8d50e432da6fa054ea0a74cca65262cbcb8fe255744b6733972",
+    "tests/test_authority_execution_projection.py": "496dd37929e771f3ca3083da12c9d150f7f4b3edb3e7e07f1aef078132381d09",
+    "tests/test_contract_linkage.py": "18e0de503900830c848962d6107f07a0598aab9c301be93ce741ceb472fbde49",
+    "tests/test_customer_policy.py": "16796f285fa9ddc340dd38ed6bb4ec2b3ec3d0c7dfc691af5d19a57cf4fa547a",
+    "tests/test_deployment.py": "e0a48e736c9fd448db015d127be34566512e5389fecd7415aa3957a312c46e2b",
+    "tests/test_diff.py": "ab5171a511af2ff766e1643373c4aea1f11940bc251e8a9940f34e4a11d103d5",
+    "tests/test_domain_policy.py": "2cc6d7520f869b05fa3b017d28d3a4f8d079f0eb9f3f0607393d96c0ed7f3d17",
+    "tests/test_extract_compile.py": "e865218849726996e4c87a28d584d71d305b7d305930608e84faed8af7a752a7",
+    "tests/test_golden_path_authority_fixture.py": "78d74a2e83acf3fbe363a8cdd6f162adb6de69d315b086de91d663d4f4a47c5c",
+    "tests/test_governance_chronology_replay_contract.py": "26c8e94b62ff3001ab940826a20c07b1f79f1c03baeb8cf2d20db87c9e9d4a20",
+    "tests/test_governance_consistency_diagnostics.py": "a67a972983e9961331b30061e0e3b370e5b36f99305e9f721547a8f7d57c4787",
+    "tests/test_governance_event_model.py": "48f8e2595b95031fef1d1e60ce6df3cc7e8eaa12f09402b5359159eb72ff51e1",
+    "tests/test_governance_extraction.py": "ed085e28bb177084c637cc53c1edc1ef1270cf9e5e4a57873d16944051cb540f",
+    "tests/test_governance_replay.py": "2c130a01ea7dcf96eadb80b5706d198f0d058db4030a0088208e9b7d4f758bf1",
+    "tests/test_guard_optional_compatibility.py": "427b37ffc4ecb6980e960f08ba16ff71b8c470e3de60732a29b70fed03e72c16",
+    "tests/test_lifecycle.py": "16d5cd40b27db2f20fcd7fac1b6dceda101e98aa514a53e333b55173321c560e",
+    "tests/test_normalization_corpus.py": "f42f8589d3f59eba8116c75e19f154f2c431634c039dd4a1c0769f13509033fc",
+    "tests/test_optional_guard_dependency.py": "4ac259df287f08bddf5f2dd0beb32a3eeb766483c5ad46cd9cc5c11746fa69f5",
+    "tests/test_package_provenance.py": "7f92e14483870678c17ddef82b4820ea8e24096840ecc5147f1b9e1162d9fa6d",
+    "tests/test_policy_translation.py": "60132954987281858517c79f6b8fc5b0fe37d0e81a850c311153fbfe87eadda7",
+    "tests/test_policy_translation_publication_v3.py": "58e888f278963ae1cfc04081c9312d2280a9ea681b99a9528765862943b0d01b",
+    "tests/test_provenance_complete_publication.py": "82bf07f146aa39acb3a3c3ee3b3f26c57629a310c5706f7f4f0d3f5baadd5771",
+    "tests/test_publication_integrity.py": "c9ea9856aa837d5ad4155986542d8d7484215ce6d28c32781a3ec3c17918f66b",
+    "tests/test_published_authority_registry.py": "e2bf485350475b7fdb224ea18a5404649b54f5fbd4283e86321a55c0e5698ef4",
+    "tests/test_release_catalog_v4.py": "f8b4c185efe39f80ec0d6d740abccfedd7a4907d62926677ccbb30b40f845f48",
+    "tests/test_review.py": "2376677374d9b10ff457609f31d0e1a88e859d3c1029b3695e4adeda98e64829",
+    "tests/test_rollback.py": "b8f60ba43cff28b431c55daf7e1c39d503b041880d88de3fd5950579c542c468",
+    "tests/test_runner_publish.py": "704a6460d7bcc97fe8d436bcafc02440bf75cfef41d0337ae1ea19b185d4ac5f",
+    "tests/test_semantic_compiler.py": "e62a67d97f24bcb51a182412cd6c2b6e01d7407859e9ddec1ae7d0411282d287",
+    "tests/test_semantic_diagnostics.py": "856141f1d74959a11784fc9e2d2b953766487d1aee3711517713b0dc7ec77b9a",
+    "tests/test_semantic_diff.py": "23277d30329fe944d2ab385735c6250483a55f83fd5ae9598402838ebd4c1fea",
+    "tests/test_semantic_diffing.py": "50db8cd7514cf688ec8d131e3fb994c95c77f00026ad4569e9667c77494be507",
+    "tests/test_semantic_extraction.py": "69eae49d1efd75f3da30c64e0d1a3671501ed82ef2f0785b3afe08f7dd618aaf",
+    "tests/test_semantic_governance_model_doc.py": "c27e1767b1386966ddbdf23cb3b56a59472711167813ca20aa3acfe36d970a4c",
+    "tests/test_semantic_lifecycle_enforcement_projection.py": "7a1d716cd4cf8383b771c21dddc793b595eb71624b2d36bf8e90234046e39181",
+    "tests/test_semantic_packets.py": "6f5e775a29fc5c503bd7e5db18ac3916adb643084e4b34ceeef27af8ef4bc71e",
+    "tests/test_semantic_preview.py": "982d2281f2a0c20cfdba2cf67c20d1cd839adc3a02af5d25e9fc86eeaedb66ae",
+    "tests/test_semantic_publication.py": "1268f1dad4e2258896ffe46fcb43a0bc028a8a8ac04a47b9a0c9b0b63ccd5429",
+    "tests/test_semantic_reconciliation.py": "fbfc40b3f40fe75cd6dabbe4af0663208383bff743c4586893582182255ee155",
+    "tests/test_snapshot.py": "84513674206791486dc2792b13bdf29aa0496493ad94abdcf3f98185fe29179b",
+    "tests/test_validation.py": "522b73344fe1a4b7888e75220e59a28f7af930da8b1215f6c7773711290be347",
+    "tools/acceptance_pytest.py": "23809514e7c49b8ca8cd42cdd6ec82de5cb20057230934f41b06a98f019e63c6",
+    "tools/check_action_policy_history.py": "9b24ecad453c5f5fc205f81d22a43508c37ef56f1ae9ee7614dfa483edab3fc7",
+    "tools/check_action_policy_legacy_operations.py": "d71c3a9cbb250d80e9e448849e238e0bde5aa456b3bc3f9d7c1b1c2387c7af7b",
+    "tools/check_action_policy_old_runtime.py": "bc121887f4cdd6f2ba9d305174b4f73114fa2e49a25429dccedf5c386d629936",
+    "tools/check_action_policy_package.py": "2e4212dcb43132a20ef1966f24033fac6b26d3e44ba6737d84ef982281cbffcc",
+    "tools/check_compiler_provenance.py": "27367a03c007a0ba8b50797368c2f5a27b475f4681fa1f2ae12b705c6261c46f",
+    "tools/check_compiler_wheel_cache.py": "1d3593dc0b1e2a6c39e6c3ab706d5d612760cab24fbf13e6530334fff9de3d20",
+    "tools/check_guard_release_execution.py": "aae447be42b17f4fbb5e1d38c2b4cf1de20f90ed77e3ecd5a4e66d92efa360a0",
+    "tools/check_installed_wheel_set.py": "db89e56835908f11b37aea9ce972b1cc60faa1dde2987e3e9ffa671c1aed2828",
+    "tools/check_ledger_release_metadata.py": "b099c4f539708f4d4f939fb1393316c46a05fb30a7199d78df1a2554def8bbab",
+    "tools/check_release_catalog_package.py": "f22aedb03c2d36f247ba600c40ceb68b983b762ae7c67fcaeea889bd6a711a6a",
+    "tools/fetch_guard_candidate.py": "1fb7d7669e3a6970126cd250de8c46048e77694166263b8c19e428d0d3e09f1c",
+    "tools/package_provenance.py": "053ee2495e54e1d96b876546b54cad467d9f6b0bb3ff01914cf5e16059e1c341",
+    "tools/run_action_policy_acceptance.py": "0785d101934a3fb0a87c9bbd7ffa191e1d4488f80c75e98d370cb061250a47d5",
+    "tools/run_guard_extra_acceptance.py": "9b56fc0098754e1bef022cf65aec58ae099efbea90058205bba710e032b67b4d"
+  },
+  "verified_inputs": {
+    "evidence_commit": "e6008345c9891ec6ffb5088f38177022e3cef4aa",
+    "cell": "windows-3.14",
+    "archive": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-inputs\\artifacts\\final-action-policy-windows-latest-3.14.zip",
+    "archive_sha256": "a8e4ff0670056461be5aa7d8f71e460af43daf1d103fc6708c9c57926265adb7",
+    "guard_manifest": {
+      "source_url": "https://github.com/Waveframe-Labs/Waveframe-Guard",
+      "source_commit": "0161ef8a52e052d1bc1366cdc93ce13a9bd535ed",
+      "provenance_kind": "coordinator-supplied-exact-candidate",
+      "wheel": "waveframe_guard-0.19.0-py3-none-any.whl",
+      "wheel_sha256": "57e3a468c1708fb32de8907d8cdc0d0612a551195eb5d0db43334a98917cddab"
+    },
+    "guard_wheel": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-inputs\\windows-3.14\\package\\waveframe_guard-0.19.0-py3-none-any.whl",
+    "compiler_wheel": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-inputs\\windows-3.14\\ledger-extra\\retained-base\\cricore_contract_compiler-0.5.0-py3-none-any.whl",
+    "compiler_build": {
+      "filename": "cricore_contract_compiler-0.5.0-py3-none-any.whl",
+      "sha256": "d694470d77f8806b883255d8810a780de4f92824a8daa80b885d315d1198dd60",
+      "origin": {
+        "url": "https://github.com/Waveframe-Labs/cricore-contract-compiler.git",
+        "vcs_info": {
+          "commit_id": "ae590dee058d3481e384dea850d5b7d980f533ff",
+          "requested_revision": "ae590dee058d3481e384dea850d5b7d980f533ff",
+          "vcs": "git"
+        }
+      },
+      "kind": "locally built pip-cached VCS wheel",
+      "supplied_archive_hash_verified": false,
+      "note": "Archive hashes can differ across builds; complete compiled fixture outputs must remain identical."
+    },
+    "historical_combined_status": "failed",
+    "historical_guard_install_upgrade": "passed",
+    "release_ready": false
+  },
+  "compiler_wheel": {
+    "filename": "cricore_contract_compiler-0.5.0-py3-none-any.whl",
+    "sha256": "d694470d77f8806b883255d8810a780de4f92824a8daa80b885d315d1198dd60",
+    "origin": {
+      "url": "https://github.com/Waveframe-Labs/cricore-contract-compiler.git",
+      "vcs_info": {
+        "commit_id": "ae590dee058d3481e384dea850d5b7d980f533ff",
+        "requested_revision": "ae590dee058d3481e384dea850d5b7d980f533ff",
+        "vcs": "git"
+      }
+    },
+    "kind": "locally built pip-cached VCS wheel",
+    "supplied_archive_hash_verified": false,
+    "note": "Archive hashes can differ across builds; complete compiled fixture outputs must remain identical."
+  },
+  "compiler_source_archive_bytes_equal": true,
+  "compiler_040_resolver_rejected": true,
+  "golden_file_bytes": {
+    "tests/fixtures/golden_path/contracts/finance-policy-1.0.0.authority-bundle.json": {
+      "git_blob_sha256": "8733272f57c1a436137ea1c03a7384b3b41e7ee0162f828c71ffee3977d76c4c",
+      "checkout_sha256": "0ff32258801718c1393d75328d1d81b0580432aa5bf1b2c9e16ce0d3ef14a5bf",
+      "retained_issue17_windows_crlf_sha256": "0ff32258801718c1393d75328d1d81b0580432aa5bf1b2c9e16ce0d3ef14a5bf"
+    },
+    "tests/fixtures/golden_path/contracts/finance-policy-1.0.0.contract.json": {
+      "git_blob_sha256": "75f3e3acaa5cfbbd912dbf279ed16af3dd528e9a0e52fc3ac7bf3c3262c14715",
+      "checkout_sha256": "9daa8c40abfb7efa6451b7e5ac8abf2574d6b24f7e40b4fb6055ad5dd4925e05",
+      "retained_issue17_windows_crlf_sha256": "9daa8c40abfb7efa6451b7e5ac8abf2574d6b24f7e40b4fb6055ad5dd4925e05"
+    },
+    "tests/fixtures/golden_path/contracts/finance-policy-1.0.0.publication-receipt.json": {
+      "git_blob_sha256": "a60fdf01ab1bb1ab3650e0cfcaa0b184cd6ef58440ccf048e2f347c67db19e05",
+      "checkout_sha256": "de9a05196f43d617b57b878e82b85956a371d2ab5273d89f06a49a0d9f0cf18c",
+      "retained_issue17_windows_crlf_sha256": "de9a05196f43d617b57b878e82b85956a371d2ab5273d89f06a49a0d9f0cf18c"
+    },
+    "tests/fixtures/golden_path/contracts/index.json": {
+      "git_blob_sha256": "1051ab0cecb1c786fedcbeab65f5cc657ab2512f2792a00c0299cbab4a1121ad",
+      "checkout_sha256": "0ce8680b708dd94f5a0c8fb60ada05341257b98326b0ccedee99d7c9c9899004",
+      "retained_issue17_windows_crlf_sha256": "0ce8680b708dd94f5a0c8fb60ada05341257b98326b0ccedee99d7c9c9899004"
+    }
+  },
+  "status": "base-passed-extra-pending"
+}

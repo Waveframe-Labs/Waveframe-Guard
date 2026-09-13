@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/authority_role_binding.v1.json",
+  "title": "Authority Role Binding",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "role_id",
+    "actor_ref",
+    "responsibilities",
+    "accountability_boundary",
+    "delegation_posture"
+  ],
+  "properties": {
+    "schema_version": { "const": "authority_role_binding.v1" },
+    "role_id": { "type": "string", "minLength": 1 },
+    "actor_ref": { "type": "string", "minLength": 1 },
+    "responsibilities": {
+      "type": "array",
+      "items": {
+        "enum": ["approval_responsibility", "review_responsibility", "override_responsibility", "attestation_responsibility", "recommendation_responsibility"]
+      }
+    },
+    "accountability_boundary": {
+      "enum": ["governance_approval", "manager_override", "break_glass", "security_review", "recommendation_only", "unspecified"]
+    },
+    "delegation_posture": {
+      "enum": ["not_allowed", "allowed_with_boundary", "ambiguous", "unspecified"]
+    }
+  }
+}

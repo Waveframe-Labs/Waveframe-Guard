@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/governance_compilation_report.v1.json",
+  "title": "Governance Compilation Report",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "authority_ref",
+    "source_governance",
+    "source_hash",
+    "coverage",
+    "normalized_statements",
+    "statement_traces",
+    "diagnostics",
+    "diagnostic_summary",
+    "publication_gate",
+    "compiler_summary",
+    "report_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "governance_compilation_report.v1"
+    },
+    "authority_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_governance": {
+      "$ref": "governance_source.v1.json"
+    },
+    "source_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "coverage": {
+      "type": "object"
+    },
+    "normalized_statements": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "statement_traces": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "$ref": "governance_diagnostic.v1.json"
+      }
+    },
+    "diagnostic_summary": {
+      "type": "object",
+      "required": ["error", "warning", "info"],
+      "properties": {
+        "error": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "warning": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "info": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "semantic_observations": {
+      "type": "array"
+    },
+    "lint_results": {
+      "type": "array"
+    },
+    "publication_gate": {
+      "type": "object",
+      "required": ["status", "blocking_diagnostics"],
+      "properties": {
+        "status": {
+          "enum": ["ALLOWED", "BLOCKED"]
+        },
+        "blocking_diagnostics": {
+          "type": "array"
+        }
+      }
+    },
+    "compiler_summary": {
+      "type": "object"
+    },
+    "report_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    }
+  }
+}

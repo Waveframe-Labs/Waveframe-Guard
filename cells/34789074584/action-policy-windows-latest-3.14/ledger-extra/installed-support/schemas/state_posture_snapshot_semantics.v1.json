@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/state_posture_snapshot_semantics.v1.json",
+  "title": "State Posture Snapshot Semantics",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "snapshot_required",
+    "snapshot_hash_algorithm",
+    "snapshot_subject",
+    "resume_comparison",
+    "drift_result",
+    "runtime_enforced_by"
+  ],
+  "properties": {
+    "schema_version": { "const": "state_posture_snapshot_semantics.v1" },
+    "snapshot_required": { "type": "boolean" },
+    "snapshot_hash_algorithm": { "enum": ["sha256"] },
+    "snapshot_subject": {
+      "enum": [
+        "active_governance_state",
+        "current_policy_version",
+        "authority_posture",
+        "unspecified"
+      ]
+    },
+    "resume_comparison": {
+      "const": "snapshot_hash_must_match_active_state_hash"
+    },
+    "drift_result": {
+      "const": "continuity_drift_detected"
+    },
+    "runtime_enforced_by": { "const": "Guard/Cloud" }
+  }
+}

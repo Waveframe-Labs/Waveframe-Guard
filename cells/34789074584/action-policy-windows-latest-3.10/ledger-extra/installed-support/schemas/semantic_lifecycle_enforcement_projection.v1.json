@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/semantic_lifecycle_enforcement_projection.v1.json",
+  "title": "semantic_lifecycle_enforcement_projection.v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "source_diff_schema_version",
+    "previous_authority_ref",
+    "current_authority_ref",
+    "generated_from_change_count",
+    "lifecycle_invalidation_model",
+    "replay_continuity_projection",
+    "authority_supersession_consequences",
+    "drift_detection_surfaces",
+    "execution_admissibility_projection",
+    "what_becomes_unsafe_now",
+    "guard_policy_projection",
+    "consequence_chain",
+    "deterministic_guarantees",
+    "non_goals"
+  ],
+  "properties": {
+    "schema_version": { "const": "semantic_lifecycle_enforcement_projection.v1" },
+    "source_diff_schema_version": { "const": "semantic_authority_diff.v1" },
+    "previous_authority_ref": { "type": "string" },
+    "current_authority_ref": { "type": "string" },
+    "generated_from_change_count": { "type": "integer", "minimum": 0 },
+    "lifecycle_invalidation_model": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/lifecycle_invalidation_observation" }
+    },
+    "replay_continuity_projection": {
+      "type": "object",
+      "required": ["schema_version", "posture", "existing_workflows_need_revalidation", "observations"],
+      "properties": {
+        "schema_version": { "const": "replay_continuity_projection.v1" },
+        "posture": { "enum": ["stable", "review_required", "revalidation_required", "invalidated"] },
+        "existing_workflows_need_revalidation": { "type": "boolean" },
+        "observations": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "authority_supersession_consequences": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["schema_version", "consequence_type", "summary", "source_change_path"],
+        "properties": {
+          "schema_version": { "const": "authority_supersession_consequence.v1" },
+          "consequence_type": { "type": "string" },
+          "summary": { "type": "string" },
+          "source_change_path": { "type": "string" }
+        }
+      }
+    },
+    "drift_detection_surfaces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["schema_version", "drift_surface", "severity", "summary", "source_change_path"],
+        "properties": {
+          "schema_version": { "const": "semantic_drift_surface.v1" },
+          "drift_surface": { "type": "string" },
+          "severity": { "enum": ["info", "warning", "critical", "continuity_risk", "replay_risk", "authority_conflict"] },
+          "summary": { "type": "string" },
+          "source_change_path": { "type": "string" }
+        }
+      }
+    },
+    "execution_admissibility_projection": {
+      "type": "object",
+      "required": ["schema_version", "projection_posture", "admissibility_observations", "runtime_enforced_by", "non_goals"],
+      "properties": {
+        "schema_version": { "const": "execution_admissibility_projection.v1" },
+        "projection_posture": { "enum": ["unchanged", "changed", "potentially_weakened"] },
+        "admissibility_observations": { "type": "array", "items": { "type": "string" } },
+        "runtime_enforced_by": { "const": "Guard/Cloud" },
+        "non_goals": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "what_becomes_unsafe_now": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/unsafe_governance_observation" }
+    },
+    "guard_policy_projection": {
+      "type": "object",
+      "required": ["schema_version", "projection_posture", "enforcement_changes", "admissibility_projection_changes", "non_goals"],
+      "properties": {
+        "schema_version": { "const": "guard_policy_projection_change.v1" },
+        "projection_posture": { "enum": ["unchanged", "changed"] },
+        "enforcement_changes": { "type": "array", "items": { "type": "string" } },
+        "admissibility_projection_changes": { "type": "array", "items": { "type": "string" } },
+        "non_goals": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "consequence_chain": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "schema_version",
+          "semantic_change",
+          "operational_consequence",
+          "continuity_impact",
+          "execution_admissibility_projection",
+          "unsafe_observations",
+          "guard_enforcement_implications",
+          "replay_compatibility_warnings"
+        ],
+        "properties": {
+          "schema_version": { "const": "semantic_lifecycle_consequence.v1" },
+          "semantic_change": { "type": "object" },
+          "operational_consequence": { "type": "string" },
+          "continuity_impact": { "type": "string" },
+          "execution_admissibility_projection": { "type": "string" },
+          "unsafe_observations": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/unsafe_governance_observation" }
+          },
+          "guard_enforcement_implications": { "type": "array", "items": { "type": "string" } },
+          "replay_compatibility_warnings": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "deterministic_guarantees": { "type": "array", "items": { "type": "string" } },
+    "non_goals": { "type": "array", "items": { "type": "string" } }
+  },
+  "$defs": {
+    "lifecycle_invalidation_observation": {
+      "type": "object",
+      "required": ["schema_version", "invalidation_type", "severity", "summary", "source_change_paths"],
+      "properties": {
+        "schema_version": { "const": "lifecycle_invalidation_observation.v1" },
+        "invalidation_type": { "type": "string" },
+        "severity": { "type": "string" },
+        "summary": { "type": "string" },
+        "source_change_paths": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "unsafe_governance_observation": {
+      "type": "object",
+      "required": ["schema_version", "unsafe_type", "severity", "summary"],
+      "properties": {
+        "schema_version": { "const": "unsafe_governance_observation.v1" },
+        "unsafe_type": { "type": "string" },
+        "severity": { "type": "string" },
+        "summary": { "type": "string" }
+      }
+    }
+  }
+}

@@ -1,0 +1,98 @@
+diff --git a/governance_ledger/cli.py b/governance_ledger/cli.py
+index 2e489c1..0ed8976 100644
+--- a/governance_ledger/cli.py
++++ b/governance_ledger/cli.py
+@@ -4,8 +4,10 @@ from __future__ import annotations
+ 
+ import argparse
+ import json
++import sys
+ from pathlib import Path
+ from typing import Sequence
++from governance_ledger.integrations.guard import GuardIntegrationUnavailableError
+ 
+ from governance_ledger.publish import approve_review_file, publish_review_file
+ from governance_ledger.registry import resolve_authority_ref
+@@ -188,7 +190,9 @@ def main(argv: Sequence[str] | None = None) -> int:
+ 
+     replay_execution_parser = subparsers.add_parser(
+         "replay-execution",
+-        help="replay deterministic admissibility from authority contract and execution state",
++        help="legacy raw replay (unsupported with Guard 0.19; use SDK/store saved replay)",
++        description="Automatic raw contract/execution-state replay is unsupported with Guard 0.19. "
++        "The Python API accepts an explicit evaluator; native saved replay uses Guard's SDK/store.",
+     )
+     replay_execution_parser.add_argument("--contract", required=True)
+     replay_execution_parser.add_argument("--execution-state", required=True)
+@@ -260,10 +264,14 @@ def main(argv: Sequence[str] | None = None) -> int:
+             expected_contract=_read_json_arg(args.contract),
+         )
+     elif args.command == "replay-execution":
+-        result = replay_admissibility(
+-            authority_contract=_read_json_arg(args.contract),
+-            execution_state=_read_json_arg(args.execution_state),
+-        )
++        try:
++            result = replay_admissibility(
++                authority_contract=_read_json_arg(args.contract),
++                execution_state=_read_json_arg(args.execution_state),
++            )
++        except GuardIntegrationUnavailableError as exc:
++            print(f"{exc.code}: {exc}", file=sys.stderr)
++            return 2
+     elif args.command == "verify-lineage":
+         result = verify_authority_lineage(
+             authority_contract=_read_json_arg(args.contract),
+diff --git a/governance_ledger/integrations/guard.py b/governance_ledger/integrations/guard.py
+index e77eac7..46a89e3 100644
+--- a/governance_ledger/integrations/guard.py
++++ b/governance_ledger/integrations/guard.py
+@@ -12,22 +12,36 @@ AdmissibilityEvaluator = Callable[[dict[str, Any], dict[str, Any]], dict[str, An
+ class GuardIntegrationUnavailableError(RuntimeError):
+     """Raised when optional Guard-backed admissibility replay is unavailable."""
+ 
++    code = "LEDGER_GUARD_UNAVAILABLE"
++
++
++class GuardReplayUnsupportedError(GuardIntegrationUnavailableError):
++    """Guard is installed, but raw legacy replay is not a supported integration."""
++
++    code = "LEDGER_GUARD_REPLAY_UNSUPPORTED"
++
+ 
+ def load_guard_admissibility_evaluator() -> AdmissibilityEvaluator:
+-    """Load the supported Guard evaluator only when replay explicitly needs it."""
++    """Report the automatic replay compatibility boundary without executing code.
++
++    Guard 0.19's callable evaluate_admissibility is a retirement stub. Native
++    execution and saved logical replay belong to Guard's public SDK/store API.
++    Applications can still explicitly inject their own replay evaluator.
++    """
+     try:
+-        from waveframe_guard import evaluate_admissibility
++        import waveframe_guard  # noqa: F401; deliberately lazy optional import
+     except ImportError:
+         raise GuardIntegrationUnavailableError(
+-            "Admissibility replay requires an injected evaluator or the optional "
+-            "Waveframe Guard integration. Install governance-ledger[guard] to use "
+-            "the release-tested Guard integration."
++            "Waveframe Guard is not installed. Raw contract/execution-state replay "
++            "requires an explicitly injected evaluator. The governance-ledger[guard] "
++            "extra enables native SDK execution and saved logical replay; installing "
++            "it does not restore the retired legacy replay API."
+         ) from None
+ 
+-    if not callable(evaluate_admissibility):
+-        raise GuardIntegrationUnavailableError(
+-            "The installed Waveframe Guard package does not expose the supported "
+-            "admissibility evaluator. Use an injected evaluator or a released, "
+-            "dependency-compatible Guard integration."
+-        )
+-    return evaluate_admissibility
++    raise GuardReplayUnsupportedError(
++        "Waveframe Guard is installed, but automatic raw contract/execution-state "
++        "replay is unsupported with Guard 0.19: evaluate_admissibility is retired. "
++        "Use replay_admissibility(evaluator=...) with an explicit evaluator, or "
++        "Guard's supported SDK/store replay(run_id) for saved native execution. "
++        "Installing governance-ledger[guard] does not restore the retired API."
++    ) from None

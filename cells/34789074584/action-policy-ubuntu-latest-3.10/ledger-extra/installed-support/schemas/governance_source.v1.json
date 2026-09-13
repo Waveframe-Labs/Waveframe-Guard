@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/governance_source.v1.json",
+  "title": "Governance Source",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "source_id",
+    "source_type",
+    "source_text",
+    "source_version",
+    "canonical_text",
+    "source_hash",
+    "created_at",
+    "extraction_mode",
+    "human_review_required"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "governance_source.v1"
+    },
+    "source_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_type": {
+      "enum": ["policy_text"]
+    },
+    "source_text": {
+      "type": "string"
+    },
+    "canonical_text": {
+      "type": "string"
+    },
+    "source_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "extraction_mode": {
+      "enum": ["deterministic_rules", "ai_assisted_reviewed"]
+    },
+    "human_review_required": {
+      "const": true
+    }
+  }
+}

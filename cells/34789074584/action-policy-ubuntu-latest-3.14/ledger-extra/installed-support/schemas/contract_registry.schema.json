@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Waveframe-Labs/Waveframe-Ledger/schemas/contract_registry.schema.json",
+  "title": "Waveframe Ledger Contract Registry",
+  "type": "object",
+  "required": ["schema_version", "generated_at", "contracts", "latest", "registry_hash"],
+  "properties": {
+    "schema_version": {"const": "contract_registry.v1"},
+    "generated_at": {"type": "string"},
+    "contracts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "contract_id",
+          "contract_version",
+          "authority_ref",
+          "contract_ref",
+          "contract_hash",
+          "path",
+          "bundle_path",
+          "bundle_hash",
+          "lifecycle_state",
+          "publication_id",
+          "published_at",
+          "published_by"
+        ],
+        "properties": {
+          "contract_id": {"type": "string"},
+          "contract_version": {"type": "string"},
+          "authority_ref": {"type": "string"},
+          "contract_ref": {"type": "string"},
+          "contract_hash": {"type": "string", "pattern": "^sha256:[A-Fa-f0-9]{64}$"},
+          "path": {"type": "string", "minLength": 1, "pattern": "^[^\\\\]*$"},
+          "bundle_path": {"type": "string", "minLength": 1, "pattern": "^[^\\\\]*$"},
+          "bundle_hash": {"type": "string", "pattern": "^sha256:[A-Fa-f0-9]{64}$"},
+          "lifecycle_state": {"enum": ["active", "superseded", "revoked"]},
+          "publication_id": {"type": "string"},
+          "published_at": {"type": "string"},
+          "published_by": {"type": "string"},
+          "source_hash": {"type": "string", "pattern": "^sha256:[A-Fa-f0-9]{64}$"},
+          "compilation_report_hash": {"type": "string", "pattern": "^sha256:[A-Fa-f0-9]{64}$"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "latest": {"type": "object"},
+    "registry_hash": {"type": "string", "pattern": "^sha256:[A-Fa-f0-9]{64}$"}
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,37 @@
+usage: governance-ledger [-h]
+                         {run,approve,publish,check,list,show,resolve,preview,diff-impact,review-packet,authority-bundle,semantic-commit,compile-authority,execution-projection,replay-authority,replay-execution,verify-lineage}
+                         ...
+
+positional arguments:
+  {run,approve,publish,check,list,show,resolve,preview,diff-impact,review-packet,authority-bundle,semantic-commit,compile-authority,execution-projection,replay-authority,replay-execution,verify-lineage}
+    run                 generate draft governance artifacts
+    approve             approve a review artifact
+    publish             publish an approved review
+    check               check generated validation artifacts
+    list                list governance registry artifacts
+    show                show a governance artifact
+    resolve             resolve an explicit versioned authority reference
+    preview             derive governance_impact_preview.v1 from an authority
+                        contract
+    diff-impact         derive authority_diff_impact.v1 from old and new
+                        authority contracts
+    review-packet       derive governance_review_packet.v1 from semantic
+                        governance artifacts
+    authority-bundle    derive authority_bundle.v1 from published governance
+                        artifacts
+    semantic-commit     freeze completed semantic reconciliation as
+                        semantic_commit_bundle.v1
+    compile-authority   compile semantic_commit_bundle.v1 into
+                        compiled_authority_contract.v1
+    execution-projection
+                        project runtime requirements from
+                        compiled_authority_contract.v1
+    replay-authority    replay governance source into compilation report and
+                        authority contract
+    replay-execution    legacy raw replay (unsupported with Guard 0.19; use
+                        SDK/store saved replay)
+    verify-lineage      verify authority provenance lineage against an
+                        optional compilation report
+
+options:
+  -h, --help            show this help message and exit

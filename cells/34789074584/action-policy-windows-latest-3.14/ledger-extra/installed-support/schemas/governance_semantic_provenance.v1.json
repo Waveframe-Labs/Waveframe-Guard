@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/governance_semantic_provenance.v1.json",
+  "title": "Governance Semantic Provenance",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "field",
+    "value",
+    "confidence",
+    "source_spans",
+    "extraction_method"
+  ],
+  "properties": {
+    "schema_version": { "const": "governance_semantic_provenance.v1" },
+    "field": { "type": "string", "minLength": 1 },
+    "value": {},
+    "confidence": { "enum": ["high", "medium", "low"] },
+    "source_spans": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["text"],
+        "properties": {
+          "text": { "type": "string", "minLength": 1 },
+          "start": { "type": "integer", "minimum": 0 },
+          "end": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "extraction_method": { "const": "deterministic_pattern" }
+  }
+}

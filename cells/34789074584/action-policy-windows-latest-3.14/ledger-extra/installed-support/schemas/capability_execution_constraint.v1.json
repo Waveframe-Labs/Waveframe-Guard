@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/capability_execution_constraint.v1.json",
+  "title": "Capability Execution Constraint",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "execution_context_semantics", "temporal_semantics", "runtime_enforced_by"],
+  "properties": {
+    "schema_version": { "const": "capability_execution_constraint.v1" },
+    "execution_context_semantics": { "type": "object" },
+    "temporal_semantics": { "type": "object" },
+    "runtime_enforced_by": { "const": "Guard/Cloud" }
+  }
+}

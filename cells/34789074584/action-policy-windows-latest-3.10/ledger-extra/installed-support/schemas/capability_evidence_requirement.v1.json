@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/capability_evidence_requirement.v1.json",
+  "title": "Capability Evidence Requirement",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "evidence_type", "summary"],
+  "properties": {
+    "schema_version": { "const": "capability_evidence_requirement.v1" },
+    "evidence_type": { "type": "string", "minLength": 1 },
+    "summary": { "type": "string", "minLength": 1 }
+  }
+}

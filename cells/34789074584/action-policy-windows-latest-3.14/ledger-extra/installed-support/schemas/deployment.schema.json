@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Waveframe-Labs/Governance-Ledger/schemas/deployment.schema.json",
+  "title": "Governance-Ledger Deployment",
+  "type": "object",
+  "required": [
+    "environment",
+    "runtime",
+    "enforcement_engine",
+    "engine_version",
+    "deployed_by",
+    "deployed_at"
+  ],
+  "properties": {
+    "environment": {
+      "type": "string",
+      "minLength": 1
+    },
+    "runtime": {
+      "type": "string",
+      "minLength": 1
+    },
+    "enforcement_engine": {
+      "type": "string",
+      "const": "cricore"
+    },
+    "engine_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "deployed_by": {
+      "type": "string",
+      "minLength": 1
+    },
+    "deployed_at": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

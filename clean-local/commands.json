@@ -1,0 +1,28 @@
+[
+  {
+    "command": [
+      "C:\\GitHub\\Waveframe-Guard\\.venv\\Scripts\\python.exe",
+      "tools/acceptance/release_catalog_package.py",
+      "--output",
+      "C:\\GitHub\\Waveframe-Guard\\acceptance-output\\issue52-clean-local\\package"
+    ],
+    "cwd": "C:\\GitHub\\Waveframe-Guard\\.candidate52\\clean-guard",
+    "exit_code": 0
+  },
+  {
+    "command": [
+      "C:\\GitHub\\Waveframe-Guard\\.venv\\Scripts\\python.exe",
+      "tools/acceptance/ledger_guard_extra.py",
+      "--ledger-source",
+      "C:\\GitHub\\Waveframe-Guard\\.candidate52\\ledger",
+      "--guard-candidate",
+      "C:\\GitHub\\Waveframe-Guard\\acceptance-output\\issue52-clean-local\\package\\guard-candidate.json",
+      "--output",
+      "C:\\GitHub\\Waveframe-Guard\\acceptance-output\\issue52-clean-local\\ledger-extra",
+      "--dependency-snapshot",
+      "C:\\GitHub\\Waveframe-Guard\\acceptance-output\\issue52-clean-local\\package\\installed-dependencies.json"
+    ],
+    "cwd": "C:\\GitHub\\Waveframe-Guard\\.candidate52\\clean-guard",
+    "exit_code": 0
+  }
+]

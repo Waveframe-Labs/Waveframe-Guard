@@ -1,0 +1,113 @@
+{
+  "schema_version": "policy_translation_review.v1",
+  "proposal_id": "policy-translation-proposal-29953e6b4e58577bae9de32f143400fce365fddbe1cbc70b25189ff2b9629ab3",
+  "proposal_hash": "sha256:29953e6b4e58577bae9de32f143400fce365fddbe1cbc70b25189ff2b9629ab3",
+  "source_policy_ref": "repository-policy@revision-1",
+  "source_snapshot_hash": "sha256:deae0122f01197c2a6a1b1277ae5c0a6d0443a3f2c4d88daf7c6321e61a67934",
+  "authority_ref": "repository-modify-only@3.0.0",
+  "capability_catalog": {
+    "catalog_id": "waveframe.coding-agent.repository-change",
+    "catalog_version": "3.0.0",
+    "catalog_hash": "sha256:bd7fd23eb59b5521ef6780edec0667ce9b7ba9b5738dfa2701a575fb3efce930"
+  },
+  "coverage": {
+    "total_clause_count": 3,
+    "enforced_clause_count": 3,
+    "unenforced_clause_count": 0,
+    "unresolved_clause_count": 0,
+    "fully_represented_clause_count": 3,
+    "partially_represented_clause_count": 0,
+    "entirely_unsupported_clause_count": 0,
+    "informational_clause_count": 0,
+    "unrepresented_clause_count": 0,
+    "enforced_clause_ids": [
+      "policy-clause-28d890fab4001767a810825220aa7b0cf32a13369f027048cf78801b0ff65f93",
+      "policy-clause-7160e8e831e8aaef05250296bcc2bc3ee78106c025de87e52bcd9a00240406e0",
+      "policy-clause-e84e8c2e5d698969d21024d69ecc57f65710810e507c490e13094482be67df4e"
+    ],
+    "unenforced_clause_ids": [],
+    "acknowledged_unrepresented_clause_ids": [],
+    "total_control_count": 3,
+    "confirmed_control_count": 3,
+    "unresolved_control_count": 0,
+    "confirmed_control_ids": [
+      "candidate-control-4fd5ead89d1804d865d34b2d0acd863e91779b73bb70fdb86b71b22cbe8f893c",
+      "candidate-control-a680c04de5f2b87d7ce56ac8532e3f236441926df35b30b4b27289147a854446",
+      "candidate-control-eba8a0d8aad1a29009d99b4548a4e4604f3b76f81a2e20ecba68e1685505ac1d"
+    ],
+    "unresolved_control_ids": []
+  },
+  "clauses": [
+    {
+      "clause_id": "policy-clause-e84e8c2e5d698969d21024d69ecc57f65710810e507c490e13094482be67df4e",
+      "source_text": "Agents must use role repository-reviewer to modify repository files.\n",
+      "proposed_coverage_status": "fully_represented",
+      "human_coverage_status": "fully_represented",
+      "controls": [
+        {
+          "candidate_control_id": "candidate-control-eba8a0d8aad1a29009d99b4548a4e4604f3b76f81a2e20ecba68e1685505ac1d",
+          "human_confirmed": true,
+          "operational_explanation": "The modify action requires repository role 'repository-reviewer'. This role grants no operation. This policy is prepared to enforce these controls through a compatible Guard runtime. Create and modify have independent paths and action-wide roles. An absent action or missing matching allow grants no permission. A matching deny wins within the same action; rules never cross actions. Roles restrict an action and grant no paths. Creation requires exclusive creation of one new regular file under an existing parent in the selected workspace, without overwrite or parent creation. Guard must check filesystem state, not caller facts. This review does not establish deployment, a connected runtime, successful execution, or control over mutations outside Guard.",
+          "remaining_unresolved_bindings": [],
+          "questions": [],
+          "technical_details": {
+            "control_type": "acting_role",
+            "fact_id": "actor.role",
+            "operator": "==",
+            "effect": "require",
+            "enforcement_point": "waveframe.guard.repository-change.v2"
+          }
+        }
+      ],
+      "residual_explanation": null
+    },
+    {
+      "clause_id": "policy-clause-7160e8e831e8aaef05250296bcc2bc3ee78106c025de87e52bcd9a00240406e0",
+      "source_text": "Agents may modify files under docs/.\n",
+      "proposed_coverage_status": "fully_represented",
+      "human_coverage_status": "fully_represented",
+      "controls": [
+        {
+          "candidate_control_id": "candidate-control-4fd5ead89d1804d865d34b2d0acd863e91779b73bb70fdb86b71b22cbe8f893c",
+          "human_confirmed": true,
+          "operational_explanation": "Automated agents may modify files under 'docs/'. This policy is prepared to enforce these controls through a compatible Guard runtime. Create and modify have independent paths and action-wide roles. An absent action or missing matching allow grants no permission. A matching deny wins within the same action; rules never cross actions. Roles restrict an action and grant no paths. Creation requires exclusive creation of one new regular file under an existing parent in the selected workspace, without overwrite or parent creation. Guard must check filesystem state, not caller facts. This review does not establish deployment, a connected runtime, successful execution, or control over mutations outside Guard.",
+          "remaining_unresolved_bindings": [],
+          "questions": [],
+          "technical_details": {
+            "control_type": "prefix_path_access",
+            "fact_id": "proposal.resource.path",
+            "operator": "starts_with",
+            "effect": "allow",
+            "enforcement_point": "waveframe.guard.repository-change.v2"
+          }
+        }
+      ],
+      "residual_explanation": null
+    },
+    {
+      "clause_id": "policy-clause-28d890fab4001767a810825220aa7b0cf32a13369f027048cf78801b0ff65f93",
+      "source_text": "Agents must not modify docs/locked.md.",
+      "proposed_coverage_status": "fully_represented",
+      "human_coverage_status": "fully_represented",
+      "controls": [
+        {
+          "candidate_control_id": "candidate-control-a680c04de5f2b87d7ce56ac8532e3f236441926df35b30b4b27289147a854446",
+          "human_confirmed": true,
+          "operational_explanation": "Automated agents must not modify the exact path 'docs/locked.md'. This restriction grants no operation. This policy is prepared to enforce these controls through a compatible Guard runtime. Create and modify have independent paths and action-wide roles. An absent action or missing matching allow grants no permission. A matching deny wins within the same action; rules never cross actions. Roles restrict an action and grant no paths. Creation requires exclusive creation of one new regular file under an existing parent in the selected workspace, without overwrite or parent creation. Guard must check filesystem state, not caller facts. This review does not establish deployment, a connected runtime, successful execution, or control over mutations outside Guard.",
+          "remaining_unresolved_bindings": [],
+          "questions": [],
+          "technical_details": {
+            "control_type": "exact_path_access",
+            "fact_id": "proposal.resource.path",
+            "operator": "==",
+            "effect": "deny",
+            "enforcement_point": "waveframe.guard.repository-change.v2"
+          }
+        }
+      ],
+      "residual_explanation": null
+    }
+  ],
+  "provider_explanations_used": false,
+  "review_hash": "sha256:8ae2ebb1b0cb8a7b76ecc40fc3c52bd0e5eeb7eebad1943fcc36fb7c8dee91d2"
+}

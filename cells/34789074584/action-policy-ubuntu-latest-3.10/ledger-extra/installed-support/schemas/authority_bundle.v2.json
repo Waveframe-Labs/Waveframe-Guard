@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/authority_bundle.v2.json",
+  "title": "Waveframe Authority Bundle v2",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "provenance_complete", "source_policy", "source_statements", "direct_parses", "statement_decisions", "source_to_constraint_mappings", "canonical_cnl_previews", "constraint_ir", "runtime_fact_schema", "domain_pack", "semantic_commit_bundle", "compiled_authority_contract", "authority", "approval_record", "publication_manifest", "provenance_bindings", "bundle_hash"],
+  "properties": {
+    "schema_version": { "const": "authority_bundle.v2" },
+    "provenance_complete": { "const": true },
+    "source_policy": { "$ref": "#/$defs/sourcePolicy" },
+    "source_statements": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/sourceStatement" } },
+    "direct_parses": { "type": "array", "items": { "$ref": "#/$defs/directParse" } },
+    "statement_decisions": { "type": "array", "items": { "$ref": "policy_mapping_decision.v1.json" } },
+    "source_to_constraint_mappings": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/sourceMapping" } },
+    "canonical_cnl_previews": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/cnlPreview" } },
+    "constraint_ir": { "$ref": "constraint_ir.v1.json" },
+    "runtime_fact_schema": { "$ref": "runtime_fact_schema.v1.json" },
+    "domain_pack": { "$ref": "constraint_ir.v1.json#/$defs/packRef" },
+    "semantic_commit_bundle": { "$ref": "semantic_commit_bundle.v1.json" },
+    "compiled_authority_contract": { "$ref": "compiled_authority_contract.v2.json" },
+    "authority": { "$ref": "#/$defs/authority" },
+    "approval_record": { "$ref": "#/$defs/approvalRecord" },
+    "publication_manifest": { "$ref": "publication_manifest.v1.json" },
+    "provenance_bindings": { "$ref": "#/$defs/provenanceBindings" },
+    "bundle_hash": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "semver": { "type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$" },
+    "utc": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$" },
+    "sourcePolicy": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source_policy_id", "source_revision", "source_policy_ref", "content_encoding", "source_bytes_base64", "snapshot_hash"],
+      "properties": {
+        "source_policy_id": { "type": "string", "minLength": 1 }, "source_revision": { "type": "string", "minLength": 1 },
+        "source_policy_ref": { "type": "string", "minLength": 3 }, "content_encoding": { "const": "base64" },
+        "source_bytes_base64": { "type": "string", "pattern": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$" },
+        "snapshot_hash": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "sourceStatement": {
+      "type": "object", "additionalProperties": false,
+      "required": ["statement_id", "start_byte", "end_byte", "statement_bytes_base64", "statement_hash", "classification", "available_mapping_control_ids", "decision_hash"],
+      "properties": {
+        "statement_id": { "type": "string", "pattern": "^statement-[a-f0-9]{64}$" }, "start_byte": { "type": "integer", "minimum": 0 }, "end_byte": { "type": "integer", "minimum": 1 },
+        "statement_bytes_base64": { "type": "string", "minLength": 1 }, "statement_hash": { "$ref": "#/$defs/sha256" },
+        "classification": { "enum": ["direct", "enforced", "informational", "unsupported"] },
+        "available_mapping_control_ids": { "type": "array", "maxItems": 0 }, "decision_hash": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/sha256" }] }
+      }
+    },
+    "directParse": {
+      "type": "object", "additionalProperties": false,
+      "required": ["parse_id", "statement_id", "start_byte", "end_byte", "constraint_ids", "compiler_id", "compiler_version", "parse_hash"],
+      "properties": {
+        "parse_id": { "type": "string", "pattern": "^direct-parse-[a-f0-9]{64}$" }, "statement_id": { "type": "string", "pattern": "^statement-[a-f0-9]{64}$" },
+        "start_byte": { "type": "integer", "minimum": 0 }, "end_byte": { "type": "integer", "minimum": 1 },
+        "constraint_ids": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "pattern": "^constraint-[a-f0-9]{64}$" } },
+        "compiler_id": { "type": "string", "minLength": 1 }, "compiler_version": { "$ref": "#/$defs/semver" }, "parse_hash": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "sourceMapping": {
+      "type": "object", "additionalProperties": false,
+      "required": ["mapping_id", "statement_id", "start_byte", "end_byte", "constraint_ids", "mode", "statement_decision_hash"],
+      "properties": {
+        "mapping_id": { "type": "string", "pattern": "^constraint-mapping-[a-f0-9]{64}$" }, "statement_id": { "type": "string", "pattern": "^statement-[a-f0-9]{64}$" },
+        "start_byte": { "type": "integer", "minimum": 0 }, "end_byte": { "type": "integer", "minimum": 1 },
+        "constraint_ids": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "pattern": "^constraint-[a-f0-9]{64}$" } },
+        "mode": { "enum": ["direct", "human_mapping"] }, "statement_decision_hash": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/sha256" }] }
+      }
+    },
+    "cnlPreview": {
+      "type": "object", "additionalProperties": false, "required": ["constraint_id", "preview"],
+      "properties": { "constraint_id": { "type": "string", "pattern": "^constraint-[a-f0-9]{64}$" }, "preview": { "type": "string", "minLength": 1 } }
+    },
+    "authority": {
+      "type": "object", "additionalProperties": false, "required": ["authority_id", "authority_version", "authority_ref", "authority_identity_hash"],
+      "properties": { "authority_id": { "type": "string", "minLength": 1 }, "authority_version": { "$ref": "#/$defs/semver" }, "authority_ref": { "type": "string", "minLength": 3 }, "authority_identity_hash": { "$ref": "#/$defs/sha256" } }
+    },
+    "approvalRecord": {
+      "type": "object", "additionalProperties": false, "required": ["approval_id", "approved_by", "approved_at", "approved_constraint_ir_hash", "approved_semantic_commit_hash", "approval_record_hash"],
+      "properties": { "approval_id": { "type": "string", "minLength": 1 }, "approved_by": { "type": "string", "minLength": 1 }, "approved_at": { "$ref": "#/$defs/utc" }, "approved_constraint_ir_hash": { "$ref": "#/$defs/sha256" }, "approved_semantic_commit_hash": { "$ref": "#/$defs/sha256" }, "approval_record_hash": { "$ref": "#/$defs/sha256" } }
+    },
+    "provenanceBindings": {
+      "type": "object", "additionalProperties": false,
+      "required": ["interpretation_id", "interpretation_hash", "source_snapshot_hash", "source_statements_hash", "direct_parses_hash", "statement_decisions_hash", "source_to_constraint_mappings_hash", "canonical_cnl_previews_hash", "constraint_ir_hash", "runtime_fact_schema_hash", "domain_pack_hash", "semantic_commit_id", "semantic_commit_hash", "semantic_commit_bundle_hash", "compiled_contract_hash", "authority_identity_hash", "approval_record_hash", "publication_manifest_hash"],
+      "properties": {
+        "interpretation_id": { "type": "string", "minLength": 1 }, "interpretation_hash": { "$ref": "#/$defs/sha256" }, "source_snapshot_hash": { "$ref": "#/$defs/sha256" },
+        "source_statements_hash": { "$ref": "#/$defs/sha256" }, "direct_parses_hash": { "$ref": "#/$defs/sha256" }, "statement_decisions_hash": { "$ref": "#/$defs/sha256" },
+        "source_to_constraint_mappings_hash": { "$ref": "#/$defs/sha256" }, "canonical_cnl_previews_hash": { "$ref": "#/$defs/sha256" },
+        "constraint_ir_hash": { "$ref": "#/$defs/sha256" }, "runtime_fact_schema_hash": { "$ref": "#/$defs/sha256" }, "domain_pack_hash": { "$ref": "#/$defs/sha256" },
+        "semantic_commit_id": { "type": "string", "minLength": 1 }, "semantic_commit_hash": { "$ref": "#/$defs/sha256" }, "semantic_commit_bundle_hash": { "$ref": "#/$defs/sha256" },
+        "compiled_contract_hash": { "$ref": "#/$defs/sha256" }, "authority_identity_hash": { "$ref": "#/$defs/sha256" }, "approval_record_hash": { "$ref": "#/$defs/sha256" }, "publication_manifest_hash": { "$ref": "#/$defs/sha256" }
+      }
+    }
+  }
+}

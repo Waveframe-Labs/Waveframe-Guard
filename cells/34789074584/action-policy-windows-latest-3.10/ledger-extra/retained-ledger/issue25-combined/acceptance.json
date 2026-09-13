@@ -1,0 +1,410 @@
+{
+  "python": "3.10.11 (tags/v3.10.11:7d4cc5a, Apr  5 2023, 00:38:17) [MSC v.1929 64 bit (AMD64)]",
+  "platform": "Windows",
+  "commands": [
+    {
+      "label": "head",
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "clean-checkout",
+      "command": [
+        "git",
+        "diff",
+        "--exit-code",
+        "HEAD"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "combined-extra-pip",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\combined-extra\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "pip==25.3"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "combined-extra-install",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\combined-extra\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "-r",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\requirements-ci.txt",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\wheelhouse\\governance_ledger-0.9.0-py3-none-any.whl[dev,guard]",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\wheelhouse\\cricore_contract_compiler-0.5.0-py3-none-any.whl",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\wheelhouse\\waveframe_guard-0.19.0-py3-none-any.whl",
+        "--report",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\combined-extra-install.json"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "combined-extra-check",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\combined-extra\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "combined-extra-freeze",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\combined-extra\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "freeze",
+        "--all"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "combined-provenance",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\combined-extra\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\installed-support\\tools\\check_installed_wheel_set.py",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\combined-extra-archive-expectations.json"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "combined-extra-default",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\combined-extra\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\installed-support\\tools\\acceptance_pytest.py",
+        "-q",
+        "-ra",
+        "--junitxml",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\combined-extra-default.xml",
+        "tests"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "combined-extra-native",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\combined-extra\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\installed-support\\tools\\acceptance_pytest.py",
+        "-q",
+        "-ra",
+        "--junitxml",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\combined-extra-native.xml",
+        "tests"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "release-package",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\combined-extra\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\installed-support\\tools\\check_release_catalog_package.py"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "development-package",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\combined-extra\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\installed-support\\tools\\check_action_policy_package.py"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "legacy-v3-example",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\combined-extra\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\installed-support\\examples\\native_v3_multi_control.py",
+        "--candidate"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "catalog-3-execution",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\combined-extra\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\installed-support\\tools\\check_guard_release_execution.py"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "reject-old-ledger-0.7.0",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\combined-extra\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "--dry-run",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\wheelhouse\\waveframe_guard-0.19.0-py3-none-any.whl",
+        "governance-ledger==0.7.0",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\wheelhouse\\cricore_contract_compiler-0.5.0-py3-none-any.whl"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 1
+    },
+    {
+      "label": "reject-old-ledger-0.8.0",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\combined-extra\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "--dry-run",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\wheelhouse\\waveframe_guard-0.19.0-py3-none-any.whl",
+        "governance-ledger==0.8.0",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\wheelhouse\\cricore_contract_compiler-0.5.0-py3-none-any.whl"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 1
+    },
+    {
+      "label": "guard-entry-pip",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\guard-entry\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "pip==25.3"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "guard-entry-install",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\guard-entry\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "-r",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\requirements-ci.txt",
+        "governance-ledger==0.8.0",
+        "waveframe-guard==0.18.0",
+        "cricore-contract-compiler==0.4.0",
+        "--report",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\guard-entry-install.json"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "guard-entry-check",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\guard-entry\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "guard-entry-freeze",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\guard-entry\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "freeze",
+        "--all"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "guard-entry-upgrade",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\guard-entry\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "--upgrade",
+        "--find-links",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\wheelhouse",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\wheelhouse\\waveframe_guard-0.19.0-py3-none-any.whl",
+        "--report",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\guard-entry-install.json"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "guard-entry-upgrade-check",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\guard-entry\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "guard-entry-provenance",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\guard-entry\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\installed-support\\tools\\check_installed_wheel_set.py",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\guard-entry-archive-expectations.json"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "guard-entry-catalog-3",
+      "command": [
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\guard-entry\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\installed-support\\tools\\check_guard_release_execution.py"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-combined\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "final-head",
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "final-clean-checkout",
+      "command": [
+        "git",
+        "diff",
+        "--exit-code",
+        "HEAD"
+      ],
+      "cwd": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger",
+      "exit_code": 0
+    }
+  ],
+  "suites": {
+    "combined-extra-default": {
+      "passed": 678,
+      "skipped": 44,
+      "skip_reasons": {
+        "explicit action-policy development opt-in required; see docs/ACTION_POLICY_DEVELOPMENT.md": 44
+      },
+      "release_passed": 70,
+      "native_passed": 0
+    },
+    "combined-extra-native": {
+      "passed": 722,
+      "skipped": 0,
+      "skip_reasons": {},
+      "release_passed": 70,
+      "native_passed": 44
+    }
+  },
+  "gates": {
+    "base": "passed",
+    "combined_extra": "passed"
+  },
+  "combined_extra": {
+    "status": "passed",
+    "executed": true,
+    "scope": "this operating system/interpreter only; all four matrix cells required"
+  },
+  "release_ready": false,
+  "runtime_activation_ready": false,
+  "head": "a34c11d81b85963794cf28b4adad091fac15e130",
+  "expected_head": "a34c11d81b85963794cf28b4adad091fac15e130",
+  "base_evidence_sha256": "79aa73072724223f53b892db70f628aac9cccffa6f0d1a1901ab6fed08a96a51",
+  "guard_candidate": {
+    "source_url": "https://github.com/Waveframe-Labs/Waveframe-Guard",
+    "source_commit": "0161ef8a52e052d1bc1366cdc93ce13a9bd535ed",
+    "provenance_kind": "coordinator-supplied-exact-candidate",
+    "wheel": "waveframe_guard-0.19.0-py3-none-any.whl",
+    "wheel_sha256": "e7cb9aae6a27437d809d5d72e0225536c4ac0ab729ad9cae162c4417c24d4ba4"
+  },
+  "verified_inputs": {
+    "evidence_commit": "e6008345c9891ec6ffb5088f38177022e3cef4aa",
+    "cell": "windows-3.10",
+    "archive": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-inputs\\artifacts\\final-action-policy-windows-latest-3.10.zip",
+    "archive_sha256": "88ae2b1295e3433bca440361971aaea4810c69f0bda5f51b85a41e30ef9d96b4",
+    "guard_manifest": {
+      "source_url": "https://github.com/Waveframe-Labs/Waveframe-Guard",
+      "source_commit": "0161ef8a52e052d1bc1366cdc93ce13a9bd535ed",
+      "provenance_kind": "coordinator-supplied-exact-candidate",
+      "wheel": "waveframe_guard-0.19.0-py3-none-any.whl",
+      "wheel_sha256": "e7cb9aae6a27437d809d5d72e0225536c4ac0ab729ad9cae162c4417c24d4ba4"
+    },
+    "guard_wheel": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-inputs\\windows-3.10\\package\\waveframe_guard-0.19.0-py3-none-any.whl",
+    "compiler_wheel": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue25-inputs\\windows-3.10\\ledger-extra\\retained-base\\cricore_contract_compiler-0.5.0-py3-none-any.whl",
+    "compiler_build": {
+      "filename": "cricore_contract_compiler-0.5.0-py3-none-any.whl",
+      "sha256": "f0d7aa912d0453ea6da2c63c084cc5b8e9ee5507bd05b482086e8c837da7b1d6",
+      "origin": {
+        "url": "https://github.com/Waveframe-Labs/cricore-contract-compiler.git",
+        "vcs_info": {
+          "commit_id": "ae590dee058d3481e384dea850d5b7d980f533ff",
+          "requested_revision": "ae590dee058d3481e384dea850d5b7d980f533ff",
+          "vcs": "git"
+        }
+      },
+      "kind": "locally built pip-cached VCS wheel",
+      "supplied_archive_hash_verified": false,
+      "note": "Archive hashes can differ across builds; complete compiled fixture outputs must remain identical."
+    },
+    "historical_combined_status": "failed",
+    "historical_guard_install_upgrade": "passed",
+    "release_ready": false
+  },
+  "compiler_origin": {
+    "filename": "cricore_contract_compiler-0.5.0-py3-none-any.whl",
+    "sha256": "f0d7aa912d0453ea6da2c63c084cc5b8e9ee5507bd05b482086e8c837da7b1d6",
+    "origin": {
+      "url": "https://github.com/Waveframe-Labs/cricore-contract-compiler.git",
+      "vcs_info": {
+        "commit_id": "ae590dee058d3481e384dea850d5b7d980f533ff",
+        "requested_revision": "ae590dee058d3481e384dea850d5b7d980f533ff",
+        "vcs": "git"
+      }
+    },
+    "kind": "locally built pip-cached VCS wheel",
+    "supplied_archive_hash_verified": false,
+    "note": "Archive hashes can differ across builds; complete compiled fixture outputs must remain identical."
+  },
+  "package_sha256": {
+    "cricore_contract_compiler-0.5.0-py3-none-any.whl": "f0d7aa912d0453ea6da2c63c084cc5b8e9ee5507bd05b482086e8c837da7b1d6",
+    "governance_ledger-0.9.0-py3-none-any.whl": "605ee246590a0e23f391f48b6fd24be091942732aaa074822b2ffbfe5eea5025",
+    "governance_ledger-0.9.0.tar.gz": "254f0daca7c74869e3d0057eaf6a7a3ff30dae005927f4cbbb99349cbb2a4175",
+    "waveframe_guard-0.19.0-py3-none-any.whl": "e7cb9aae6a27437d809d5d72e0225536c4ac0ab729ad9cae162c4417c24d4ba4"
+  },
+  "catalog_3_execution_cases": 56,
+  "status": "combined-extra-passed"
+}

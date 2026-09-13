@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/semantic_commit_bundle.v1.json",
+  "title": "Semantic Commit Bundle",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "source_id",
+    "source_hash",
+    "extraction_id",
+    "semantic_commit_id",
+    "semantic_commit_hash",
+    "committed_at",
+    "committed_by",
+    "committed_capabilities",
+    "resolved_interpretations",
+    "approved_constraints",
+    "lifecycle_posture",
+    "continuity_posture",
+    "identity_bindings",
+    "execution_admissibility_semantics",
+    "replay_obligations",
+    "committed_semantic_meaning",
+    "non_goals",
+    "bundle_hash"
+  ],
+  "properties": {
+    "schema_version": { "const": "semantic_commit_bundle.v1" },
+    "source_id": { "type": ["string", "null"] },
+    "source_hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "extraction_id": { "type": ["string", "null"] },
+    "semantic_commit_id": { "type": "string", "minLength": 1 },
+    "semantic_commit_hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "committed_at": { "type": "string", "minLength": 1 },
+    "committed_by": { "type": "string", "minLength": 1 },
+    "committed_capabilities": { "type": "array" },
+    "resolved_interpretations": { "type": "array" },
+    "approved_constraints": { "type": "object" },
+    "lifecycle_posture": { "type": "object" },
+    "continuity_posture": { "type": "object" },
+    "identity_bindings": { "type": "object" },
+    "execution_admissibility_semantics": { "type": "object" },
+    "replay_obligations": { "type": "array" },
+    "committed_semantic_meaning": { "type": "object" },
+    "provenance_bindings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_policy_ref",
+        "source_snapshot_hash",
+        "source_statements_hash",
+        "interpretation_id",
+        "mapping_hash",
+        "resolution_id",
+        "resolution_hash"
+      ],
+      "properties": {
+        "source_policy_ref": { "type": "string", "minLength": 3, "maxLength": 513, "pattern": "^[^@]+@[^@]+$" },
+        "source_snapshot_hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "source_statements_hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "interpretation_id": { "type": "string", "minLength": 1 },
+        "mapping_hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "resolution_id": { "type": "string", "pattern": "^resolution-set-[a-f0-9]{64}$" },
+        "resolution_hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+      }
+    },
+    "non_goals": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "bundle_hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+  }
+}

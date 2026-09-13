@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/replay_execution_request.v1.json",
+  "title": "Replay Execution Request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "authority_contract", "execution_state"],
+  "properties": {
+    "schema_version": {
+      "const": "replay_execution_request.v1"
+    },
+    "authority_contract": {
+      "type": "object"
+    },
+    "execution_state": {
+      "$ref": "governed_execution_state.v1.json"
+    }
+  }
+}

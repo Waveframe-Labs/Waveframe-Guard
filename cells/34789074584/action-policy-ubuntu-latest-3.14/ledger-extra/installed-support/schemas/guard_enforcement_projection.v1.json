@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/guard_enforcement_projection.v1.json",
+  "title": "Guard Enforcement Projection",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "authority_ref",
+    "compiled_contract_hash",
+    "admissibility_requirements",
+    "replay_obligations",
+    "approval_constraints",
+    "continuity_rules",
+    "execution_constraints",
+    "excluded_from_guard_consumption",
+    "non_goals"
+  ],
+  "properties": {
+    "schema_version": { "const": "guard_enforcement_projection.v1" },
+    "authority_ref": { "type": "string" },
+    "compiled_contract_hash": { "type": ["string", "null"] },
+    "admissibility_requirements": { "type": "object" },
+    "replay_obligations": { "type": "array", "items": { "type": "object" } },
+    "approval_constraints": { "type": "object" },
+    "continuity_rules": { "type": "object" },
+    "execution_constraints": { "type": "object" },
+    "excluded_from_guard_consumption": { "type": "array", "items": { "type": "string" } },
+    "non_goals": { "type": "array", "items": { "type": "string" } }
+  }
+}

@@ -1,0 +1,303 @@
+{
+  "dependencies": {
+    "cricore-contract-compiler": {
+      "url": "https://github.com/Waveframe-Labs/cricore-contract-compiler.git",
+      "vcs_info": {
+        "commit_id": "ae590dee058d3481e384dea850d5b7d980f533ff",
+        "requested_revision": "ae590dee058d3481e384dea850d5b7d980f533ff",
+        "vcs": "git"
+      }
+    },
+    "governance-ledger": {
+      "url": "https://github.com/Waveframe-Labs/Waveframe-Ledger.git",
+      "vcs_info": {
+        "commit_id": "a34c11d81b85963794cf28b4adad091fac15e130",
+        "requested_revision": "a34c11d81b85963794cf28b4adad091fac15e130",
+        "vcs": "git"
+      }
+    }
+  },
+  "guard_pep610": {
+    "archive_info": {
+      "hash": "sha256=e734836af5780fff7f834e2904c67f88a1d3a5ef1b47a2e8fc2f4e07f3dbb42f",
+      "hashes": {
+        "sha256": "e734836af5780fff7f834e2904c67f88a1d3a5ef1b47a2e8fc2f4e07f3dbb42f"
+      }
+    },
+    "url": "file:///home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/package/waveframe_guard-0.19.0-py3-none-any.whl"
+  },
+  "outcomes": {
+    "collision": {
+      "callback_count": 1,
+      "decision": "ALLOWED",
+      "exact_package_roundtrip": true,
+      "execution_status": "failed",
+      "mutation_executed": false,
+      "preserve_status": 201,
+      "report_status": 201,
+      "retrieve_status": 200,
+      "run_id": "guard_run_648d440515b721d365dd1da8"
+    },
+    "create-only-no-modify": {
+      "callback_count": 0,
+      "decision": "BLOCKED",
+      "exact_package_roundtrip": true,
+      "execution_status": "blocked",
+      "mutation_executed": false,
+      "preserve_status": 201,
+      "report_status": 201,
+      "retrieve_status": 200,
+      "run_id": "guard_run_1fd270f7ab32c0e1480ee4c5"
+    },
+    "created": {
+      "callback_count": 1,
+      "decision": "ALLOWED",
+      "exact_package_roundtrip": true,
+      "execution_status": "succeeded",
+      "mutation_executed": true,
+      "preserve_status": 201,
+      "report_status": 201,
+      "retrieve_status": 200,
+      "run_id": "guard_run_8baf3c9fd4cfc4aa930ebaa4"
+    },
+    "default-deny": {
+      "callback_count": 0,
+      "decision": "BLOCKED",
+      "exact_package_roundtrip": true,
+      "execution_status": "blocked",
+      "mutation_executed": false,
+      "preserve_status": 201,
+      "report_status": 201,
+      "retrieve_status": 200,
+      "run_id": "guard_run_8093bd5dc40aca788a630847"
+    },
+    "denied-path": {
+      "callback_count": 0,
+      "decision": "BLOCKED",
+      "exact_package_roundtrip": true,
+      "execution_status": "blocked",
+      "mutation_executed": false,
+      "preserve_status": 201,
+      "report_status": 201,
+      "retrieve_status": 200,
+      "run_id": "guard_run_3c9dfbce2364c9ae2d7e45f2"
+    },
+    "denied-role": {
+      "callback_count": 0,
+      "decision": "BLOCKED",
+      "exact_package_roundtrip": true,
+      "execution_status": "blocked",
+      "mutation_executed": false,
+      "preserve_status": 201,
+      "report_status": 201,
+      "retrieve_status": 200,
+      "run_id": "guard_run_a519d062c11dc20d312c19b7"
+    },
+    "empty": {
+      "callback_count": 1,
+      "decision": "ALLOWED",
+      "exact_package_roundtrip": true,
+      "execution_status": "succeeded",
+      "mutation_executed": true,
+      "preserve_status": 201,
+      "report_status": 201,
+      "retrieve_status": 200,
+      "run_id": "guard_run_d49f731b6a1682491b2f25f3"
+    },
+    "legacy-cannot-create": {
+      "authorization_event": false,
+      "callback_count": 0,
+      "decision": "not_evaluated",
+      "mutation_executed": false,
+      "report_status": null
+    },
+    "mixed-create-role": {
+      "callback_count": 0,
+      "decision": "BLOCKED",
+      "exact_package_roundtrip": true,
+      "execution_status": "blocked",
+      "mutation_executed": false,
+      "preserve_status": 201,
+      "report_status": 201,
+      "retrieve_status": 200,
+      "run_id": "guard_run_92b6f01ebafa177c3d819bb2"
+    },
+    "mixed-created": {
+      "callback_count": 1,
+      "decision": "ALLOWED",
+      "exact_package_roundtrip": true,
+      "execution_status": "succeeded",
+      "mutation_executed": true,
+      "preserve_status": 201,
+      "report_status": 201,
+      "retrieve_status": 200,
+      "run_id": "guard_run_b10c7dbaee12984d4ac10abb"
+    },
+    "mixed-modified": {
+      "callback_count": 1,
+      "decision": "ALLOWED",
+      "exact_package_roundtrip": true,
+      "execution_status": "succeeded",
+      "mutation_executed": true,
+      "preserve_status": 201,
+      "report_status": 201,
+      "retrieve_status": 200,
+      "run_id": "guard_run_58ae3d78cde128ab08295345"
+    },
+    "mixed-modify-role": {
+      "callback_count": 0,
+      "decision": "BLOCKED",
+      "exact_package_roundtrip": true,
+      "execution_status": "blocked",
+      "mutation_executed": false,
+      "preserve_status": 201,
+      "report_status": 201,
+      "retrieve_status": 200,
+      "run_id": "guard_run_66c84fab71194d7fb34cb113"
+    },
+    "modified": {
+      "callback_count": 1,
+      "decision": "ALLOWED",
+      "exact_package_roundtrip": true,
+      "execution_status": "succeeded",
+      "mutation_executed": true,
+      "preserve_status": 201,
+      "report_status": 201,
+      "retrieve_status": 200,
+      "run_id": "guard_run_17c02c6354545a8966c3b4be"
+    },
+    "modify-denied-path": {
+      "callback_count": 0,
+      "decision": "BLOCKED",
+      "exact_package_roundtrip": true,
+      "execution_status": "blocked",
+      "mutation_executed": false,
+      "preserve_status": 201,
+      "report_status": 201,
+      "retrieve_status": 200,
+      "run_id": "guard_run_b1542ee23e482c348a5a262a"
+    },
+    "modify-denied-role": {
+      "callback_count": 0,
+      "decision": "BLOCKED",
+      "exact_package_roundtrip": true,
+      "execution_status": "blocked",
+      "mutation_executed": false,
+      "preserve_status": 201,
+      "report_status": 201,
+      "retrieve_status": 200,
+      "run_id": "guard_run_32db4c86a59a5a82d835aa1c"
+    },
+    "modify-only-no-create": {
+      "callback_count": 0,
+      "decision": "BLOCKED",
+      "exact_package_roundtrip": true,
+      "execution_status": "blocked",
+      "mutation_executed": false,
+      "preserve_status": 201,
+      "report_status": 201,
+      "retrieve_status": 200,
+      "run_id": "guard_run_a036055b7ceefd59ae119b8c"
+    },
+    "no-report": {
+      "callback_count": 0,
+      "decision": "ALLOWED",
+      "exact_package_roundtrip": true,
+      "execution_status": null,
+      "mutation_executed": null,
+      "preserve_status": 201,
+      "report_status": null,
+      "retrieve_status": 200,
+      "run_id": "guard_run_412cde0b796280e36db1bfe8"
+    },
+    "partial": {
+      "callback_count": 1,
+      "decision": "ALLOWED",
+      "exact_package_roundtrip": true,
+      "execution_status": "failed",
+      "mutation_executed": true,
+      "preserve_status": 201,
+      "report_status": 201,
+      "retrieve_status": 200,
+      "run_id": "guard_run_02b50ef0cbe4c65140d56325"
+    },
+    "post-validation": {
+      "callback_count": 1,
+      "decision": "ALLOWED",
+      "exact_package_roundtrip": true,
+      "execution_status": "failed",
+      "mutation_executed": true,
+      "preserve_status": 201,
+      "report_status": 201,
+      "retrieve_status": 200,
+      "run_id": "guard_run_76520c95882b74aea1d7b3dd"
+    },
+    "pre-callback": {
+      "callback_count": 0,
+      "decision": "ALLOWED",
+      "exact_package_roundtrip": true,
+      "execution_status": "not_executed",
+      "mutation_executed": false,
+      "preserve_status": 201,
+      "report_status": 201,
+      "retrieve_status": 200,
+      "run_id": "guard_run_8a8165bc85f1873c3fa6b1ef"
+    },
+    "returned-summary": {
+      "callback_count": 1,
+      "decision": "ALLOWED",
+      "exact_package_roundtrip": true,
+      "execution_status": "failed",
+      "mutation_executed": null,
+      "preserve_status": 201,
+      "report_status": 201,
+      "retrieve_status": 200,
+      "run_id": "guard_run_8a14cd8a2cb6dd714f7fbf0c"
+    },
+    "unknown": {
+      "callback_count": 1,
+      "decision": "ALLOWED",
+      "exact_package_roundtrip": true,
+      "execution_status": "failed",
+      "mutation_executed": null,
+      "preserve_status": 201,
+      "report_status": 201,
+      "retrieve_status": 200,
+      "run_id": "guard_run_01d8fbd9c2b337b6e9e681e0"
+    },
+    "wrong-runtime": {
+      "callback_count": 1,
+      "decision": "ALLOWED",
+      "preserve_status": 403,
+      "preserved": false,
+      "report_status": 403,
+      "run_id": "guard_run_644031c233a8a0151daa434f"
+    }
+  },
+  "platform": "Linux-6.17.0-1022-azure-x86_64-with-glibc2.39",
+  "python": "3.14.7 (main, Aug  6 2026, 02:19:46) [GCC 13.3.0]",
+  "server": {
+    "cloud_commit": "547291b525e2f1d05d92ed65b6058c4ca91588a8",
+    "dependencies": {
+      "cricore-contract-compiler": {
+        "url": "https://github.com/Waveframe-Labs/cricore-contract-compiler.git",
+        "vcs_info": {
+          "commit_id": "3b91fcc03c804804b2ace7302f37340a787496d9",
+          "requested_revision": "3b91fcc03c804804b2ace7302f37340a787496d9",
+          "vcs": "git"
+        },
+        "version": "0.4.0"
+      },
+      "governance-ledger": {
+        "url": "https://github.com/Waveframe-Labs/Waveframe-Ledger.git",
+        "vcs_info": {
+          "commit_id": "54379d9c8044544fc1b8f32109bdfce35c1c6a05",
+          "requested_revision": "54379d9c8044544fc1b8f32109bdfce35c1c6a05",
+          "vcs": "git"
+        },
+        "version": "0.8.0"
+      }
+    },
+    "source_clean": true
+  }
+}

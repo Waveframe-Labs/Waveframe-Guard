@@ -1,0 +1,41 @@
+{
+  "name": "finance transfer approval",
+  "policy_text": "Transfers above $1000000 require manager approval. Requester and approver must be separate. All transfer approvals must be recorded for audit purposes.",
+  "expected_policy": {
+    "authority": {
+      "required_roles": ["manager"],
+      "separation_of_duties": true
+    },
+    "approvals": {
+      "required": [
+        {
+          "role": "manager",
+          "condition": {
+            "field": "amount",
+            "operator": ">",
+            "value": 1000000
+          }
+        }
+      ],
+      "thresholds": [
+        {
+          "field": "amount",
+          "operator": ">",
+          "value": 1000000,
+          "requires_role": "manager"
+        }
+      ]
+    },
+    "artifacts": {
+      "required": ["approval_audit_record"]
+    }
+  },
+  "expected_classifications": [
+    "conditional_threshold_approval",
+    "separation_of_duties_constraint",
+    "artifact_requirement"
+  ],
+  "expected_coverage_percent": 100,
+  "expected_warning_types": [],
+  "expected_publication_gate": "READY"
+}

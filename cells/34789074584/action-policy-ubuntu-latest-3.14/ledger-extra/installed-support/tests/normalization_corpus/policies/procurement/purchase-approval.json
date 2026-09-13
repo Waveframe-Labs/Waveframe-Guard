@@ -1,0 +1,39 @@
+{
+  "name": "procurement purchase approval",
+  "policy_text": "Purchases at least $50,000 require procurement approval. Approval evidence must be retained.",
+  "expected_policy": {
+    "authority": {
+      "required_roles": ["procurement"]
+    },
+    "approvals": {
+      "required": [
+        {
+          "role": "procurement",
+          "condition": {
+            "field": "amount",
+            "operator": ">=",
+            "value": 50000
+          }
+        }
+      ],
+      "thresholds": [
+        {
+          "field": "amount",
+          "operator": ">=",
+          "value": 50000,
+          "requires_role": "procurement"
+        }
+      ]
+    },
+    "artifacts": {
+      "required": ["approval_audit_record"]
+    }
+  },
+  "expected_classifications": [
+    "conditional_threshold_approval",
+    "artifact_requirement"
+  ],
+  "expected_coverage_percent": 100,
+  "expected_warning_types": [],
+  "expected_publication_gate": "READY"
+}

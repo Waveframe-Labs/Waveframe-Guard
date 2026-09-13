@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/domain_pack.v1.json",
+  "title": "Waveframe Domain Pack",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "domain_pack_id", "domain_pack_version", "name", "description", "supported_actions", "resource_kinds", "resource_contracts", "subject_kinds", "role_kinds", "vocabulary", "synonyms", "types_and_units", "runtime_fact_schema", "grammar_compiler", "allowed_mapping_controls", "semantic_validation_rules", "compiler_lowering", "test_vectors", "canonical_hash"],
+  "properties": {
+    "schema_version": { "const": "domain_pack.v1" },
+    "domain_pack_id": { "$ref": "#/$defs/identity" },
+    "domain_pack_version": { "$ref": "#/$defs/semver" },
+    "name": { "type": "string", "minLength": 1 },
+    "description": { "type": "string", "minLength": 1 },
+    "supported_actions": { "$ref": "#/$defs/symbols" },
+    "resource_kinds": { "$ref": "#/$defs/symbols" },
+    "resource_contracts": { "type": "array", "minItems": 1, "items": {
+      "type": "object", "additionalProperties": false,
+      "required": ["resource_kind", "permitted_match_modes", "value_type", "enum_values", "null_allowed", "format_id", "value_fact_id"],
+      "properties": {
+        "resource_kind": { "$ref": "#/$defs/identity" },
+        "permitted_match_modes": { "$ref": "#/$defs/symbols" },
+        "value_type": { "enum": ["boolean", "decimal", "enum", "integer", "string", "string_set", "timestamp"] },
+        "enum_values": { "oneOf": [{ "type": "null" }, { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }] },
+        "null_allowed": { "type": "boolean" },
+        "format_id": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/identity" }] },
+        "value_fact_id": { "type": ["string", "null"], "minLength": 3 }
+      }
+    } },
+    "subject_kinds": { "$ref": "#/$defs/symbols" },
+    "role_kinds": { "$ref": "#/$defs/symbols" },
+    "vocabulary": { "type": "object", "additionalProperties": false, "required": ["effects", "resource_matches", "evidence_types"], "properties": {
+      "effects": { "$ref": "#/$defs/symbols" }, "resource_matches": { "$ref": "#/$defs/symbols" },
+      "evidence_types": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
+    } },
+    "synonyms": { "type": "object", "additionalProperties": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } } },
+    "types_and_units": { "type": "array", "minItems": 1, "items": { "type": "object", "additionalProperties": false, "required": ["type", "canonical_units"], "properties": {
+      "type": { "$ref": "#/$defs/identity" }, "canonical_units": { "type": "array", "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
+    } } },
+    "runtime_fact_schema": { "$ref": "runtime_fact_schema.v1.json" },
+    "grammar_compiler": { "$ref": "#/$defs/compilerIdentity" },
+    "allowed_mapping_controls": { "type": "array", "minItems": 1, "items": {
+      "type": "object", "additionalProperties": false,
+      "required": ["control_id", "name", "description", "selection_schema", "emitter_id"],
+      "properties": {
+        "control_id": { "$ref": "#/$defs/identity" }, "name": { "type": "string", "minLength": 1 }, "description": { "type": "string", "minLength": 1 },
+        "selection_schema": { "type": "object", "additionalProperties": { "type": "object", "additionalProperties": false, "required": ["type", "enum_values", "canonical_unit", "format_id"], "properties": {
+          "type": { "enum": ["boolean", "decimal", "enum", "integer", "string", "string_set", "timestamp"] },
+          "enum_values": { "oneOf": [{ "type": "null" }, { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }] },
+          "canonical_unit": { "type": ["string", "null"] }, "format_id": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/identity" }] }
+        } } },
+        "emitter_id": { "$ref": "#/$defs/identity" }
+      }
+    } },
+    "semantic_validation_rules": { "$ref": "#/$defs/symbols" },
+    "compiler_lowering": { "type": "object", "additionalProperties": false, "required": ["lowering_id", "lowering_version"], "properties": { "lowering_id": { "$ref": "#/$defs/identity" }, "lowering_version": { "$ref": "#/$defs/semver" } } },
+    "test_vectors": { "type": "object", "additionalProperties": false, "required": ["positive", "negative", "invalid"], "properties": { "positive": { "$ref": "#/$defs/vectors" }, "negative": { "$ref": "#/$defs/vectors" }, "invalid": { "$ref": "#/$defs/vectors" } } },
+    "canonical_hash": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "identity": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,255}$" },
+    "semver": { "type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$" },
+    "sha256": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "symbols": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+    "compilerIdentity": { "type": "object", "additionalProperties": false, "required": ["compiler_id", "compiler_version"], "properties": { "compiler_id": { "$ref": "#/$defs/identity" }, "compiler_version": { "$ref": "#/$defs/semver" } } },
+    "vectors": { "type": "array", "minItems": 1, "items": { "type": "object", "additionalProperties": false, "required": ["source", "expected"], "properties": { "source": { "type": "string", "minLength": 1 }, "expected": { "type": "string", "minLength": 1 } } } }
+  }
+}

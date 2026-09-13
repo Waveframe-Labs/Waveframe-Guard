@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Waveframe-Labs/Governance-Ledger/schemas/publication_manifest.schema.json",
+  "title": "Governance-Ledger Publication Manifest",
+  "type": "object",
+  "required": ["published_at", "published_by", "contracts", "reviews", "snapshots"],
+  "properties": {
+    "published_at": {
+      "type": "string"
+    },
+    "published_by": {
+      "type": "string"
+    },
+    "contracts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["contract_id", "contract_version", "contract_hash", "path"],
+        "properties": {
+          "contract_id": {"type": "string"},
+          "contract_version": {"type": "string"},
+          "contract_hash": {
+            "type": "string",
+            "pattern": "^sha256:[A-Fa-f0-9]{64}$"
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[^\\\\]*$"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "reviews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[^\\\\]*$"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "snapshots": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[^\\\\]*$"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

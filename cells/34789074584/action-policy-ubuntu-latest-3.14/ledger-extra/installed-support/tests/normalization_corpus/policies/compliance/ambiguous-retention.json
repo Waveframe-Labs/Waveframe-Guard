@@ -1,0 +1,21 @@
+{
+  "name": "ambiguous compliance retention",
+  "policy_text": "High risk access must be reviewed promptly. Evidence must be retained for 7 years.",
+  "expected_policy": {
+    "artifacts": {
+      "required": ["evidence_record"]
+    }
+  },
+  "expected_classifications": [
+    "unclassified_governance_statement",
+    "artifact_requirement"
+  ],
+  "expected_coverage_percent": 50,
+  "expected_warning_types": [
+    "ambiguous_risk",
+    "ambiguous_temporal",
+    "normalization_coverage",
+    "unsupported_constraint"
+  ],
+  "expected_publication_gate": "BLOCKED"
+}

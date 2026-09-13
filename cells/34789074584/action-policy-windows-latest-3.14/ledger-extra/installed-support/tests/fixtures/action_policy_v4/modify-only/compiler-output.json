@@ -1,0 +1,23 @@
+{
+  "action_requirements": {
+    "modify": {
+      "allow": [
+        {
+          "match": "prefix",
+          "value": "docs/"
+        }
+      ],
+      "deny": [
+        {
+          "match": "exact",
+          "value": "docs/locked.md"
+        }
+      ],
+      "required_role": "repository-reviewer"
+    }
+  },
+  "contract_hash": "32d4cd3f0d8457e19f41ee425e44a23f594ea5173a509809f3ae23082cfad23f",
+  "contract_id": "repository-modify-only",
+  "contract_version": "2.0.0",
+  "schema_version": "compiled_action_contract.v1"
+}

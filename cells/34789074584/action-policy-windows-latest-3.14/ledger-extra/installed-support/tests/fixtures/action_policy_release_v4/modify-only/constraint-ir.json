@@ -1,0 +1,99 @@
+{
+  "schema_version": "constraint_ir.v1",
+  "domain_pack": {
+    "domain_pack_id": "repository-changes",
+    "domain_pack_version": "3.0.0",
+    "domain_pack_hash": "sha256:78783654a8131cb7a6547ee2ed9507e1dced640aebe32d35057c385bb1dc4459"
+  },
+  "runtime_fact_schema_hash": "sha256:3fcf3af0a61f91a78b171ccd6247db9f0f908e1baf44aa50ece12349c44bb582",
+  "constraints": [
+    {
+      "constraint_id": "constraint-30a7e2cf004413add7e05deeac07730bab79fd9e2e65f7c82d3852c929368e58",
+      "subject": {
+        "kind": "subject_kind",
+        "value": "agent"
+      },
+      "acting_role": {
+        "kind": "role",
+        "value": "repository-reviewer"
+      },
+      "action": "modify",
+      "resource": {
+        "kind": "repository_change",
+        "match": "any",
+        "value": null
+      },
+      "effect": "require",
+      "condition": null,
+      "obligations": {
+        "approvals": [],
+        "evidence": [],
+        "separation_of_duties": []
+      },
+      "exceptions": [],
+      "required_runtime_facts": [
+        "actor.role",
+        "actor.subject_kind",
+        "proposal.action",
+        "proposal.resource.kind"
+      ]
+    },
+    {
+      "constraint_id": "constraint-a92833c7cfd28b31534965efad02e01fa1e2d3392e9cc598d221c6b6ece86637",
+      "subject": {
+        "kind": "subject_kind",
+        "value": "agent"
+      },
+      "acting_role": null,
+      "action": "modify",
+      "resource": {
+        "kind": "repository_path",
+        "match": "prefix",
+        "value": "docs/"
+      },
+      "effect": "allow",
+      "condition": null,
+      "obligations": {
+        "approvals": [],
+        "evidence": [],
+        "separation_of_duties": []
+      },
+      "exceptions": [],
+      "required_runtime_facts": [
+        "actor.subject_kind",
+        "proposal.action",
+        "proposal.resource.kind",
+        "proposal.resource.path"
+      ]
+    },
+    {
+      "constraint_id": "constraint-56c3605a97ad91eed8eb255ae250d7c352e07630d36dacabfed1da5d70847f52",
+      "subject": {
+        "kind": "subject_kind",
+        "value": "agent"
+      },
+      "acting_role": null,
+      "action": "modify",
+      "resource": {
+        "kind": "repository_path",
+        "match": "exact",
+        "value": "docs/locked.md"
+      },
+      "effect": "deny",
+      "condition": null,
+      "obligations": {
+        "approvals": [],
+        "evidence": [],
+        "separation_of_duties": []
+      },
+      "exceptions": [],
+      "required_runtime_facts": [
+        "actor.subject_kind",
+        "proposal.action",
+        "proposal.resource.kind",
+        "proposal.resource.path"
+      ]
+    }
+  ],
+  "ir_hash": "sha256:2175306ee71f6c597b66d4592236e92b40cc1e55a1fb57c3a9f0841948bbf462"
+}

@@ -1,0 +1,178 @@
+{
+  "authority_contract": {
+    "approval_requirements": {
+      "thresholds": [
+        {
+          "field": "amount",
+          "operator": ">",
+          "requires_role": "manager",
+          "value": 1000000
+        }
+      ]
+    },
+    "artifact_requirements": {},
+    "authority_requirements": {
+      "required_roles": [
+        "manager"
+      ]
+    },
+    "contract_hash": "c26887c13491fb5db61f46e3cc83a5769fd4071087e978e9de8db2e5ab20248a",
+    "contract_id": "finance-policy",
+    "contract_version": "1.0.0",
+    "invariants": {},
+    "lineage": {
+      "compilation_report_hash": "sha256:5ffb7ae6eea3a350f61ed5fcf52c357fb073446d6e13df9d935a04c1c47bd117",
+      "review_id": "review-finance-policy-1.0.0",
+      "schema_version": "governance_authority_lineage.v1",
+      "source_hash": "sha256:cb6740ea72ac0687d6642e19058e33ecba203424c5084765cf0cea78e41d48c0"
+    },
+    "schema_version": "compiled_authority_contract.v1",
+    "stage_requirements": {}
+  },
+  "authority_diff_impact": null,
+  "authority_ref": "finance-policy@1.0.0",
+  "compiled_authority_contract": null,
+  "compiled_contract_hash": null,
+  "continuity_implications": [
+    "Lifecycle continuity follows the authority contract without additional stage constraints."
+  ],
+  "contract_hash": "sha256:c26887c13491fb5db61f46e3cc83a5769fd4071087e978e9de8db2e5ab20248a",
+  "governance_impact_preview": {
+    "authority_ref": "finance-policy@1.0.0",
+    "contract_hash": "c26887c13491fb5db61f46e3cc83a5769fd4071087e978e9de8db2e5ab20248a",
+    "contract_id": "finance-policy",
+    "contract_version": "1.0.0",
+    "enforcement_behavior": [
+      "Executions with amount > $1,000,000 require manager review."
+    ],
+    "example_governed_outcomes": [
+      {
+        "description": "Execution proceeds when applicable authority, approval, and evidence requirements are satisfied.",
+        "outcome": "allowed_execution"
+      },
+      {
+        "description": "Execution is blocked when required authority evidence is missing.",
+        "outcome": "blocked_execution"
+      },
+      {
+        "description": "Execution escalates for manager review when threshold conditions apply.",
+        "outcome": "escalation"
+      }
+    ],
+    "governance_summary": "Finance Policy are governed by finance-policy@1.0.0.",
+    "lifecycle_implications": [
+      "Lifecycle continuity follows the authority contract without additional stage constraints."
+    ],
+    "operational_consequences": [
+      "Blocked executions generate immutable replay and evidence artifacts.",
+      "Executions crossing approval thresholds require explicit approval evidence before completion."
+    ],
+    "schema_version": "governance_impact_preview.v1"
+  },
+  "governance_review_packets": [],
+  "immutable_inputs": {
+    "authority_hash": "sha256:c26887c13491fb5db61f46e3cc83a5769fd4071087e978e9de8db2e5ab20248a",
+    "compiled_contract_hash": null,
+    "diff_hash": null,
+    "manifest_hash": "sha256:fdc5650c827575cb1dc0689eacd48147680713f28965243aa621c837585a568b",
+    "preview_hash": "sha256:8e9555cb307bbb562722f0b1330aa22a7c009804833319ee7a922002ec4ed04f",
+    "review_packet_hashes": [],
+    "semantic_commit_hash": null
+  },
+  "lineage": {
+    "authority_lineage": {
+      "compilation_report_hash": "sha256:5ffb7ae6eea3a350f61ed5fcf52c357fb073446d6e13df9d935a04c1c47bd117",
+      "review_id": "review-finance-policy-1.0.0",
+      "schema_version": "governance_authority_lineage.v1",
+      "source_hash": "sha256:cb6740ea72ac0687d6642e19058e33ecba203424c5084765cf0cea78e41d48c0"
+    },
+    "compilation_report_hash": "sha256:5ffb7ae6eea3a350f61ed5fcf52c357fb073446d6e13df9d935a04c1c47bd117",
+    "manifest_contract": {
+      "compilation_report_hash": "sha256:5ffb7ae6eea3a350f61ed5fcf52c357fb073446d6e13df9d935a04c1c47bd117",
+      "contract_hash": "sha256:c26887c13491fb5db61f46e3cc83a5769fd4071087e978e9de8db2e5ab20248a",
+      "contract_id": "finance-policy",
+      "contract_version": "1.0.0",
+      "path": "contracts/finance-policy-1.0.0.contract.json",
+      "source_hash": "sha256:cb6740ea72ac0687d6642e19058e33ecba203424c5084765cf0cea78e41d48c0"
+    },
+    "source_hash": "sha256:cb6740ea72ac0687d6642e19058e33ecba203424c5084765cf0cea78e41d48c0"
+  },
+  "non_goals": [
+    "does_not_deploy_authority",
+    "does_not_approve_authority",
+    "does_not_change_execution_outcome",
+    "does_not_mutate_evidence",
+    "does_not_alter_replay",
+    "does_not_bypass_guard",
+    "does_not_call_cloud"
+  ],
+  "operational_implications": [
+    "Blocked executions generate immutable replay and evidence artifacts.",
+    "Executions crossing approval thresholds require explicit approval evidence before completion.",
+    "Executions with amount > $1,000,000 require manager review."
+  ],
+  "provenance": {
+    "manifest_schema_version": "publication_manifest.v1",
+    "published_at": "2026-07-17T16:00:00+00:00",
+    "published_by": "waveframe-governance"
+  },
+  "publication_id": "pub_20260717_0001",
+  "publication_manifest": {
+    "contracts": [
+      {
+        "compilation_report_hash": "sha256:5ffb7ae6eea3a350f61ed5fcf52c357fb073446d6e13df9d935a04c1c47bd117",
+        "contract_hash": "sha256:c26887c13491fb5db61f46e3cc83a5769fd4071087e978e9de8db2e5ab20248a",
+        "contract_id": "finance-policy",
+        "contract_version": "1.0.0",
+        "path": "contracts/finance-policy-1.0.0.contract.json",
+        "source_hash": "sha256:cb6740ea72ac0687d6642e19058e33ecba203424c5084765cf0cea78e41d48c0"
+      }
+    ],
+    "publication_id": "pub_20260717_0001",
+    "published_at": "2026-07-17T16:00:00+00:00",
+    "published_by": "waveframe-governance",
+    "reviews": [
+      {
+        "path": "reviews/finance_policy.deployed.review.json"
+      }
+    ],
+    "schema_version": "publication_manifest.v1",
+    "snapshots": [
+      {
+        "path": "snapshots/snapshot-d7efe4fe0cb7.json"
+      }
+    ]
+  },
+  "publication_meaning": "Finance Policy are governed by finance-policy@1.0.0.",
+  "review_packets": [],
+  "schema_compatibility": {
+    "artifacts": {
+      "authority_contract": "compiled_authority_contract.v1",
+      "authority_diff_impact": null,
+      "compiled_authority_contract": null,
+      "governance_impact_preview": "governance_impact_preview.v1",
+      "governance_review_packets": [],
+      "publication_manifest": "publication_manifest.v1",
+      "semantic_commit_bundle": null
+    },
+    "compatibility_mode": "additive_v1",
+    "compatible": true,
+    "expected": {
+      "authority_diff_impact": null,
+      "compiled_authority_contract": null,
+      "governance_impact_preview": "governance_impact_preview.v1",
+      "governance_review_packets": [],
+      "publication_manifest": "publication_manifest.v1",
+      "semantic_commit_bundle": null
+    }
+  },
+  "schema_version": "authority_bundle.v1",
+  "semantic_artifacts": [
+    {
+      "artifact_hash": "sha256:8e9555cb307bbb562722f0b1330aa22a7c009804833319ee7a922002ec4ed04f",
+      "artifact_type": "governance_impact_preview.v1"
+    }
+  ],
+  "semantic_commit_bundle": null,
+  "semantic_commit_hash": null
+}

@@ -1,0 +1,170 @@
+{
+  "schema_version": "policy_translation_proposal.v1",
+  "source_policy": {
+    "source_policy_id": "repository-policy",
+    "source_revision": "revision-1",
+    "source_policy_ref": "repository-policy@revision-1",
+    "content_encoding": "base64",
+    "source_bytes_base64": "QWdlbnRzIG11c3QgdXNlIHJvbGUgcmVwb3NpdG9yeS1yZXZpZXdlciB0byBtb2RpZnkgcmVwb3NpdG9yeSBmaWxlcy4KQWdlbnRzIG1heSBtb2RpZnkgZmlsZXMgdW5kZXIgZG9jcy8uCkFnZW50cyBtdXN0IG5vdCBtb2RpZnkgZG9jcy9sb2NrZWQubWQu",
+    "snapshot_hash": "sha256:deae0122f01197c2a6a1b1277ae5c0a6d0443a3f2c4d88daf7c6321e61a67934"
+  },
+  "authority": {
+    "authority_id": "repository-modify-only",
+    "authority_version": "2.0.0",
+    "authority_ref": "repository-modify-only@2.0.0"
+  },
+  "capability_catalog": {
+    "catalog_id": "waveframe.coding-agent.repository-change",
+    "catalog_version": "2.0.0",
+    "catalog_hash": "sha256:8530e82761a333c5e7e8cc0ccb0b2949310ea91b470d548613c98078896f030a"
+  },
+  "clauses": [
+    {
+      "clause_id": "policy-clause-e84e8c2e5d698969d21024d69ecc57f65710810e507c490e13094482be67df4e",
+      "index": 0,
+      "start_byte": 0,
+      "end_byte": 69,
+      "clause_bytes_base64": "QWdlbnRzIG11c3QgdXNlIHJvbGUgcmVwb3NpdG9yeS1yZXZpZXdlciB0byBtb2RpZnkgcmVwb3NpdG9yeSBmaWxlcy4K",
+      "clause_hash": "sha256:32ae7a8910f82366795678c6e7fb74cfa5b0008c7e1ee5162a3e0d04670f140d",
+      "coverage_status": "fully_represented",
+      "candidate_controls": [
+        {
+          "control_type": "acting_role",
+          "actor_kind": "autonomous_agent",
+          "action": "modify",
+          "resource_kind": "repository_change",
+          "fact_id": "actor.role",
+          "operator": "==",
+          "effect": "require",
+          "enforcement_point": "waveframe.guard.repository-change.v2-development",
+          "required_runtime_facts": [
+            "actor.role",
+            "actor.subject_kind",
+            "proposal.action",
+            "proposal.resource.kind"
+          ],
+          "value": {
+            "kind": "source_literal",
+            "value": "repository-reviewer",
+            "canonical_value": "repository-reviewer",
+            "start_byte": 21,
+            "end_byte": 40,
+            "literal_hash": "sha256:2e82c715bd962efb07944d7d7c91d25dc6fc293b47e5671a0f70d4495ccafb76"
+          },
+          "candidate_control_id": "candidate-control-25b5e2b43968c36d93e8bca1a5d49d11f82fad9504ae705673aa8d743ec49082"
+        }
+      ],
+      "unresolved_binding_ids": [],
+      "limitation_code": null,
+      "residual_unsupported_spans": []
+    },
+    {
+      "clause_id": "policy-clause-7160e8e831e8aaef05250296bcc2bc3ee78106c025de87e52bcd9a00240406e0",
+      "index": 1,
+      "start_byte": 69,
+      "end_byte": 106,
+      "clause_bytes_base64": "QWdlbnRzIG1heSBtb2RpZnkgZmlsZXMgdW5kZXIgZG9jcy8uCg==",
+      "clause_hash": "sha256:5054dd2bbc1ba6419c1691f521b8f0e79349fdd3eca46c9a37a62b1b16f0be53",
+      "coverage_status": "fully_represented",
+      "candidate_controls": [
+        {
+          "control_type": "prefix_path_access",
+          "actor_kind": "autonomous_agent",
+          "action": "modify",
+          "resource_kind": "repository_path",
+          "fact_id": "proposal.resource.path",
+          "operator": "starts_with",
+          "effect": "allow",
+          "enforcement_point": "waveframe.guard.repository-change.v2-development",
+          "required_runtime_facts": [
+            "actor.subject_kind",
+            "proposal.action",
+            "proposal.resource.kind",
+            "proposal.resource.path"
+          ],
+          "value": {
+            "kind": "source_literal",
+            "value": "docs/",
+            "canonical_value": "docs/",
+            "start_byte": 99,
+            "end_byte": 104,
+            "literal_hash": "sha256:756dcfcddff993c7fd6cf14a402d97e7cbd9faafa6339aa722d19eeceb6d1391"
+          },
+          "candidate_control_id": "candidate-control-284221b0fd9e8151fd338451bb8be9419534794d5dd72da24291edefac4f0a58"
+        }
+      ],
+      "unresolved_binding_ids": [],
+      "limitation_code": null,
+      "residual_unsupported_spans": []
+    },
+    {
+      "clause_id": "policy-clause-28d890fab4001767a810825220aa7b0cf32a13369f027048cf78801b0ff65f93",
+      "index": 2,
+      "start_byte": 106,
+      "end_byte": 144,
+      "clause_bytes_base64": "QWdlbnRzIG11c3Qgbm90IG1vZGlmeSBkb2NzL2xvY2tlZC5tZC4=",
+      "clause_hash": "sha256:03e1b248b1ef5c92dcb1e0783d7f70328febd325f9c9cfc5765c58d00d097936",
+      "coverage_status": "fully_represented",
+      "candidate_controls": [
+        {
+          "control_type": "exact_path_access",
+          "actor_kind": "autonomous_agent",
+          "action": "modify",
+          "resource_kind": "repository_path",
+          "fact_id": "proposal.resource.path",
+          "operator": "==",
+          "effect": "deny",
+          "enforcement_point": "waveframe.guard.repository-change.v2-development",
+          "required_runtime_facts": [
+            "actor.subject_kind",
+            "proposal.action",
+            "proposal.resource.kind",
+            "proposal.resource.path"
+          ],
+          "value": {
+            "kind": "source_literal",
+            "value": "docs/locked.md",
+            "canonical_value": "docs/locked.md",
+            "start_byte": 129,
+            "end_byte": 143,
+            "literal_hash": "sha256:a5f46ef7a87a99c783f33aedfe9bdea68d64de8b2922584bf599164821d0d20e"
+          },
+          "candidate_control_id": "candidate-control-1ed7736a8c3a9c68d676682c14ae4faafd236deab23fe3c35a7de497b30cf603"
+        }
+      ],
+      "unresolved_binding_ids": [],
+      "limitation_code": null,
+      "residual_unsupported_spans": []
+    }
+  ],
+  "organizational_bindings": [],
+  "translation_runs": [
+    {
+      "run_id": "translation-run-bda7042fac90beb3ec41bc88d38e6f80808d36d7c55f9c505263ad7ba669118d",
+      "sequence_number": 0,
+      "source_policy_ref": "repository-policy@revision-1",
+      "source_revision": "revision-1",
+      "source_snapshot_hash": "sha256:deae0122f01197c2a6a1b1277ae5c0a6d0443a3f2c4d88daf7c6321e61a67934",
+      "capability_catalog": {
+        "catalog_id": "waveframe.coding-agent.repository-change",
+        "catalog_version": "2.0.0",
+        "catalog_hash": "sha256:8530e82761a333c5e7e8cc0ccb0b2949310ea91b470d548613c98078896f030a"
+      },
+      "provider_class": "guided_deterministic",
+      "provider_identifier": "development-fixture-author",
+      "translation_template_version": "fixture-v1",
+      "translation_template_hash": "sha256:fc1c0e0c7ae8690bf702ade724d2543f81603a03b3956338f76ddef54ad713b9",
+      "request_configuration_id": "fixture-v1",
+      "request_configuration_hash": "sha256:fc1c0e0c7ae8690bf702ade724d2543f81603a03b3956338f76ddef54ad713b9",
+      "request_hash": "sha256:deae0122f01197c2a6a1b1277ae5c0a6d0443a3f2c4d88daf7c6321e61a67934",
+      "response_hash": "sha256:c4d8ae75942700ba6c030e6a7af8ecd78162d8b45afab6b074561997f15b0c47",
+      "explanation_hash": null,
+      "created_at": "2026-09-11T12:00:00Z",
+      "completed_at": "2026-09-11T12:00:01Z",
+      "previous_run_hash": null,
+      "run_hash": "sha256:9e0411d936303efec554a86b596e7d9b5b5d7c03ad7cf1fb181a69a44b286fc8"
+    }
+  ],
+  "proposal_id": "policy-translation-proposal-fff734544f0e555a072b81afdf9958767b67e868e61b1744d37bcfff6f86afa9",
+  "proposal_hash": "sha256:fff734544f0e555a072b81afdf9958767b67e868e61b1744d37bcfff6f86afa9"
+}

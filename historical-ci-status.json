@@ -1,0 +1,251 @@
+{
+  "run": "34788632771",
+  "head": "004f959f6d46a40b34a10ca3a789afff8aed7d74",
+  "scope": "All four combined wrappers failed before installation because shallow checkout lacked BASE. Guard and connected producers passed; none substitutes for final-head validation. Corrected by fetch-depth: 0.",
+  "cells": {
+    "action-policy-ubuntu-latest-3.10": {
+      "wrapper_error": "guard-stack",
+      "git_output": "fatal: Not a valid commit name 0161ef8a52e052d1bc1366cdc93ce13a9bd535ed\n",
+      "head": null,
+      "commands": [
+        {
+          "label": "ledger-head",
+          "command": [
+            "git",
+            "rev-parse",
+            "HEAD"
+          ],
+          "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/.candidate52/ledger",
+          "exit_code": 0
+        },
+        {
+          "label": "ledger-clean",
+          "command": [
+            "git",
+            "status",
+            "--porcelain",
+            "--untracked-files=no"
+          ],
+          "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/.candidate52/ledger",
+          "exit_code": 0
+        },
+        {
+          "label": "guard-head",
+          "command": [
+            "git",
+            "rev-parse",
+            "HEAD"
+          ],
+          "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard",
+          "exit_code": 0
+        },
+        {
+          "label": "guard-clean",
+          "command": [
+            "git",
+            "status",
+            "--porcelain",
+            "--untracked-files=no"
+          ],
+          "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard",
+          "exit_code": 0
+        },
+        {
+          "label": "guard-stack",
+          "command": [
+            "git",
+            "merge-base",
+            "--is-ancestor",
+            "0161ef8a52e052d1bc1366cdc93ce13a9bd535ed",
+            "004f959f6d46a40b34a10ca3a789afff8aed7d74"
+          ],
+          "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard",
+          "exit_code": 128
+        }
+      ]
+    },
+    "action-policy-ubuntu-latest-3.14": {
+      "wrapper_error": "guard-stack",
+      "git_output": "fatal: Not a valid commit name 0161ef8a52e052d1bc1366cdc93ce13a9bd535ed\n",
+      "head": null,
+      "commands": [
+        {
+          "label": "ledger-head",
+          "command": [
+            "git",
+            "rev-parse",
+            "HEAD"
+          ],
+          "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/.candidate52/ledger",
+          "exit_code": 0
+        },
+        {
+          "label": "ledger-clean",
+          "command": [
+            "git",
+            "status",
+            "--porcelain",
+            "--untracked-files=no"
+          ],
+          "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/.candidate52/ledger",
+          "exit_code": 0
+        },
+        {
+          "label": "guard-head",
+          "command": [
+            "git",
+            "rev-parse",
+            "HEAD"
+          ],
+          "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard",
+          "exit_code": 0
+        },
+        {
+          "label": "guard-clean",
+          "command": [
+            "git",
+            "status",
+            "--porcelain",
+            "--untracked-files=no"
+          ],
+          "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard",
+          "exit_code": 0
+        },
+        {
+          "label": "guard-stack",
+          "command": [
+            "git",
+            "merge-base",
+            "--is-ancestor",
+            "0161ef8a52e052d1bc1366cdc93ce13a9bd535ed",
+            "004f959f6d46a40b34a10ca3a789afff8aed7d74"
+          ],
+          "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard",
+          "exit_code": 128
+        }
+      ]
+    },
+    "action-policy-windows-latest-3.10": {
+      "wrapper_error": "guard-stack",
+      "git_output": "fatal: Not a valid commit name 0161ef8a52e052d1bc1366cdc93ce13a9bd535ed\n",
+      "head": null,
+      "commands": [
+        {
+          "label": "ledger-head",
+          "command": [
+            "git",
+            "rev-parse",
+            "HEAD"
+          ],
+          "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\.candidate52\\ledger",
+          "exit_code": 0
+        },
+        {
+          "label": "ledger-clean",
+          "command": [
+            "git",
+            "status",
+            "--porcelain",
+            "--untracked-files=no"
+          ],
+          "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\.candidate52\\ledger",
+          "exit_code": 0
+        },
+        {
+          "label": "guard-head",
+          "command": [
+            "git",
+            "rev-parse",
+            "HEAD"
+          ],
+          "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard",
+          "exit_code": 0
+        },
+        {
+          "label": "guard-clean",
+          "command": [
+            "git",
+            "status",
+            "--porcelain",
+            "--untracked-files=no"
+          ],
+          "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard",
+          "exit_code": 0
+        },
+        {
+          "label": "guard-stack",
+          "command": [
+            "git",
+            "merge-base",
+            "--is-ancestor",
+            "0161ef8a52e052d1bc1366cdc93ce13a9bd535ed",
+            "004f959f6d46a40b34a10ca3a789afff8aed7d74"
+          ],
+          "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard",
+          "exit_code": 128
+        }
+      ]
+    },
+    "action-policy-windows-latest-3.14": {
+      "wrapper_error": "guard-stack",
+      "git_output": "fatal: Not a valid commit name 0161ef8a52e052d1bc1366cdc93ce13a9bd535ed\n",
+      "head": null,
+      "commands": [
+        {
+          "label": "ledger-head",
+          "command": [
+            "git",
+            "rev-parse",
+            "HEAD"
+          ],
+          "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\.candidate52\\ledger",
+          "exit_code": 0
+        },
+        {
+          "label": "ledger-clean",
+          "command": [
+            "git",
+            "status",
+            "--porcelain",
+            "--untracked-files=no"
+          ],
+          "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\.candidate52\\ledger",
+          "exit_code": 0
+        },
+        {
+          "label": "guard-head",
+          "command": [
+            "git",
+            "rev-parse",
+            "HEAD"
+          ],
+          "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard",
+          "exit_code": 0
+        },
+        {
+          "label": "guard-clean",
+          "command": [
+            "git",
+            "status",
+            "--porcelain",
+            "--untracked-files=no"
+          ],
+          "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard",
+          "exit_code": 0
+        },
+        {
+          "label": "guard-stack",
+          "command": [
+            "git",
+            "merge-base",
+            "--is-ancestor",
+            "0161ef8a52e052d1bc1366cdc93ce13a9bd535ed",
+            "004f959f6d46a40b34a10ca3a789afff8aed7d74"
+          ],
+          "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard",
+          "exit_code": 128
+        }
+      ]
+    }
+  }
+}

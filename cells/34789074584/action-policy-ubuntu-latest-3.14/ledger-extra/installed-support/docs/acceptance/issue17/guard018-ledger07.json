@@ -1,0 +1,178 @@
+{
+  "python": "3.14.4",
+  "ledger": "0.7.0",
+  "guard": "0.18.0",
+  "compiler": "0.4.0",
+  "environment": "ordinary published packages; isolated Python imports",
+  "results": [
+    {
+      "fixture": "create-only",
+      "bundle_version": "authority_bundle.v4",
+      "receipt_version": "publication_receipt.v4",
+      "rejected": true,
+      "reason": "authority bundle schema_version must be authority_bundle.v1: repository-create-only@2.0.0"
+    },
+    {
+      "fixture": "create-only",
+      "bundle_version": "authority_bundle.v3",
+      "receipt_version": "publication_receipt.v3",
+      "rejected": true,
+      "reason": "installed governance-ledger does not support authority_bundle.v3; governance-ledger>=0.8.0 is required"
+    },
+    {
+      "fixture": "create-only",
+      "bundle_version": "authority_bundle.v2",
+      "receipt_version": "publication_receipt.v2",
+      "rejected": true,
+      "reason": "Ledger rejected the v2 publication chain for repository-create-only@2.0.0: authority_bundle.v2 fields are invalid; unknown=['compiler_binding', 'policy_translation_commitment'], missing=['canonical_cnl_previews', 'direct_parses', 'source_statements', 'source_to_constraint_mappings', 'statement_decisions']"
+    },
+    {
+      "fixture": "create-only",
+      "bundle_version": "authority_bundle.v1",
+      "receipt_version": "publication_receipt.v1",
+      "rejected": true,
+      "reason": "authority bundle is missing authority_contract: repository-create-only@2.0.0"
+    },
+    {
+      "fixture": "create-only",
+      "bundle_version": "authority_bundle.v3",
+      "receipt_version": "publication_receipt.v4",
+      "rejected": true,
+      "reason": "installed governance-ledger does not support authority_bundle.v3; governance-ledger>=0.8.0 is required"
+    },
+    {
+      "fixture": "create-only",
+      "bundle_version": "authority_bundle.v4",
+      "receipt_version": "publication_receipt.v3",
+      "rejected": true,
+      "reason": "authority bundle schema_version must be authority_bundle.v1: repository-create-only@2.0.0"
+    },
+    {
+      "fixture": "create-only",
+      "bundle_version": null,
+      "receipt_version": null,
+      "rejected": true,
+      "reason": "authority bundle schema_version must be authority_bundle.v1: repository-create-only@2.0.0"
+    },
+    {
+      "fixture": "create-only",
+      "bundle_version": "authority_bundle.v99",
+      "receipt_version": "publication_receipt.v99",
+      "rejected": true,
+      "reason": "authority bundle schema_version must be authority_bundle.v1: repository-create-only@2.0.0"
+    },
+    {
+      "fixture": "modify-only",
+      "bundle_version": "authority_bundle.v4",
+      "receipt_version": "publication_receipt.v4",
+      "rejected": true,
+      "reason": "authority bundle schema_version must be authority_bundle.v1: repository-modify-only@2.0.0"
+    },
+    {
+      "fixture": "modify-only",
+      "bundle_version": "authority_bundle.v3",
+      "receipt_version": "publication_receipt.v3",
+      "rejected": true,
+      "reason": "installed governance-ledger does not support authority_bundle.v3; governance-ledger>=0.8.0 is required"
+    },
+    {
+      "fixture": "modify-only",
+      "bundle_version": "authority_bundle.v2",
+      "receipt_version": "publication_receipt.v2",
+      "rejected": true,
+      "reason": "Ledger rejected the v2 publication chain for repository-modify-only@2.0.0: authority_bundle.v2 fields are invalid; unknown=['compiler_binding', 'policy_translation_commitment'], missing=['canonical_cnl_previews', 'direct_parses', 'source_statements', 'source_to_constraint_mappings', 'statement_decisions']"
+    },
+    {
+      "fixture": "modify-only",
+      "bundle_version": "authority_bundle.v1",
+      "receipt_version": "publication_receipt.v1",
+      "rejected": true,
+      "reason": "authority bundle is missing authority_contract: repository-modify-only@2.0.0"
+    },
+    {
+      "fixture": "modify-only",
+      "bundle_version": "authority_bundle.v3",
+      "receipt_version": "publication_receipt.v4",
+      "rejected": true,
+      "reason": "installed governance-ledger does not support authority_bundle.v3; governance-ledger>=0.8.0 is required"
+    },
+    {
+      "fixture": "modify-only",
+      "bundle_version": "authority_bundle.v4",
+      "receipt_version": "publication_receipt.v3",
+      "rejected": true,
+      "reason": "authority bundle schema_version must be authority_bundle.v1: repository-modify-only@2.0.0"
+    },
+    {
+      "fixture": "modify-only",
+      "bundle_version": null,
+      "receipt_version": null,
+      "rejected": true,
+      "reason": "authority bundle schema_version must be authority_bundle.v1: repository-modify-only@2.0.0"
+    },
+    {
+      "fixture": "modify-only",
+      "bundle_version": "authority_bundle.v99",
+      "receipt_version": "publication_receipt.v99",
+      "rejected": true,
+      "reason": "authority bundle schema_version must be authority_bundle.v1: repository-modify-only@2.0.0"
+    },
+    {
+      "fixture": "mixed",
+      "bundle_version": "authority_bundle.v4",
+      "receipt_version": "publication_receipt.v4",
+      "rejected": true,
+      "reason": "authority bundle schema_version must be authority_bundle.v1: repository-mixed@2.0.0"
+    },
+    {
+      "fixture": "mixed",
+      "bundle_version": "authority_bundle.v3",
+      "receipt_version": "publication_receipt.v3",
+      "rejected": true,
+      "reason": "installed governance-ledger does not support authority_bundle.v3; governance-ledger>=0.8.0 is required"
+    },
+    {
+      "fixture": "mixed",
+      "bundle_version": "authority_bundle.v2",
+      "receipt_version": "publication_receipt.v2",
+      "rejected": true,
+      "reason": "Ledger rejected the v2 publication chain for repository-mixed@2.0.0: authority_bundle.v2 fields are invalid; unknown=['compiler_binding', 'policy_translation_commitment'], missing=['canonical_cnl_previews', 'direct_parses', 'source_statements', 'source_to_constraint_mappings', 'statement_decisions']"
+    },
+    {
+      "fixture": "mixed",
+      "bundle_version": "authority_bundle.v1",
+      "receipt_version": "publication_receipt.v1",
+      "rejected": true,
+      "reason": "authority bundle is missing authority_contract: repository-mixed@2.0.0"
+    },
+    {
+      "fixture": "mixed",
+      "bundle_version": "authority_bundle.v3",
+      "receipt_version": "publication_receipt.v4",
+      "rejected": true,
+      "reason": "installed governance-ledger does not support authority_bundle.v3; governance-ledger>=0.8.0 is required"
+    },
+    {
+      "fixture": "mixed",
+      "bundle_version": "authority_bundle.v4",
+      "receipt_version": "publication_receipt.v3",
+      "rejected": true,
+      "reason": "authority bundle schema_version must be authority_bundle.v1: repository-mixed@2.0.0"
+    },
+    {
+      "fixture": "mixed",
+      "bundle_version": null,
+      "receipt_version": null,
+      "rejected": true,
+      "reason": "authority bundle schema_version must be authority_bundle.v1: repository-mixed@2.0.0"
+    },
+    {
+      "fixture": "mixed",
+      "bundle_version": "authority_bundle.v99",
+      "receipt_version": "publication_receipt.v99",
+      "rejected": true,
+      "reason": "authority bundle schema_version must be authority_bundle.v1: repository-mixed@2.0.0"
+    }
+  ],
+  "limits": "Native fixtures and discriminator downgrade/mixed pairs only. Not proof against arbitrary forged legacy envelopes or filesystem creation acceptance."
+}

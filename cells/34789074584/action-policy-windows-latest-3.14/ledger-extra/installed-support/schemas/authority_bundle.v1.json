@@ -1,0 +1,553 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/authority_bundle.v1.json",
+  "title": "Authority Bundle",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "publication_id",
+    "authority_ref",
+    "contract_hash",
+    "semantic_commit_hash",
+    "compiled_contract_hash",
+    "authority_contract",
+    "semantic_commit_bundle",
+    "compiled_authority_contract",
+    "publication_manifest",
+    "governance_impact_preview",
+    "authority_diff_impact",
+    "governance_review_packets",
+    "semantic_artifacts",
+    "review_packets",
+    "lineage",
+    "provenance",
+    "schema_compatibility",
+    "publication_meaning",
+    "operational_implications",
+    "continuity_implications",
+    "immutable_inputs",
+    "non_goals"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "authority_bundle.v1"
+    },
+    "publication_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authority_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contract_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "semantic_commit_hash": {
+      "type": ["string", "null"],
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "compiled_contract_hash": {
+      "type": ["string", "null"],
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "authority_contract": {
+      "type": "object"
+    },
+    "semantic_commit_bundle": {
+      "type": ["object", "null"]
+    },
+    "compiled_authority_contract": {
+      "type": ["object", "null"]
+    },
+    "publication_manifest": {
+      "type": "object"
+    },
+    "governance_impact_preview": {
+      "type": "object"
+    },
+    "authority_diff_impact": {
+      "type": ["object", "null"]
+    },
+    "governance_review_packets": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "semantic_artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["artifact_type", "artifact_hash"],
+        "properties": {
+          "artifact_type": {
+            "enum": [
+              "governance_impact_preview.v1",
+              "authority_diff_impact.v1",
+              "semantic_commit_bundle.v1",
+              "compiled_authority_contract.v1"
+            ]
+          },
+          "artifact_hash": {
+            "type": "string",
+            "pattern": "^sha256:[a-f0-9]{64}$"
+          }
+        }
+      }
+    },
+    "review_packets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["packet_id", "packet_hash", "authority_ref", "operational_state"],
+        "properties": {
+          "packet_id": {
+            "type": ["string", "null"]
+          },
+          "packet_hash": {
+            "type": "string",
+            "pattern": "^sha256:[a-f0-9]{64}$"
+          },
+          "authority_ref": {
+            "type": ["string", "null"]
+          },
+          "operational_state": {
+            "type": ["string", "null"]
+          }
+        }
+      }
+    },
+    "lineage": {
+      "type": "object"
+    },
+    "provenance": {
+      "type": "object"
+    },
+    "provenance_profile": {
+      "enum": [
+        "legacy_provenance_incomplete",
+        "customer_policy_provenance_complete_v1"
+      ]
+    },
+    "customer_policy_provenance": {
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/customerPolicyProvenance" }
+      ]
+    },
+    "schema_compatibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["compatibility_mode", "artifacts", "expected", "compatible"],
+      "properties": {
+        "compatibility_mode": {
+          "const": "additive_v1"
+        },
+        "artifacts": {
+          "type": "object"
+        },
+        "expected": {
+          "type": "object"
+        },
+        "compatible": {
+          "type": "boolean"
+        }
+      }
+    },
+    "publication_meaning": {
+      "type": "string",
+      "minLength": 1
+    },
+    "operational_implications": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "continuity_implications": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "immutable_inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "authority_hash",
+        "manifest_hash",
+        "preview_hash",
+        "diff_hash",
+        "review_packet_hashes",
+        "semantic_commit_hash",
+        "compiled_contract_hash"
+      ],
+      "properties": {
+        "authority_hash": {
+          "type": "string",
+          "minLength": 1
+        },
+        "manifest_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "preview_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "diff_hash": {
+          "type": ["string", "null"],
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "review_packet_hashes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^sha256:[a-f0-9]{64}$"
+          }
+        },
+        "semantic_commit_hash": {
+          "type": ["string", "null"],
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "compiled_contract_hash": {
+          "type": ["string", "null"],
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "provenance_profile": { "const": "customer_policy_provenance_complete_v1" },
+        "provenance_complete": { "const": true },
+        "source_policy_id": { "type": "string", "minLength": 1, "maxLength": 256, "pattern": "^[^@]+$" },
+        "source_revision": { "type": "string", "minLength": 1, "maxLength": 256, "pattern": "^[^@]+$" },
+        "source_policy_ref": { "type": "string", "minLength": 3, "maxLength": 513, "pattern": "^[^@]+@[^@]+$" },
+        "source_snapshot_hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "source_statements_hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "interpretation_id": { "type": "string", "minLength": 1 },
+        "mapping_hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "resolution_id": { "type": "string", "pattern": "^resolution-set-[a-f0-9]{64}$" },
+        "resolution_hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "approval_id": { "type": "string", "minLength": 1 },
+        "approval_record_hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "semantic_commit_id": { "type": "string", "minLength": 1 },
+        "compiled_contract_id": { "type": "string", "minLength": 1 },
+        "compiled_contract_version": { "type": "string", "minLength": 1 },
+        "compiled_contract_ref": { "type": "string", "minLength": 1 },
+        "authority_id": { "type": "string", "minLength": 1 },
+        "authority_version": { "type": "string", "minLength": 1 },
+        "authority_ref": { "type": "string", "minLength": 1 },
+        "authority_identity_hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+        "version_binding_hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+      }
+    },
+    "non_goals": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "const": "does_not_deploy_authority"
+        },
+        {
+          "const": "does_not_approve_authority"
+        },
+        {
+          "const": "does_not_change_execution_outcome"
+        },
+        {
+          "const": "does_not_mutate_evidence"
+        },
+        {
+          "const": "does_not_alter_replay"
+        },
+        {
+          "const": "does_not_bypass_guard"
+        },
+        {
+          "const": "does_not_call_cloud"
+        }
+      ],
+      "items": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "required": ["provenance_profile"],
+        "properties": {
+          "provenance_profile": { "const": "customer_policy_provenance_complete_v1" }
+        }
+      },
+      "then": {
+        "required": ["customer_policy_provenance"],
+        "properties": {
+          "customer_policy_provenance": { "$ref": "#/$defs/customerPolicyProvenance" },
+          "semantic_commit_bundle": { "type": "object" },
+          "compiled_authority_contract": { "type": "object" },
+          "immutable_inputs": {
+            "required": [
+              "provenance_profile",
+              "provenance_complete",
+              "source_policy_id",
+              "source_revision",
+              "source_policy_ref",
+              "source_snapshot_hash",
+              "source_statements_hash",
+              "interpretation_id",
+              "mapping_hash",
+              "resolution_id",
+              "resolution_hash",
+              "approval_id",
+              "approval_record_hash",
+              "semantic_commit_id",
+              "semantic_commit_hash",
+              "compiled_contract_id",
+              "compiled_contract_version",
+              "compiled_contract_ref",
+              "compiled_contract_hash",
+              "authority_id",
+              "authority_version",
+              "authority_ref",
+              "authority_identity_hash",
+              "version_binding_hash"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "customerPolicyProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile",
+        "provenance_complete",
+        "source_policy",
+        "source_statements",
+        "interpretation",
+        "resolution",
+        "approval_record",
+        "version_binding"
+      ],
+      "properties": {
+        "profile": { "const": "customer_policy_provenance_complete_v1" },
+        "provenance_complete": { "const": true },
+        "source_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "source_policy_id",
+            "source_revision",
+            "source_policy_ref",
+            "content_encoding",
+            "source_bytes_base64",
+            "snapshot_hash"
+          ],
+          "properties": {
+            "source_policy_id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^[^@]+$"
+            },
+            "source_revision": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^[^@]+$"
+            },
+            "source_policy_ref": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 513,
+              "pattern": "^[^@]+@[^@]+$"
+            },
+            "content_encoding": { "const": "base64" },
+            "source_bytes_base64": {
+              "type": "string",
+              "minLength": 4,
+              "maxLength": 327680,
+              "$comment": "Canonical base64 for at most 245760 decoded source bytes (240 KiB). Runtime validation enforces the decoded-byte limit.",
+              "contentEncoding": "base64"
+            },
+            "snapshot_hash": { "$ref": "#/$defs/sha256" }
+          }
+        },
+        "source_statements": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 2048,
+          "$comment": "At most 2048 ordered statements forming a complete, non-overlapping byte partition.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "statement_id",
+              "start_byte",
+              "end_byte",
+              "statement_bytes_base64",
+              "statement_hash",
+              "classification"
+            ],
+            "properties": {
+              "statement_id": {
+                "type": "string",
+                "pattern": "^statement-[a-f0-9]{64}$"
+              },
+              "start_byte": { "type": "integer", "minimum": 0 },
+              "end_byte": { "type": "integer", "minimum": 1 },
+              "statement_bytes_base64": {
+                "type": "string",
+                "minLength": 4,
+                "maxLength": 327680,
+                "contentEncoding": "base64"
+              },
+              "statement_hash": { "$ref": "#/$defs/sha256" },
+              "classification": {
+                "enum": [
+                  "enforced",
+                  "informational",
+                  "unsupported",
+                  "requires_resolution"
+                ]
+              }
+            }
+          }
+        },
+        "interpretation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["interpretation_id", "statement_rule_mappings", "mapping_hash"],
+          "properties": {
+            "interpretation_id": { "type": "string", "minLength": 1 },
+            "statement_rule_mappings": {
+              "type": "array",
+              "maxItems": 1024,
+              "$comment": "At most 1024 enforced statement-to-rule mappings.",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["mapping_id", "statement_ids", "rule_ids"],
+                "properties": {
+                  "mapping_id": {
+                    "type": "string",
+                    "pattern": "^mapping-[a-f0-9]{64}$"
+                  },
+                  "statement_ids": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 1,
+                    "uniqueItems": true,
+                    "items": { "type": "string", "pattern": "^statement-[a-f0-9]{64}$" }
+                  },
+                  "rule_ids": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 256,
+                    "uniqueItems": true,
+                    "items": { "type": "string", "minLength": 1 }
+                  }
+                }
+              }
+            },
+            "mapping_hash": { "$ref": "#/$defs/sha256" }
+          }
+        },
+        "resolution": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["resolution_id", "ambiguity_resolutions", "resolution_hash"],
+          "properties": {
+            "resolution_id": {
+              "type": "string",
+              "pattern": "^resolution-set-[a-f0-9]{64}$"
+            },
+            "ambiguity_resolutions": {
+              "type": "array",
+              "maxItems": 1024,
+              "$comment": "At most 1024 canonical, auditable resolution records.",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "resolution_id",
+                  "ambiguity_id",
+                  "statement_ids",
+                  "selected_decision",
+                  "resolved_by",
+                  "resolved_at"
+                ],
+                "properties": {
+                  "resolution_id": {
+                    "type": "string",
+                    "pattern": "^resolution-[a-f0-9]{64}$"
+                  },
+                  "ambiguity_id": { "type": "string", "minLength": 1, "maxLength": 256 },
+                  "statement_ids": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 64,
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "string",
+                      "pattern": "^statement-[a-f0-9]{64}$"
+                    }
+                  },
+                  "selected_decision": { "type": "string", "minLength": 1, "maxLength": 4096 },
+                  "resolved_by": { "type": "string", "minLength": 1, "maxLength": 256 },
+                  "resolved_at": {
+                    "type": "string",
+                    "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+                  }
+                }
+              }
+            },
+            "resolution_hash": { "$ref": "#/$defs/sha256" }
+          }
+        },
+        "approval_record": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "approval_id",
+            "approved_by",
+            "approved_at",
+            "approved_semantic_commit_hash",
+            "approval_record_hash"
+          ],
+          "properties": {
+            "approval_id": { "type": "string", "minLength": 1 },
+            "approved_by": { "type": "string", "minLength": 1 },
+            "approved_at": { "type": "string", "minLength": 1 },
+            "approved_semantic_commit_hash": { "$ref": "#/$defs/sha256" },
+            "approval_record_hash": { "$ref": "#/$defs/sha256" }
+          }
+        },
+        "version_binding": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["source_policy_ref", "authority_ref", "relationship", "binding_hash"],
+          "properties": {
+            "source_policy_ref": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 513,
+              "pattern": "^[^@]+@[^@]+$"
+            },
+            "authority_ref": { "type": "string", "minLength": 1 },
+            "relationship": { "const": "publishes_as" },
+            "binding_hash": { "$ref": "#/$defs/sha256" }
+          }
+        }
+      }
+    }
+  }
+}

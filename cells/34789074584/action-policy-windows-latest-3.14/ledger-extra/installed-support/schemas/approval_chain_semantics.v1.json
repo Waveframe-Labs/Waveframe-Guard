@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/approval_chain_semantics.v1.json",
+  "title": "Approval Chain Semantics",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "required_approval_count",
+    "required_roles",
+    "independence_required",
+    "self_approval_prohibited",
+    "delegation_posture",
+    "attestation_required"
+  ],
+  "properties": {
+    "schema_version": { "const": "approval_chain_semantics.v1" },
+    "required_approval_count": { "type": ["integer", "null"], "minimum": 1 },
+    "required_roles": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "independence_required": { "type": "boolean" },
+    "self_approval_prohibited": { "type": "boolean" },
+    "independent_actor_refs": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "delegation_posture": {
+      "enum": ["not_allowed", "allowed_with_boundary", "ambiguous", "unspecified"]
+    },
+    "attestation_required": { "type": "boolean" },
+    "human_in_loop_required": { "type": "boolean" },
+    "ai_recommendation_posture": {
+      "enum": ["recommendation_only", "not_present", "unspecified"]
+    }
+  }
+}

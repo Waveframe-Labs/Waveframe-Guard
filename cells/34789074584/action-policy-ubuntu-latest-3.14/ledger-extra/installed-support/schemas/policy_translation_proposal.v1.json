@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/policy_translation_proposal.v1.json",
+  "title": "Waveframe Untrusted Policy Translation Proposal v1",
+  "description": "Untrusted authoring proposal binding exact source and ordered translation-run descriptors. Schema validity does not establish semantic validity or runtime authority; raw run bytes are retained separately.",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "proposal_id", "proposal_hash", "source_policy", "authority", "capability_catalog", "clauses", "organizational_bindings", "translation_runs"],
+  "properties": {
+    "schema_version": {"const": "policy_translation_proposal.v1"},
+    "proposal_id": {"type": "string", "pattern": "^policy-translation-proposal-[a-f0-9]{64}$"},
+    "proposal_hash": {"$ref": "#/$defs/sha256"},
+    "source_policy": {"$ref": "authority_bundle.v2.json#/$defs/sourcePolicy"},
+    "authority": {
+      "type": "object", "additionalProperties": false,
+      "required": ["authority_id", "authority_version", "authority_ref"],
+      "properties": {
+        "authority_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,255}$"},
+        "authority_version": {"$ref": "#/$defs/semver"},
+        "authority_ref": {"type": "string", "minLength": 3}
+      }
+    },
+    "capability_catalog": {"$ref": "#/$defs/catalogRef"},
+    "clauses": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/clause"}},
+    "organizational_bindings": {"type": "array", "items": {"$ref": "#/$defs/binding"}},
+    "translation_runs": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/translationRun"}}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"},
+    "semver": {"type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"},
+    "utc": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"},
+    "base64": {"type": "string", "pattern": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"},
+    "catalogRef": {
+      "type": "object", "additionalProperties": false,
+      "required": ["catalog_id", "catalog_version", "catalog_hash"],
+      "properties": {"catalog_id": {"type": "string", "minLength": 1}, "catalog_version": {"$ref": "#/$defs/semver"}, "catalog_hash": {"$ref": "#/$defs/sha256"}}
+    },
+    "portableId": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9]*(?:[._-][A-Za-z0-9]+)*$", "maxLength": 256},
+    "operatorId": {"type": "string", "pattern": "^\\S{1,64}$", "maxLength": 64},
+    "value": {
+      "oneOf": [
+        {"type": "object", "additionalProperties": false, "required": ["kind", "value", "canonical_value", "start_byte", "end_byte", "literal_hash"], "properties": {"kind": {"const": "source_literal"}, "value": {"type": "string", "minLength": 1}, "canonical_value": {"type": "string", "minLength": 1}, "start_byte": {"type": "integer", "minimum": 0}, "end_byte": {"type": "integer", "minimum": 1}, "literal_hash": {"$ref": "#/$defs/sha256"}}},
+        {"type": "object", "additionalProperties": false, "required": ["kind", "binding_id"], "properties": {"kind": {"const": "organizational_binding"}, "binding_id": {"type": "string", "minLength": 1}}}
+      ]
+    },
+    "control": {
+      "type": "object", "additionalProperties": false,
+      "required": ["candidate_control_id", "control_type", "actor_kind", "action", "resource_kind", "fact_id", "operator", "effect", "enforcement_point", "value", "required_runtime_facts"],
+      "properties": {
+        "candidate_control_id": {"type": "string", "pattern": "^candidate-control-[a-f0-9]{64}$"},
+        "control_type": {"$ref": "#/$defs/portableId"},
+        "actor_kind": {"$ref": "#/$defs/portableId"}, "action": {"$ref": "#/$defs/portableId"},
+        "resource_kind": {"$ref": "#/$defs/portableId"},
+        "fact_id": {"$ref": "#/$defs/portableId"},
+        "operator": {"$ref": "#/$defs/operatorId"}, "effect": {"$ref": "#/$defs/portableId"},
+        "enforcement_point": {"$ref": "#/$defs/portableId"},
+        "value": {"$ref": "#/$defs/value"},
+        "required_runtime_facts": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "clause": {
+      "type": "object", "additionalProperties": false,
+      "required": ["clause_id", "index", "start_byte", "end_byte", "clause_bytes_base64", "clause_hash", "coverage_status", "candidate_controls", "unresolved_binding_ids", "limitation_code", "residual_unsupported_spans"],
+      "properties": {
+        "clause_id": {"type": "string", "pattern": "^policy-clause-[a-f0-9]{64}$"},
+        "index": {"type": "integer", "minimum": 0}, "start_byte": {"type": "integer", "minimum": 0}, "end_byte": {"type": "integer", "minimum": 1},
+        "clause_bytes_base64": {"$ref": "#/$defs/base64"}, "clause_hash": {"$ref": "#/$defs/sha256"},
+        "coverage_status": {"enum": ["fully_represented", "partially_represented", "entirely_unsupported", "informational"]},
+        "candidate_controls": {"type": "array", "items": {"$ref": "#/$defs/control"}},
+        "unresolved_binding_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "limitation_code": {"type": ["string", "null"], "enum": [null, "unavailable_action", "unavailable_actor_kind", "unavailable_runtime_fact", "unavailable_enforcement_point", "unavailable_binding_type", "cross_repository_adapter_required", "pull_request_approval_not_supported", "other"]},
+        "residual_unsupported_spans": {"type": "array", "items": {"$ref": "#/$defs/residualSpan"}}
+      }
+    },
+    "residualSpan": {
+      "type": "object", "additionalProperties": false,
+      "required": ["residual_id", "index", "start_byte", "end_byte", "residual_bytes_base64", "residual_hash"],
+      "properties": {"residual_id": {"type": "string", "pattern": "^policy-residual-[a-f0-9]{64}$"}, "index": {"type": "integer", "minimum": 0}, "start_byte": {"type": "integer", "minimum": 0}, "end_byte": {"type": "integer", "minimum": 1}, "residual_bytes_base64": {"$ref": "#/$defs/base64"}, "residual_hash": {"$ref": "#/$defs/sha256"}}
+    },
+    "binding": {
+      "type": "object", "additionalProperties": false,
+      "required": ["binding_id", "binding_type", "symbol", "question", "status"],
+      "properties": {
+        "binding_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,255}$"},
+        "binding_type": {"$ref": "#/$defs/portableId"},
+        "symbol": {"type": "string", "minLength": 1}, "question": {"type": "string", "minLength": 1}, "status": {"const": "unresolved"}
+      }
+    },
+    "translationRun": {
+      "type": "object", "additionalProperties": false,
+      "required": ["run_id", "run_hash", "sequence_number", "source_policy_ref", "source_revision", "source_snapshot_hash", "capability_catalog", "provider_class", "provider_identifier", "translation_template_version", "translation_template_hash", "request_configuration_id", "request_configuration_hash", "request_hash", "response_hash", "explanation_hash", "created_at", "completed_at", "previous_run_hash"],
+      "properties": {
+        "run_id": {"type": "string", "pattern": "^translation-run-[a-f0-9]{64}$"}, "run_hash": {"$ref": "#/$defs/sha256"},
+        "sequence_number": {"type": "integer", "minimum": 0}, "source_policy_ref": {"type": "string", "minLength": 3}, "source_revision": {"type": "string", "minLength": 1}, "source_snapshot_hash": {"$ref": "#/$defs/sha256"}, "capability_catalog": {"$ref": "#/$defs/catalogRef"},
+        "provider_class": {"enum": ["hosted_model", "local_model", "guided_deterministic", "other"]},
+        "provider_identifier": {"type": ["string", "null"], "minLength": 1},
+        "translation_template_version": {"type": "string", "minLength": 1}, "translation_template_hash": {"$ref": "#/$defs/sha256"},
+        "request_configuration_id": {"type": "string", "minLength": 1}, "request_configuration_hash": {"$ref": "#/$defs/sha256"},
+        "request_hash": {"$ref": "#/$defs/sha256"}, "response_hash": {"$ref": "#/$defs/sha256"}, "explanation_hash": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/sha256"}]},
+        "created_at": {"$ref": "#/$defs/utc"}, "completed_at": {"$ref": "#/$defs/utc"}, "previous_run_hash": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/sha256"}]}
+      },
+      "allOf": [{"if": {"properties": {"provider_class": {"enum": ["hosted_model", "local_model"]}}, "required": ["provider_class"]}, "then": {"properties": {"provider_identifier": {"type": "string", "minLength": 1}}}}]
+    }
+  }
+}

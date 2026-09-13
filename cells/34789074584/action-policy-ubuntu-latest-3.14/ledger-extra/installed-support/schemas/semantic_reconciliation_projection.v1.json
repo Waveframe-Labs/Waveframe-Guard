@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/semantic_reconciliation_projection.v1.json",
+  "title": "Semantic Reconciliation Projection",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "source_id",
+    "unresolved_ambiguities",
+    "operator_reviewed_interpretations",
+    "conflicting_extracted_semantics",
+    "normalization_decisions",
+    "interpretation_completeness_posture"
+  ],
+  "properties": {
+    "schema_version": { "const": "semantic_reconciliation_projection.v1" },
+    "source_id": { "type": "string", "minLength": 1 },
+    "unresolved_ambiguities": { "type": "array" },
+    "operator_reviewed_interpretations": { "type": "array" },
+    "conflicting_extracted_semantics": { "type": "array" },
+    "normalization_decisions": { "type": "array" },
+    "interpretation_completeness_posture": { "enum": ["complete", "operator_required"] }
+  }
+}

@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/governance_review_packet.v1.json",
+  "title": "Governance Review Packet",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "packet_id",
+    "authority_ref",
+    "operational_state",
+    "consequence_summary",
+    "protected_resource",
+    "governed_action",
+    "continuity_signals",
+    "timeline",
+    "immutable_inputs",
+    "review_context",
+    "non_goals"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "governance_review_packet.v1"
+    },
+    "packet_id": {
+      "type": "string",
+      "pattern": "^grp_[a-f0-9]{24}$"
+    },
+    "authority_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "operational_state": {
+      "type": "string",
+      "minLength": 1
+    },
+    "consequence_summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "protected_resource": {
+      "type": "string",
+      "minLength": 1
+    },
+    "governed_action": {
+      "type": "string",
+      "minLength": 1
+    },
+    "continuity_signals": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "timeline": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["source", "event", "timestamp", "detail"],
+        "properties": {
+          "source": {
+            "type": "string",
+            "minLength": 1
+          },
+          "event": {
+            "type": ["string", "null"]
+          },
+          "timestamp": {
+            "type": ["string", "null"]
+          },
+          "detail": {}
+        }
+      }
+    },
+    "immutable_inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["authority_hash", "preview_hash", "diff_hash"],
+      "properties": {
+        "authority_hash": {
+          "type": ["string", "null"]
+        },
+        "preview_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "diff_hash": {
+          "type": ["string", "null"],
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      }
+    },
+    "review_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["disposition", "annotations"],
+      "properties": {
+        "disposition": {
+          "type": ["string", "null"]
+        },
+        "annotations": {
+          "type": "array"
+        }
+      }
+    },
+    "non_goals": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "const": "does_not_change_execution_outcome"
+        },
+        {
+          "const": "does_not_mutate_evidence"
+        },
+        {
+          "const": "does_not_alter_replay"
+        },
+        {
+          "const": "does_not_bypass_guard"
+        }
+      ],
+      "items": false
+    }
+  }
+}

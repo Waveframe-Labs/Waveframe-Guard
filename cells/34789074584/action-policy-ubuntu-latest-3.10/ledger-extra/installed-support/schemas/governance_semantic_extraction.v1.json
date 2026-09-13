@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/governance_semantic_extraction.v1.json",
+  "title": "Governance Semantic Extraction",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "source_id",
+    "source_hash",
+    "extracted_at",
+    "extraction_method",
+    "confidence_posture",
+    "candidate_authority",
+    "candidate_capabilities",
+    "candidate_rules",
+    "semantic_provenance",
+    "ambiguities",
+    "missing_information",
+    "non_goals"
+  ],
+  "properties": {
+    "schema_version": { "const": "governance_semantic_extraction.v1" },
+    "source_id": { "type": "string", "minLength": 1 },
+    "source_hash": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "extracted_at": { "type": "string" },
+    "extraction_method": { "const": "deterministic_pattern_pass" },
+    "confidence_posture": { "const": "requires_human_review" },
+    "candidate_authority": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "candidate_capabilities": {
+      "type": "array",
+      "items": { "$ref": "governance_capability.v1.json" }
+    },
+    "candidate_rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["rule_type", "summary", "fields"],
+        "properties": {
+          "rule_type": { "type": "string" },
+          "summary": { "type": "string" },
+          "fields": { "type": "object" }
+        }
+      }
+    },
+    "semantic_provenance": {
+      "type": "array",
+      "items": {
+        "$ref": "governance_semantic_provenance.v1.json"
+      }
+    },
+    "ambiguities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["ambiguity_type", "summary"],
+        "properties": {
+          "ambiguity_type": { "type": "string" },
+          "summary": { "type": "string" }
+        }
+      }
+    },
+    "missing_information": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["field", "summary"],
+        "properties": {
+          "field": { "type": "string" },
+          "summary": { "type": "string" }
+        }
+      }
+    },
+    "non_goals": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "governance_source": {
+      "$ref": "governance_source.v1.json"
+    }
+  }
+}

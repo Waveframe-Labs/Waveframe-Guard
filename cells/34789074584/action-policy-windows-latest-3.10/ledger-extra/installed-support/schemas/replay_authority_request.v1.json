@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/replay_authority_request.v1.json",
+  "title": "Replay Authority Request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "source_text"],
+  "properties": {
+    "schema_version": {
+      "const": "replay_authority_request.v1"
+    },
+    "source_text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "expected_report": {
+      "type": ["object", "null"]
+    },
+    "expected_contract": {
+      "type": ["object", "null"]
+    }
+  }
+}

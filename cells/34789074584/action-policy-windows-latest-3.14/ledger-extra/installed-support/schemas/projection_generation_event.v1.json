@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://waveframe.ai/schemas/projection_generation_event.v1.json",
+  "title": "projection_generation_event.v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "event_id",
+    "event_type",
+    "timestamp",
+    "authority_ref",
+    "authority_version",
+    "severity",
+    "caused_by_event_id",
+    "event_category",
+    "immutability_posture",
+    "projection_name",
+    "generated_at",
+    "source_event_ids",
+    "freshness_posture",
+    "projection_version",
+    "projection_dependencies"
+  ],
+  "properties": {
+    "schema_version": { "const": "projection_generation_event.v1" },
+    "event_id": { "type": "string", "minLength": 1 },
+    "event_type": { "const": "projection_generated" },
+    "timestamp": { "type": "string", "minLength": 1 },
+    "authority_ref": { "type": "string", "minLength": 1 },
+    "authority_version": { "type": "string", "minLength": 1 },
+    "severity": {
+      "enum": [
+        "info",
+        "warning",
+        "critical",
+        "continuity_risk",
+        "replay_risk",
+        "authority_conflict"
+      ]
+    },
+    "caused_by_event_id": { "type": ["string", "null"] },
+    "event_category": { "const": "projection" },
+    "immutability_posture": { "const": "append_only" },
+    "projection_name": { "type": "string", "minLength": 1 },
+    "generated_at": { "type": "string", "minLength": 1 },
+    "source_event_ids": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "freshness_posture": { "enum": ["fresh", "stale", "invalidated"] },
+    "projection_version": { "type": "string", "minLength": 1 },
+    "projection_dependencies": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "summary": { "type": "string" }
+  },
+  "additionalProperties": false
+}

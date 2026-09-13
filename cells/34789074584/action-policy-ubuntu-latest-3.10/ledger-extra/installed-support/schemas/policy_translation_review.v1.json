@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/policy_translation_review.v1.json",
+  "title": "Waveframe Deterministic Policy Translation Review v1",
+  "description": "Strict deterministic human-review rendering bound by policy translation approval.",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "proposal_id", "proposal_hash", "source_policy_ref", "source_snapshot_hash", "authority_ref", "capability_catalog", "coverage", "clauses", "provider_explanations_used", "review_hash"],
+  "properties": {
+    "schema_version": {"const": "policy_translation_review.v1"},
+    "proposal_id": {"type": "string", "pattern": "^policy-translation-proposal-[a-f0-9]{64}$"}, "proposal_hash": {"$ref": "#/$defs/sha256"},
+    "source_policy_ref": {"type": "string", "minLength": 3}, "source_snapshot_hash": {"$ref": "#/$defs/sha256"}, "authority_ref": {"type": "string", "minLength": 3},
+    "capability_catalog": {"$ref": "#/$defs/catalogRef"}, "coverage": {"$ref": "policy_translation_confirmation.v1.json#/$defs/coverage"},
+    "clauses": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/clause"}}, "provider_explanations_used": {"const": false}, "review_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"},
+    "catalogRef": {"type": "object", "additionalProperties": false, "required": ["catalog_id", "catalog_version", "catalog_hash"], "properties": {"catalog_id": {"type": "string", "minLength": 1}, "catalog_version": {"type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"}, "catalog_hash": {"$ref": "#/$defs/sha256"}}},
+    "technicalDetails": {"type": "object", "additionalProperties": false, "required": ["control_type", "fact_id", "operator", "effect", "enforcement_point"], "properties": {"control_type": {"type": "string", "minLength": 1}, "fact_id": {"type": "string", "minLength": 1}, "operator": {"type": "string", "minLength": 1}, "effect": {"type": "string", "minLength": 1}, "enforcement_point": {"type": "string", "minLength": 1}}},
+    "control": {"type": "object", "additionalProperties": false, "required": ["candidate_control_id", "human_confirmed", "operational_explanation", "remaining_unresolved_bindings", "questions", "technical_details"], "properties": {"candidate_control_id": {"type": "string", "pattern": "^candidate-control-[a-f0-9]{64}$"}, "human_confirmed": {"type": "boolean"}, "operational_explanation": {"type": "string", "minLength": 1}, "remaining_unresolved_bindings": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}}, "questions": {"type": "array", "items": {"type": "string", "minLength": 1}}, "technical_details": {"$ref": "#/$defs/technicalDetails"}}},
+    "clause": {"type": "object", "additionalProperties": false, "required": ["clause_id", "source_text", "proposed_coverage_status", "human_coverage_status", "controls", "residual_explanation"], "properties": {"clause_id": {"type": "string", "pattern": "^policy-clause-[a-f0-9]{64}$"}, "source_text": {"type": "string", "minLength": 1}, "proposed_coverage_status": {"enum": ["fully_represented", "partially_represented", "entirely_unsupported", "informational"]}, "human_coverage_status": {"type": ["string", "null"], "enum": [null, "fully_represented", "partially_represented", "entirely_unsupported", "informational"]}, "controls": {"type": "array", "items": {"$ref": "#/$defs/control"}}, "residual_explanation": {"type": ["string", "null"], "minLength": 1}}}
+  }
+}

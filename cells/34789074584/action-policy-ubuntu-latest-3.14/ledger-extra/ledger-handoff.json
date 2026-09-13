@@ -1,0 +1,395 @@
+{
+  "head": "a34c11d81b85963794cf28b4adad091fac15e130",
+  "base": "3cc34e7b3cb6efca5102e0e22d559ec0c0fd583f",
+  "base_branch": "feat/issue-23-ledger-090",
+  "pr": "https://github.com/Waveframe-Labs/Waveframe-Ledger/pull/26",
+  "guard_head": "0161ef8a52e052d1bc1366cdc93ce13a9bd535ed",
+  "compiler_head": "ae590dee058d3481e384dea850d5b7d980f533ff",
+  "guard_evidence_commit": "e6008345c9891ec6ffb5088f38177022e3cef4aa",
+  "ci_run": "https://github.com/Waveframe-Labs/Waveframe-Ledger/actions/runs/34786440114",
+  "release_ready": false,
+  "runtime_activation_ready": false,
+  "cells": {
+    "ubuntu-3.14": {
+      "platform": "Linux",
+      "python": "3.14.7 (main, Aug  6 2026, 02:19:46) [GCC 13.3.0]",
+      "base_gate": "passed",
+      "combined_gate": "passed",
+      "suites": {
+        "source-default": {
+          "passed": 674,
+          "failed": 0,
+          "skipped": 47,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "explicit action-policy development opt-in required; see docs/ACTION_POLICY_DEVELOPMENT.md": 44,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 0
+        },
+        "source-native": {
+          "passed": 718,
+          "failed": 0,
+          "skipped": 3,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 44
+        },
+        "installed-default": {
+          "passed": 674,
+          "failed": 0,
+          "skipped": 47,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "explicit action-policy development opt-in required; see docs/ACTION_POLICY_DEVELOPMENT.md": 44,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 0
+        },
+        "installed-native": {
+          "passed": 718,
+          "failed": 0,
+          "skipped": 3,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 44
+        },
+        "combined-extra-default": {
+          "passed": 678,
+          "failed": 0,
+          "skipped": 44,
+          "skip_reasons": {
+            "explicit action-policy development opt-in required; see docs/ACTION_POLICY_DEVELOPMENT.md": 44
+          },
+          "release_passed": 70,
+          "native_passed": 0
+        },
+        "combined-extra-native": {
+          "passed": 722,
+          "failed": 0,
+          "skipped": 0,
+          "skip_reasons": {},
+          "release_passed": 70,
+          "native_passed": 44
+        }
+      },
+      "package_sha256": {
+        "governance_ledger-0.9.0-py3-none-any.whl": "6b7913e4ba4e2b11d1007bb3006dea81cde08ebc06980a7bab89113938779bd4",
+        "governance_ledger-0.9.0.tar.gz": "8ceb328437c794a3306d22ca82e99787f3bf4ff0d0281b4e245d7d0b29c42c2c",
+        "cricore_contract_compiler-0.5.0-py3-none-any.whl": "1bc689d2885e32641ac3ade7e710a4d0fe079c089f1a2160e2d86f328bbb7c44",
+        "waveframe_guard-0.19.0-py3-none-any.whl": "2b78374416635ca551ee5470fcd1e9e390d3f08141a53c91bcba7d42516b046e"
+      },
+      "catalog_3_execution_cases": 56,
+      "compiler_source_archive_bytes_equal": true,
+      "guard_manifest": {
+        "source_url": "https://github.com/Waveframe-Labs/Waveframe-Guard",
+        "source_commit": "0161ef8a52e052d1bc1366cdc93ce13a9bd535ed",
+        "provenance_kind": "coordinator-supplied-exact-candidate",
+        "wheel": "waveframe_guard-0.19.0-py3-none-any.whl",
+        "wheel_sha256": "2b78374416635ca551ee5470fcd1e9e390d3f08141a53c91bcba7d42516b046e"
+      },
+      "input_archive_sha256": "e7da1b4d84c706503d55758aa83c9537eea6b794bae0159baa62541b9a537270",
+      "archive": "artifacts/issue25-ubuntu-latest-py3.14-a34c11d81b85963794cf28b4adad091fac15e130.zip",
+      "guard_entry_upgrade": "passed",
+      "old_ledger_rejection": "passed"
+    },
+    "windows-3.10": {
+      "platform": "Windows",
+      "python": "3.10.11 (tags/v3.10.11:7d4cc5a, Apr  5 2023, 00:38:17) [MSC v.1929 64 bit (AMD64)]",
+      "base_gate": "passed",
+      "combined_gate": "passed",
+      "suites": {
+        "source-default": {
+          "passed": 674,
+          "failed": 0,
+          "skipped": 47,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "explicit action-policy development opt-in required; see docs/ACTION_POLICY_DEVELOPMENT.md": 44,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 0
+        },
+        "source-native": {
+          "passed": 718,
+          "failed": 0,
+          "skipped": 3,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 44
+        },
+        "installed-default": {
+          "passed": 674,
+          "failed": 0,
+          "skipped": 47,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "explicit action-policy development opt-in required; see docs/ACTION_POLICY_DEVELOPMENT.md": 44,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 0
+        },
+        "installed-native": {
+          "passed": 718,
+          "failed": 0,
+          "skipped": 3,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 44
+        },
+        "combined-extra-default": {
+          "passed": 678,
+          "failed": 0,
+          "skipped": 44,
+          "skip_reasons": {
+            "explicit action-policy development opt-in required; see docs/ACTION_POLICY_DEVELOPMENT.md": 44
+          },
+          "release_passed": 70,
+          "native_passed": 0
+        },
+        "combined-extra-native": {
+          "passed": 722,
+          "failed": 0,
+          "skipped": 0,
+          "skip_reasons": {},
+          "release_passed": 70,
+          "native_passed": 44
+        }
+      },
+      "package_sha256": {
+        "cricore_contract_compiler-0.5.0-py3-none-any.whl": "f0d7aa912d0453ea6da2c63c084cc5b8e9ee5507bd05b482086e8c837da7b1d6",
+        "governance_ledger-0.9.0-py3-none-any.whl": "605ee246590a0e23f391f48b6fd24be091942732aaa074822b2ffbfe5eea5025",
+        "governance_ledger-0.9.0.tar.gz": "254f0daca7c74869e3d0057eaf6a7a3ff30dae005927f4cbbb99349cbb2a4175",
+        "waveframe_guard-0.19.0-py3-none-any.whl": "e7cb9aae6a27437d809d5d72e0225536c4ac0ab729ad9cae162c4417c24d4ba4"
+      },
+      "catalog_3_execution_cases": 56,
+      "compiler_source_archive_bytes_equal": true,
+      "guard_manifest": {
+        "source_url": "https://github.com/Waveframe-Labs/Waveframe-Guard",
+        "source_commit": "0161ef8a52e052d1bc1366cdc93ce13a9bd535ed",
+        "provenance_kind": "coordinator-supplied-exact-candidate",
+        "wheel": "waveframe_guard-0.19.0-py3-none-any.whl",
+        "wheel_sha256": "e7cb9aae6a27437d809d5d72e0225536c4ac0ab729ad9cae162c4417c24d4ba4"
+      },
+      "input_archive_sha256": "88ae2b1295e3433bca440361971aaea4810c69f0bda5f51b85a41e30ef9d96b4",
+      "archive": "artifacts/issue25-windows-latest-py3.10-a34c11d81b85963794cf28b4adad091fac15e130.zip",
+      "guard_entry_upgrade": "passed",
+      "old_ledger_rejection": "passed"
+    },
+    "ubuntu-3.10": {
+      "platform": "Linux",
+      "python": "3.10.21 (main, Aug 13 2026, 02:42:48) [GCC 13.3.0]",
+      "base_gate": "passed",
+      "combined_gate": "passed",
+      "suites": {
+        "source-default": {
+          "passed": 674,
+          "failed": 0,
+          "skipped": 47,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "explicit action-policy development opt-in required; see docs/ACTION_POLICY_DEVELOPMENT.md": 44,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 0
+        },
+        "source-native": {
+          "passed": 718,
+          "failed": 0,
+          "skipped": 3,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 44
+        },
+        "installed-default": {
+          "passed": 674,
+          "failed": 0,
+          "skipped": 47,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "explicit action-policy development opt-in required; see docs/ACTION_POLICY_DEVELOPMENT.md": 44,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 0
+        },
+        "installed-native": {
+          "passed": 718,
+          "failed": 0,
+          "skipped": 3,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 44
+        },
+        "combined-extra-default": {
+          "passed": 678,
+          "failed": 0,
+          "skipped": 44,
+          "skip_reasons": {
+            "explicit action-policy development opt-in required; see docs/ACTION_POLICY_DEVELOPMENT.md": 44
+          },
+          "release_passed": 70,
+          "native_passed": 0
+        },
+        "combined-extra-native": {
+          "passed": 722,
+          "failed": 0,
+          "skipped": 0,
+          "skip_reasons": {},
+          "release_passed": 70,
+          "native_passed": 44
+        }
+      },
+      "package_sha256": {
+        "governance_ledger-0.9.0-py3-none-any.whl": "3b76d333c33df8fd7a68ee2a35b04ef880407cdcdcaf9500b195c9ea7198c7d8",
+        "governance_ledger-0.9.0.tar.gz": "11400cb3e45af9bdece82d5cf856e44d84712896eefafda7093b49321b193e2a",
+        "cricore_contract_compiler-0.5.0-py3-none-any.whl": "03b9077cbfb1e5b54f4203b8d45fdd9021a773fc08688945a0dd4fd7694f92d0",
+        "waveframe_guard-0.19.0-py3-none-any.whl": "34181026b13e5a60c8ec7370dda875c911ef762903865db25705c73872f330e9"
+      },
+      "catalog_3_execution_cases": 56,
+      "compiler_source_archive_bytes_equal": true,
+      "guard_manifest": {
+        "source_url": "https://github.com/Waveframe-Labs/Waveframe-Guard",
+        "source_commit": "0161ef8a52e052d1bc1366cdc93ce13a9bd535ed",
+        "provenance_kind": "coordinator-supplied-exact-candidate",
+        "wheel": "waveframe_guard-0.19.0-py3-none-any.whl",
+        "wheel_sha256": "34181026b13e5a60c8ec7370dda875c911ef762903865db25705c73872f330e9"
+      },
+      "input_archive_sha256": "fced7cad0b90ac7c0d238056466bdd6b8f1895eb53cfc2c5b0733ae465562d7e",
+      "archive": "artifacts/issue25-ubuntu-latest-py3.10-a34c11d81b85963794cf28b4adad091fac15e130.zip",
+      "guard_entry_upgrade": "passed",
+      "old_ledger_rejection": "passed"
+    },
+    "windows-3.14": {
+      "platform": "Windows",
+      "python": "3.14.7 (tags/v3.14.7:823f032, Aug  5 2026, 10:51:32) [MSC v.1944 64 bit (AMD64)]",
+      "base_gate": "passed",
+      "combined_gate": "passed",
+      "suites": {
+        "source-default": {
+          "passed": 674,
+          "failed": 0,
+          "skipped": 47,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "explicit action-policy development opt-in required; see docs/ACTION_POLICY_DEVELOPMENT.md": 44,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 0
+        },
+        "source-native": {
+          "passed": 718,
+          "failed": 0,
+          "skipped": 3,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 44
+        },
+        "installed-default": {
+          "passed": 674,
+          "failed": 0,
+          "skipped": 47,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "explicit action-policy development opt-in required; see docs/ACTION_POLICY_DEVELOPMENT.md": 44,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 0
+        },
+        "installed-native": {
+          "passed": 718,
+          "failed": 0,
+          "skipped": 3,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 44
+        },
+        "combined-extra-default": {
+          "passed": 678,
+          "failed": 0,
+          "skipped": 44,
+          "skip_reasons": {
+            "explicit action-policy development opt-in required; see docs/ACTION_POLICY_DEVELOPMENT.md": 44
+          },
+          "release_passed": 70,
+          "native_passed": 0
+        },
+        "combined-extra-native": {
+          "passed": 722,
+          "failed": 0,
+          "skipped": 0,
+          "skip_reasons": {},
+          "release_passed": 70,
+          "native_passed": 44
+        }
+      },
+      "package_sha256": {
+        "cricore_contract_compiler-0.5.0-py3-none-any.whl": "d694470d77f8806b883255d8810a780de4f92824a8daa80b885d315d1198dd60",
+        "governance_ledger-0.9.0-py3-none-any.whl": "d7710160038b107bc2aae83680b84c85cb11b149927c60c171a3ff6bb2059d82",
+        "governance_ledger-0.9.0.tar.gz": "f6cd4491c6ed97d322c80c129794ea7ef69f03f93370990952cc600c03f2b8b3",
+        "waveframe_guard-0.19.0-py3-none-any.whl": "57e3a468c1708fb32de8907d8cdc0d0612a551195eb5d0db43334a98917cddab"
+      },
+      "catalog_3_execution_cases": 56,
+      "compiler_source_archive_bytes_equal": true,
+      "guard_manifest": {
+        "source_url": "https://github.com/Waveframe-Labs/Waveframe-Guard",
+        "source_commit": "0161ef8a52e052d1bc1366cdc93ce13a9bd535ed",
+        "provenance_kind": "coordinator-supplied-exact-candidate",
+        "wheel": "waveframe_guard-0.19.0-py3-none-any.whl",
+        "wheel_sha256": "57e3a468c1708fb32de8907d8cdc0d0612a551195eb5d0db43334a98917cddab"
+      },
+      "input_archive_sha256": "a8e4ff0670056461be5aa7d8f71e460af43daf1d103fc6708c9c57926265adb7",
+      "archive": "artifacts/issue25-windows-latest-py3.14-a34c11d81b85963794cf28b4adad091fac15e130.zip",
+      "guard_entry_upgrade": "passed",
+      "old_ledger_rejection": "passed"
+    }
+  },
+  "archive_sha256": {
+    "artifacts/issue25-ubuntu-latest-py3.14-a34c11d81b85963794cf28b4adad091fac15e130.zip": "cf1cdd57f4a68ad1e10b0b7b9a48ab1046685009052d3e8fb4ea6c0c44f7b282",
+    "artifacts/issue25-windows-latest-py3.10-a34c11d81b85963794cf28b4adad091fac15e130.zip": "fa5f3e92af57559cb361f29a6e428e6ba4ce1b70ce1ab4612dfe6517c8d80517",
+    "artifacts/issue25-ubuntu-latest-py3.10-a34c11d81b85963794cf28b4adad091fac15e130.zip": "1d900834a5f0139873342aef5b60ccfc2524a39aad7ae5e69aaf444b525d160c",
+    "artifacts/issue25-windows-latest-py3.14-a34c11d81b85963794cf28b4adad091fac15e130.zip": "3f0321ed7c52ff3542a885aae7f0c854521dd5110dc7809bdbc3059c3a794faa"
+  },
+  "downstream": [
+    "Coordination: Guard must repin/revalidate this exact Ledger head and package set, rerun red combined CI, and correct its stale README Ledger 0.7 minimum.",
+    "Cloud must complete final package-set and Console acceptance; #151 used earlier packages.",
+    "Publication order Compiler 0.5.0 -> Ledger 0.9.0 -> Guard 0.19.0; ordinary index acceptance and separately authorized Cloud rollout/activation remain pending."
+  ],
+  "authorization": "No sibling changes, merges, tags, publication, deployment or activation.",
+  "historical_failed_runs": [
+    "https://github.com/Waveframe-Labs/Waveframe-Ledger/actions/runs/34786193614",
+    "https://github.com/Waveframe-Labs/Waveframe-Ledger/actions/runs/34786387303"
+  ],
+  "general_ci_run": "https://github.com/Waveframe-Labs/Waveframe-Ledger/actions/runs/34786440125"
+}

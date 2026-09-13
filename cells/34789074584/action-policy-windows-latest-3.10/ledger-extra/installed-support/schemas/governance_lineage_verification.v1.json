@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/governance_lineage_verification.v1.json",
+  "title": "Governance Lineage Verification",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "checks",
+    "diagnostics",
+    "lineage_verified"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "governance_lineage_verification.v1"
+    },
+    "authority_ref": {
+      "type": ["string", "null"]
+    },
+    "contract_hash": {
+      "type": ["string", "null"]
+    },
+    "source_hash": {
+      "type": ["string", "null"],
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "compilation_report_hash": {
+      "type": ["string", "null"],
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "checks": {
+      "type": "object"
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "$ref": "governance_diagnostic.v1.json"
+      }
+    },
+    "lineage_verified": {
+      "type": "boolean"
+    }
+  }
+}

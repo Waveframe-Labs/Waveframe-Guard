@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/constraint_ir.v1.json",
+  "title": "Waveframe Constraint IR",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "domain_pack", "runtime_fact_schema_hash", "constraints", "ir_hash"],
+  "properties": {
+    "schema_version": { "const": "constraint_ir.v1" },
+    "domain_pack": { "$ref": "#/$defs/packRef" },
+    "runtime_fact_schema_hash": { "$ref": "#/$defs/sha256" },
+    "constraints": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/constraint" } },
+    "ir_hash": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "packRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["domain_pack_id", "domain_pack_version", "domain_pack_hash"],
+      "properties": {
+        "domain_pack_id": { "type": "string", "minLength": 1 },
+        "domain_pack_version": { "type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$" },
+        "domain_pack_hash": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "selector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "value"],
+      "properties": { "kind": { "type": "string", "minLength": 1 }, "value": { "type": "string", "minLength": 1 } }
+    },
+    "resource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "match", "value"],
+      "properties": {
+        "kind": { "type": "string", "minLength": 1 },
+        "match": { "type": "string", "minLength": 1 },
+        "value": { "type": ["boolean", "integer", "string", "array", "null"], "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }
+      }
+    },
+    "literal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "value", "unit"],
+      "properties": {
+        "type": { "enum": ["boolean", "decimal", "enum", "integer", "string", "string_set", "timestamp"] },
+        "value": { "type": ["boolean", "integer", "string", "array"] },
+        "unit": { "type": ["string", "null"] }
+      }
+    },
+    "condition": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "operator", "operands"],
+          "properties": {
+            "kind": { "const": "group" },
+            "operator": { "enum": ["all", "any", "not"] },
+            "operands": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/condition" } }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "operator", "fact", "literal"],
+          "properties": {
+            "kind": { "const": "comparison" },
+            "operator": { "enum": ["==", "!=", ">", ">=", "<", "<=", "contains", "starts_with"] },
+            "fact": { "type": "string", "minLength": 3 },
+            "literal": { "$ref": "#/$defs/literal" }
+          }
+        }
+      ]
+    },
+    "obligations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["approvals", "evidence", "separation_of_duties"],
+      "properties": {
+        "approvals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["minimum", "role", "evidence_fact"],
+            "properties": {
+              "minimum": { "type": "integer", "minimum": 1 },
+              "role": { "type": "string", "minLength": 1 },
+              "evidence_fact": { "type": "string", "minLength": 3 }
+            }
+          }
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["evidence_type", "fact"],
+            "properties": { "evidence_type": { "type": "string", "minLength": 1 }, "fact": { "type": "string", "minLength": 3 } }
+          }
+        },
+        "separation_of_duties": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["roles", "principal_facts"],
+            "properties": {
+              "roles": { "type": "array", "minItems": 2, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+              "principal_facts": { "type": "array", "minItems": 2, "uniqueItems": true, "items": { "type": "string", "minLength": 3 } }
+            }
+          }
+        }
+      }
+    },
+    "exception": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["exception_id", "effect", "condition"],
+      "properties": {
+        "exception_id": { "type": "string", "minLength": 1 },
+        "effect": { "enum": ["allow", "deny", "require"] },
+        "condition": { "$ref": "#/$defs/condition" }
+      }
+    },
+    "constraint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["constraint_id", "subject", "acting_role", "action", "resource", "effect", "condition", "obligations", "exceptions", "required_runtime_facts"],
+      "properties": {
+        "constraint_id": { "type": "string", "pattern": "^constraint-[a-f0-9]{64}$" },
+        "subject": { "$ref": "#/$defs/selector" },
+        "acting_role": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/selector" }] },
+        "action": { "type": "string", "minLength": 1 },
+        "resource": { "$ref": "#/$defs/resource" },
+        "effect": { "enum": ["allow", "deny", "require"] },
+        "condition": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/condition" }] },
+        "obligations": { "$ref": "#/$defs/obligations" },
+        "exceptions": { "type": "array", "items": { "$ref": "#/$defs/exception" } },
+        "required_runtime_facts": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 3 } }
+      }
+    }
+  }
+}

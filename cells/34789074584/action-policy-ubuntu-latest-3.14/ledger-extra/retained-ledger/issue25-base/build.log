@@ -1,0 +1,603 @@
+* Creating isolated environment: venv+pip...
+* Installing packages in isolated environment:
+  - setuptools>=68
+* Getting build dependencies for sdist...
+running egg_info
+creating governance_ledger.egg-info
+writing governance_ledger.egg-info/PKG-INFO
+writing dependency_links to governance_ledger.egg-info/dependency_links.txt
+writing entry points to governance_ledger.egg-info/entry_points.txt
+writing requirements to governance_ledger.egg-info/requires.txt
+writing top-level names to governance_ledger.egg-info/top_level.txt
+writing manifest file 'governance_ledger.egg-info/SOURCES.txt'
+reading manifest file 'governance_ledger.egg-info/SOURCES.txt'
+reading manifest template 'MANIFEST.in'
+adding license file 'LICENSE'
+writing manifest file 'governance_ledger.egg-info/SOURCES.txt'
+* Building sdist...
+running sdist
+running egg_info
+writing governance_ledger.egg-info/PKG-INFO
+writing dependency_links to governance_ledger.egg-info/dependency_links.txt
+writing entry points to governance_ledger.egg-info/entry_points.txt
+writing requirements to governance_ledger.egg-info/requires.txt
+writing top-level names to governance_ledger.egg-info/top_level.txt
+reading manifest file 'governance_ledger.egg-info/SOURCES.txt'
+reading manifest template 'MANIFEST.in'
+adding license file 'LICENSE'
+writing manifest file 'governance_ledger.egg-info/SOURCES.txt'
+running check
+creating governance_ledger-0.9.0
+creating governance_ledger-0.9.0/docs
+creating governance_ledger-0.9.0/docs/acceptance/issue17
+creating governance_ledger-0.9.0/docs/acceptance/issue19
+creating governance_ledger-0.9.0/examples
+creating governance_ledger-0.9.0/governance_ledger
+creating governance_ledger-0.9.0/governance_ledger.egg-info
+creating governance_ledger-0.9.0/governance_ledger/integrations
+creating governance_ledger-0.9.0/governance_ledger/semantics
+creating governance_ledger-0.9.0/schemas
+creating governance_ledger-0.9.0/tests
+creating governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4
+creating governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/create-only
+creating governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/mixed
+creating governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/modify-only
+creating governance_ledger-0.9.0/tests/fixtures/action_policy_v4/create-only
+creating governance_ledger-0.9.0/tests/fixtures/action_policy_v4/mixed
+creating governance_ledger-0.9.0/tests/fixtures/action_policy_v4/modify-only
+creating governance_ledger-0.9.0/tests/fixtures/golden_path
+creating governance_ledger-0.9.0/tests/fixtures/golden_path/contracts
+creating governance_ledger-0.9.0/tests/fixtures/provenance_complete
+creating governance_ledger-0.9.0/tests/normalization_corpus/policies/access-control
+creating governance_ledger-0.9.0/tests/normalization_corpus/policies/compliance
+creating governance_ledger-0.9.0/tests/normalization_corpus/policies/finance
+creating governance_ledger-0.9.0/tests/normalization_corpus/policies/healthcare
+creating governance_ledger-0.9.0/tests/normalization_corpus/policies/procurement
+creating governance_ledger-0.9.0/tools
+copying files to governance_ledger-0.9.0...
+copying CHANGELOG.md -> governance_ledger-0.9.0
+copying CITATION.cff -> governance_ledger-0.9.0
+copying EVENT_ORDERING_SEMANTICS.md -> governance_ledger-0.9.0
+copying EXECUTION_CONTEXT_MODEL.md -> governance_ledger-0.9.0
+copying GOVERNANCE_CHRONOLOGY_REPLAY.md -> governance_ledger-0.9.0
+copying GOVERNANCE_EVENT_MODEL.md -> governance_ledger-0.9.0
+copying GOVERNANCE_OBJECT_MODEL.md -> governance_ledger-0.9.0
+copying GOVERNANCE_SEMANTIC_RECONCILIATION.md -> governance_ledger-0.9.0
+copying IDENTITY_AND_RESPONSIBILITY_MODEL.md -> governance_ledger-0.9.0
+copying LICENSE -> governance_ledger-0.9.0
+copying LIFECYCLE.md -> governance_ledger-0.9.0
+copying MANIFEST.in -> governance_ledger-0.9.0
+copying NON_GOALS.md -> governance_ledger-0.9.0
+copying PROJECTION_DEPENDENCY_GRAPH.md -> governance_ledger-0.9.0
+copying PROJECTION_OWNERSHIP.md -> governance_ledger-0.9.0
+copying PROVENANCE.md -> governance_ledger-0.9.0
+copying README.md -> governance_ledger-0.9.0
+copying RELEASE_NOTES.md -> governance_ledger-0.9.0
+copying SEMANTICS.md -> governance_ledger-0.9.0
+copying SEMANTIC_GOVERNANCE_MODEL.md -> governance_ledger-0.9.0
+copying TEMPORAL_AND_STATE_CONTINUITY.md -> governance_ledger-0.9.0
+copying pyproject.toml -> governance_ledger-0.9.0
+copying requirements-action-policy-dev.txt -> governance_ledger-0.9.0
+copying requirements-ci.txt -> governance_ledger-0.9.0
+copying docs/ACTION_POLICY_DEVELOPMENT.md -> governance_ledger-0.9.0/docs
+copying docs/DOMAIN_PACK_COMPILER.md -> governance_ledger-0.9.0/docs
+copying docs/LEDGER_090_ACCEPTANCE.md -> governance_ledger-0.9.0/docs
+copying docs/PUBLISHED_AUTHORITY_SPEC.md -> governance_ledger-0.9.0/docs
+copying docs/RELEASE_CATALOG_3.md -> governance_ledger-0.9.0/docs
+copying docs/UNTRUSTED_POLICY_TRANSLATION.md -> governance_ledger-0.9.0/docs
+copying docs/acceptance/issue17/README.md -> governance_ledger-0.9.0/docs/acceptance/issue17
+copying docs/acceptance/issue17/compiler-provenance.json -> governance_ledger-0.9.0/docs/acceptance/issue17
+copying docs/acceptance/issue17/guard018-ledger07.json -> governance_ledger-0.9.0/docs/acceptance/issue17
+copying docs/acceptance/issue17/guard018-ledger08.json -> governance_ledger-0.9.0/docs/acceptance/issue17
+copying docs/acceptance/issue17/historical-hash-comparison.json -> governance_ledger-0.9.0/docs/acceptance/issue17
+copying docs/acceptance/issue17/legacy-operations.json -> governance_ledger-0.9.0/docs/acceptance/issue17
+copying docs/acceptance/issue17/package-acceptance.json -> governance_ledger-0.9.0/docs/acceptance/issue17
+copying docs/acceptance/issue19/README.md -> governance_ledger-0.9.0/docs/acceptance/issue19
+copying examples/native_v3_multi_control.py -> governance_ledger-0.9.0/examples
+copying examples/native_v4_development.py -> governance_ledger-0.9.0/examples
+copying examples/native_v4_release.py -> governance_ledger-0.9.0/examples
+copying governance_ledger/__init__.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/action_policy.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/action_policy_publication.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/authority_contract.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/checks.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/cli.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/constraint_ir.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/contract_linkage.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/customer_policy.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/deployment.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/diagnostics.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/diff.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/domain_packs.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/domain_policy.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/extract.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/inspect.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/lifecycle.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/normalization_report.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/paths.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/patterns.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/pipeline.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/policy_translation.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/policy_translation_publication.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/provenance.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/publication_provenance.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/publish.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/registry.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/replay.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/report.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/review.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/rollback.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/runner.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/schema_versions.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/snapshot.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/statement_normalizer.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/summary.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger/validation.py -> governance_ledger-0.9.0/governance_ledger
+copying governance_ledger.egg-info/PKG-INFO -> governance_ledger-0.9.0/governance_ledger.egg-info
+copying governance_ledger.egg-info/SOURCES.txt -> governance_ledger-0.9.0/governance_ledger.egg-info
+copying governance_ledger.egg-info/dependency_links.txt -> governance_ledger-0.9.0/governance_ledger.egg-info
+copying governance_ledger.egg-info/entry_points.txt -> governance_ledger-0.9.0/governance_ledger.egg-info
+copying governance_ledger.egg-info/requires.txt -> governance_ledger-0.9.0/governance_ledger.egg-info
+copying governance_ledger.egg-info/top_level.txt -> governance_ledger-0.9.0/governance_ledger.egg-info
+copying governance_ledger/integrations/__init__.py -> governance_ledger-0.9.0/governance_ledger/integrations
+copying governance_ledger/integrations/guard.py -> governance_ledger-0.9.0/governance_ledger/integrations
+copying governance_ledger/semantics/__init__.py -> governance_ledger-0.9.0/governance_ledger/semantics
+copying governance_ledger/semantics/capabilities.py -> governance_ledger-0.9.0/governance_ledger/semantics
+copying governance_ledger/semantics/compiler.py -> governance_ledger-0.9.0/governance_ledger/semantics
+copying governance_ledger/semantics/consequences.py -> governance_ledger-0.9.0/governance_ledger/semantics
+copying governance_ledger/semantics/continuity.py -> governance_ledger-0.9.0/governance_ledger/semantics
+copying governance_ledger/semantics/diagnostics.py -> governance_ledger-0.9.0/governance_ledger/semantics
+copying governance_ledger/semantics/diff.py -> governance_ledger-0.9.0/governance_ledger/semantics
+copying governance_ledger/semantics/diffing.py -> governance_ledger-0.9.0/governance_ledger/semantics
+copying governance_ledger/semantics/execution_projection.py -> governance_ledger-0.9.0/governance_ledger/semantics
+copying governance_ledger/semantics/extraction.py -> governance_ledger-0.9.0/governance_ledger/semantics
+copying governance_ledger/semantics/lifecycle.py -> governance_ledger-0.9.0/governance_ledger/semantics
+copying governance_ledger/semantics/lifecycle_enforcement.py -> governance_ledger-0.9.0/governance_ledger/semantics
+copying governance_ledger/semantics/packets.py -> governance_ledger-0.9.0/governance_ledger/semantics
+copying governance_ledger/semantics/preview.py -> governance_ledger-0.9.0/governance_ledger/semantics
+copying governance_ledger/semantics/publication.py -> governance_ledger-0.9.0/governance_ledger/semantics
+copying governance_ledger/semantics/reconciliation.py -> governance_ledger-0.9.0/governance_ledger/semantics
+copying governance_ledger/semantics/summaries.py -> governance_ledger-0.9.0/governance_ledger/semantics
+copying schemas/approval_chain_semantics.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/authority_bundle.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/authority_bundle.v2.json -> governance_ledger-0.9.0/schemas
+copying schemas/authority_bundle.v3.json -> governance_ledger-0.9.0/schemas
+copying schemas/authority_bundle.v4.json -> governance_ledger-0.9.0/schemas
+copying schemas/authority_diff_impact.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/authority_execution_projection.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/authority_lifecycle_event.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/authority_role_binding.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/capability_continuity_semantics.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/capability_evidence_requirement.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/capability_execution_constraint.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/capability_identity_requirement.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/capability_requirement.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/compiled_authority_contract.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/compiled_authority_contract.v2.json -> governance_ledger-0.9.0/schemas
+copying schemas/compiled_authority_contract.v3.json -> governance_ledger-0.9.0/schemas
+copying schemas/constraint_ir.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/continuity_transition_event.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/contract_registry.schema.json -> governance_ledger-0.9.0/schemas
+copying schemas/cricore_policy.schema.json -> governance_ledger-0.9.0/schemas
+copying schemas/deployment.schema.json -> governance_ledger-0.9.0/schemas
+copying schemas/domain_pack.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/execution_admissibility_projection.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/execution_context_semantics.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/execution_requirement_projection.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/governance_actor.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/governance_capability.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/governance_compilation_report.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/governance_diagnostic.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/governance_event.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/governance_impact_preview.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/governance_lineage_verification.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/governance_quality_diagnostic.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/governance_replay_diff.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/governance_replay_state.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/governance_review_packet.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/governance_semantic_extraction.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/governance_semantic_provenance.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/governance_semantic_reconciliation.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/governance_source.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/guard_enforcement_projection.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/identity_continuity_semantics.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/policy_mapping_decision.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/policy_translation_approval.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/policy_translation_capability_catalog.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/policy_translation_capability_catalog.v2.json -> governance_ledger-0.9.0/schemas
+copying schemas/policy_translation_commitment.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/policy_translation_confirmation.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/policy_translation_proposal.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/policy_translation_review.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/policy_translation_run_evidence.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/projection_generation_event.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/projection_invalidation_event.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/publication_manifest.schema.json -> governance_ledger-0.9.0/schemas
+copying schemas/publication_manifest.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/publication_receipt.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/publication_receipt.v2.json -> governance_ledger-0.9.0/schemas
+copying schemas/publication_receipt.v3.json -> governance_ledger-0.9.0/schemas
+copying schemas/publication_receipt.v4.json -> governance_ledger-0.9.0/schemas
+copying schemas/replay_authority_request.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/replay_execution_request.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/review.schema.json -> governance_ledger-0.9.0/schemas
+copying schemas/runtime_consequence_projection.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/runtime_fact_schema.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/semantic_ambiguity.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/semantic_authority_diff.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/semantic_commit_bundle.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/semantic_conflict.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/semantic_interpretation_decision.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/semantic_lifecycle_enforcement_projection.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/semantic_reconciliation_projection.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/semantic_stability_projection.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/snapshot.schema.json -> governance_ledger-0.9.0/schemas
+copying schemas/state_posture_snapshot_semantics.v1.json -> governance_ledger-0.9.0/schemas
+copying schemas/temporal_authority_semantics.v1.json -> governance_ledger-0.9.0/schemas
+copying tests/test_action_policy_v4.py -> governance_ledger-0.9.0/tests
+copying tests/test_authority_execution_projection.py -> governance_ledger-0.9.0/tests
+copying tests/test_contract_linkage.py -> governance_ledger-0.9.0/tests
+copying tests/test_customer_policy.py -> governance_ledger-0.9.0/tests
+copying tests/test_deployment.py -> governance_ledger-0.9.0/tests
+copying tests/test_diff.py -> governance_ledger-0.9.0/tests
+copying tests/test_domain_policy.py -> governance_ledger-0.9.0/tests
+copying tests/test_extract_compile.py -> governance_ledger-0.9.0/tests
+copying tests/test_golden_path_authority_fixture.py -> governance_ledger-0.9.0/tests
+copying tests/test_governance_chronology_replay_contract.py -> governance_ledger-0.9.0/tests
+copying tests/test_governance_consistency_diagnostics.py -> governance_ledger-0.9.0/tests
+copying tests/test_governance_event_model.py -> governance_ledger-0.9.0/tests
+copying tests/test_governance_extraction.py -> governance_ledger-0.9.0/tests
+copying tests/test_governance_replay.py -> governance_ledger-0.9.0/tests
+copying tests/test_guard_optional_compatibility.py -> governance_ledger-0.9.0/tests
+copying tests/test_lifecycle.py -> governance_ledger-0.9.0/tests
+copying tests/test_normalization_corpus.py -> governance_ledger-0.9.0/tests
+copying tests/test_optional_guard_dependency.py -> governance_ledger-0.9.0/tests
+copying tests/test_package_provenance.py -> governance_ledger-0.9.0/tests
+copying tests/test_policy_translation.py -> governance_ledger-0.9.0/tests
+copying tests/test_policy_translation_publication_v3.py -> governance_ledger-0.9.0/tests
+copying tests/test_provenance_complete_publication.py -> governance_ledger-0.9.0/tests
+copying tests/test_publication_integrity.py -> governance_ledger-0.9.0/tests
+copying tests/test_published_authority_registry.py -> governance_ledger-0.9.0/tests
+copying tests/test_release_catalog_v4.py -> governance_ledger-0.9.0/tests
+copying tests/test_review.py -> governance_ledger-0.9.0/tests
+copying tests/test_rollback.py -> governance_ledger-0.9.0/tests
+copying tests/test_runner_publish.py -> governance_ledger-0.9.0/tests
+copying tests/test_semantic_compiler.py -> governance_ledger-0.9.0/tests
+copying tests/test_semantic_diagnostics.py -> governance_ledger-0.9.0/tests
+copying tests/test_semantic_diff.py -> governance_ledger-0.9.0/tests
+copying tests/test_semantic_diffing.py -> governance_ledger-0.9.0/tests
+copying tests/test_semantic_extraction.py -> governance_ledger-0.9.0/tests
+copying tests/test_semantic_governance_model_doc.py -> governance_ledger-0.9.0/tests
+copying tests/test_semantic_lifecycle_enforcement_projection.py -> governance_ledger-0.9.0/tests
+copying tests/test_semantic_packets.py -> governance_ledger-0.9.0/tests
+copying tests/test_semantic_preview.py -> governance_ledger-0.9.0/tests
+copying tests/test_semantic_publication.py -> governance_ledger-0.9.0/tests
+copying tests/test_semantic_reconciliation.py -> governance_ledger-0.9.0/tests
+copying tests/test_snapshot.py -> governance_ledger-0.9.0/tests
+copying tests/test_validation.py -> governance_ledger-0.9.0/tests
+copying tests/fixtures/action_policy_release_v4/catalog.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4
+copying tests/fixtures/action_policy_release_v4/domain-pack.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4
+copying tests/fixtures/action_policy_release_v4/runtime-fact-schema.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4
+copying tests/fixtures/action_policy_release_v4/create-only/approval.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/create-only
+copying tests/fixtures/action_policy_release_v4/create-only/authority-bundle.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/create-only
+copying tests/fixtures/action_policy_release_v4/create-only/compiled-authority.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/create-only
+copying tests/fixtures/action_policy_release_v4/create-only/compiler-input.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/create-only
+copying tests/fixtures/action_policy_release_v4/create-only/compiler-output.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/create-only
+copying tests/fixtures/action_policy_release_v4/create-only/confirmation.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/create-only
+copying tests/fixtures/action_policy_release_v4/create-only/constraint-ir.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/create-only
+copying tests/fixtures/action_policy_release_v4/create-only/proposal.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/create-only
+copying tests/fixtures/action_policy_release_v4/create-only/publication-receipt.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/create-only
+copying tests/fixtures/action_policy_release_v4/create-only/review.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/create-only
+copying tests/fixtures/action_policy_release_v4/create-only/source-interpretation.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/create-only
+copying tests/fixtures/action_policy_release_v4/create-only/source.txt -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/create-only
+copying tests/fixtures/action_policy_release_v4/mixed/approval.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/mixed
+copying tests/fixtures/action_policy_release_v4/mixed/authority-bundle.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/mixed
+copying tests/fixtures/action_policy_release_v4/mixed/compiled-authority.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/mixed
+copying tests/fixtures/action_policy_release_v4/mixed/compiler-input.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/mixed
+copying tests/fixtures/action_policy_release_v4/mixed/compiler-output.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/mixed
+copying tests/fixtures/action_policy_release_v4/mixed/confirmation.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/mixed
+copying tests/fixtures/action_policy_release_v4/mixed/constraint-ir.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/mixed
+copying tests/fixtures/action_policy_release_v4/mixed/proposal.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/mixed
+copying tests/fixtures/action_policy_release_v4/mixed/publication-receipt.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/mixed
+copying tests/fixtures/action_policy_release_v4/mixed/review.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/mixed
+copying tests/fixtures/action_policy_release_v4/mixed/source-interpretation.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/mixed
+copying tests/fixtures/action_policy_release_v4/mixed/source.txt -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/mixed
+copying tests/fixtures/action_policy_release_v4/modify-only/approval.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/modify-only
+copying tests/fixtures/action_policy_release_v4/modify-only/authority-bundle.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/modify-only
+copying tests/fixtures/action_policy_release_v4/modify-only/compiled-authority.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/modify-only
+copying tests/fixtures/action_policy_release_v4/modify-only/compiler-input.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/modify-only
+copying tests/fixtures/action_policy_release_v4/modify-only/compiler-output.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/modify-only
+copying tests/fixtures/action_policy_release_v4/modify-only/confirmation.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/modify-only
+copying tests/fixtures/action_policy_release_v4/modify-only/constraint-ir.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/modify-only
+copying tests/fixtures/action_policy_release_v4/modify-only/proposal.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/modify-only
+copying tests/fixtures/action_policy_release_v4/modify-only/publication-receipt.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/modify-only
+copying tests/fixtures/action_policy_release_v4/modify-only/review.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/modify-only
+copying tests/fixtures/action_policy_release_v4/modify-only/source-interpretation.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/modify-only
+copying tests/fixtures/action_policy_release_v4/modify-only/source.txt -> governance_ledger-0.9.0/tests/fixtures/action_policy_release_v4/modify-only
+copying tests/fixtures/action_policy_v4/create-only/approval.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/create-only
+copying tests/fixtures/action_policy_v4/create-only/authority-bundle.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/create-only
+copying tests/fixtures/action_policy_v4/create-only/compiled-authority.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/create-only
+copying tests/fixtures/action_policy_v4/create-only/compiler-input.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/create-only
+copying tests/fixtures/action_policy_v4/create-only/compiler-output.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/create-only
+copying tests/fixtures/action_policy_v4/create-only/confirmation.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/create-only
+copying tests/fixtures/action_policy_v4/create-only/constraint-ir.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/create-only
+copying tests/fixtures/action_policy_v4/create-only/proposal.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/create-only
+copying tests/fixtures/action_policy_v4/create-only/publication-receipt.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/create-only
+copying tests/fixtures/action_policy_v4/create-only/review.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/create-only
+copying tests/fixtures/action_policy_v4/create-only/source-interpretation.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/create-only
+copying tests/fixtures/action_policy_v4/create-only/source.txt -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/create-only
+copying tests/fixtures/action_policy_v4/mixed/approval.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/mixed
+copying tests/fixtures/action_policy_v4/mixed/authority-bundle.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/mixed
+copying tests/fixtures/action_policy_v4/mixed/compiled-authority.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/mixed
+copying tests/fixtures/action_policy_v4/mixed/compiler-input.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/mixed
+copying tests/fixtures/action_policy_v4/mixed/compiler-output.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/mixed
+copying tests/fixtures/action_policy_v4/mixed/confirmation.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/mixed
+copying tests/fixtures/action_policy_v4/mixed/constraint-ir.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/mixed
+copying tests/fixtures/action_policy_v4/mixed/proposal.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/mixed
+copying tests/fixtures/action_policy_v4/mixed/publication-receipt.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/mixed
+copying tests/fixtures/action_policy_v4/mixed/review.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/mixed
+copying tests/fixtures/action_policy_v4/mixed/source-interpretation.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/mixed
+copying tests/fixtures/action_policy_v4/mixed/source.txt -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/mixed
+copying tests/fixtures/action_policy_v4/modify-only/approval.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/modify-only
+copying tests/fixtures/action_policy_v4/modify-only/authority-bundle.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/modify-only
+copying tests/fixtures/action_policy_v4/modify-only/compiled-authority.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/modify-only
+copying tests/fixtures/action_policy_v4/modify-only/compiler-input.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/modify-only
+copying tests/fixtures/action_policy_v4/modify-only/compiler-output.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/modify-only
+copying tests/fixtures/action_policy_v4/modify-only/confirmation.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/modify-only
+copying tests/fixtures/action_policy_v4/modify-only/constraint-ir.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/modify-only
+copying tests/fixtures/action_policy_v4/modify-only/proposal.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/modify-only
+copying tests/fixtures/action_policy_v4/modify-only/publication-receipt.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/modify-only
+copying tests/fixtures/action_policy_v4/modify-only/review.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/modify-only
+copying tests/fixtures/action_policy_v4/modify-only/source-interpretation.json -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/modify-only
+copying tests/fixtures/action_policy_v4/modify-only/source.txt -> governance_ledger-0.9.0/tests/fixtures/action_policy_v4/modify-only
+copying tests/fixtures/golden_path/README.md -> governance_ledger-0.9.0/tests/fixtures/golden_path
+copying tests/fixtures/golden_path/contracts/finance-policy-1.0.0.authority-bundle.json -> governance_ledger-0.9.0/tests/fixtures/golden_path/contracts
+copying tests/fixtures/golden_path/contracts/finance-policy-1.0.0.contract.json -> governance_ledger-0.9.0/tests/fixtures/golden_path/contracts
+copying tests/fixtures/golden_path/contracts/finance-policy-1.0.0.publication-receipt.json -> governance_ledger-0.9.0/tests/fixtures/golden_path/contracts
+copying tests/fixtures/golden_path/contracts/index.json -> governance_ledger-0.9.0/tests/fixtures/golden_path/contracts
+copying tests/fixtures/provenance_complete/publication-inputs.json -> governance_ledger-0.9.0/tests/fixtures/provenance_complete
+copying tests/fixtures/provenance_complete/repository-change-policy.base64 -> governance_ledger-0.9.0/tests/fixtures/provenance_complete
+copying tests/normalization_corpus/policies/access-control/production-access.json -> governance_ledger-0.9.0/tests/normalization_corpus/policies/access-control
+copying tests/normalization_corpus/policies/compliance/ambiguous-retention.json -> governance_ledger-0.9.0/tests/normalization_corpus/policies/compliance
+copying tests/normalization_corpus/policies/finance/transfer-approval.json -> governance_ledger-0.9.0/tests/normalization_corpus/policies/finance
+copying tests/normalization_corpus/policies/healthcare/patient-access.json -> governance_ledger-0.9.0/tests/normalization_corpus/policies/healthcare
+copying tests/normalization_corpus/policies/procurement/purchase-approval.json -> governance_ledger-0.9.0/tests/normalization_corpus/policies/procurement
+copying tools/acceptance_pytest.py -> governance_ledger-0.9.0/tools
+copying tools/check_action_policy_history.py -> governance_ledger-0.9.0/tools
+copying tools/check_action_policy_legacy_operations.py -> governance_ledger-0.9.0/tools
+copying tools/check_action_policy_old_runtime.py -> governance_ledger-0.9.0/tools
+copying tools/check_action_policy_package.py -> governance_ledger-0.9.0/tools
+copying tools/check_compiler_provenance.py -> governance_ledger-0.9.0/tools
+copying tools/check_compiler_wheel_cache.py -> governance_ledger-0.9.0/tools
+copying tools/check_guard_release_execution.py -> governance_ledger-0.9.0/tools
+copying tools/check_installed_wheel_set.py -> governance_ledger-0.9.0/tools
+copying tools/check_ledger_release_metadata.py -> governance_ledger-0.9.0/tools
+copying tools/check_release_catalog_package.py -> governance_ledger-0.9.0/tools
+copying tools/fetch_guard_candidate.py -> governance_ledger-0.9.0/tools
+copying tools/package_provenance.py -> governance_ledger-0.9.0/tools
+copying tools/run_action_policy_acceptance.py -> governance_ledger-0.9.0/tools
+copying tools/run_guard_extra_acceptance.py -> governance_ledger-0.9.0/tools
+copying governance_ledger.egg-info/SOURCES.txt -> governance_ledger-0.9.0/governance_ledger.egg-info
+Writing governance_ledger-0.9.0/setup.cfg
+Creating tar archive
+removing 'governance_ledger-0.9.0' (and everything under it)
+* Building wheel from sdist
+* Creating isolated environment: venv+pip...
+* Installing packages in isolated environment:
+  - setuptools>=68
+* Getting build dependencies for wheel...
+running egg_info
+writing governance_ledger.egg-info/PKG-INFO
+writing dependency_links to governance_ledger.egg-info/dependency_links.txt
+writing entry points to governance_ledger.egg-info/entry_points.txt
+writing requirements to governance_ledger.egg-info/requires.txt
+writing top-level names to governance_ledger.egg-info/top_level.txt
+reading manifest file 'governance_ledger.egg-info/SOURCES.txt'
+reading manifest template 'MANIFEST.in'
+adding license file 'LICENSE'
+writing manifest file 'governance_ledger.egg-info/SOURCES.txt'
+* Building wheel...
+running bdist_wheel
+running build
+running build_py
+creating build/lib/governance_ledger
+copying governance_ledger/checks.py -> build/lib/governance_ledger
+copying governance_ledger/review.py -> build/lib/governance_ledger
+copying governance_ledger/paths.py -> build/lib/governance_ledger
+copying governance_ledger/replay.py -> build/lib/governance_ledger
+copying governance_ledger/report.py -> build/lib/governance_ledger
+copying governance_ledger/provenance.py -> build/lib/governance_ledger
+copying governance_ledger/policy_translation_publication.py -> build/lib/governance_ledger
+copying governance_ledger/policy_translation.py -> build/lib/governance_ledger
+copying governance_ledger/registry.py -> build/lib/governance_ledger
+copying governance_ledger/__init__.py -> build/lib/governance_ledger
+copying governance_ledger/snapshot.py -> build/lib/governance_ledger
+copying governance_ledger/action_policy_publication.py -> build/lib/governance_ledger
+copying governance_ledger/authority_contract.py -> build/lib/governance_ledger
+copying governance_ledger/diff.py -> build/lib/governance_ledger
+copying governance_ledger/lifecycle.py -> build/lib/governance_ledger
+copying governance_ledger/validation.py -> build/lib/governance_ledger
+copying governance_ledger/contract_linkage.py -> build/lib/governance_ledger
+copying governance_ledger/diagnostics.py -> build/lib/governance_ledger
+copying governance_ledger/constraint_ir.py -> build/lib/governance_ledger
+copying governance_ledger/publish.py -> build/lib/governance_ledger
+copying governance_ledger/publication_provenance.py -> build/lib/governance_ledger
+copying governance_ledger/rollback.py -> build/lib/governance_ledger
+copying governance_ledger/statement_normalizer.py -> build/lib/governance_ledger
+copying governance_ledger/patterns.py -> build/lib/governance_ledger
+copying governance_ledger/domain_policy.py -> build/lib/governance_ledger
+copying governance_ledger/schema_versions.py -> build/lib/governance_ledger
+copying governance_ledger/pipeline.py -> build/lib/governance_ledger
+copying governance_ledger/inspect.py -> build/lib/governance_ledger
+copying governance_ledger/domain_packs.py -> build/lib/governance_ledger
+copying governance_ledger/summary.py -> build/lib/governance_ledger
+copying governance_ledger/normalization_report.py -> build/lib/governance_ledger
+copying governance_ledger/deployment.py -> build/lib/governance_ledger
+copying governance_ledger/customer_policy.py -> build/lib/governance_ledger
+copying governance_ledger/action_policy.py -> build/lib/governance_ledger
+copying governance_ledger/extract.py -> build/lib/governance_ledger
+copying governance_ledger/cli.py -> build/lib/governance_ledger
+copying governance_ledger/runner.py -> build/lib/governance_ledger
+creating build/lib/governance_ledger/integrations
+copying governance_ledger/integrations/__init__.py -> build/lib/governance_ledger/integrations
+copying governance_ledger/integrations/guard.py -> build/lib/governance_ledger/integrations
+creating build/lib/governance_ledger/semantics
+copying governance_ledger/semantics/continuity.py -> build/lib/governance_ledger/semantics
+copying governance_ledger/semantics/publication.py -> build/lib/governance_ledger/semantics
+copying governance_ledger/semantics/extraction.py -> build/lib/governance_ledger/semantics
+copying governance_ledger/semantics/__init__.py -> build/lib/governance_ledger/semantics
+copying governance_ledger/semantics/preview.py -> build/lib/governance_ledger/semantics
+copying governance_ledger/semantics/diff.py -> build/lib/governance_ledger/semantics
+copying governance_ledger/semantics/lifecycle.py -> build/lib/governance_ledger/semantics
+copying governance_ledger/semantics/packets.py -> build/lib/governance_ledger/semantics
+copying governance_ledger/semantics/diagnostics.py -> build/lib/governance_ledger/semantics
+copying governance_ledger/semantics/compiler.py -> build/lib/governance_ledger/semantics
+copying governance_ledger/semantics/summaries.py -> build/lib/governance_ledger/semantics
+copying governance_ledger/semantics/capabilities.py -> build/lib/governance_ledger/semantics
+copying governance_ledger/semantics/consequences.py -> build/lib/governance_ledger/semantics
+copying governance_ledger/semantics/lifecycle_enforcement.py -> build/lib/governance_ledger/semantics
+copying governance_ledger/semantics/execution_projection.py -> build/lib/governance_ledger/semantics
+copying governance_ledger/semantics/reconciliation.py -> build/lib/governance_ledger/semantics
+copying governance_ledger/semantics/diffing.py -> build/lib/governance_ledger/semantics
+running egg_info
+writing governance_ledger.egg-info/PKG-INFO
+writing dependency_links to governance_ledger.egg-info/dependency_links.txt
+writing entry points to governance_ledger.egg-info/entry_points.txt
+writing requirements to governance_ledger.egg-info/requires.txt
+writing top-level names to governance_ledger.egg-info/top_level.txt
+reading manifest file 'governance_ledger.egg-info/SOURCES.txt'
+reading manifest template 'MANIFEST.in'
+adding license file 'LICENSE'
+writing manifest file 'governance_ledger.egg-info/SOURCES.txt'
+installing to build/bdist.linux-x86_64/wheel
+running install
+running install_lib
+creating build/bdist.linux-x86_64/wheel
+creating build/bdist.linux-x86_64/wheel/governance_ledger
+copying build/lib/governance_ledger/checks.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/review.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/paths.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/replay.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/report.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/provenance.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/policy_translation_publication.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/policy_translation.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/registry.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/__init__.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/snapshot.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/action_policy_publication.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/authority_contract.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/diff.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/lifecycle.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/validation.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/contract_linkage.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/diagnostics.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/constraint_ir.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/publish.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/publication_provenance.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/rollback.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/statement_normalizer.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/patterns.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/domain_policy.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/schema_versions.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/pipeline.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/inspect.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/domain_packs.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/summary.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/normalization_report.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+creating build/bdist.linux-x86_64/wheel/governance_ledger/integrations
+copying build/lib/governance_ledger/integrations/__init__.py -> build/bdist.linux-x86_64/wheel/./governance_ledger/integrations
+copying build/lib/governance_ledger/integrations/guard.py -> build/bdist.linux-x86_64/wheel/./governance_ledger/integrations
+copying build/lib/governance_ledger/deployment.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/customer_policy.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/action_policy.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/extract.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+creating build/bdist.linux-x86_64/wheel/governance_ledger/semantics
+copying build/lib/governance_ledger/semantics/continuity.py -> build/bdist.linux-x86_64/wheel/./governance_ledger/semantics
+copying build/lib/governance_ledger/semantics/publication.py -> build/bdist.linux-x86_64/wheel/./governance_ledger/semantics
+copying build/lib/governance_ledger/semantics/extraction.py -> build/bdist.linux-x86_64/wheel/./governance_ledger/semantics
+copying build/lib/governance_ledger/semantics/__init__.py -> build/bdist.linux-x86_64/wheel/./governance_ledger/semantics
+copying build/lib/governance_ledger/semantics/preview.py -> build/bdist.linux-x86_64/wheel/./governance_ledger/semantics
+copying build/lib/governance_ledger/semantics/diff.py -> build/bdist.linux-x86_64/wheel/./governance_ledger/semantics
+copying build/lib/governance_ledger/semantics/lifecycle.py -> build/bdist.linux-x86_64/wheel/./governance_ledger/semantics
+copying build/lib/governance_ledger/semantics/packets.py -> build/bdist.linux-x86_64/wheel/./governance_ledger/semantics
+copying build/lib/governance_ledger/semantics/diagnostics.py -> build/bdist.linux-x86_64/wheel/./governance_ledger/semantics
+copying build/lib/governance_ledger/semantics/compiler.py -> build/bdist.linux-x86_64/wheel/./governance_ledger/semantics
+copying build/lib/governance_ledger/semantics/summaries.py -> build/bdist.linux-x86_64/wheel/./governance_ledger/semantics
+copying build/lib/governance_ledger/semantics/capabilities.py -> build/bdist.linux-x86_64/wheel/./governance_ledger/semantics
+copying build/lib/governance_ledger/semantics/consequences.py -> build/bdist.linux-x86_64/wheel/./governance_ledger/semantics
+copying build/lib/governance_ledger/semantics/lifecycle_enforcement.py -> build/bdist.linux-x86_64/wheel/./governance_ledger/semantics
+copying build/lib/governance_ledger/semantics/execution_projection.py -> build/bdist.linux-x86_64/wheel/./governance_ledger/semantics
+copying build/lib/governance_ledger/semantics/reconciliation.py -> build/bdist.linux-x86_64/wheel/./governance_ledger/semantics
+copying build/lib/governance_ledger/semantics/diffing.py -> build/bdist.linux-x86_64/wheel/./governance_ledger/semantics
+copying build/lib/governance_ledger/cli.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+copying build/lib/governance_ledger/runner.py -> build/bdist.linux-x86_64/wheel/./governance_ledger
+running install_egg_info
+Copying governance_ledger.egg-info to build/bdist.linux-x86_64/wheel/./governance_ledger-0.9.0-py3.14.egg-info
+running install_scripts
+creating build/bdist.linux-x86_64/wheel/governance_ledger-0.9.0.dist-info/WHEEL
+creating '/home/runner/work/Waveframe-Ledger/Waveframe-Ledger/runtime/issue25-base/dist/.tmp-9i9zd5wq/governance_ledger-0.9.0-py3-none-any.whl' and adding 'build/bdist.linux-x86_64/wheel' to it
+adding 'governance_ledger/__init__.py'
+adding 'governance_ledger/action_policy.py'
+adding 'governance_ledger/action_policy_publication.py'
+adding 'governance_ledger/authority_contract.py'
+adding 'governance_ledger/checks.py'
+adding 'governance_ledger/cli.py'
+adding 'governance_ledger/constraint_ir.py'
+adding 'governance_ledger/contract_linkage.py'
+adding 'governance_ledger/customer_policy.py'
+adding 'governance_ledger/deployment.py'
+adding 'governance_ledger/diagnostics.py'
+adding 'governance_ledger/diff.py'
+adding 'governance_ledger/domain_packs.py'
+adding 'governance_ledger/domain_policy.py'
+adding 'governance_ledger/extract.py'
+adding 'governance_ledger/inspect.py'
+adding 'governance_ledger/lifecycle.py'
+adding 'governance_ledger/normalization_report.py'
+adding 'governance_ledger/paths.py'
+adding 'governance_ledger/patterns.py'
+adding 'governance_ledger/pipeline.py'
+adding 'governance_ledger/policy_translation.py'
+adding 'governance_ledger/policy_translation_publication.py'
+adding 'governance_ledger/provenance.py'
+adding 'governance_ledger/publication_provenance.py'
+adding 'governance_ledger/publish.py'
+adding 'governance_ledger/registry.py'
+adding 'governance_ledger/replay.py'
+adding 'governance_ledger/report.py'
+adding 'governance_ledger/review.py'
+adding 'governance_ledger/rollback.py'
+adding 'governance_ledger/runner.py'
+adding 'governance_ledger/schema_versions.py'
+adding 'governance_ledger/snapshot.py'
+adding 'governance_ledger/statement_normalizer.py'
+adding 'governance_ledger/summary.py'
+adding 'governance_ledger/validation.py'
+adding 'governance_ledger/integrations/__init__.py'
+adding 'governance_ledger/integrations/guard.py'
+adding 'governance_ledger/semantics/__init__.py'
+adding 'governance_ledger/semantics/capabilities.py'
+adding 'governance_ledger/semantics/compiler.py'
+adding 'governance_ledger/semantics/consequences.py'
+adding 'governance_ledger/semantics/continuity.py'
+adding 'governance_ledger/semantics/diagnostics.py'
+adding 'governance_ledger/semantics/diff.py'
+adding 'governance_ledger/semantics/diffing.py'
+adding 'governance_ledger/semantics/execution_projection.py'
+adding 'governance_ledger/semantics/extraction.py'
+adding 'governance_ledger/semantics/lifecycle.py'
+adding 'governance_ledger/semantics/lifecycle_enforcement.py'
+adding 'governance_ledger/semantics/packets.py'
+adding 'governance_ledger/semantics/preview.py'
+adding 'governance_ledger/semantics/publication.py'
+adding 'governance_ledger/semantics/reconciliation.py'
+adding 'governance_ledger/semantics/summaries.py'
+adding 'governance_ledger-0.9.0.dist-info/licenses/LICENSE'
+adding 'governance_ledger-0.9.0.dist-info/METADATA'
+adding 'governance_ledger-0.9.0.dist-info/WHEEL'
+adding 'governance_ledger-0.9.0.dist-info/entry_points.txt'
+adding 'governance_ledger-0.9.0.dist-info/top_level.txt'
+adding 'governance_ledger-0.9.0.dist-info/RECORD'
+removing build/bdist.linux-x86_64/wheel
+Successfully built governance_ledger-0.9.0.tar.gz and governance_ledger-0.9.0-py3-none-any.whl

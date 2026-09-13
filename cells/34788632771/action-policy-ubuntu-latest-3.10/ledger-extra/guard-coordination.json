@@ -1,0 +1,65 @@
+{
+  "ledger_head": "a34c11d81b85963794cf28b4adad091fac15e130",
+  "compiler_head": "ae590dee058d3481e384dea850d5b7d980f533ff",
+  "guard_base": "0161ef8a52e052d1bc1366cdc93ce13a9bd535ed",
+  "ledger_evidence_commit": "46cd4c5a9a2c17e2367d64b56803df92de69d8b3",
+  "commands": [
+    {
+      "label": "ledger-head",
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/.candidate52/ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "ledger-clean",
+      "command": [
+        "git",
+        "status",
+        "--porcelain",
+        "--untracked-files=no"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/.candidate52/ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "guard-head",
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard",
+      "exit_code": 0
+    },
+    {
+      "label": "guard-clean",
+      "command": [
+        "git",
+        "status",
+        "--porcelain",
+        "--untracked-files=no"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard",
+      "exit_code": 0
+    },
+    {
+      "label": "guard-stack",
+      "command": [
+        "git",
+        "merge-base",
+        "--is-ancestor",
+        "0161ef8a52e052d1bc1366cdc93ce13a9bd535ed",
+        "004f959f6d46a40b34a10ca3a789afff8aed7d74"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard",
+      "exit_code": 128
+    }
+  ],
+  "status": "failed",
+  "release_ready": false,
+  "error": "guard-stack"
+}

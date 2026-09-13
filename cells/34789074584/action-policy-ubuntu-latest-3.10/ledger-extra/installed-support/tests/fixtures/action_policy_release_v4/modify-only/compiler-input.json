@@ -1,0 +1,22 @@
+{
+  "schema_version": "action_policy.v1",
+  "contract_id": "repository-modify-only",
+  "contract_version": "3.0.0",
+  "action_requirements": {
+    "modify": {
+      "required_role": "repository-reviewer",
+      "allow": [
+        {
+          "match": "prefix",
+          "value": "docs/"
+        }
+      ],
+      "deny": [
+        {
+          "match": "exact",
+          "value": "docs/locked.md"
+        }
+      ]
+    }
+  }
+}

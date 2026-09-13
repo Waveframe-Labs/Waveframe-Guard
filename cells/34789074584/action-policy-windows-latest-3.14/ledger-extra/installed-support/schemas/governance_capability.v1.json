@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/governance_capability.v1.json",
+  "title": "Governance Capability",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "capability_id",
+    "action",
+    "action_type",
+    "requirements",
+    "continuity_semantics",
+    "evidence_requirements",
+    "execution_constraints",
+    "identity_requirements",
+    "non_goals"
+  ],
+  "properties": {
+    "schema_version": { "const": "governance_capability.v1" },
+    "capability_id": { "type": "string", "minLength": 1 },
+    "action": { "type": "string", "minLength": 1 },
+    "action_type": {
+      "enum": ["governed_action", "approval_action", "resume_action", "delegation_action", "ai_recommendation_action"]
+    },
+    "requirements": {
+      "type": "array",
+      "items": { "$ref": "capability_requirement.v1.json" }
+    },
+    "continuity_semantics": { "type": "object" },
+    "evidence_requirements": {
+      "type": "array",
+      "items": { "$ref": "capability_evidence_requirement.v1.json" }
+    },
+    "execution_constraints": { "type": "object" },
+    "identity_requirements": { "type": "object" },
+    "non_goals": { "type": "array", "items": { "type": "string" } }
+  }
+}

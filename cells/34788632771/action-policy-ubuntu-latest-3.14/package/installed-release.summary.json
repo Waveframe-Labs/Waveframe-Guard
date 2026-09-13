@@ -1,0 +1,590 @@
+{
+  "cases": 735,
+  "release_executed": 150,
+  "skips": [
+    {
+      "case": "tests.test_action_policy_creation.test_exact_dependencies_and_installed_public_api_acceptance[development]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_action_roles_paths_and_evaluation_only[development-create-only-repository-maintainer-create-generated/new.md-admissible]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_action_roles_paths_and_evaluation_only[development-create-only-repository-maintainer-modify-generated/new.md-blocked]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_action_roles_paths_and_evaluation_only[development-create-only-repository-maintainer-create-generated/private/key-blocked]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_action_roles_paths_and_evaluation_only[development-create-only-security-reviewer-create-generated/new.md-blocked]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_action_roles_paths_and_evaluation_only[development-create-only-repository-maintainer-create-other.md-blocked]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_action_roles_paths_and_evaluation_only[development-modify-only-repository-maintainer-create-README.md-blocked]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_action_roles_paths_and_evaluation_only[development-mixed-repository-maintainer-create-generated/new.md-admissible]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_action_roles_paths_and_evaluation_only[development-mixed-repository-maintainer-modify-README.md-blocked]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_action_roles_paths_and_evaluation_only[development-mixed-security-reviewer-modify-README.md-admissible]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_action_roles_paths_and_evaluation_only[development-mixed-security-reviewer-create-generated/new.md-blocked]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_creation_once_expiry_and_modify_separation[development]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_missing_parent_preserves_allowed_decision[development]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_partial_write_failure_is_not_rollback[development]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_gate_revocation_contract_and_cache_substitution",
+      "reason": "requires explicit action policy development environment"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_downgraded_or_unknown_envelopes_rejected[development-authority_bundle.v1]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_downgraded_or_unknown_envelopes_rejected[development-authority_bundle.v2]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_downgraded_or_unknown_envelopes_rejected[development-authority_bundle.v3]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_downgraded_or_unknown_envelopes_rejected[development-authority_bundle.v5]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_replay_revalidates_retained_publication[development]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_injected_facts_rejected[development-facts]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_injected_facts_rejected[development-runtime_facts]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_injected_facts_rejected[development-proposal.action]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_injected_facts_rejected[development-actor.role]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_unsupported_creation_paths_fail_closed[development-../escape]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_unsupported_creation_paths_fail_closed[development-generated/../escape]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_unsupported_creation_paths_fail_closed[development-generated/new.md:stream]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_unsupported_creation_paths_fail_closed[development-generated/NUL]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_unsupported_creation_paths_fail_closed[development-generated/./new.md]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_unsupported_creation_paths_fail_closed[development-generated/new.md.]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_unsupported_creation_paths_fail_closed[development-generated\\\\new.md]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_unsupported_creation_paths_fail_closed[development-/absolute]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_unsupported_creation_paths_fail_closed[development-C:/absolute]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_parent_replacement_between_evaluation_and_binding[development]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_parent_substitution_inside_callback[development]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_real_indirection_and_case_alias_rejected[development]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_escalated_no_callback_or_creation[development]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_modify_grant_cannot_create_missing_file[development]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_malformed_native_publication_rejected[development-receipt_schema]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_malformed_native_publication_rejected[development-contract_action]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_malformed_native_publication_rejected[development-contract_field]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_malformed_native_publication_rejected[development-pack_hash]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_malformed_native_publication_rejected[development-schema_hash]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_cache_marker_registry_lifecycle_and_loaded_substitution[development]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_gate_revocation_inside_callback_prevents_creation",
+      "reason": "requires explicit action policy development environment"
+    },
+    {
+      "case": "tests.test_action_policy_creation.test_creation_rejects_cloud_clients",
+      "reason": "requires explicit action policy development environment"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_automatic_reports_use_validated_operation[development-created-succeeded-True]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_automatic_reports_use_validated_operation[development-empty-succeeded-True]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_automatic_reports_use_validated_operation[development-collision-failed-False]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_automatic_reports_use_validated_operation[development-partial-failed-True]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_automatic_reports_use_validated_operation[development-unknown-failed-None]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_automatic_reports_use_validated_operation[development-callback-return-failed-None]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_automatic_reports_use_validated_operation[development-post-validation-failed-True]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_automatic_reports_use_validated_operation[development-pre-callback-not_executed-False]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_automatic_reports_use_validated_operation[development-missing-parent-not_executed-False]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_automatic_reports_use_validated_operation[development-blocked-blocked-False]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_identity_overrides_fail_before_saved_run[development-configuration-runtime_id-other]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_identity_overrides_fail_before_saved_run[development-configuration-organization_id-other]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_identity_overrides_fail_before_saved_run[development-configuration-runtime_id-None]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_identity_overrides_fail_before_saved_run[development-boundary-runtime_id-other]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_identity_overrides_fail_before_saved_run[development-boundary-organization_id-other]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_identity_overrides_fail_before_saved_run[development-boundary-runtime_id-None]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_identity_overrides_fail_before_saved_run[development-call-runtime_id-other]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_identity_overrides_fail_before_saved_run[development-call-organization_id-other]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_identity_overrides_fail_before_saved_run[development-call-runtime_id-None]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_reporting_failure_never_repeats_mutation[development-False-403-preserve]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_reporting_failure_never_repeats_mutation[development-False-403-report]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_reporting_failure_never_repeats_mutation[development-False-503-preserve]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_reporting_failure_never_repeats_mutation[development-False-503-report]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_reporting_failure_never_repeats_mutation[development-False-307-preserve]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_reporting_failure_never_repeats_mutation[development-False-307-report]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_reporting_failure_never_repeats_mutation[development-False-fault3-preserve]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_reporting_failure_never_repeats_mutation[development-False-fault3-report]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_reporting_failure_never_repeats_mutation[development-False-fault4-preserve]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_reporting_failure_never_repeats_mutation[development-False-fault4-report]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_reporting_failure_never_repeats_mutation[development-True-403-preserve]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_reporting_failure_never_repeats_mutation[development-True-403-report]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_reporting_failure_never_repeats_mutation[development-True-503-preserve]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_reporting_failure_never_repeats_mutation[development-True-503-report]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_reporting_failure_never_repeats_mutation[development-True-307-preserve]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_reporting_failure_never_repeats_mutation[development-True-307-report]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_reporting_failure_never_repeats_mutation[development-True-fault3-preserve]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_reporting_failure_never_repeats_mutation[development-True-fault3-report]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_reporting_failure_never_repeats_mutation[development-True-fault4-preserve]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_reporting_failure_never_repeats_mutation[development-True-fault4-report]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_published_ledger_cannot_activate_native_cloud_even_with_flags",
+      "reason": "requires the released Ledger installation; covered by released CI"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_native_intake_rejects_tampering_even_with_outer_hashes[development-tenant]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_native_intake_rejects_tampering_even_with_outer_hashes[development-authority]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_native_intake_rejects_tampering_even_with_outer_hashes[development-bundle]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_native_intake_rejects_tampering_even_with_outer_hashes[development-receipt]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_native_intake_rejects_tampering_even_with_outer_hashes[development-mixed]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_native_intake_rejects_tampering_even_with_outer_hashes[development-downgrade]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_native_intake_rejects_tampering_even_with_outer_hashes[development-registry]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_native_intake_rejects_tampering_even_with_outer_hashes[development-revoked]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_native_intake_rejects_tampering_even_with_outer_hashes[development-superseded]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_native_intake_rejects_tampering_even_with_outer_hashes[development-reference]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_native_intake_rejects_tampering_even_with_outer_hashes[development-provenance]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_no_terminal_report_and_malformed_request[development]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_required_dependency_api_and_warm_identity_rejection[development]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_native_cloud_cache_revalidates_resolution[bundle]",
+      "reason": "requires explicit action policy development environment"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_native_cloud_cache_revalidates_resolution[receipt]",
+      "reason": "requires explicit action policy development environment"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_native_cloud_cache_revalidates_resolution[revoked]",
+      "reason": "requires explicit action policy development environment"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_native_cloud_cache_revalidates_resolution[gate]",
+      "reason": "requires explicit action policy development environment"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_generic_boundary_cannot_ignore_identity_override[development]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_matching_per_call_identity_and_other_context_are_saved[development]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_repository_workspace.test_case_alias_of_deny_with_different_disk_spelling",
+      "reason": "case-insensitive filesystem required"
+    },
+    {
+      "case": "tests.test_repository_workspace.test_junction_parent_escape[deny-only]",
+      "reason": "Windows junction/reparse test"
+    },
+    {
+      "case": "tests.test_repository_workspace.test_junction_parent_escape[allow-list]",
+      "reason": "Windows junction/reparse test"
+    },
+    {
+      "case": "tests.test_repository_workspace.test_authorization_and_callback_cannot_replace_target[deny-only]",
+      "reason": "Windows namespace locks"
+    },
+    {
+      "case": "tests.test_repository_workspace.test_authorization_and_callback_cannot_replace_target[allow-list]",
+      "reason": "Windows namespace locks"
+    },
+    {
+      "case": "tests.test_repository_workspace.test_windows_case_sensitive_workspace_where_supported",
+      "reason": "NTFS case-sensitive directory feature"
+    },
+    {
+      "case": "tests.test_repository_workspace.test_same_device_bind_mount_rejected_where_namespaces_available",
+      "reason": "unprivileged mount namespaces unavailable"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_rehashed_contradictions_rejected_by_public_and_saved_readers[development-review-collision-created-and-written]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_rehashed_contradictions_rejected_by_public_and_saved_readers[development-review-success-without-execution]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_rehashed_contradictions_rejected_by_public_and_saved_readers[development-collision-created-empty-file]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_rehashed_contradictions_rejected_by_public_and_saved_readers[development-operation-success-outer-failed]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_rehashed_contradictions_rejected_by_public_and_saved_readers[development-operation-success-outer-incomplete]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_rehashed_contradictions_rejected_by_public_and_saved_readers[development-operation-success-unknown-callback]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_rehashed_contradictions_rejected_by_public_and_saved_readers[development-failure-without-error]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_rehashed_contradictions_rejected_by_public_and_saved_readers[development-precondition-error-after-invocation]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_rehashed_contradictions_rejected_by_public_and_saved_readers[development-terminal-failure-with-incomplete-execution]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_rehashed_contradictions_rejected_by_public_and_saved_readers[development-collision-without-execution]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_rehashed_contradictions_rejected_by_public_and_saved_readers[development-attempt-without-known-invocation]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_rehashed_contradictions_rejected_by_public_and_saved_readers[development-attempt-without-execution]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_rehashed_contradictions_rejected_by_public_and_saved_readers[development-unfinished-operation-with-terminal-execution]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_rehashed_contradictions_rejected_by_public_and_saved_readers[development-not-run-operation-claims-created-file]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_rehashed_contradictions_rejected_by_public_and_saved_readers[development-post-callback-error-before-execution]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_rehashed_contradictions_rejected_by_public_and_saved_readers[development-precondition-error-with-incomplete-execution]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_rehashed_contradictions_rejected_by_public_and_saved_readers[development-attempt-with-terminal-error]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_valid_observation_states_remain_readable[development-not_run-not_run-False-0-None]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_valid_observation_states_remain_readable[development-not_run-not_run-False-0-operation_precondition_failed]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_valid_observation_states_remain_readable[development-unknown-not_run-False-0-None]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_valid_observation_states_remain_readable[development-incomplete-not_run-False-0-None]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_valid_observation_states_remain_readable[development-incomplete-attempted-False-0-None]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_valid_observation_states_remain_readable[development-incomplete-attempted-True-0-None]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_valid_observation_states_remain_readable[development-incomplete-attempted-True-3-None]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_valid_observation_states_remain_readable[development-failed-failed-False-0-exclusive_create_collision]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_valid_observation_states_remain_readable[development-post_callback_failed-failed-False-0-exclusive_create_collision]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_valid_observation_states_remain_readable[development-failed-failed-False-0-creation_or_callback_failed]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_valid_observation_states_remain_readable[development-failed-failed-True-0-creation_or_callback_failed]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_valid_observation_states_remain_readable[development-failed-failed-True-3-creation_or_callback_failed]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_valid_observation_states_remain_readable[development-post_callback_failed-failed-True-0-post_callback_validation_failed]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_valid_observation_states_remain_readable[development-post_callback_failed-failed-True-3-post_callback_validation_failed]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_valid_observation_states_remain_readable[development-failed-failed-False-0-post_callback_validation_failed]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_valid_observation_states_remain_readable[development-succeeded-succeeded-True-0-None]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    },
+    {
+      "case": "tests.test_creation_attestation_consistency.test_real_collision_and_zero_byte_creation_remain_readable[development]",
+      "reason": "catalog 2 requires explicit Guard and Ledger development opt-ins"
+    }
+  ]
+}

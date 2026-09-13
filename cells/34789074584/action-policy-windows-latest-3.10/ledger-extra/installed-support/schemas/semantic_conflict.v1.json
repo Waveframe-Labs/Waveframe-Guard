@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/semantic_conflict.v1.json",
+  "title": "Semantic Conflict",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "conflict_id", "conflict_type", "requires_operator_resolution", "summary"],
+  "properties": {
+    "schema_version": { "const": "semantic_conflict.v1" },
+    "conflict_id": { "type": "string", "minLength": 1 },
+    "conflict_type": { "type": "string", "minLength": 1 },
+    "extracted_value": {},
+    "resolved_value": {},
+    "requires_operator_resolution": { "type": "boolean" },
+    "summary": { "type": "string", "minLength": 1 }
+  }
+}

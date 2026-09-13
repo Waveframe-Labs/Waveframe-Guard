@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/semantic_ambiguity.v1.json",
+  "title": "Semantic Ambiguity",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "ambiguity_id", "ambiguity_type", "text", "summary", "requires_operator_resolution"],
+  "properties": {
+    "schema_version": { "const": "semantic_ambiguity.v1" },
+    "ambiguity_id": { "type": "string", "minLength": 1 },
+    "ambiguity_type": { "type": "string", "minLength": 1 },
+    "text": { "type": "string" },
+    "summary": { "type": "string" },
+    "requires_operator_resolution": { "type": "boolean" }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/governance_actor.v1.json",
+  "title": "Governance Actor",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "actor_id",
+    "actor_type",
+    "authority_scope",
+    "delegation_allowed",
+    "attestation_required",
+    "identity_continuity_required"
+  ],
+  "properties": {
+    "schema_version": { "const": "governance_actor.v1" },
+    "actor_id": { "type": "string", "minLength": 1 },
+    "actor_type": {
+      "enum": ["human_role", "team", "system_role", "agent", "external_party", "unspecified"]
+    },
+    "authority_scope": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "delegation_allowed": { "type": "boolean" },
+    "attestation_required": { "type": "boolean" },
+    "identity_continuity_required": { "type": "boolean" }
+  }
+}

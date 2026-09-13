@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/governance_diagnostic.v1.json",
+  "title": "Governance Diagnostic",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "type",
+    "severity",
+    "code",
+    "domain",
+    "title",
+    "detail",
+    "blocks_publication",
+    "text"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "governance_diagnostic.v1"
+    },
+    "type": {
+      "const": "compiler_diagnostic"
+    },
+    "severity": {
+      "enum": ["error", "warning", "info"]
+    },
+    "code": {
+      "type": "string",
+      "pattern": "^G[0-9]{3}$"
+    },
+    "domain": {
+      "enum": [
+        "authority_threshold",
+        "lifecycle",
+        "artifact",
+        "role_integrity",
+        "governance_lint",
+        "lineage",
+        "general"
+      ]
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "detail": {
+      "type": "string",
+      "minLength": 1
+    },
+    "blocks_publication": {
+      "type": "boolean"
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "recommendation": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

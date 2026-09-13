@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/capability_continuity_semantics.v1.json",
+  "title": "Capability Continuity Semantics",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "revalidation_required", "revocation_invalidates_resume", "state_snapshot_semantics"],
+  "properties": {
+    "schema_version": { "const": "capability_continuity_semantics.v1" },
+    "revalidation_required": { "type": "boolean" },
+    "revocation_invalidates_resume": { "type": "boolean" },
+    "state_snapshot_semantics": { "type": "object" }
+  }
+}

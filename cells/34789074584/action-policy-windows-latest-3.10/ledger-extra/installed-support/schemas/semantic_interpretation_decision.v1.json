@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/semantic_interpretation_decision.v1.json",
+  "title": "Semantic Interpretation Decision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "decision_id",
+    "field",
+    "selected_interpretation",
+    "rejected_interpretations",
+    "decision_type",
+    "resolved_value",
+    "rationale",
+    "operator",
+    "timestamp",
+    "justification",
+    "decision_posture"
+  ],
+  "properties": {
+    "schema_version": { "const": "semantic_interpretation_decision.v1" },
+    "decision_id": { "type": "string", "minLength": 1 },
+    "field": { "type": "string", "minLength": 1 },
+    "selected_interpretation": {},
+    "rejected_interpretations": { "type": "array" },
+    "decision_type": { "type": "string", "minLength": 1 },
+    "ambiguity_id": { "type": ["string", "null"] },
+    "resolved_value": {},
+    "rationale": { "type": "string", "minLength": 1 },
+    "operator": { "type": "string", "minLength": 1 },
+    "timestamp": { "type": "string", "minLength": 1 },
+    "justification": { "type": "string", "minLength": 1 },
+    "decision_posture": { "const": "operator_reviewed" }
+  }
+}

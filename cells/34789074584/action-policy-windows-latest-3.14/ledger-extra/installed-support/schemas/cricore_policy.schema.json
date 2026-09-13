@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://waveframelabs.org/schemas/cricore-policy-0.1.0.json",
+  "title": "CRI-CORE Governance Policy",
+  "description": "Declarative governance policy compiled into a CRI-CORE compiled contract artifact.",
+  "type": "object",
+  "required": [
+    "contract_id",
+    "contract_version"
+  ],
+  "properties": {
+    "contract_id": {
+      "type": "string",
+      "description": "Identifier for the governance policy."
+    },
+    "contract_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Semantic version of the governance policy."
+    },
+    "authority": {
+      "type": "object",
+      "description": "Authority and role structure required for governed mutations.",
+      "properties": {
+        "required_roles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        },
+        "separation_of_duties": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "artifacts": {
+      "type": "object",
+      "description": "Artifact requirements enforced by the governance policy.",
+      "properties": {
+        "required": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "approvals": {
+      "type": "object",
+      "description": "Approval requirements triggered by threshold conditions.",
+      "properties": {
+        "thresholds": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "field",
+              "operator",
+              "value",
+              "requires_role"
+            ],
+            "properties": {
+              "field": {
+                "type": "string"
+              },
+              "operator": {
+                "type": "string"
+              },
+              "value": {},
+              "requires_role": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "stages": {
+      "type": "object",
+      "description": "Stage-level constraints used by governance workflows.",
+      "properties": {
+        "allowed_transitions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "from",
+              "to"
+            ],
+            "properties": {
+              "from": {
+                "type": "string"
+              },
+              "to": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

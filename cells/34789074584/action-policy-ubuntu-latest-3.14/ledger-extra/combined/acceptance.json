@@ -1,0 +1,316 @@
+{
+  "python": "3.14.7 (main, Aug  6 2026, 02:19:46) [GCC 13.3.0]",
+  "platform": "Linux",
+  "commands": [
+    {
+      "label": "combined-extra-pip",
+      "command": [
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/combined-extra/bin/python",
+        "-m",
+        "pip",
+        "install",
+        "pip==25.3"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "combined-extra-install",
+      "command": [
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/combined-extra/bin/python",
+        "-m",
+        "pip",
+        "install",
+        "-r",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support/requirements-ci.txt",
+        "--find-links",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/wheelhouse",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/wheelhouse/governance_ledger-0.9.0-py3-none-any.whl[dev,guard]",
+        "--report",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/combined-extra-install.json"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "combined-extra-check",
+      "command": [
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/combined-extra/bin/python",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "combined-extra-freeze",
+      "command": [
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/combined-extra/bin/python",
+        "-m",
+        "pip",
+        "freeze",
+        "--all"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "combined-provenance",
+      "command": [
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/combined-extra/bin/python",
+        "-I",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support/tools/check_installed_wheel_set.py",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/combined-extra-archive-expectations.json"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "combined-extra-default",
+      "command": [
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/combined-extra/bin/python",
+        "-I",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support/tools/acceptance_pytest.py",
+        "-q",
+        "-ra",
+        "--junitxml",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/combined-extra-default.xml",
+        "tests"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "combined-extra-native",
+      "command": [
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/combined-extra/bin/python",
+        "-I",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support/tools/acceptance_pytest.py",
+        "-q",
+        "-ra",
+        "--junitxml",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/combined-extra-native.xml",
+        "tests"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "release-package",
+      "command": [
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/combined-extra/bin/python",
+        "-I",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support/tools/check_release_catalog_package.py"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "development-package",
+      "command": [
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/combined-extra/bin/python",
+        "-I",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support/tools/check_action_policy_package.py"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "legacy-v3-example",
+      "command": [
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/combined-extra/bin/python",
+        "-I",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support/examples/native_v3_multi_control.py",
+        "--candidate"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "catalog-3-execution",
+      "command": [
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/combined-extra/bin/python",
+        "-I",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support/tools/check_guard_release_execution.py"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "reject-old-ledger-0.7.0",
+      "command": [
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/combined-extra/bin/python",
+        "-m",
+        "pip",
+        "install",
+        "--dry-run",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/wheelhouse/waveframe_guard-0.19.0-py3-none-any.whl",
+        "governance-ledger==0.7.0",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/wheelhouse/cricore_contract_compiler-0.5.0-py3-none-any.whl"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support",
+      "exit_code": 1
+    },
+    {
+      "label": "reject-old-ledger-0.8.0",
+      "command": [
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/combined-extra/bin/python",
+        "-m",
+        "pip",
+        "install",
+        "--dry-run",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/wheelhouse/waveframe_guard-0.19.0-py3-none-any.whl",
+        "governance-ledger==0.8.0",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/wheelhouse/cricore_contract_compiler-0.5.0-py3-none-any.whl"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support",
+      "exit_code": 1
+    },
+    {
+      "label": "guard-entry-pip",
+      "command": [
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/guard-entry/bin/python",
+        "-m",
+        "pip",
+        "install",
+        "pip==25.3"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "guard-entry-install",
+      "command": [
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/guard-entry/bin/python",
+        "-m",
+        "pip",
+        "install",
+        "-r",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support/requirements-ci.txt",
+        "governance-ledger==0.8.0",
+        "waveframe-guard==0.18.0",
+        "cricore-contract-compiler==0.4.0",
+        "--report",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/guard-entry-install.json"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "guard-entry-check",
+      "command": [
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/guard-entry/bin/python",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "guard-entry-freeze",
+      "command": [
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/guard-entry/bin/python",
+        "-m",
+        "pip",
+        "freeze",
+        "--all"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "guard-entry-upgrade",
+      "command": [
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/guard-entry/bin/python",
+        "-m",
+        "pip",
+        "install",
+        "--upgrade",
+        "--find-links",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/wheelhouse",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/wheelhouse/waveframe_guard-0.19.0-py3-none-any.whl",
+        "--report",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/guard-entry-install.json"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "guard-entry-upgrade-check",
+      "command": [
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/guard-entry/bin/python",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "guard-entry-provenance",
+      "command": [
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/guard-entry/bin/python",
+        "-I",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support/tools/check_installed_wheel_set.py",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/guard-entry-archive-expectations.json"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "guard-entry-catalog-3",
+      "command": [
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/guard-entry/bin/python",
+        "-I",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support/tools/check_guard_release_execution.py"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/installed-support",
+      "exit_code": 0
+    }
+  ],
+  "suites": {
+    "combined-extra-default": {
+      "passed": 678,
+      "skipped": 44,
+      "skip_reasons": {
+        "explicit action-policy development opt-in required; see docs/ACTION_POLICY_DEVELOPMENT.md": 44
+      },
+      "release_passed": 70,
+      "native_passed": 0
+    },
+    "combined-extra-native": {
+      "passed": 722,
+      "skipped": 0,
+      "skip_reasons": {},
+      "release_passed": 70,
+      "native_passed": 44
+    }
+  },
+  "gates": {
+    "combined_extra": "passed"
+  },
+  "combined_extra": {
+    "status": "passed",
+    "executed": true
+  },
+  "release_ready": false,
+  "runtime_activation_ready": false,
+  "head": "afe5093e39bdd132bfb4da2a45e3199f1f6eca16",
+  "ledger_head": "a34c11d81b85963794cf28b4adad091fac15e130",
+  "guard_candidate": {
+    "source_url": "https://github.com/Waveframe-Labs/Waveframe-Guard",
+    "source_commit": "afe5093e39bdd132bfb4da2a45e3199f1f6eca16",
+    "provenance_kind": "coordinator-supplied-exact-candidate",
+    "wheel": "waveframe_guard-0.19.0-py3-none-any.whl",
+    "wheel_sha256": "e734836af5780fff7f834e2904c67f88a1d3a5ef1b47a2e8fc2f4e07f3dbb42f"
+  },
+  "archive_origin": {
+    "url": "https://raw.githubusercontent.com/Waveframe-Labs/Waveframe-Ledger/46cd4c5a9a2c17e2367d64b56803df92de69d8b3/artifacts/issue25-ubuntu-latest-py3.14-a34c11d81b85963794cf28b4adad091fac15e130.zip",
+    "sha256": "cf1cdd57f4a68ad1e10b0b7b9a48ab1046685009052d3e8fb4ea6c0c44f7b282",
+    "cell": "ubuntu-3.14"
+  },
+  "catalog_3_execution_cases": 56,
+  "status": "combined-extra-passed"
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/capability_identity_requirement.v1.json",
+  "title": "Capability Identity Requirement",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "governance_actor",
+    "authority_role_binding",
+    "approval_chain_semantics",
+    "identity_continuity_semantics"
+  ],
+  "properties": {
+    "schema_version": { "const": "capability_identity_requirement.v1" },
+    "governance_actor": { "type": "object" },
+    "authority_role_binding": { "type": "object" },
+    "approval_chain_semantics": { "type": "object" },
+    "identity_continuity_semantics": { "type": "object" }
+  }
+}

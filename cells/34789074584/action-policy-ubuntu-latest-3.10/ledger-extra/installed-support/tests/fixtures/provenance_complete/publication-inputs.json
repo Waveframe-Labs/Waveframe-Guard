@@ -1,0 +1,60 @@
+{
+  "approval": {
+    "approval_id": "approval-repository-change-001",
+    "approved_at": "2026-08-29T13:59:00Z",
+    "approved_by": "policy-owner@example.com"
+  },
+  "authority": {
+    "authority_id": "repository-change-authority",
+    "authority_version": "6.0.0"
+  },
+  "confirmed_rules": [
+    {
+      "role": "repository-maintainer",
+      "rule_id": "rule-role-maintainer",
+      "rule_type": "required_actor_role"
+    },
+    {
+      "effect": "allow",
+      "rule_id": "rule-allow-readme",
+      "rule_type": "exact_target",
+      "target": "README.md"
+    },
+    {
+      "effect": "deny",
+      "rule_id": "rule-deny-deployment-prefix",
+      "rule_type": "target_prefix",
+      "target_prefix": "deployment/"
+    }
+  ],
+  "interpretation": {
+    "interpretation_id": "interpretation-repository-change-001",
+    "statement_classifications": [
+      "enforced",
+      "enforced",
+      "enforced"
+    ],
+    "statement_rule_ids": [
+      ["rule-role-maintainer"],
+      ["rule-allow-readme"],
+      ["rule-deny-deployment-prefix"]
+    ]
+  },
+  "publication": {
+    "publication_id": "pub_20260829_0001",
+    "published_at": "2026-08-29T14:01:00Z",
+    "published_by": "policy-owner@example.com"
+  },
+  "resolution": {
+    "ambiguity_resolutions": []
+  },
+  "semantic_commit": {
+    "committed_at": "2026-08-29T14:00:00Z",
+    "committed_by": "policy-owner@example.com"
+  },
+  "source_policy": {
+    "source_policy_id": "repository-change-policy",
+    "source_revision": "rev-17"
+  },
+  "version_relationship": "publishes_as"
+}

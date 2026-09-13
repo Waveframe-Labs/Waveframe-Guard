@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/temporal_authority_semantics.v1.json",
+  "title": "Temporal Authority Semantics",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "timestamp_source",
+    "expiration_basis",
+    "runtime_enforced_by"
+  ],
+  "properties": {
+    "schema_version": { "const": "temporal_authority_semantics.v1" },
+    "validity_window": {
+      "type": "string",
+      "pattern": "^P[0-9]+D$"
+    },
+    "expiration_trigger": {
+      "type": "string",
+      "minLength": 1
+    },
+    "timestamp_source": {
+      "enum": [
+        "execution_payload",
+        "signed_oracle",
+        "block_timestamp",
+        "cloud_attested_time",
+        "unspecified"
+      ]
+    },
+    "expiration_basis": {
+      "type": "string",
+      "minLength": 1
+    },
+    "runtime_enforced_by": { "const": "Guard/Cloud" }
+  }
+}

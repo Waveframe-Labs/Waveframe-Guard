@@ -1,0 +1,388 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "contract_id",
+    "contract_version",
+    "authority_ref",
+    "action_requirements",
+    "compiler_output",
+    "provenance",
+    "contract_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "compiled_authority_contract.v3"
+    },
+    "contract_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contract_version": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+    },
+    "authority_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action_requirements": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": false,
+      "properties": {
+        "create": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "required_role",
+            "allow",
+            "deny"
+          ],
+          "properties": {
+            "required_role": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "minLength": 1
+            },
+            "allow": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "match",
+                  "value"
+                ],
+                "properties": {
+                  "match": {
+                    "enum": [
+                      "exact",
+                      "prefix"
+                    ]
+                  },
+                  "value": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            },
+            "deny": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "match",
+                  "value"
+                ],
+                "properties": {
+                  "match": {
+                    "enum": [
+                      "exact",
+                      "prefix"
+                    ]
+                  },
+                  "value": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "modify": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "required_role",
+            "allow",
+            "deny"
+          ],
+          "properties": {
+            "required_role": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "minLength": 1
+            },
+            "allow": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "match",
+                  "value"
+                ],
+                "properties": {
+                  "match": {
+                    "enum": [
+                      "exact",
+                      "prefix"
+                    ]
+                  },
+                  "value": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            },
+            "deny": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "match",
+                  "value"
+                ],
+                "properties": {
+                  "match": {
+                    "enum": [
+                      "exact",
+                      "prefix"
+                    ]
+                  },
+                  "value": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "compiler_output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "contract_id",
+        "contract_version",
+        "action_requirements",
+        "contract_hash"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "compiled_action_contract.v1"
+        },
+        "contract_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contract_version": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+        },
+        "action_requirements": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": false,
+          "properties": {
+            "create": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "required_role",
+                "allow",
+                "deny"
+              ],
+              "properties": {
+                "required_role": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "minLength": 1
+                },
+                "allow": {
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "match",
+                      "value"
+                    ],
+                    "properties": {
+                      "match": {
+                        "enum": [
+                          "exact",
+                          "prefix"
+                        ]
+                      },
+                      "value": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  }
+                },
+                "deny": {
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "match",
+                      "value"
+                    ],
+                    "properties": {
+                      "match": {
+                        "enum": [
+                          "exact",
+                          "prefix"
+                        ]
+                      },
+                      "value": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "modify": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "required_role",
+                "allow",
+                "deny"
+              ],
+              "properties": {
+                "required_role": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "minLength": 1
+                },
+                "allow": {
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "match",
+                      "value"
+                    ],
+                    "properties": {
+                      "match": {
+                        "enum": [
+                          "exact",
+                          "prefix"
+                        ]
+                      },
+                      "value": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  }
+                },
+                "deny": {
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "match",
+                      "value"
+                    ],
+                    "properties": {
+                      "match": {
+                        "enum": [
+                          "exact",
+                          "prefix"
+                        ]
+                      },
+                      "value": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "contract_hash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_snapshot_hash",
+        "policy_translation_commitment_hash",
+        "constraint_ir_hash",
+        "domain_pack_hash",
+        "runtime_fact_schema_hash",
+        "compiler_binding_hash",
+        "semantic_commit_hash"
+      ],
+      "properties": {
+        "source_snapshot_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "policy_translation_commitment_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "constraint_ir_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "domain_pack_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "runtime_fact_schema_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "compiler_binding_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "semantic_commit_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      }
+    },
+    "contract_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/compiled_authority_contract.v3.json",
+  "title": "Waveframe Compiled Authority Contract v3",
+  "description": "Ledger development authority retaining independently verified compiler output and source/approval provenance."
+}

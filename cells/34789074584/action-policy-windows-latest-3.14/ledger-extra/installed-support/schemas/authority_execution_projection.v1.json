@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/authority_execution_projection.v1.json",
+  "title": "Authority Execution Projection",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "authority_ref",
+    "compiled_contract_hash",
+    "execution_requirement_projection",
+    "execution_admissibility_projection",
+    "runtime_consequence_projection",
+    "guard_enforcement_projection",
+    "deterministic_guarantees",
+    "non_goals"
+  ],
+  "properties": {
+    "schema_version": { "const": "authority_execution_projection.v1" },
+    "authority_ref": { "type": "string" },
+    "compiled_contract_hash": { "type": ["string", "null"] },
+    "execution_requirement_projection": { "$ref": "execution_requirement_projection.v1.json" },
+    "execution_admissibility_projection": { "$ref": "execution_admissibility_projection.v1.json" },
+    "runtime_consequence_projection": { "$ref": "runtime_consequence_projection.v1.json" },
+    "guard_enforcement_projection": { "$ref": "guard_enforcement_projection.v1.json" },
+    "deterministic_guarantees": { "type": "array", "items": { "type": "string" } },
+    "non_goals": { "type": "array", "items": { "type": "string" } }
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/policy_translation_capability_catalog.v1.json",
+  "title": "Waveframe Policy Translation Capability Catalog v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "catalog_id", "catalog_version", "domain_pack", "actor_kinds", "actions", "facts", "operators", "effects", "binding_types", "enforcement_points", "control_types", "known_fail_closed_capabilities", "catalog_hash"],
+  "properties": {
+    "schema_version": {"const": "policy_translation_capability_catalog.v1"},
+    "catalog_id": {"const": "waveframe.coding-agent.repository-change"},
+    "catalog_version": {"const": "1.0.0"},
+    "domain_pack": {"$ref": "constraint_ir.v1.json#/$defs/packRef"},
+    "actor_kinds": {"type": "array", "const": ["autonomous_agent"]},
+    "actions": {"type": "array", "const": ["modify"]},
+    "facts": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/fact"}},
+    "operators": {"type": "array", "const": ["==", "starts_with"]},
+    "effects": {"type": "array", "const": ["allow", "deny", "require"]},
+    "binding_types": {"type": "array", "const": ["repository_exact_path", "repository_path_prefix", "repository_role"]},
+    "enforcement_points": {
+      "type": "array", "minItems": 1, "maxItems": 1,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["enforcement_point_id", "actions", "runtime_fact_ids"],
+        "properties": {
+          "enforcement_point_id": {"const": "waveframe.guard.repository-change.v1"},
+          "actions": {"type": "array", "const": ["modify"]},
+          "runtime_fact_ids": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+        }
+      }
+    },
+    "control_types": {
+      "type": "array", "minItems": 3, "maxItems": 3,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["control_type", "mapping_control_id", "action", "resource_kind", "fact_id", "operator", "effects", "binding_types", "required_runtime_facts"],
+        "properties": {
+          "control_type": {"enum": ["acting_role", "exact_path_access", "prefix_path_access"]},
+          "mapping_control_id": {"enum": ["acting-role", "exact-path-access", "prefix-path-access"]},
+          "action": {"const": "modify"},
+          "resource_kind": {"enum": ["repository_change", "repository_path"]},
+          "fact_id": {"enum": ["actor.role", "proposal.resource.path"]},
+          "operator": {"enum": ["==", "starts_with"]},
+          "effects": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["allow", "deny", "require"]}},
+          "binding_types": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["repository_exact_path", "repository_path_prefix", "repository_role"]}},
+          "required_runtime_facts": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+        }
+      }
+    },
+    "known_fail_closed_capabilities": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "catalog_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"},
+    "fact": {
+      "type": "object", "additionalProperties": false,
+      "required": ["fact_id", "type", "enum_values", "canonical_unit", "required", "derivation", "comparison_operators"],
+      "properties": {
+        "fact_id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"},
+        "type": {"enum": ["boolean", "decimal", "enum", "integer", "string", "string_set", "timestamp"]},
+        "enum_values": {"oneOf": [{"type": "null"}, {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}}]},
+        "canonical_unit": {"type": ["string", "null"]}, "required": {"type": "boolean"},
+        "derivation": {"oneOf": [{"type": "null"}, {"type": "object", "additionalProperties": false, "required": ["kind", "field_path"], "properties": {"kind": {"const": "proposal_field"}, "field_path": {"type": "string", "minLength": 1}}}]},
+        "comparison_operators": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["==", "starts_with"]}}
+      }
+    }
+  }
+}

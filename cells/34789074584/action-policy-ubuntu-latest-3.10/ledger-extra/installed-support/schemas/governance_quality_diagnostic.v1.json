@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/governance_quality_diagnostic.v1.json",
+  "title": "Governance Quality Diagnostic",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "type",
+    "code",
+    "title",
+    "text",
+    "severity",
+    "domain",
+    "recommendation",
+    "rationale",
+    "operational_examples",
+    "replay_implications",
+    "blocks_publication",
+    "non_goals"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "governance_quality_diagnostic.v1"
+    },
+    "type": {
+      "const": "governance_quality_diagnostic"
+    },
+    "code": {
+      "type": "string",
+      "minLength": 1
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "severity": {
+      "enum": ["info", "warning"]
+    },
+    "domain": {
+      "type": "string",
+      "minLength": 1
+    },
+    "recommendation": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 1
+    },
+    "operational_examples": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "replay_implications": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "blocks_publication": {
+      "const": false
+    },
+    "non_goals": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "contains": {
+        "const": "does_not_reject_publication"
+      }
+    }
+  }
+}

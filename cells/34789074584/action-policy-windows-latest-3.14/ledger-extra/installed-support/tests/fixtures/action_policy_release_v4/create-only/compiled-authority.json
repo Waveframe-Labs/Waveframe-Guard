@@ -1,0 +1,56 @@
+{
+  "schema_version": "compiled_authority_contract.v3",
+  "contract_id": "repository-create-only",
+  "contract_version": "3.0.0",
+  "authority_ref": "repository-create-only@3.0.0",
+  "action_requirements": {
+    "create": {
+      "allow": [
+        {
+          "match": "prefix",
+          "value": "generated/"
+        }
+      ],
+      "deny": [
+        {
+          "match": "prefix",
+          "value": "generated/private/"
+        }
+      ],
+      "required_role": "repository-maintainer"
+    }
+  },
+  "compiler_output": {
+    "action_requirements": {
+      "create": {
+        "allow": [
+          {
+            "match": "prefix",
+            "value": "generated/"
+          }
+        ],
+        "deny": [
+          {
+            "match": "prefix",
+            "value": "generated/private/"
+          }
+        ],
+        "required_role": "repository-maintainer"
+      }
+    },
+    "contract_hash": "7fe6444ed4b139014072c8107d40d32998ef2f2c87eb3832a4983de5deeb2bd2",
+    "contract_id": "repository-create-only",
+    "contract_version": "3.0.0",
+    "schema_version": "compiled_action_contract.v1"
+  },
+  "provenance": {
+    "source_snapshot_hash": "sha256:ff5601216d1505cc8d8c9fb73fe3276d3a7852a083f302e8767e592ca1b3727f",
+    "policy_translation_commitment_hash": "sha256:203f0c783579dbe001154adc62095b0a891ba4db1b1c3f467529ee6e1e9a44a0",
+    "constraint_ir_hash": "sha256:fbe8eb4107ba88ab4862409be4cc0911ab22dcea2b5427e439781b80d8c3e557",
+    "domain_pack_hash": "sha256:78783654a8131cb7a6547ee2ed9507e1dced640aebe32d35057c385bb1dc4459",
+    "runtime_fact_schema_hash": "sha256:3fcf3af0a61f91a78b171ccd6247db9f0f908e1baf44aa50ece12349c44bb582",
+    "compiler_binding_hash": "sha256:016661d783a45facf86375c0347b7c37567c1379e77b1d79d10c028159f90d85",
+    "semantic_commit_hash": "sha256:7773d75b232a2a89a3236bf8e8809807cdf6e3fdfaa6fb4445e71b1e98fc293f"
+  },
+  "contract_hash": "sha256:be6ced1145454e1c0b0b10efbbbe2610460b5700a63edec0f6b1bbc803172e75"
+}

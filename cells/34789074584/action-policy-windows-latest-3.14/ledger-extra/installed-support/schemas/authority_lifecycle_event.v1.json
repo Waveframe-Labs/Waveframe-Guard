@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://waveframe.ai/schemas/authority_lifecycle_event.v1.json",
+  "title": "authority_lifecycle_event.v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "event_id",
+    "authority_ref",
+    "authority_version",
+    "event_type",
+    "timestamp",
+    "actor",
+    "source",
+    "artifact_hashes",
+    "notes",
+    "previous_event_id"
+  ],
+  "properties": {
+    "schema_version": { "const": "authority_lifecycle_event.v1" },
+    "event_id": { "type": "string", "minLength": 1 },
+    "authority_ref": { "type": "string", "minLength": 1 },
+    "authority_version": { "type": "string", "minLength": 1 },
+    "event_type": {
+      "enum": ["drafted", "reviewed", "exported", "registered", "superseded", "revoked"]
+    },
+    "timestamp": { "type": "string", "minLength": 1 },
+    "actor": { "type": "string", "minLength": 1 },
+    "source": { "type": "string", "minLength": 1 },
+    "artifact_hashes": { "type": "object" },
+    "notes": { "type": "object" },
+    "previous_event_id": {
+      "anyOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+    }
+  },
+  "additionalProperties": false
+}

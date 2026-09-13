@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/policy_mapping_decision.v1.json",
+  "title": "Waveframe Policy Statement Decision",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "source_document_hash", "statement_id", "start_byte", "end_byte", "domain_pack", "disposition", "reason_code", "human_reason", "mapper_identity", "mapped_at", "decision_hash"],
+  "properties": {
+    "schema_version": { "const": "policy_mapping_decision.v1" },
+    "source_document_hash": { "$ref": "#/$defs/sha256" },
+    "statement_id": { "type": "string", "pattern": "^statement-[a-f0-9]{64}$" },
+    "start_byte": { "type": "integer", "minimum": 0 },
+    "end_byte": { "type": "integer", "minimum": 1 },
+    "domain_pack": { "$ref": "constraint_ir.v1.json#/$defs/packRef" },
+    "disposition": { "enum": ["enforced", "informational", "unsupported"] },
+    "reason_code": { "enum": ["human-mapped", "context-only", "descriptive", "non-policy", "outside-domain", "not-enforceable", "deferred", "other"] },
+    "human_reason": { "type": ["string", "null"], "minLength": 1, "maxLength": 1024 },
+    "mapper_identity": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "mapped_at": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$" },
+    "control_id": { "type": "string", "minLength": 1 },
+    "emitter_id": { "type": "string", "minLength": 1 },
+    "control_selections": {
+      "type": "object", "minProperties": 1,
+      "propertyNames": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,255}$" },
+      "additionalProperties": {
+        "oneOf": [
+          { "type": "boolean" }, { "type": "integer" }, { "type": "string", "minLength": 1 },
+          { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
+        ]
+      }
+    },
+    "selected_subject": { "$ref": "constraint_ir.v1.json#/$defs/selector" },
+    "selected_role": { "oneOf": [{ "type": "null" }, { "$ref": "constraint_ir.v1.json#/$defs/selector" }] },
+    "selected_action": { "type": "string", "minLength": 1 },
+    "selected_resource": { "$ref": "constraint_ir.v1.json#/$defs/resource" },
+    "selected_effect": { "enum": ["allow", "deny", "require"] },
+    "selected_typed_conditions": { "oneOf": [{ "type": "null" }, { "$ref": "constraint_ir.v1.json#/$defs/condition" }] },
+    "selected_obligations": { "$ref": "constraint_ir.v1.json#/$defs/obligations" },
+    "selected_exceptions": { "type": "array", "items": { "$ref": "constraint_ir.v1.json#/$defs/exception" } },
+    "required_runtime_facts": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 3 } },
+    "constraint_id": { "type": "string", "pattern": "^constraint-[a-f0-9]{64}$" },
+    "decision_hash": { "$ref": "#/$defs/sha256" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "disposition": { "const": "enforced" } }, "required": ["disposition"] },
+      "then": {
+        "required": ["control_id", "emitter_id", "control_selections", "selected_subject", "selected_role", "selected_action", "selected_resource", "selected_effect", "selected_typed_conditions", "selected_obligations", "selected_exceptions", "required_runtime_facts", "constraint_id"],
+        "properties": { "reason_code": { "const": "human-mapped" }, "human_reason": { "type": "null" } }
+      },
+      "else": { "not": { "anyOf": [
+        { "required": ["control_id"] }, { "required": ["emitter_id"] }, { "required": ["control_selections"] },
+        { "required": ["selected_subject"] }, { "required": ["selected_role"] }, { "required": ["selected_action"] },
+        { "required": ["selected_resource"] }, { "required": ["selected_effect"] }, { "required": ["selected_typed_conditions"] },
+        { "required": ["selected_obligations"] }, { "required": ["selected_exceptions"] }, { "required": ["required_runtime_facts"] },
+        { "required": ["constraint_id"] }
+      ] } }
+    },
+    {
+      "if": { "properties": { "disposition": { "const": "informational" } }, "required": ["disposition"] },
+      "then": { "properties": { "reason_code": { "enum": ["context-only", "descriptive", "non-policy", "other"] } } }
+    },
+    {
+      "if": { "properties": { "disposition": { "const": "unsupported" } }, "required": ["disposition"] },
+      "then": { "properties": { "reason_code": { "enum": ["outside-domain", "not-enforceable", "deferred", "other"] } } }
+    },
+    {
+      "if": { "properties": { "reason_code": { "const": "other" } }, "required": ["reason_code"] },
+      "then": { "properties": { "human_reason": { "type": "string", "minLength": 1, "maxLength": 1024 } } }
+    }
+  ],
+  "$defs": { "sha256": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" } }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "production access lifecycle",
+  "policy_text": "Only admins may access production systems. Deployments must transition from submitted to approved.",
+  "expected_policy": {
+    "authority": {
+      "required_roles": ["admin"]
+    },
+    "stages": {
+      "allowed_transitions": [
+        {
+          "from": "submitted",
+          "to": "approved"
+        }
+      ]
+    }
+  },
+  "expected_classifications": [
+    "role_authority_constraint",
+    "lifecycle_transition_constraint"
+  ],
+  "expected_coverage_percent": 100,
+  "expected_warning_types": [],
+  "expected_publication_gate": "READY"
+}

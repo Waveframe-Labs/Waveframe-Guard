@@ -1,0 +1,28 @@
+{
+  "name": "healthcare patient access approval",
+  "policy_text": "Only clinicians may approve patient record access. Access decisions must be recorded for audit purposes. Requester and approver must be different.",
+  "expected_policy": {
+    "authority": {
+      "required_roles": ["clinician"],
+      "separation_of_duties": true
+    },
+    "approvals": {
+      "required": [
+        {
+          "role": "clinician"
+        }
+      ]
+    },
+    "artifacts": {
+      "required": ["access_audit_record"]
+    }
+  },
+  "expected_classifications": [
+    "approval_authority_constraint",
+    "artifact_requirement",
+    "separation_of_duties_constraint"
+  ],
+  "expected_coverage_percent": 100,
+  "expected_warning_types": [],
+  "expected_publication_gate": "READY"
+}

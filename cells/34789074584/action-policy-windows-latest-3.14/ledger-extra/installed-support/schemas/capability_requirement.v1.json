@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/capability_requirement.v1.json",
+  "title": "Capability Requirement",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "requirement_type", "summary", "fields"],
+  "properties": {
+    "schema_version": { "const": "capability_requirement.v1" },
+    "requirement_type": { "type": "string", "minLength": 1 },
+    "summary": { "type": "string", "minLength": 1 },
+    "fields": { "type": "object" }
+  }
+}

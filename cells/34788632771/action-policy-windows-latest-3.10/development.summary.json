@@ -1,0 +1,62 @@
+{
+  "cases": 1568,
+  "release_executed": 150,
+  "skips": [
+    {
+      "case": "tests.test_ledger_v2_authority_runtime.test_linux_substitution_after_callback_is_failed_unknown_not_success",
+      "reason": "Linux post-callback substitution evidence"
+    },
+    {
+      "case": "tests.test_native_cloud_connection.test_published_ledger_cannot_activate_native_cloud_even_with_flags",
+      "reason": "requires the released Ledger installation; covered by released CI"
+    },
+    {
+      "case": "tests.test_repository_execution_evidence.test_repository_execution_states_persist_and_reload[v1-post_callback_native]",
+      "reason": "Windows namespace locks prevent this replacement; fault injection runs on both OSes"
+    },
+    {
+      "case": "tests.test_repository_execution_evidence.test_repository_execution_states_persist_and_reload[v2-post_callback_native]",
+      "reason": "Windows namespace locks prevent this replacement; fault injection runs on both OSes"
+    },
+    {
+      "case": "tests.test_repository_execution_evidence.test_repository_execution_states_persist_and_reload[v3-post_callback_native]",
+      "reason": "Windows namespace locks prevent this replacement; fault injection runs on both OSes"
+    },
+    {
+      "case": "tests.test_repository_workspace.test_same_device_bind_mount_rejected_where_namespaces_available",
+      "reason": "Linux mount namespace"
+    },
+    {
+      "case": "tests.test_repository_workspace.test_linux_revalidation_before_callback_prevents_mutation[deny-only-file]",
+      "reason": "Linux detected namespace substitution"
+    },
+    {
+      "case": "tests.test_repository_workspace.test_linux_revalidation_before_callback_prevents_mutation[deny-only-root]",
+      "reason": "Linux detected namespace substitution"
+    },
+    {
+      "case": "tests.test_repository_workspace.test_linux_revalidation_before_callback_prevents_mutation[deny-only-hardlink]",
+      "reason": "Linux detected namespace substitution"
+    },
+    {
+      "case": "tests.test_repository_workspace.test_linux_revalidation_before_callback_prevents_mutation[allow-list-file]",
+      "reason": "Linux detected namespace substitution"
+    },
+    {
+      "case": "tests.test_repository_workspace.test_linux_revalidation_before_callback_prevents_mutation[allow-list-root]",
+      "reason": "Linux detected namespace substitution"
+    },
+    {
+      "case": "tests.test_repository_workspace.test_linux_revalidation_before_callback_prevents_mutation[allow-list-hardlink]",
+      "reason": "Linux detected namespace substitution"
+    },
+    {
+      "case": "tests.test_repository_workspace.test_linux_post_callback_substitution_reports_failure_without_undo[deny-only]",
+      "reason": "Linux post-callback namespace check"
+    },
+    {
+      "case": "tests.test_repository_workspace.test_linux_post_callback_substitution_reports_failure_without_undo[allow-list]",
+      "reason": "Linux post-callback namespace check"
+    }
+  ]
+}

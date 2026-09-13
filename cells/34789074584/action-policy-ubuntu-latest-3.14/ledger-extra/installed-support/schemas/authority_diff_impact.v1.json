@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/authority_diff_impact.v1.json",
+  "title": "Authority Diff Impact",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "old_authority_ref",
+    "new_authority_ref",
+    "changed_governance_rules",
+    "operational_implications",
+    "lifecycle_continuity_implications",
+    "escalation_impact",
+    "replay_continuity_implications",
+    "deterministic_guarantees"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "authority_diff_impact.v1"
+    },
+    "old_authority_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "new_authority_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "old_contract_hash": {
+      "type": ["string", "null"]
+    },
+    "new_contract_hash": {
+      "type": ["string", "null"]
+    },
+    "changed_governance_rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "change_type",
+          "rule_ref",
+          "before",
+          "after",
+          "summary",
+          "operational_impact",
+          "continuity_implications",
+          "escalation_impact",
+          "replay_continuity_implications"
+        ],
+        "properties": {
+          "change_type": {
+            "enum": [
+              "ESCALATION_THRESHOLD_CHANGED",
+              "ESCALATION_THRESHOLD_ADDED",
+              "ESCALATION_THRESHOLD_REMOVED",
+              "AUTHORITY_ROLE_ADDED",
+              "AUTHORITY_ROLE_REMOVED",
+              "EVIDENCE_ARTIFACT_REQUIRED",
+              "EVIDENCE_ARTIFACT_REMOVED",
+              "LIFECYCLE_TRANSITION_ADDED",
+              "LIFECYCLE_TRANSITION_REMOVED",
+              "CONTINUITY_REQUIREMENT_CHANGED"
+            ]
+          },
+          "rule_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "before": {},
+          "after": {},
+          "summary": {
+            "type": "string",
+            "minLength": 1
+          },
+          "operational_impact": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "continuity_implications": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "escalation_impact": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "replay_continuity_implications": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "operational_implications": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "lifecycle_continuity_implications": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "escalation_impact": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "replay_continuity_implications": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "deterministic_guarantees": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

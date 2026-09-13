@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.waveframe.dev/publication_receipt.v3.json",
+  "title": "Waveframe Publication Receipt v3",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "receipt_id", "publication_id", "authority_ref", "published_at", "published_by", "bundle_hash", "source_snapshot_hash", "source_clauses_hash", "policy_translation_commitment_hash", "confirmed_controls_hash", "acknowledged_residuals_hash", "customer_bindings_hash", "coverage_hash", "capability_catalog_hash", "constraint_ir_hash", "runtime_fact_schema_hash", "domain_pack_hash", "compiler_binding_hash", "semantic_commit_id", "semantic_commit_hash", "semantic_commit_bundle_hash", "compiled_contract_hash", "authority_identity_hash", "approval_record_hash", "publication_manifest_hash", "domain_pack", "compiled_contract_ref", "provenance_complete", "receipt_hash"],
+  "properties": {
+    "schema_version": {"const": "publication_receipt.v3"}, "receipt_id": {"type": "string", "pattern": "^receipt-v3-[a-f0-9]{64}$"},
+    "publication_id": {"type": "string", "minLength": 1}, "authority_ref": {"type": "string", "minLength": 3},
+    "published_at": {"$ref": "#/$defs/utc"}, "published_by": {"type": "string", "minLength": 1},
+    "bundle_hash": {"$ref": "#/$defs/sha256"}, "source_snapshot_hash": {"$ref": "#/$defs/sha256"},
+    "source_clauses_hash": {"$ref": "#/$defs/sha256"}, "policy_translation_commitment_hash": {"$ref": "#/$defs/sha256"},
+    "confirmed_controls_hash": {"$ref": "#/$defs/sha256"}, "acknowledged_residuals_hash": {"$ref": "#/$defs/sha256"},
+    "customer_bindings_hash": {"$ref": "#/$defs/sha256"}, "coverage_hash": {"$ref": "#/$defs/sha256"},
+    "capability_catalog_hash": {"$ref": "#/$defs/sha256"}, "constraint_ir_hash": {"$ref": "#/$defs/sha256"},
+    "runtime_fact_schema_hash": {"$ref": "#/$defs/sha256"}, "domain_pack_hash": {"$ref": "#/$defs/sha256"},
+    "compiler_binding_hash": {"$ref": "#/$defs/sha256"}, "semantic_commit_id": {"type": "string", "minLength": 1},
+    "semantic_commit_hash": {"$ref": "#/$defs/sha256"}, "semantic_commit_bundle_hash": {"$ref": "#/$defs/sha256"},
+    "compiled_contract_hash": {"$ref": "#/$defs/sha256"}, "authority_identity_hash": {"$ref": "#/$defs/sha256"},
+    "approval_record_hash": {"$ref": "#/$defs/sha256"}, "publication_manifest_hash": {"$ref": "#/$defs/sha256"},
+    "domain_pack": {"$ref": "constraint_ir.v1.json#/$defs/packRef"}, "compiled_contract_ref": {"type": "string", "minLength": 3},
+    "provenance_complete": {"const": true}, "receipt_hash": {"$ref": "#/$defs/sha256"}
+  },
+  "$defs": {
+    "sha256": {"type": "string", "pattern": "^sha256:[a-f0-9]{64}$"},
+    "utc": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"}
+  }
+}

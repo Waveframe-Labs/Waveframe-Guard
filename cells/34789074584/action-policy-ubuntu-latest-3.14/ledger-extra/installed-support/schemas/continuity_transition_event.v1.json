@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://waveframe.ai/schemas/continuity_transition_event.v1.json",
+  "title": "continuity_transition_event.v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "event_id",
+    "event_type",
+    "timestamp",
+    "authority_ref",
+    "authority_version",
+    "severity",
+    "caused_by_event_id",
+    "event_category",
+    "immutability_posture",
+    "transition_type",
+    "from",
+    "to"
+  ],
+  "properties": {
+    "schema_version": { "const": "continuity_transition_event.v1" },
+    "event_id": { "type": "string", "minLength": 1 },
+    "event_type": { "const": "continuity_transition" },
+    "timestamp": { "type": "string", "minLength": 1 },
+    "authority_ref": { "type": "string", "minLength": 1 },
+    "authority_version": { "type": "string", "minLength": 1 },
+    "severity": {
+      "enum": [
+        "info",
+        "warning",
+        "critical",
+        "continuity_risk",
+        "replay_risk",
+        "authority_conflict"
+      ]
+    },
+    "caused_by_event_id": { "type": ["string", "null"] },
+    "event_category": { "const": "continuity" },
+    "immutability_posture": { "const": "append_only" },
+    "transition_type": { "type": "string", "minLength": 1 },
+    "from": {},
+    "to": {},
+    "summary": { "type": "string" }
+  },
+  "additionalProperties": false
+}
