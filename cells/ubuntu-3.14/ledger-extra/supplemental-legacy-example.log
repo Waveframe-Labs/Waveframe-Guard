@@ -1,0 +1,26 @@
+Traceback (most recent call last):
+  File "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/installed-support/examples/native_v3_multi_control.py", line 276, in <module>
+    main(candidate=parser.parse_args().candidate)
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/installed-support/examples/native_v3_multi_control.py", line 253, in main
+    assert modify("README.md")["executed"] is True
+           ~~~~~~^^^^^^^^^^^^^
+  File "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/combined-extra/lib/python3.14/site-packages/guard/sdk/guard.py", line 385, in wrapped
+    result = boundary.execute(
+        fn,
+    ...<3 lines>...
+        raise_on_block=raise_on_block,
+    )
+  File "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/combined-extra/lib/python3.14/site-packages/guard/sdk/execution.py", line 375, in execute
+    evaluation = self.evaluate(execution_request, save=False, **{
+        key: value for key, value in kwargs.items()
+        if key not in {"save", "args", "kwargs", "raise_on_block"}
+    })
+  File "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/combined-extra/lib/python3.14/site-packages/guard/sdk/execution.py", line 196, in evaluate
+    with self._require_workspace().bind(
+         ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/combined-extra/lib/python3.14/site-packages/guard/sdk/execution.py", line 179, in _require_workspace
+    raise RepositoryBoundaryError(
+    ...<3 lines>...
+    )
+guard.sdk.repository_boundary.RepositoryBoundaryError: repository authority requires repository_root=<absolute protected workspace> and repository_tool(); untyped v1 non-repository targets must explicitly select target_domain='literal'

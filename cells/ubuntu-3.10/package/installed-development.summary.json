@@ -1,0 +1,38 @@
+{
+  "cases": 735,
+  "release_executed": 150,
+  "skips": [
+    {
+      "case": "tests.test_native_cloud_connection.test_published_ledger_cannot_activate_native_cloud_even_with_flags",
+      "reason": "requires the released Ledger installation; covered by released CI"
+    },
+    {
+      "case": "tests.test_repository_workspace.test_case_alias_of_deny_with_different_disk_spelling",
+      "reason": "case-insensitive filesystem required"
+    },
+    {
+      "case": "tests.test_repository_workspace.test_junction_parent_escape[deny-only]",
+      "reason": "Windows junction/reparse test"
+    },
+    {
+      "case": "tests.test_repository_workspace.test_junction_parent_escape[allow-list]",
+      "reason": "Windows junction/reparse test"
+    },
+    {
+      "case": "tests.test_repository_workspace.test_authorization_and_callback_cannot_replace_target[deny-only]",
+      "reason": "Windows namespace locks"
+    },
+    {
+      "case": "tests.test_repository_workspace.test_authorization_and_callback_cannot_replace_target[allow-list]",
+      "reason": "Windows namespace locks"
+    },
+    {
+      "case": "tests.test_repository_workspace.test_windows_case_sensitive_workspace_where_supported",
+      "reason": "NTFS case-sensitive directory feature"
+    },
+    {
+      "case": "tests.test_repository_workspace.test_same_device_bind_mount_rejected_where_namespaces_available",
+      "reason": "unprivileged mount namespaces unavailable"
+    }
+  ]
+}

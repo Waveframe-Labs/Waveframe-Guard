@@ -1,0 +1,656 @@
+{
+  "run_id": "guard_run_6a7252203b1059482205cc99",
+  "proof": {
+    "attestation_hash": "sha256:c940b2bef58892cd125907f7c6ec5da3d121a62e2016782574d08b605d1a35c9",
+    "authority_basis": {
+      "authority_evidence_hash": "sha256:902b5e72b78181bfff298df9931ce4ddb22c5388f096c2c3e6b649ad1e8a5751",
+      "compiled_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+      "contract_id": "repository-create-only",
+      "contract_version": "3.0.0",
+      "declared_contract_hash": "sha256:be6ced1145454e1c0b0b10efbbbe2610460b5700a63edec0f6b1bbc803172e75",
+      "kind": "published_authority",
+      "runtime_facts_hash": "sha256:2ea8720f665e94a325735ae2a42288615fd173daa9601228ed4c984a0e25fbf8"
+    },
+    "callback_completed": true,
+    "callback_invoked": true,
+    "decision": "admissible",
+    "decision_outcome_hash": "sha256:36f5a3bccba1fadcfa7d56691661ffa13b2eb9d4201ad6b545fc1fecae2ea697",
+    "execution_request": {
+      "action": "create",
+      "arguments": {},
+      "artifacts": [],
+      "request_id": "repository_fda11b45a788474885cc146f01ea93f4",
+      "schema_version": "normalized_execution_request.v1",
+      "target": "generated/release-example.md"
+    },
+    "execution_request_hash": "sha256:b603bd2a5417dffb50b4060e65497251775f47722efc260827c685ee627c921b",
+    "execution_status": "succeeded",
+    "guard_receipt_hash": "sha256:1057307d5d64990e872ac4976fd27025639a72eb564a89a944a665434fef929c",
+    "mutation_executed": true,
+    "mutation_status": "executed",
+    "repository_operation": {
+      "bytes_written": 46,
+      "created": true,
+      "error": null,
+      "operation": "create",
+      "schema_version": "guard_repository_operation.v1",
+      "status": "succeeded",
+      "target": "generated/release-example.md"
+    },
+    "run_id": "guard_run_6a7252203b1059482205cc99",
+    "schema_version": "guard_execution_attestation.v3",
+    "target_binding": {
+      "adapter_version": "guard.repository-file.v2",
+      "assurance_class": "linux-openat2-descriptor.v1",
+      "authority_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+      "domain_resolver": "guard.target-domain-resolver.v1",
+      "schema_version": "guard_target_binding.v1",
+      "target_domain": "repository_path",
+      "workspace_binding_id": "workspace_8b3f843a2cda4404aed577b276bfb0fd"
+    },
+    "target_binding_hash": "sha256:53684864dcf430bbff513a3b0566d94ad6552d82c55d58b917d8a94aedda868d"
+  },
+  "replay": {
+    "schema_version": "guard_replay_result.v1",
+    "replay_scope": "logical_decision_only",
+    "filesystem_state_recreated": false,
+    "run_id": "guard_run_6a7252203b1059482205cc99",
+    "matches": true,
+    "outcome_matches": true,
+    "mismatch_classes": [],
+    "replay_failure_reasons": [],
+    "original_outcome_hash": "sha256:36f5a3bccba1fadcfa7d56691661ffa13b2eb9d4201ad6b545fc1fecae2ea697",
+    "replayed_outcome_hash": "sha256:36f5a3bccba1fadcfa7d56691661ffa13b2eb9d4201ad6b545fc1fecae2ea697",
+    "replayed_evaluation": {
+      "status": "admissible",
+      "execution_state": "allowed",
+      "runtime_lifecycle_state": "admissible",
+      "admissible": true,
+      "blocked": false,
+      "escalated": false,
+      "rationale": "execution is admissible against compiled authority",
+      "violated_constraints": [],
+      "required_evidence": [],
+      "replay_obligations": [],
+      "continuity_requirements": [],
+      "continuation_status": {
+        "schema_version": "guard_continuation_status.v1",
+        "status": "admissible",
+        "lifecycle_state": "admissible",
+        "admissible": true,
+        "invalidated": false,
+        "expired": false,
+        "revalidation_required": false,
+        "escalation_required": false,
+        "evidence_valid": true,
+        "replay_valid": true,
+        "dependency_valid": true,
+        "continuity_valid": true,
+        "dependency_failures": []
+      },
+      "continuation_requirements": [],
+      "invalidation_reasons": [],
+      "runtime_condition_checks": [
+        {
+          "condition": "evidence_valid",
+          "valid": true,
+          "rationale": "runtime evidence validity checked"
+        },
+        {
+          "condition": "replay_valid",
+          "valid": true,
+          "rationale": "replay posture validity checked"
+        },
+        {
+          "condition": "dependency_valid",
+          "valid": true,
+          "rationale": "runtime dependency validity checked"
+        },
+        {
+          "condition": "continuity_valid",
+          "valid": true,
+          "rationale": "lineage continuity validity checked"
+        },
+        {
+          "condition": "not_expired",
+          "valid": true,
+          "rationale": "continuation did not expire before execution"
+        }
+      ],
+      "runtime_dependency_posture": {
+        "schema_version": "guard_runtime_dependency_posture.v1",
+        "dependencies": [],
+        "valid": true,
+        "expired": false,
+        "failures": []
+      },
+      "enforcement_consequences": [
+        {
+          "consequence": "allow_execution"
+        }
+      ],
+      "admissibility_projection": {
+        "schema_version": "execution_admissibility_projection.v1",
+        "authority_ref": "repository-create-only@3.0.0",
+        "contract_hash": "sha256:be6ced1145454e1c0b0b10efbbbe2610460b5700a63edec0f6b1bbc803172e75",
+        "execution_request": {
+          "action": "create",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_fda11b45a788474885cc146f01ea93f4",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "generated/release-example.md"
+        },
+        "actor_identity": {
+          "id": "example-agent",
+          "role": "repository-maintainer",
+          "type": "agent"
+        },
+        "status": "admissible",
+        "rationale": "execution is admissible against compiled authority",
+        "violated_constraints": [],
+        "required_evidence": [],
+        "replay_obligations": [],
+        "continuity_requirements": [],
+        "continuation_status": {
+          "schema_version": "guard_continuation_status.v1",
+          "status": "admissible",
+          "lifecycle_state": "admissible",
+          "admissible": true,
+          "invalidated": false,
+          "expired": false,
+          "revalidation_required": false,
+          "escalation_required": false,
+          "evidence_valid": true,
+          "replay_valid": true,
+          "dependency_valid": true,
+          "continuity_valid": true,
+          "dependency_failures": []
+        },
+        "enforcement_consequences": [
+          {
+            "consequence": "allow_execution"
+          }
+        ],
+        "projection_id": "admissibility_projection_381e52c4806bac2e56b9315d",
+        "projection_hash": "sha256:1be622d464cd54a9bea76c500d1136377c0e8d21bdc7519ac39154717095ae84"
+      },
+      "runtime_posture": {
+        "schema_version": "execution_runtime_posture.v1",
+        "posture": "admissible",
+        "rationale": "execution is admissible against compiled authority",
+        "authority_ref": "repository-create-only@3.0.0",
+        "contract_hash": "sha256:be6ced1145454e1c0b0b10efbbbe2610460b5700a63edec0f6b1bbc803172e75",
+        "execution_request": {
+          "action": "create",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_fda11b45a788474885cc146f01ea93f4",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "generated/release-example.md"
+        },
+        "actor_identity": {
+          "id": "example-agent",
+          "role": "repository-maintainer",
+          "type": "agent"
+        },
+        "runtime_blockers": [],
+        "continuity_state": {
+          "schema_version": "guard_continuity_posture.v1",
+          "authority_ref": "repository-create-only@3.0.0",
+          "continuity_state": {},
+          "replay_posture": {},
+          "continuity_requirements": [],
+          "replay_obligations": [],
+          "requires_revalidation": false,
+          "requires_replay": false,
+          "signals": [],
+          "posture_id": "continuity_posture_245f69ff70961a5aa1169c2f",
+          "posture_hash": "sha256:2c835f6bbf628695b082e6337e1749095bc50739ffce68019dc2de2561afc7f2"
+        },
+        "continuation_status": {
+          "schema_version": "guard_continuation_status.v1",
+          "status": "admissible",
+          "lifecycle_state": "admissible",
+          "admissible": true,
+          "invalidated": false,
+          "expired": false,
+          "revalidation_required": false,
+          "escalation_required": false,
+          "evidence_valid": true,
+          "replay_valid": true,
+          "dependency_valid": true,
+          "continuity_valid": true,
+          "dependency_failures": []
+        },
+        "replay_requirements": [],
+        "enforcement_outcome": {
+          "schema_version": "guard_enforcement_outcome.v1",
+          "authority_ref": "repository-create-only@3.0.0",
+          "status": "admissible",
+          "execution_state": "allowed",
+          "runtime_lifecycle_state": "admissible",
+          "rationale": "execution is admissible against compiled authority",
+          "consequences": [
+            {
+              "consequence": "allow_execution"
+            }
+          ],
+          "continuation_status": {
+            "schema_version": "guard_continuation_status.v1",
+            "status": "admissible",
+            "lifecycle_state": "admissible",
+            "admissible": true,
+            "invalidated": false,
+            "expired": false,
+            "revalidation_required": false,
+            "escalation_required": false,
+            "evidence_valid": true,
+            "replay_valid": true,
+            "dependency_valid": true,
+            "continuity_valid": true,
+            "dependency_failures": []
+          },
+          "continuation_requirements": [],
+          "invalidation_reasons": [],
+          "runtime_condition_checks": [
+            {
+              "condition": "evidence_valid",
+              "valid": true,
+              "rationale": "runtime evidence validity checked"
+            },
+            {
+              "condition": "replay_valid",
+              "valid": true,
+              "rationale": "replay posture validity checked"
+            },
+            {
+              "condition": "dependency_valid",
+              "valid": true,
+              "rationale": "runtime dependency validity checked"
+            },
+            {
+              "condition": "continuity_valid",
+              "valid": true,
+              "rationale": "lineage continuity validity checked"
+            },
+            {
+              "condition": "not_expired",
+              "valid": true,
+              "rationale": "continuation did not expire before execution"
+            }
+          ],
+          "runtime_dependency_posture": {
+            "schema_version": "guard_runtime_dependency_posture.v1",
+            "dependencies": [],
+            "valid": true,
+            "expired": false,
+            "failures": []
+          },
+          "outcome_id": "enforcement_outcome_959101110417cf4e2edf48d8",
+          "outcome_hash": "sha256:36f5a3bccba1fadcfa7d56691661ffa13b2eb9d4201ad6b545fc1fecae2ea697"
+        },
+        "chronology_event_ids": [
+          "guard_event_a1c20c7225b3b3b99a2941db",
+          "guard_event_eeed523764628143973b1385",
+          "guard_event_188cdb06a75cb00ecac9ad4c",
+          "guard_event_c6ebecaaf5ab9fa8c49165a3",
+          "guard_event_00ee0b077c4a59314a0212b0",
+          "guard_event_d8c17a192477574113358869",
+          "guard_event_91ed584bff3a6f2ad66248e8"
+        ],
+        "telemetry_event_types": [
+          "authority_context_resolved",
+          "evaluation_pipeline_started",
+          "runtime_evidence_loaded",
+          "continuity_checked",
+          "replay_validated",
+          "admissibility_evaluated",
+          "enforcement_outcome_recorded"
+        ],
+        "posture_id": "runtime_posture_1d85b55f26fe5cbd1abbb6e2",
+        "posture_hash": "sha256:92f5ac2d50c8c397006262484c782c3248965e9463554242bf20ca17cc56bd50"
+      },
+      "telemetry_events": [
+        {
+          "schema_version": "guard_runtime_event.v1",
+          "sequence": 1,
+          "event_type": "authority_context_resolved",
+          "timestamp": "2026-09-13T17:50:21.428686+00:00",
+          "authority_ref": "repository-create-only@3.0.0",
+          "details": {
+            "contract_boundary": "compiled_authority"
+          },
+          "event_id": "guard_event_a1c20c7225b3b3b99a2941db",
+          "event_hash": "sha256:ce8e21ad2589bd93e4094e8d15e79f6e5fa824fb93a6438db98699a8d0c70f6f"
+        },
+        {
+          "schema_version": "guard_runtime_event.v1",
+          "sequence": 2,
+          "event_type": "evaluation_pipeline_started",
+          "timestamp": "2026-09-13T17:50:21.428686+00:00",
+          "authority_ref": "repository-create-only@3.0.0",
+          "details": {
+            "status": "started"
+          },
+          "event_id": "guard_event_eeed523764628143973b1385",
+          "event_hash": "sha256:e90b73962445b67606a442aab40c3b1e032a3eb4ff8af803bddd6b9cfc69d9df"
+        },
+        {
+          "schema_version": "guard_runtime_event.v1",
+          "sequence": 3,
+          "event_type": "runtime_evidence_loaded",
+          "timestamp": "2026-09-13T17:50:21.428686+00:00",
+          "authority_ref": "repository-create-only@3.0.0",
+          "details": {
+            "evidence_boundary": "guard_runtime_evidence_model.v1",
+            "required_evidence": []
+          },
+          "event_id": "guard_event_188cdb06a75cb00ecac9ad4c",
+          "event_hash": "sha256:680ba4ab9abaf17612243fb0a47280876ef98a457a714aa2b42f448f15bdd68a"
+        },
+        {
+          "schema_version": "guard_runtime_event.v1",
+          "sequence": 4,
+          "event_type": "continuity_checked",
+          "timestamp": "2026-09-13T17:50:21.428686+00:00",
+          "authority_ref": "repository-create-only@3.0.0",
+          "details": {
+            "continuity_requirements": []
+          },
+          "event_id": "guard_event_c6ebecaaf5ab9fa8c49165a3",
+          "event_hash": "sha256:af4ce5bc15faed2fc7d210dba5bfd6fd33cf08037adfa24bb2029ae5bf981faa"
+        },
+        {
+          "schema_version": "guard_runtime_event.v1",
+          "sequence": 5,
+          "event_type": "replay_validated",
+          "timestamp": "2026-09-13T17:50:21.428686+00:00",
+          "authority_ref": "repository-create-only@3.0.0",
+          "details": {
+            "replay_obligations": []
+          },
+          "event_id": "guard_event_00ee0b077c4a59314a0212b0",
+          "event_hash": "sha256:4caf86b207a9ef30919a01d37ca1038334770f1b3889ffabe53108cf837a8b40"
+        },
+        {
+          "schema_version": "guard_runtime_event.v1",
+          "sequence": 6,
+          "event_type": "admissibility_evaluated",
+          "timestamp": "2026-09-13T17:50:21.428686+00:00",
+          "authority_ref": "repository-create-only@3.0.0",
+          "details": {
+            "status": "admissible",
+            "runtime_lifecycle_state": "admissible",
+            "violated_constraints": [],
+            "required_evidence": []
+          },
+          "event_id": "guard_event_d8c17a192477574113358869",
+          "event_hash": "sha256:602b264ede0a9bacadfbbf731c40a207923b5ca8dea84b607913018e150037ea"
+        },
+        {
+          "schema_version": "guard_runtime_event.v1",
+          "sequence": 7,
+          "event_type": "enforcement_outcome_recorded",
+          "timestamp": "2026-09-13T17:50:21.428686+00:00",
+          "authority_ref": "repository-create-only@3.0.0",
+          "details": {
+            "status": "admissible",
+            "runtime_lifecycle_state": "admissible",
+            "consequences": [
+              {
+                "consequence": "allow_execution"
+              }
+            ]
+          },
+          "event_id": "guard_event_91ed584bff3a6f2ad66248e8",
+          "event_hash": "sha256:16937b0aeccb18bbcbbab8f9d0cd2b023ddda2b8be0843b759aea01af7b36c64"
+        }
+      ],
+      "telemetry_stream": [
+        {
+          "event_id": "guard_event_a1c20c7225b3b3b99a2941db",
+          "event_type": "authority_context_resolved",
+          "sequence": 1,
+          "timestamp": "2026-09-13T17:50:21.428686+00:00",
+          "authority_ref": "repository-create-only@3.0.0",
+          "event_hash": "sha256:ce8e21ad2589bd93e4094e8d15e79f6e5fa824fb93a6438db98699a8d0c70f6f"
+        },
+        {
+          "event_id": "guard_event_eeed523764628143973b1385",
+          "event_type": "evaluation_pipeline_started",
+          "sequence": 2,
+          "timestamp": "2026-09-13T17:50:21.428686+00:00",
+          "authority_ref": "repository-create-only@3.0.0",
+          "event_hash": "sha256:e90b73962445b67606a442aab40c3b1e032a3eb4ff8af803bddd6b9cfc69d9df"
+        },
+        {
+          "event_id": "guard_event_188cdb06a75cb00ecac9ad4c",
+          "event_type": "runtime_evidence_loaded",
+          "sequence": 3,
+          "timestamp": "2026-09-13T17:50:21.428686+00:00",
+          "authority_ref": "repository-create-only@3.0.0",
+          "event_hash": "sha256:680ba4ab9abaf17612243fb0a47280876ef98a457a714aa2b42f448f15bdd68a"
+        },
+        {
+          "event_id": "guard_event_c6ebecaaf5ab9fa8c49165a3",
+          "event_type": "continuity_checked",
+          "sequence": 4,
+          "timestamp": "2026-09-13T17:50:21.428686+00:00",
+          "authority_ref": "repository-create-only@3.0.0",
+          "event_hash": "sha256:af4ce5bc15faed2fc7d210dba5bfd6fd33cf08037adfa24bb2029ae5bf981faa"
+        },
+        {
+          "event_id": "guard_event_00ee0b077c4a59314a0212b0",
+          "event_type": "replay_validated",
+          "sequence": 5,
+          "timestamp": "2026-09-13T17:50:21.428686+00:00",
+          "authority_ref": "repository-create-only@3.0.0",
+          "event_hash": "sha256:4caf86b207a9ef30919a01d37ca1038334770f1b3889ffabe53108cf837a8b40"
+        },
+        {
+          "event_id": "guard_event_d8c17a192477574113358869",
+          "event_type": "admissibility_evaluated",
+          "sequence": 6,
+          "timestamp": "2026-09-13T17:50:21.428686+00:00",
+          "authority_ref": "repository-create-only@3.0.0",
+          "event_hash": "sha256:602b264ede0a9bacadfbbf731c40a207923b5ca8dea84b607913018e150037ea"
+        },
+        {
+          "event_id": "guard_event_91ed584bff3a6f2ad66248e8",
+          "event_type": "enforcement_outcome_recorded",
+          "sequence": 7,
+          "timestamp": "2026-09-13T17:50:21.428686+00:00",
+          "authority_ref": "repository-create-only@3.0.0",
+          "event_hash": "sha256:16937b0aeccb18bbcbbab8f9d0cd2b023ddda2b8be0843b759aea01af7b36c64"
+        }
+      ],
+      "evaluation_trace": {
+        "schema_version": "guard_evaluation_trace.v1",
+        "authority_ref": "repository-create-only@3.0.0",
+        "status": "admissible",
+        "rationale": "execution is admissible against compiled authority",
+        "steps": [
+          {
+            "step": "compiled_authority_loaded",
+            "status": "completed",
+            "authority_ref": "repository-create-only@3.0.0"
+          },
+          {
+            "step": "execution_request_projected",
+            "status": "completed",
+            "target": "generated/release-example.md"
+          },
+          {
+            "step": "admissibility_assessed",
+            "status": "admissible",
+            "rationale": "execution is admissible against compiled authority"
+          },
+          {
+            "step": "runtime_posture_materialized",
+            "status": "completed"
+          }
+        ],
+        "trace_id": "guard_trace_8bb033fc691083d9f0857d4b",
+        "trace_hash": "sha256:71b93ac1803385875be8ff955b38019a4b4f885bcd32060fddcab62ed8627f58"
+      },
+      "continuity_posture": {
+        "schema_version": "guard_continuity_posture.v1",
+        "authority_ref": "repository-create-only@3.0.0",
+        "continuity_state": {},
+        "replay_posture": {},
+        "continuity_requirements": [],
+        "replay_obligations": [],
+        "requires_revalidation": false,
+        "requires_replay": false,
+        "signals": [],
+        "posture_id": "continuity_posture_245f69ff70961a5aa1169c2f",
+        "posture_hash": "sha256:2c835f6bbf628695b082e6337e1749095bc50739ffce68019dc2de2561afc7f2"
+      },
+      "enforcement_outcome": {
+        "schema_version": "guard_enforcement_outcome.v1",
+        "authority_ref": "repository-create-only@3.0.0",
+        "status": "admissible",
+        "execution_state": "allowed",
+        "runtime_lifecycle_state": "admissible",
+        "rationale": "execution is admissible against compiled authority",
+        "consequences": [
+          {
+            "consequence": "allow_execution"
+          }
+        ],
+        "continuation_status": {
+          "schema_version": "guard_continuation_status.v1",
+          "status": "admissible",
+          "lifecycle_state": "admissible",
+          "admissible": true,
+          "invalidated": false,
+          "expired": false,
+          "revalidation_required": false,
+          "escalation_required": false,
+          "evidence_valid": true,
+          "replay_valid": true,
+          "dependency_valid": true,
+          "continuity_valid": true,
+          "dependency_failures": []
+        },
+        "continuation_requirements": [],
+        "invalidation_reasons": [],
+        "runtime_condition_checks": [
+          {
+            "condition": "evidence_valid",
+            "valid": true,
+            "rationale": "runtime evidence validity checked"
+          },
+          {
+            "condition": "replay_valid",
+            "valid": true,
+            "rationale": "replay posture validity checked"
+          },
+          {
+            "condition": "dependency_valid",
+            "valid": true,
+            "rationale": "runtime dependency validity checked"
+          },
+          {
+            "condition": "continuity_valid",
+            "valid": true,
+            "rationale": "lineage continuity validity checked"
+          },
+          {
+            "condition": "not_expired",
+            "valid": true,
+            "rationale": "continuation did not expire before execution"
+          }
+        ],
+        "runtime_dependency_posture": {
+          "schema_version": "guard_runtime_dependency_posture.v1",
+          "dependencies": [],
+          "valid": true,
+          "expired": false,
+          "failures": []
+        },
+        "outcome_id": "enforcement_outcome_959101110417cf4e2edf48d8",
+        "outcome_hash": "sha256:36f5a3bccba1fadcfa7d56691661ffa13b2eb9d4201ad6b545fc1fecae2ea697"
+      },
+      "runtime_evidence": {
+        "schema_version": "guard_runtime_evidence_model.v1",
+        "actor_identity": {
+          "id": "example-agent",
+          "role": "repository-maintainer",
+          "type": "agent"
+        },
+        "approvals": [],
+        "replay_evidence": {},
+        "continuity_snapshot": {},
+        "timestamp_source": {
+          "source": "caller_supplied",
+          "timestamp": "2026-09-13T17:50:21.428686+00:00"
+        },
+        "execution_context": {
+          "surface": "guard_sdk",
+          "target_binding": {
+            "adapter_version": "guard.repository-file.v2",
+            "assurance_class": "linux-openat2-descriptor.v1",
+            "authority_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+            "domain_resolver": "guard.target-domain-resolver.v1",
+            "schema_version": "guard_target_binding.v1",
+            "target_domain": "repository_path",
+            "workspace_binding_id": "workspace_8b3f843a2cda4404aed577b276bfb0fd"
+          }
+        },
+        "runtime_dependencies": []
+      },
+      "execution_posture_surface": {
+        "schema_version": "execution_posture_surface.v1",
+        "posture": "admissible",
+        "rationale": "execution is admissible against compiled authority",
+        "runtime_blockers": [],
+        "continuity_state": {
+          "schema_version": "guard_continuity_posture.v1",
+          "authority_ref": "repository-create-only@3.0.0",
+          "continuity_state": {},
+          "replay_posture": {},
+          "continuity_requirements": [],
+          "replay_obligations": [],
+          "requires_revalidation": false,
+          "requires_replay": false,
+          "signals": [],
+          "posture_id": "continuity_posture_245f69ff70961a5aa1169c2f",
+          "posture_hash": "sha256:2c835f6bbf628695b082e6337e1749095bc50739ffce68019dc2de2561afc7f2"
+        },
+        "replay_requirements": [],
+        "chronology_event_ids": [
+          "guard_event_a1c20c7225b3b3b99a2941db",
+          "guard_event_eeed523764628143973b1385",
+          "guard_event_188cdb06a75cb00ecac9ad4c",
+          "guard_event_c6ebecaaf5ab9fa8c49165a3",
+          "guard_event_00ee0b077c4a59314a0212b0",
+          "guard_event_d8c17a192477574113358869",
+          "guard_event_91ed584bff3a6f2ad66248e8"
+        ]
+      },
+      "target_binding": {
+        "adapter_version": "guard.repository-file.v2",
+        "assurance_class": "linux-openat2-descriptor.v1",
+        "authority_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+        "domain_resolver": "guard.target-domain-resolver.v1",
+        "schema_version": "guard_target_binding.v1",
+        "target_domain": "repository_path",
+        "workspace_binding_id": "workspace_8b3f843a2cda4404aed577b276bfb0fd"
+      },
+      "target_binding_hash": "sha256:53684864dcf430bbff513a3b0566d94ad6552d82c55d58b917d8a94aedda868d"
+    },
+    "target_binding": {
+      "adapter_version": "guard.repository-file.v2",
+      "assurance_class": "linux-openat2-descriptor.v1",
+      "authority_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+      "domain_resolver": "guard.target-domain-resolver.v1",
+      "schema_version": "guard_target_binding.v1",
+      "target_domain": "repository_path",
+      "workspace_binding_id": "workspace_8b3f843a2cda4404aed577b276bfb0fd"
+    },
+    "target_binding_hash": "sha256:53684864dcf430bbff513a3b0566d94ad6552d82c55d58b917d8a94aedda868d",
+    "binding_assurance": "recorded_not_revalidated"
+  }
+}

@@ -1,0 +1,149 @@
+{
+  "python": "3.10.11 (tags/v3.10.11:7d4cc5a, Apr  5 2023, 00:38:17) [MSC v.1929 64 bit (AMD64)]",
+  "commands": [
+    {
+      "label": "head",
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\.candidate50\\ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "clean-checkout",
+      "command": [
+        "git",
+        "diff",
+        "--exit-code",
+        "HEAD"
+      ],
+      "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\.candidate50\\ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "combined-extra-pip",
+      "command": [
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\combined-extra\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "pip==25.3"
+      ],
+      "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\.candidate50\\ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "combined-extra-install",
+      "command": [
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\combined-extra\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "-r",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\.candidate50\\ledger\\requirements-ci.txt",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\wheelhouse\\governance_ledger-0.9.0-py3-none-any.whl[dev,guard]",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\wheelhouse\\cricore_contract_compiler-0.5.0-py3-none-any.whl",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\wheelhouse\\waveframe_guard-0.19.0-py3-none-any.whl",
+        "--report",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\combined-extra-install.json"
+      ],
+      "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\.candidate50\\ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "combined-extra-check",
+      "command": [
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\combined-extra\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\.candidate50\\ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "combined-extra-freeze",
+      "command": [
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\combined-extra\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "freeze",
+        "--all"
+      ],
+      "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\.candidate50\\ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "combined-provenance",
+      "command": [
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\combined-extra\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\installed-support\\tools\\check_installed_wheel_set.py",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\wheel-set.json"
+      ],
+      "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "combined-extra-default",
+      "command": [
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\combined-extra\\Scripts\\python.exe",
+        "-I",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\installed-support\\tools\\acceptance_pytest.py",
+        "-q",
+        "-ra",
+        "--junitxml",
+        "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\combined-extra-default.xml",
+        "tests"
+      ],
+      "cwd": "D:\\a\\Waveframe-Guard\\Waveframe-Guard\\acceptance-output\\ledger-extra\\combined\\installed-support",
+      "exit_code": 1
+    }
+  ],
+  "suites": {},
+  "gates": {
+    "base": "passed",
+    "combined_extra": "failed"
+  },
+  "combined_extra": {
+    "status": "incomplete",
+    "executed": true
+  },
+  "release_ready": false,
+  "runtime_activation_ready": false,
+  "head": "3cc34e7b3cb6efca5102e0e22d559ec0c0fd583f",
+  "expected_head": "3cc34e7b3cb6efca5102e0e22d559ec0c0fd583f",
+  "base_evidence_sha256": "2ccbe1c2099de13709485a58669fe8d0b481a303b0fed0d6e978a79d1d9923a9",
+  "guard_candidate": {
+    "source_url": "https://github.com/Waveframe-Labs/Waveframe-Guard",
+    "source_commit": "0161ef8a52e052d1bc1366cdc93ce13a9bd535ed",
+    "provenance_kind": "coordinator-supplied-exact-candidate",
+    "wheel": "waveframe_guard-0.19.0-py3-none-any.whl",
+    "wheel_sha256": "e7cb9aae6a27437d809d5d72e0225536c4ac0ab729ad9cae162c4417c24d4ba4"
+  },
+  "compiler_origin": {
+    "filename": "cricore_contract_compiler-0.5.0-py3-none-any.whl",
+    "sha256": "f0d7aa912d0453ea6da2c63c084cc5b8e9ee5507bd05b482086e8c837da7b1d6",
+    "origin": {
+      "url": "https://github.com/Waveframe-Labs/cricore-contract-compiler.git",
+      "vcs_info": {
+        "commit_id": "ae590dee058d3481e384dea850d5b7d980f533ff",
+        "requested_revision": "ae590dee058d3481e384dea850d5b7d980f533ff",
+        "vcs": "git"
+      }
+    },
+    "kind": "locally built pip-cached VCS wheel",
+    "supplied_archive_hash_verified": false,
+    "note": "Archive hashes can differ across builds; complete compiled fixture outputs must remain identical."
+  },
+  "package_sha256": {
+    "cricore_contract_compiler-0.5.0-py3-none-any.whl": "f0d7aa912d0453ea6da2c63c084cc5b8e9ee5507bd05b482086e8c837da7b1d6",
+    "governance_ledger-0.9.0-py3-none-any.whl": "9d16d0befe27378d14aa033067ae4426c370c091a3205457ba35bb30ceb69502",
+    "governance_ledger-0.9.0.tar.gz": "d60eb84a735a2aaf2c38dfc867d7f8eb5526781cd97289ee11776ae86c48e33e",
+    "waveframe_guard-0.19.0-py3-none-any.whl": "e7cb9aae6a27437d809d5d72e0225536c4ac0ab729ad9cae162c4417c24d4ba4"
+  },
+  "status": "failed",
+  "error": "combined-extra-default: unexpected exit 1"
+}

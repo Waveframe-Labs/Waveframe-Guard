@@ -1,0 +1,23 @@
+{
+  "command": [
+    "docker",
+    "run",
+    "--rm",
+    "--cap-add",
+    "SYS_ADMIN",
+    "--security-opt",
+    "seccomp=unconfined",
+    "--tmpfs",
+    "/tmp:exec,mode=1777",
+    "--mount",
+    "type=bind,source=C:/GitHub/Waveframe-Guard,target=/guard,readonly",
+    "python@sha256:656d12e70054d5fda18a045e2494c96701e9792dd1445f95b3d038df954f57e9",
+    "python",
+    "/guard/.candidate48/mount.py",
+    "/guard/acceptance-output/release50-head016-ci/action-policy-ubuntu-latest-3.14/package/waveframe_guard-0.19.0-py3-none-any.whl"
+  ],
+  "guard_head": "0161ef8a52e052d1bc1366cdc93ce13a9bd535ed",
+  "wheel_sha256": "2b78374416635ca551ee5470fcd1e9e390d3f08141a53c91bcba7d42516b046e",
+  "runner_sha256": "3bbbb36beb5d2dca92a7b95f666ebf7b2cc98e4e831147d9d903122964d73d60",
+  "exit_code": 0
+}

@@ -1,0 +1,22 @@
+Processing /home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/package/waveframe_guard-0.19.0-py3-none-any.whl
+Collecting governance-ledger==0.8.0
+  Using cached governance_ledger-0.8.0-py3-none-any.whl.metadata (35 kB)
+Collecting cricore<0.15.0,>=0.13.0 (from waveframe-guard==0.19.0)
+  Using cached cricore-0.14.0-py3-none-any.whl.metadata (9.2 kB)
+Collecting cricore-proposal-normalizer<0.3.0,>=0.2.0 (from waveframe-guard==0.19.0)
+  Using cached cricore_proposal_normalizer-0.2.0-py3-none-any.whl.metadata (4.6 kB)
+INFO: pip is looking at multiple versions of waveframe-guard to determine which version is compatible with other requirements. This could take a while.
+ERROR: Cannot install governance-ledger==0.8.0 and waveframe-guard==0.19.0 because these package versions have conflicting dependencies.
+
+The conflict is caused by:
+    The user requested governance-ledger==0.8.0
+    waveframe-guard 0.19.0 depends on governance-ledger<0.10.0 and >=0.9.0
+
+Additionally, some packages in these conflicts have no matching distributions available for your environment:
+    governance-ledger
+
+To fix this you could try to:
+1. loosen the range of package versions you've specified
+2. remove package versions to allow pip to attempt to solve the dependency conflict
+
+ERROR: ResolutionImpossible: for help visit https://pip.pypa.io/en/latest/topics/dependency-resolution/#dealing-with-dependency-conflicts

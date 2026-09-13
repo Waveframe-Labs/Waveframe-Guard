@@ -1,0 +1,26 @@
+diff --git a/guard/sdk/guard.py b/guard/sdk/guard.py
+index 903ea8a..8ddaab8 100644
+--- a/guard/sdk/guard.py
++++ b/guard/sdk/guard.py
+@@ -505,7 +505,7 @@ def _guard_version() -> str:
+     try:
+         return version("waveframe-guard")
+     except PackageNotFoundError:
+-        return "0.18.0"
++        return "0.19.0"
+ 
+ 
+ def _normalized_request_from_call(args: tuple[Any, ...], kwargs: dict[str, Any]) -> dict[str, Any]:
+diff --git a/waveframe_guard/__init__.py b/waveframe_guard/__init__.py
+index 32dbdcf..a302bde 100644
+--- a/waveframe_guard/__init__.py
++++ b/waveframe_guard/__init__.py
+@@ -10,7 +10,7 @@ from .schemas import (
+     GOVERNED_EXECUTION_STATE_V1,
+ )
+ 
+-__version__ = "0.18.0"
++__version__ = "0.19.0"
+ 
+ 
+ def __getattr__(name):

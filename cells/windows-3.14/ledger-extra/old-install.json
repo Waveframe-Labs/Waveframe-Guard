@@ -1,0 +1,435 @@
+{
+  "version": "1",
+  "pip_version": "26.2.1",
+  "install": [
+    {
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/f1/12/8804dc46dd44fd0c6592e6478522ade7589f93f07253a515ebfa61670af6/governance_ledger-0.8.0-py3-none-any.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "a78c0124899db2b63a689dcb1e3700b4326a8154e954253cde2328fedf5a1ce2"
+          },
+          "hash": "sha256=a78c0124899db2b63a689dcb1e3700b4326a8154e954253cde2328fedf5a1ce2"
+        }
+      },
+      "is_direct": false,
+      "is_yanked": false,
+      "requested": true,
+      "metadata": {
+        "metadata_version": "2.4",
+        "name": "governance-ledger",
+        "version": "0.8.0",
+        "dynamic": [
+          "license-file"
+        ],
+        "summary": "Governance compiler and semantic derivation infrastructure for deterministic governance operationalization.",
+        "description": "<p align=\"center\">\n  <img src=\"https://raw.githubusercontent.com/Waveframe-Labs/.github/main/assets/branding/canon_wf_logo_extended.png\" width=\"700\">\n</p>\n\n# Governance-Ledger\n\nGovernance-Ledger turns governed source text and authority contracts into deterministic, reviewable, publishable governance authority. It is best understood as **Governance Compiler + Semantic Derivation Infrastructure**.\n\nLedger is not an AI or general-purpose policy interpreter, workflow automation layer, orchestration engine, cloud operations layer, or runtime execution system. It does not guess meaning from policy language. It recognizes only a published deterministic sentence grammar, preserves everything else as informational, unsupported, or requiring resolution, derives deterministic governance meaning, gates publication, preserves lineage, and makes governance authority replayable.\n\n## What It Provides\n\n- Governance normalization from source text into canonical governance statements.\n- Semantic diagnostics for ambiguous, conflicting, incomplete, or unsafe authority.\n- Governance compilation reports with coverage, diagnostics, statement traces, and report hashes.\n- Publication gating so governance authority cannot be published when blocking diagnostics are present.\n- Provenance chains from source governance to compilation reports to published authority contracts.\n- Publication manifests and contract registries with integrity hashes.\n- Lineage verification for authority artifacts.\n- Replay tooling for compilation and admissibility evidence.\n- Deterministic snapshots, rollback artifacts, diffs, and review lifecycle state.\n- Canonical semantic artifacts for previews, diff impacts, review packets, and authority bundles.\n- Governance chronology replay and replay diff infrastructure for reconstructing authority posture from append-only events.\n- Canonical schemas for generated governance, diagnostics, replay, publication, review, registry, snapshot, and semantic artifacts.\n\n## Why This Exists\n\nGovernance used by runtime systems must be deterministic, inspectable, and reproducible. Human governance language can enter the system, but publication authority should only come from normalized statements, explicit diagnostics, approved reviews, canonical compilation reports, and traceable provenance.\n\nGovernance-Ledger exists to make that path auditable:\n\n```text\nGovernance Source\n  -> Normalized Statements\n  -> Semantic Diagnostics\n  -> Governance Compilation Report\n  -> Human Review and Approval\n  -> Published Authority Contract\n  -> Semantic Derivation Artifacts\n  -> Manifest, Registry, Snapshot\n  -> Authority Bundle\n  -> Lineage Verification and Replay\n```\n\n## Core Concepts\n\n**Governance normalization**\n\nLedger classifies governance statements and converts supported language into canonical policy structures. Unsupported or ambiguous language remains visible as diagnostics; it is not silently converted into executable authority.\n\n**Semantic diagnostics**\n\nDiagnostics identify governance risks such as missing authority, overlapping thresholds, duplicate roles, weak normalization coverage, and publication-blocking compiler issues. Diagnostics are structured artifacts with stable codes, severity, domains, and publication impact.\n\n**Governance compilation reports**\n\nCompilation reports bind source governance identity, normalized statement traces, coverage metrics, diagnostics, compiler summaries, and a deterministic `report_hash`. They are evidence objects, not log output.\n\n**Publication gating**\n\nPublishing requires an approved review and generated policy that passes compiler-ingestion validation. Blocking diagnostics prevent publication. Published contract, manifest, registry, deployed review, and snapshot artifacts are written as one transaction.\n\n**Lineage verification**\n\nPublished authority contracts include `governance_authority_lineage.v1` linking the authority to source governance and compilation report hashes. Ledger can verify that lineage independently.\n\n**Semantic governance compilation**\n\nLedger owns deterministic governance interpretation after authority has been structured. Semantic derivation modules convert `authority_contract.v1` and related publication artifacts into canonical meaning artifacts without invoking Guard, Cloud, simulation, runtime evaluation, or admissibility execution.\n\nThe canonical semantic artifacts are:\n\n- `governance_impact_preview.v1`: governance summary, enforcement behavior, consequences, lifecycle implications, and example governed outcomes.\n- `authority_diff_impact.v1`: semantic impact of authority changes, including escalation, operational, lifecycle, and replay continuity implications.\n- `governance_review_packet.v1`: review-ready packet binding authority, preview, optional diff impact, optional evidence, review context, immutable hashes, and explicit non-goals.\n- `authority_bundle.v1`: publishable governance object binding authority contract, publication manifest, semantic artifacts, review packets, lineage, provenance, schema compatibility, and immutable inputs. Customer-authored bundles may declare the additive `customer_policy_provenance_complete_v1` profile; older bundles remain readable as provenance-incomplete.\n\n**Replayability**\n\nReplay tooling reproduces compilation evidence from source governance and can replay admissibility decisions against authority and execution state. Replay failures produce diagnostics rather than silent disagreement.\n\n**Deterministic governance operationalization**\n\nLedger records governance state transitions and publication artifacts with deterministic identifiers, hashes, normalized paths, immutable publication outputs, and rollback-capable snapshots.\n\n**Governance chronology replay**\n\nLedger can replay append-only governance events to reconstruct governance meaning at a point in time. Chronology replay reconstructs active authority, lineage state, continuity posture, replay posture, projection freshness, governance health, and operational summaries without calling Guard or Cloud.\n\nLedger can also compare replay states across cutoffs with `governance_replay_diff.v1`, making governance posture changes over time deterministic and reviewable.\n\n## What It Is Not\n\nGovernance-Ledger is not:\n\n- AI policy interpretation.\n- Legal advice or legal reasoning.\n- A workflow automation product.\n- An orchestration engine.\n- A cloud governance operations service.\n- A runtime mutation executor.\n- A replacement for CRI-CORE Contract Compiler semantics.\n- A replacement for Waveframe Guard runtime enforcement.\n- A system that bypasses Guard admissibility.\n- A system that infers unsupported governance meaning.\n\n## Install\n\n```powershell\npython -m venv venv\n.\\venv\\Scripts\\Activate.ps1\npip install governance-ledger\n```\n\nLedger relies on installed package contracts for integration behavior:\n\n- `cricore-contract-compiler>=0.4.0` (the first released compiler contract with exact/prefix target rules)\n\nThe base install does not install Waveframe Guard. Install the release-tested runtime\nintegration explicitly:\n\n```powershell\npip install \"governance-ledger[guard]==0.8.0\"\n```\n\nLedger 0.8.0 pins its `guard` extra to `waveframe-guard==0.17.0`. Guard 0.17.0 declares\n`governance-ledger>=0.7.0,<0.9.0`, verifies native v3 publications, and enforces their\nunchanged `compiled_authority_contract.v2` runtime payload. Normal dependency resolution\nand `pip check` are part of release acceptance.\n\n### Release compatibility matrix\n\n| Ledger | Guard | Publication support | Notes |\n| --- | --- | --- | --- |\n| 0.8.0 | 0.17.0 | v1, v2, native v3 | Release-tested pair; selected by the Ledger `guard` extra. |\n| 0.7.0 | 0.17.0 | v1, v2 | Dependency-compatible; native v3 requires Ledger 0.8 or later. |\n| 0.7.0 | 0.16.1 | v1, v2 | Prior release-tested compatibility pair; no native v3 support. |\n\nApplications can inject a compatible evaluator without installing Guard in Ledger's\nenvironment:\n\n```python\nfrom governance_ledger.replay import replay_admissibility\n\nresult = replay_admissibility(\n    authority_contract=authority,\n    execution_state=execution_state,\n    evaluator=my_admissibility_evaluator,\n)\n```\n\nExisting callers that omit `evaluator` may use the optional Guard integration. Without\neither an evaluator or compatible Guard, Ledger raises an actionable\n`GuardIntegrationUnavailableError`. Ledger prepares, publishes, replays, and verifies\nauthority evidence; Guard evaluates runtime admissibility. Enforcement logic remains\noutside Ledger.\n\nLocal checkout path resolution is not part of production behavior.\n\n## Deterministic Domain-Pack Policy Compiler\n\nLedger's production policy boundary is a selected, immutable domain pack rather than a universal company-policy grammar. The only built-in pack is `repository-changes` / `1.0.0`; it contains repository concepts only. It binds scoped vocabulary, typed resource contracts, runtime facts, typed Constraint IR semantics, trusted grammar/emitter/format/lowering identities, conformance vectors, and a canonical hash.\n\nClauses inside the selected grammar compile directly. Every other nonempty clause remains pending until a human explicitly chooses one pack-bounded enforcement control, `informational`, or `unsupported`. Users do not author policy JSON or rule JSON. Arbitrary prose cannot be automatically interpreted without AI, and this workflow uses no AI, probabilistic inference, embeddings, external inference, spaCy heuristics, or network lookup. Missing runtime facts block publication rather than weakening a rule.\n\nThe domain-pack publication path emits standalone `compiled_authority_contract.v2`, limited to the repository pack's current acting-role and exact/prefix path allow/deny lowering. Advanced conditions, evidence, exceptions, approvals, and other obligations remain representable in Constraint IR but fail closed until a trusted lowering supports them. Released v0.6 compatibility outputs remain unchanged.\n\nSee [Deterministic Domain-Pack Policy Compiler](docs/DOMAIN_PACK_COMPILER.md) for the representation boundaries, guided-mapping workflow, exact public APIs, repository/finance compatibility boundary, and native `authority_bundle.v2` provenance chain.\n\n## Untrusted policy translation proposals\n\nLedger provides a model-agnostic `policy_translation_proposal.v1` boundary for coding-agent\nengineering policy. An external model or deterministic form may propose; a human confirms;\nLedger validates, renders, and compiles; Guard enforces published authority without a\nmodel. Ledger does not call or bundle an AI/model provider. Exact source bytes\nremain bound through the semantic commitment, contract, bundle, receipt, and Guard\nevidence. Ordered proposal run descriptors retain exact request/response hashes and\nattribution, never raw bytes. Optional raw request/response bytes live in a separate,\nprivate, independently deletable retention artifact; optional provider prose lives only\nthere. Provider output and explanations\nare evidence, never runtime authority or approval text.\n\nEach clause may contain an ordered list of candidate controls, and each control requires\nits own human confirmation. The human separately confirms whether the original visible\nclause is fully represented, partially represented with explicit unsupported residual\nmeaning, entirely unsupported, or informational. Ledger proves exact source preservation\nand the confirmed mappings; it cannot mathematically prove that an untrusted translator\nextracted every meaning from arbitrary English. That semantic-completeness judgment is\nexplicitly human-confirmed.\n\nThe unchanged v2 publication path supports multiple controls only when the deterministic\nsource grammar reconstructs all of them. It cannot encode multiple human-mapped controls,\nor both enforced and residual unsupported meaning, inside one otherwise pending source\nstatement. The additive `policy_translation_commitment.v1`, `authority_bundle.v3`, and\n`publication_receipt.v3` path publishes those cases without changing v2. Every control\nhas its own confirmation, every residual has an explicit acknowledgment, and the\nruntime payload remains `compiled_authority_contract.v2`.\n\nCustomer review uses six deterministic states: Ready to enforce, Needs an answer, Needs\na connection, Partially enforceable, Not currently enforceable, and Informational.\nProvider/model/prompt details and raw translation evidence remain private, independently\ndeletable, and absent from the package and published authority. The published commitment,\nauthority, receipt, and runtime contract do not depend on them. Guard 0.17.0 verifies and\nenforces native v3 publications as well as existing v1/v2 authority. Hosted Cloud\nauthoring and native v3 serving are not yet available.\n\nThe first catalog truthfully supports only autonomous-agent repository modification,\nrepository roles, and exact/prefix path allow/deny controls already implemented by the\nreleased repository compiler and Guard 0.17.0 boundary. Branch, push, pull-request,\nreviewer, threshold, separation-of-duties, environment, and evidence semantics fail\nclosed. The proposal schema uses portable capability identifiers, while the trusted\ncatalog registry—not caller input—decides what is actually available. See [Untrusted\nPolicy Translation Proposals](docs/UNTRUSTED_POLICY_TRANSLATION.md) for the APIs,\nprovenance proof, coverage rules, and precise limitations.\n\nThe runnable [native v3 multi-control example](examples/native_v3_multi_control.py)\npublishes two exact-path controls from one clause, deletes its private translation\nevidence, loads the v3 bundle and receipt through Guard 0.17.0, allows both published\npaths, and blocks an unpublished path.\n\n## v0.6 Customer-Policy Compatibility Service\n\nThe published v0.6 APIs remain stable compatibility wrappers with their exact supported/rejected behavior and canonical hashes. They do not add domain-pack metadata to legacy artifacts:\n\n```python\nfrom governance_ledger import (\n    finalize_customer_policy_authority,\n    interpret_customer_policy,\n)\n\ndraft = interpret_customer_policy(\n    exact_policy_bytes,\n    source_policy_id=\"repository-change-policy\",\n    source_revision=\"rev-17\",\n    authority_id=\"repository-change-authority\",\n    authority_version=\"6.0.0\",\n)\n\npublication = finalize_customer_policy_authority(\n    draft,\n    resolutions=[],\n    approval_id=\"approval-001\",\n    approved_by=\"policy-owner@example.com\",\n    approved_at=\"2026-08-29T13:58:00Z\",\n    committed_by=\"policy-owner@example.com\",\n    committed_at=\"2026-08-29T13:59:00Z\",\n    publication_id=\"publication-001\",\n    published_by=\"publisher@example.com\",\n    published_at=\"2026-08-29T14:00:00Z\",\n)\n```\n\n`interpret_customer_policy_text(...)` is a convenience wrapper that performs only `text.encode(\"utf-8\")`. Neither entry point normalizes newlines, Unicode, whitespace, or punctuation. Finalization reconstructs the draft from its embedded exact bytes and identities, so caller-edited classifications, rules, mappings, spans, or hashes are rejected.\n\nThe v0.6 grammar recognizes only these case-sensitive, period-terminated forms:\n\n- `<subject> may be made only by <plural-role>.` — required actor role; the plural role must end in `s`, which is removed before lower-case hyphenation.\n- `Agents may modify <exact-path>.`\n- `Agents must not modify <exact-path>.`\n- `Agents may modify files under <prefix-path/>.`\n- `Agents must not modify files under <prefix-path/>.`\n- `<Transfers|Purchases|Payments|Invoices|Requests> <above|over|at least|below|under> $<number> require <role> approval.`\n- `Requester and approver must be separate.` (an initial `The ` is also accepted).\n\nExact and prefix targets must be repository-relative forward-slash paths. Absolute, drive-qualified, traversal, backslash, control-character, unsafe empty-segment, and malformed trailing-slash targets fail closed. Duplicate and overlapping allow/deny meanings become bounded ambiguities; Ledger never invents precedence.\n\nNormative text outside this exact grammar is `unsupported`. Non-normative text is `informational`. Normative statements containing terms such as `normally`, `appropriate`, `unless necessary`, or other documented ambiguous qualifiers are `requires_resolution`. When removing exactly one recognized modifier produces exactly one valid grammar rule, Ledger offers that specific enforcement consequence alongside `unsupported` and `informational`; otherwise only the two non-enforcement choices are available. A resolution can select only an interpreter-produced option. Unsupported text remains visible in the approved interpretation.\n\nStatement classification is complete once every source statement has one classification; interpretation remains incomplete while any ambiguity is unresolved. A draft is ready for finalization only when no ambiguity remains and at least one enforceable rule is present. Informational/unsupported-only drafts remain inspectable but cannot publish, and Ledger invents neither allow-all nor implicit deny-all semantics.\n\nFinalization requires explicit resolution, approval, commit, and publication identities and canonical UTC timestamps. Chronology is enforced as every `resolved_at` ≤ `approved_at` ≤ `committed_at` ≤ `published_at`, with equality allowed and supplied resolution order preserved. Required actor roles, conditional approval thresholds, target rules, and separation-of-duties constraints remain distinct when projected into the installed CRI-CORE Contract Compiler. Finalization then returns the validated interpretation, resolution set, approval record, semantic commit, compiler input, canonical compiled contract, impact preview, manifest, provenance-complete `authority_bundle.v1`, and `publication_receipt.v1`. Source revision and authority version are independent and are hash-bound by `publishes_as`.\n\n## Command Workflow\n\nGenerate normalized governance drafts and validation artifacts:\n\n```powershell\ngovernance-ledger run policies/\n```\n\nCheck publication readiness:\n\n```powershell\ngovernance-ledger check generated/\n```\n\nApprove a reviewed governance artifact:\n\n```powershell\ngovernance-ledger approve reviews/finance_policy.review.json --actor governance-team\n```\n\nPublish approved governance authority:\n\n```powershell\ngovernance-ledger publish reviews/finance_policy.review.json\n```\n\nInspect published authority:\n\n```powershell\ngovernance-ledger list contracts\ngovernance-ledger resolve finance-policy@0.1.0\ngovernance-ledger show contracts/finance-policy-0.1.0.contract.json\n```\n\nVerify authority lineage:\n\n```powershell\ngovernance-ledger verify-lineage --contract contracts/finance-policy-0.1.0.contract.json\n```\n\nReplay source governance into compilation evidence:\n\n```powershell\ngovernance-ledger replay-authority `\n  --source policies/finance_policy.txt `\n  --report reviews/finance_policy.deployed.review.json `\n  --contract contracts/finance-policy-0.1.0.contract.json\n```\n\nReplay execution admissibility:\n\n```powershell\ngovernance-ledger replay-execution `\n  --contract contracts/finance-policy-0.1.0.contract.json `\n  --execution-state execution_state.json\n```\n\nThe CLI form uses the optional Guard adapter and therefore requires\n`governance-ledger[guard]`. Programmatic callers may use evaluator injection instead.\n\nGenerate semantic governance artifacts:\n\n```powershell\ngovernance-ledger preview `\n  contracts/finance-policy-0.1.0.contract.json `\n  --output generated/finance-policy.preview.json\n\ngovernance-ledger diff-impact `\n  --old contracts/finance-policy-0.1.0.contract.json `\n  --new contracts/finance-policy-0.2.0.contract.json `\n  --output generated/finance-policy.diff-impact.json\n\ngovernance-ledger review-packet `\n  --authority contracts/finance-policy-0.1.0.contract.json `\n  --preview generated/finance-policy.preview.json `\n  --output generated/finance-policy.review-packet.json\n\ngovernance-ledger authority-bundle `\n  --authority contracts/finance-policy-0.1.0.contract.json `\n  --manifest contracts/finance_policy.publication_manifest.json `\n  --preview generated/finance-policy.preview.json `\n  --output generated/finance-policy.authority-bundle.json\n```\n\n`publish` now emits the canonical local authority bundle automatically. The `authority-bundle` command remains available for deterministic derivation and inspection workflows.\n\n## Artifact Layout\n\n```text\npolicies/      source governance text\ngenerated/     normalized policy drafts and validation artifacts\nreviews/       review, approval, compilation, and deployment evidence\ncontracts/     immutable published authority contracts, manifests, registry\nsnapshots/     deterministic governance state snapshots\nschemas/       canonical JSON schemas\ngovernance_ledger/semantics/\n               canonical semantic derivation layer\n```\n\nPublication produces:\n\n- `contracts/<contract-id>-<version>.contract.json`\n- `contracts/<contract-id>-<version>.authority-bundle.json`\n- `contracts/<contract-id>-<version>.publication-receipt.json`\n- `contracts/<policy>.publication_manifest.json`\n- `contracts/index.json`\n- `reviews/<policy>.deployed.review.json`\n- `snapshots/<snapshot-id>.json`\n\nPublication artifacts use normalized POSIX-style paths such as `contracts/finance-policy-0.1.0.contract.json`, even on Windows.\n\nThe registry entry for a published authority includes deterministic bundle identity:\n\n```json\n{\n  \"authority_ref\": \"finance-policy@0.1.0\",\n  \"contract_hash\": \"sha256:...\",\n  \"bundle_path\": \"contracts/finance-policy-0.1.0.authority-bundle.json\",\n  \"bundle_hash\": \"sha256:...\",\n  \"lifecycle_state\": \"active\"\n}\n```\n\n`governance-ledger resolve <authority-ref>` accepts only explicit versioned references such as `finance-policy@0.1.0` and resolves them to the canonical local authority bundle.\n\nSemantic artifacts are deterministic derivations. They may be exported under `generated/` for review or packaging, but they are not runtime evaluations and do not change execution outcomes.\n\n## Example Normalization\n\nSource governance:\n\n```text\nTransfers above $1M require manager approval.\nRequester and approver must be separate.\nAll transfer approvals must be recorded for audit purposes.\n```\n\nNormalized policy excerpt:\n\n```json\n{\n  \"contract_id\": \"finance-policy\",\n  \"contract_version\": \"0.1.0\",\n  \"authority\": {\n    \"required_roles\": [\"manager\"],\n    \"separation_of_duties\": true\n  },\n  \"approvals\": {\n    \"required\": [\n      {\n        \"role\": \"manager\",\n        \"condition\": {\n          \"field\": \"amount\",\n          \"operator\": \">\",\n          \"value\": 1000000\n        }\n      }\n    ],\n    \"thresholds\": [\n      {\n        \"field\": \"amount\",\n        \"operator\": \">\",\n        \"value\": 1000000,\n        \"requires_role\": \"manager\"\n      }\n    ]\n  },\n  \"artifacts\": {\n    \"required\": [\"approval_audit_record\"]\n  }\n}\n```\n\n## Diagnostics and Gates\n\nValidation artifacts and review artifacts include structured warnings and compiler diagnostics. A diagnostic may be informational, warning-level, or publication-blocking.\n\nExamples of publication-blocking conditions:\n\n- Ambiguous authority, such as approval without a named approving role.\n- Low governance normalization coverage.\n- Overlapping approval thresholds.\n- Duplicate or conflicting approval requirements.\n- Compiler schema violations.\n- Missing or mismatched provenance lineage.\n\n`governance-ledger check generated/` exits non-zero when validation contains error-severity diagnostics.\n\n## Lineage and Integrity\n\nPublished authority contracts include lineage:\n\n```json\n{\n  \"lineage\": {\n    \"schema_version\": \"governance_authority_lineage.v1\",\n    \"source_hash\": \"sha256:...\",\n    \"compilation_report_hash\": \"sha256:...\",\n    \"review_id\": \"review-finance_policy\"\n  }\n}\n```\n\nPublication manifests, receipts, and registries carry source and report hashes so consumers can verify the authority chain without trusting local build state.\n\nSemantic artifacts also carry immutable input hashes. Authority bundles bind contract, manifest, preview, optional diff impact, and optional review packets into a single publishable governance object that Cloud can ingest, validate, store, replay, and operate without reconstructing governance context. Local publication receipts are deterministic Ledger evidence for the publication record; hosted Cloud receipts can preserve the same authority durably but are not interchangeable with local publication state.\n\n## Schemas\n\nCanonical schemas live in [schemas/](schemas/), including:\n\n- [policy_translation_capability_catalog.v1.json](schemas/policy_translation_capability_catalog.v1.json): immutable finite coding-agent capability boundary.\n- [policy_translation_proposal.v1.json](schemas/policy_translation_proposal.v1.json): strict exact-source-bound untrusted translation proposal.\n- [policy_translation_confirmation.v1.json](schemas/policy_translation_confirmation.v1.json): bounded human bindings, per-control confirmations, clause coverage decisions, acknowledgements, and coverage.\n- [policy_translation_approval.v1.json](schemas/policy_translation_approval.v1.json): approval binding proposal, confirmation, review, source, catalog, authority, and coverage.\n- [domain_pack.v1.json](schemas/domain_pack.v1.json): immutable, versioned deterministic domain-pack contracts.\n- [runtime_fact_schema.v1.json](schemas/runtime_fact_schema.v1.json): exact proposal/derived runtime fact contracts.\n- [constraint_ir.v1.json](schemas/constraint_ir.v1.json): Waveframe-owned typed enforcement Constraint IR.\n- [policy_mapping_decision.v1.json](schemas/policy_mapping_decision.v1.json): exact-source-bound human mapping decisions.\n- [compiled_authority_contract.v2.json](schemas/compiled_authority_contract.v2.json): strict compiled repository surface used by the v2 domain-pack publication path.\n- [authority_bundle.v2.json](schemas/authority_bundle.v2.json): complete native domain-pack authority bundle with strict component bindings.\n- [publication_receipt.v2.json](schemas/publication_receipt.v2.json): receipt binding the complete v2 authority bundle.\n- [policy_translation_commitment.v1.json](schemas/policy_translation_commitment.v1.json): provider-free confirmed-control and acknowledged-residual commitment.\n- [authority_bundle.v3.json](schemas/authority_bundle.v3.json): additive native multi-control and partial-coverage authority bundle.\n- [publication_receipt.v3.json](schemas/publication_receipt.v3.json): receipt binding the complete v3 authority bundle.\n\n- [governance_source.v1.json](schemas/governance_source.v1.json): governance source identity.\n- [governance_diagnostic.v1.json](schemas/governance_diagnostic.v1.json): governance diagnostics.\n- [governance_quality_diagnostic.v1.json](schemas/governance_quality_diagnostic.v1.json): advisory governance quality diagnostics.\n- [governance_compilation_report.v1.json](schemas/governance_compilation_report.v1.json): governance compilation reports.\n- [governance_impact_preview.v1.json](schemas/governance_impact_preview.v1.json): governance impact previews.\n- [authority_diff_impact.v1.json](schemas/authority_diff_impact.v1.json): authority diff impacts.\n- [governance_review_packet.v1.json](schemas/governance_review_packet.v1.json): governance review packets.\n- [authority_bundle.v1.json](schemas/authority_bundle.v1.json): authority bundles.\n- [publication_receipt.v1.json](schemas/publication_receipt.v1.json): publication receipts.\n- [policy_translation_capability_catalog.v1.json](schemas/policy_translation_capability_catalog.v1.json): finite coding-agent translation capabilities.\n- [policy_translation_proposal.v1.json](schemas/policy_translation_proposal.v1.json): exact-source, ordered-run untrusted proposals.\n- [policy_translation_run_evidence.v1.json](schemas/policy_translation_run_evidence.v1.json): optional private raw run evidence.\n- [policy_translation_confirmation.v1.json](schemas/policy_translation_confirmation.v1.json): bounded human confirmations.\n- [policy_translation_review.v1.json](schemas/policy_translation_review.v1.json): deterministic approval-bound reviews.\n- [policy_translation_approval.v1.json](schemas/policy_translation_approval.v1.json): proposal publication approvals.\n- [authority_lifecycle_event.v1.json](schemas/authority_lifecycle_event.v1.json): append-only authority lifecycle events.\n- [governance_semantic_extraction.v1.json](schemas/governance_semantic_extraction.v1.json): deterministic semantic extraction artifacts.\n- [governance_semantic_provenance.v1.json](schemas/governance_semantic_provenance.v1.json): semantic provenance and source-span bindings.\n- [governance_semantic_reconciliation.v1.json](schemas/governance_semantic_reconciliation.v1.json): semantic reconciliation artifacts.\n- [semantic_conflict.v1.json](schemas/semantic_conflict.v1.json): semantic conflicts.\n- [semantic_ambiguity.v1.json](schemas/semantic_ambiguity.v1.json): semantic ambiguities.\n- [semantic_interpretation_decision.v1.json](schemas/semantic_interpretation_decision.v1.json): operator interpretation decisions.\n- [semantic_reconciliation_projection.v1.json](schemas/semantic_reconciliation_projection.v1.json): reconciliation projections.\n- [semantic_stability_projection.v1.json](schemas/semantic_stability_projection.v1.json): semantic stability projections.\n- [semantic_commit_bundle.v1.json](schemas/semantic_commit_bundle.v1.json): committed semantic interpretation bundles.\n- [semantic_authority_diff.v1.json](schemas/semantic_authority_diff.v1.json): semantic authority diffs.\n- [semantic_lifecycle_enforcement_projection.v1.json](schemas/semantic_lifecycle_enforcement_projection.v1.json): lifecycle enforcement consequence projections.\n- [compiled_authority_contract.v1.json](schemas/compiled_authority_contract.v1.json): released v1 compiled authority contract schema.\n- [authority_execution_projection.v1.json](schemas/authority_execution_projection.v1.json): authority execution projections.\n- [execution_requirement_projection.v1.json](schemas/execution_requirement_projection.v1.json): execution requirement projections.\n- [execution_admissibility_projection.v1.json](schemas/execution_admissibility_projection.v1.json): execution admissibility projections.\n- [runtime_consequence_projection.v1.json](schemas/runtime_consequence_projection.v1.json): runtime consequence projections.\n- [guard_enforcement_projection.v1.json](schemas/guard_enforcement_projection.v1.json): Guard enforcement projections.\n- [governance_capability.v1.json](schemas/governance_capability.v1.json): governance capabilities.\n- [capability_requirement.v1.json](schemas/capability_requirement.v1.json): capability requirements.\n- [capability_continuity_semantics.v1.json](schemas/capability_continuity_semantics.v1.json): capability continuity semantics.\n- [capability_evidence_requirement.v1.json](schemas/capability_evidence_requirement.v1.json): capability evidence requirements.\n- [capability_execution_constraint.v1.json](schemas/capability_execution_constraint.v1.json): capability execution constraints.\n- [capability_identity_requirement.v1.json](schemas/capability_identity_requirement.v1.json): capability identity requirements.\n- [temporal_authority_semantics.v1.json](schemas/temporal_authority_semantics.v1.json): temporal authority semantics.\n- [state_posture_snapshot_semantics.v1.json](schemas/state_posture_snapshot_semantics.v1.json): state posture snapshot semantics.\n- [execution_context_semantics.v1.json](schemas/execution_context_semantics.v1.json): execution context semantics.\n- [governance_actor.v1.json](schemas/governance_actor.v1.json): governance actors.\n- [authority_role_binding.v1.json](schemas/authority_role_binding.v1.json): authority role bindings.\n- [approval_chain_semantics.v1.json](schemas/approval_chain_semantics.v1.json): approval chain semantics.\n- [identity_continuity_semantics.v1.json](schemas/identity_continuity_semantics.v1.json): identity continuity semantics.\n- [governance_event.v1.json](schemas/governance_event.v1.json): base governance event envelope.\n- [projection_generation_event.v1.json](schemas/projection_generation_event.v1.json): projection generation events.\n- [projection_invalidation_event.v1.json](schemas/projection_invalidation_event.v1.json): projection invalidation events.\n- [continuity_transition_event.v1.json](schemas/continuity_transition_event.v1.json): continuity transition events.\n- [governance_replay_state.v1.json](schemas/governance_replay_state.v1.json): governance chronology replay state.\n- [governance_replay_diff.v1.json](schemas/governance_replay_diff.v1.json): governance replay state diffs.\n- [governance_lineage_verification.v1.json](schemas/governance_lineage_verification.v1.json): lineage verification artifacts.\n- [replay_authority_request.v1.json](schemas/replay_authority_request.v1.json): replay authority requests.\n- [replay_execution_request.v1.json](schemas/replay_execution_request.v1.json): replay execution requests.\n- [publication_manifest.v1.json](schemas/publication_manifest.v1.json): publication manifests.\n- [publication_manifest.schema.json](schemas/publication_manifest.schema.json): publication manifest schema compatibility.\n- [contract_registry.schema.json](schemas/contract_registry.schema.json): contract registries.\n- [deployment.schema.json](schemas/deployment.schema.json): deployment records.\n- [cricore_policy.schema.json](schemas/cricore_policy.schema.json): CRI-CORE policy compatibility.\n- [review.schema.json](schemas/review.schema.json): reviews.\n- [snapshot.schema.json](schemas/snapshot.schema.json): snapshots.\n\n## Documentation\n\n- [CHANGELOG.md](CHANGELOG.md)\n- [PROJECTION_OWNERSHIP.md](PROJECTION_OWNERSHIP.md)\n- [PROJECTION_DEPENDENCY_GRAPH.md](PROJECTION_DEPENDENCY_GRAPH.md)\n- [SEMANTIC_GOVERNANCE_MODEL.md](SEMANTIC_GOVERNANCE_MODEL.md)\n- [GOVERNANCE_EVENT_MODEL.md](GOVERNANCE_EVENT_MODEL.md)\n- [GOVERNANCE_CHRONOLOGY_REPLAY.md](GOVERNANCE_CHRONOLOGY_REPLAY.md)\n- [EVENT_ORDERING_SEMANTICS.md](EVENT_ORDERING_SEMANTICS.md)\n- [GOVERNANCE_SEMANTIC_RECONCILIATION.md](GOVERNANCE_SEMANTIC_RECONCILIATION.md)\n- [TEMPORAL_AND_STATE_CONTINUITY.md](TEMPORAL_AND_STATE_CONTINUITY.md)\n- [EXECUTION_CONTEXT_MODEL.md](EXECUTION_CONTEXT_MODEL.md)\n- [IDENTITY_AND_RESPONSIBILITY_MODEL.md](IDENTITY_AND_RESPONSIBILITY_MODEL.md)\n- [GOVERNANCE_OBJECT_MODEL.md](GOVERNANCE_OBJECT_MODEL.md)\n- [SEMANTICS.md](SEMANTICS.md)\n- [LIFECYCLE.md](LIFECYCLE.md)\n- [PROVENANCE.md](PROVENANCE.md)\n- [NON_GOALS.md](NON_GOALS.md)\n- [schemas/](schemas/)\n\n---\n\n<div align=\"center\">\n  <sub>© 2026 Waveframe Labs — Independent Open-Science Research Entity</sub>\n</div>\n",
+        "description_content_type": "text/markdown",
+        "author": "Waveframe Labs",
+        "license_expression": "Apache-2.0",
+        "license_file": [
+          "LICENSE"
+        ],
+        "requires_dist": [
+          "cricore-contract-compiler>=0.4.0",
+          "waveframe-guard==0.17.0; extra == \"guard\"",
+          "pytest>=7; extra == \"dev\"",
+          "jsonschema>=4; extra == \"dev\""
+        ],
+        "requires_python": ">=3.10",
+        "provides_extra": [
+          "guard",
+          "dev"
+        ]
+      }
+    },
+    {
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/72/c7/0b5c2d3fd3eef5143815bbb858e00448de923b86c93404e2830d7676180b/cricore_contract_compiler-0.4.0-py3-none-any.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "7f5acee0e78e30204f33e52bb3a8feaf64986abcb419eada97951c6104649b5e"
+          },
+          "hash": "sha256=7f5acee0e78e30204f33e52bb3a8feaf64986abcb419eada97951c6104649b5e"
+        }
+      },
+      "is_direct": false,
+      "is_yanked": false,
+      "requested": false,
+      "metadata": {
+        "metadata_version": "2.4",
+        "name": "cricore-contract-compiler",
+        "version": "0.4.0",
+        "dynamic": [
+          "license-file"
+        ],
+        "summary": "Deterministic compiler for governance policies into CRI-CORE contract artifacts.",
+        "description": "<p align=\"center\">\n  <img src=\"https://raw.githubusercontent.com/Waveframe-Labs/.github/main/assets/branding/canon_wf_logo_extended.png\" width=\"700\">\n</p>\n\n# CRI-CORE Contract Compiler\n\nThe CRI-CORE Contract Compiler is a deterministic compiler for governance\npolicies into CRI-CORE contract artifacts.\n\nIt bridges governance design and runtime enforcement by converting a\nhuman-authored JSON policy into a stable, machine-readable compiled contract.\nThe compiled contract is a required input to CRI-CORE and defines the\ngovernance constraints evaluated at the execution boundary.\n\nThe compiler does not execute governance logic, make runtime decisions, or\nenforce policy. Its role is limited to producing reproducible contract\nartifacts with a stable structure and deterministic hash.\n\n## Installation\n\nInstall from PyPI:\n\n```bash\npip install cricore-contract-compiler\n```\n\nRequires Python 3.9 or later.\n\n## CLI Usage\n\nCompile a governance policy into a compiled contract artifact:\n\n```bash\ncricore-compile-policy policy.json compiled_contract.json\n```\n\nThe output is a deterministic JSON artifact that includes compiler metadata,\ncompiled governance requirements, invariants, and a contract hash.\n\n## Python Usage\n\nThe compiler can also be used programmatically:\n\n```python\nfrom compiler.compile_policy import compile_policy\n\npolicy = {\n    \"contract_id\": \"finance-policy\",\n    \"contract_version\": \"1.0.0\",\n    \"authority\": {\n        \"required_roles\": [\"proposer\", \"reviewer\"]\n    },\n    \"approvals\": {\n        \"thresholds\": [\n            {\n                \"field\": \"amount\",\n                \"operator\": \">\",\n                \"value\": 1000,\n                \"requires_role\": \"approver\"\n            }\n        ]\n    },\n    \"artifacts\": {\n        \"required\": [\"proposal\", \"approval\"]\n    },\n    \"stages\": {\n        \"allowed_transitions\": [\n            {\"from\": \"proposed\", \"to\": \"approved\"}\n        ]\n    },\n    \"constraints\": [\n        {\n            \"type\": \"separation_of_duties\",\n            \"roles\": [\"proposer\", \"reviewer\"]\n        }\n    ]\n}\n\ncompiled_contract = compile_policy(policy)\n```\n\n## Policy Input\n\nPolicies are JSON objects with a required contract identity:\n\n```json\n{\n  \"contract_id\": \"finance-policy\",\n  \"contract_version\": \"1.0.0\"\n}\n```\n\nThe compiler currently recognizes these optional sections:\n\n- `authority.required_roles`: list of role names required by the contract.\n- `approvals.thresholds`: list of threshold-based approval requirements.\n- `artifacts.required`: list of required governance artifact names.\n- `stages.allowed_transitions`: list of allowed lifecycle transition objects.\n- `constraints`: list of explicit structural constraints.\n- `targets.allow` / `targets.deny`: optional opaque target-scoping rules using\n  `exact` or `prefix` matching.\n\n`contract_version` must follow semantic version format: `X.Y.Z`.\n`contract_version` is assigned by the policy owner and is independent of the\ncompiler package version.\n\n## Compiled Output\n\nThe compiled contract always includes these top-level sections:\n\n```json\n{\n  \"contract_id\": \"finance-policy\",\n  \"contract_version\": \"1.0.0\",\n  \"authority_requirements\": {},\n  \"approval_requirements\": {},\n  \"artifact_requirements\": {},\n  \"stage_requirements\": {},\n  \"invariants\": {},\n  \"contract_hash\": \"...\"\n}\n```\n\nThe required core identity fields of every compiled contract are:\n\n- `contract_id`\n- `contract_version`\n- `contract_hash`\n\nThese are the only identity fields emitted by the compiler. The compiler does\nnot emit aliases such as `id` or `version`.\n\nThe compiler maps policy fields into compiled contract fields as follows:\n\n- `policy.authority.required_roles` becomes `authority_requirements.required_roles`.\n- `policy.approvals.thresholds` becomes `approval_requirements.thresholds`.\n- `policy.artifacts.required` becomes `artifact_requirements.required_artifacts`.\n- `policy.stages.allowed_transitions` becomes `stage_requirements.allowed_transitions`.\n- `constraints[type=\"separation_of_duties\"]` becomes `invariants.separation_of_duties`.\n\nEmpty compiled sections remain present as empty objects to keep the contract\nshape stable for downstream validation and hashing.\n\n## Target Scoping\n\nTarget scope defines which resources an automated action may or may not change.\n\n```json\n{\n  \"targets\": {\n    \"allow\": [\n      {\"match\": \"exact\", \"value\": \"README.md\"}\n    ],\n    \"deny\": [\n      {\"match\": \"prefix\", \"value\": \"deployment/\"}\n    ]\n  }\n}\n```\n\nWhen `targets` is present, it maps directly to the optional compiled section:\n\n```json\n{\n  \"target_requirements\": {\n    \"allow\": [\n      {\"match\": \"exact\", \"value\": \"README.md\"}\n    ],\n    \"deny\": [\n      {\"match\": \"prefix\", \"value\": \"deployment/\"}\n    ]\n  }\n}\n```\n\nSupported match types are exactly `exact` and literal `prefix`; matching is\ncase-sensitive against the opaque target supplied by Guard. Deny rules take\nprecedence over allow rules. A nonempty allow list blocks unmatched targets,\nwhile an empty or absent allow list allows targets unless denied. Missing or\ninvalid execution targets fail closed whenever `target_requirements` exists.\nThe format supports neither globs nor regular expressions, and the compiler\nperforms no implicit or filesystem normalization. The compiler defines and\nhashes these constraints, but Guard enforces them at runtime.\n\n## Contract Identity Guarantee\n\nThe compiler produces a deterministic contract identity composed of:\n\n- `contract_id`\n- `contract_version`\n- `contract_hash`\n\nThe `contract_hash` is computed from the canonical compiled contract structure\nusing sorted JSON serialization.\n\nFor identical policy inputs, the compiler guarantees identical contract hashes.\n\nThis identity is used by downstream systems (e.g., CRI-CORE) to verify that a\nproposal references the exact contract used for evaluation. Mismatches result\nin enforcement failure.\n\n## Contract Pass-Through Requirement\n\nCompiled contracts must be passed through downstream systems without\nmodification.\n\nIn particular:\n\n- Contract identity fields (`contract_id`, `contract_version`, `contract_hash`)\n  must not be altered.\n- Downstream components must not recompute or overwrite the contract hash.\n\nCRI-CORE enforces this at evaluation time. Any mismatch between a proposal's\ndeclared contract hash and the compiled contract hash will result in a blocked\ndecision.\n\n## Determinism\n\nCompiled contracts are hashed with SHA-256 after canonicalizing the compiled\nstructure using sorted JSON keys.\n\nThis ensures:\n\n- identical policy inputs produce identical compiled outputs\n- identical compiled outputs produce identical contract hashes\n\nThis determinism is required for reproducible enforcement and contract identity\nverification in CRI-CORE.\n\nWritten artifacts also include `_compiler` metadata:\n\n```json\n{\n  \"_compiler\": {\n    \"tool\": \"cricore-contract-compiler\",\n    \"version\": \"0.4.0\",\n    \"contract_hash\": \"...\"\n  }\n}\n```\n\n## Validation\n\nThe compiler performs minimal compile-time validation for:\n\n- Policy root type.\n- Required `contract_id`.\n- Required semantic `contract_version`.\n- `authority.required_roles` as a list of strings.\n- `approvals.thresholds` as a list of threshold objects.\n- `artifacts.required` as a list of strings.\n- `stages.allowed_transitions` as a list of transition objects.\n- Separation-of-duties constraints with at least two roles.\n\nThe JSON schema in `schema/policy.schema.json` defines the supported policy\nsurface. Runtime enforcement remains outside this package.\n\n## Position in the Governance Pipeline\n\n```text\nGovernance Policy\n        |\nContract Compiler\n        |\nCompiled Contract\n        |\nProposal Normalizer\n        |\nCRI-CORE Kernel\n        |\nCommit Decision\n```\n\nThe compiler sits upstream of CRI-CORE runtime enforcement. It produces the\nstructural contract artifact that downstream systems can evaluate.\n\n## Role in the Execution Protocol\n\nThe compiler is responsible for defining governance constraints in a\ndeterministic, machine-readable form.\n\nWithin the CRI-CORE execution model:\n\n- The compiler defines contract identity and constraints\n- The proposal normalizer constructs canonical proposals referencing the contract\n- CRI-CORE evaluates whether the proposed action is admissible\n\nThe compiler does not participate in runtime evaluation.\nIt defines the contract that runtime enforcement depends on.\n\n## Non-Responsibilities\n\nThe compiler does not:\n\n- Execute governance validation.\n- Interpret policy semantics beyond structural compilation.\n- Perform runtime decision logic.\n- Enforce governance rules.\n- Modify or interpret proposal data at runtime.\n\nAll runtime enforcement is handled by CRI-CORE or other downstream systems.\n\n## Forward Compatibility\n\nCompiled contracts may include additional sections beyond those currently\nenforced by CRI-CORE (e.g., approval requirements, artifact requirements,\nstage constraints, invariants).\n\nThese fields are preserved for forward compatibility and may be enforced by\nfuture versions of the execution pipeline.\n\n## Project Status\n\nVersion `0.4.0` adds deterministic target scoping to contract identity while\npreserving legacy target-free compiled outputs and hashes. Runtime enforcement\nof target requirements requires a Guard version that supports\n`target_requirements`; no migration is required.\n\n## License\n\nApache-2.0\n\nCopyright 2026 Waveframe Labs.\n",
+        "description_content_type": "text/markdown",
+        "keywords": [
+          "governance",
+          "policy compiler",
+          "ai governance",
+          "compliance",
+          "contracts"
+        ],
+        "author_email": "Waveframe Labs <swright@waveframelabs.org>",
+        "license": "Apache-2.0",
+        "license_file": [
+          "LICENSE"
+        ],
+        "classifier": [
+          "Programming Language :: Python :: 3",
+          "License :: OSI Approved :: Apache Software License",
+          "Operating System :: OS Independent"
+        ],
+        "requires_dist": [
+          "jsonschema>=4",
+          "pytest>=7; extra == \"dev\"",
+          "jsonschema>=4; extra == \"dev\""
+        ],
+        "requires_python": ">=3.9",
+        "project_url": [
+          "Homepage, https://waveframelabs.org",
+          "Source, https://github.com/Waveframe-Labs/cricore-contract-compiler",
+          "Issues, https://github.com/Waveframe-Labs/cricore-contract-compiler/issues"
+        ],
+        "provides_extra": [
+          "dev"
+        ]
+      }
+    },
+    {
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/69/90/f63fb5873511e014207a475e2bb4e8b2e570d655b00ac19a9a0ca0a385ee/jsonschema-4.26.0-py3-none-any.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "d489f15263b8d200f8387e64b4c3a75f06629559fb73deb8fdfb525f2dab50ce"
+          },
+          "hash": "sha256=d489f15263b8d200f8387e64b4c3a75f06629559fb73deb8fdfb525f2dab50ce"
+        }
+      },
+      "is_direct": false,
+      "is_yanked": false,
+      "requested": false,
+      "metadata": {
+        "metadata_version": "2.4",
+        "name": "jsonschema",
+        "version": "4.26.0",
+        "summary": "An implementation of JSON Schema validation for Python",
+        "description": "==========\njsonschema\n==========\n\n|PyPI| |Pythons| |CI| |ReadTheDocs| |Precommit| |Zenodo|\n\n.. |PyPI| image:: https://img.shields.io/pypi/v/jsonschema.svg\n   :alt: PyPI version\n   :target: https://pypi.org/project/jsonschema/\n\n.. |Pythons| image:: https://img.shields.io/pypi/pyversions/jsonschema.svg\n   :alt: Supported Python versions\n   :target: https://pypi.org/project/jsonschema/\n\n.. |CI| image:: https://github.com/python-jsonschema/jsonschema/workflows/CI/badge.svg\n  :alt: Build status\n  :target: https://github.com/python-jsonschema/jsonschema/actions?query=workflow%3ACI\n\n.. |ReadTheDocs| image:: https://readthedocs.org/projects/python-jsonschema/badge/?version=stable&style=flat\n   :alt: ReadTheDocs status\n   :target: https://python-jsonschema.readthedocs.io/en/stable/\n\n.. |Precommit| image:: https://results.pre-commit.ci/badge/github/python-jsonschema/jsonschema/main.svg\n   :alt: pre-commit.ci status\n   :target: https://results.pre-commit.ci/latest/github/python-jsonschema/jsonschema/main\n\n.. |Zenodo| image:: https://zenodo.org/badge/3072629.svg\n   :alt: Zenodo DOI\n   :target: https://zenodo.org/badge/latestdoi/3072629\n\n\n``jsonschema`` is an implementation of the `JSON Schema <https://json-schema.org>`_ specification for Python.\n\n.. code:: python\n\n    >>> from jsonschema import validate\n\n    >>> # A sample schema, like what we'd get from json.load()\n    >>> schema = {\n    ...     \"type\" : \"object\",\n    ...     \"properties\" : {\n    ...         \"price\" : {\"type\" : \"number\"},\n    ...         \"name\" : {\"type\" : \"string\"},\n    ...     },\n    ... }\n\n    >>> # If no exception is raised by validate(), the instance is valid.\n    >>> validate(instance={\"name\" : \"Eggs\", \"price\" : 34.99}, schema=schema)\n\n    >>> validate(\n    ...     instance={\"name\" : \"Eggs\", \"price\" : \"Invalid\"}, schema=schema,\n    ... )                                   # doctest: +IGNORE_EXCEPTION_DETAIL\n    Traceback (most recent call last):\n        ...\n    ValidationError: 'Invalid' is not of type 'number'\n\nIt can also be used from the command line by installing `check-jsonschema <https://github.com/python-jsonschema/check-jsonschema>`_.\n\nFeatures\n--------\n\n* Full support for `Draft 2020-12 <https://python-jsonschema.readthedocs.io/en/latest/api/jsonschema/validators/#jsonschema.validators.Draft202012Validator>`_, `Draft 2019-09 <https://python-jsonschema.readthedocs.io/en/latest/api/jsonschema/validators/#jsonschema.validators.Draft201909Validator>`_, `Draft 7 <https://python-jsonschema.readthedocs.io/en/latest/api/jsonschema/validators/#jsonschema.validators.Draft7Validator>`_, `Draft 6 <https://python-jsonschema.readthedocs.io/en/latest/api/jsonschema/validators/#jsonschema.validators.Draft6Validator>`_, `Draft 4 <https://python-jsonschema.readthedocs.io/en/latest/api/jsonschema/validators/#jsonschema.validators.Draft4Validator>`_ and `Draft 3 <https://python-jsonschema.readthedocs.io/en/latest/api/jsonschema/validators/#jsonschema.validators.Draft3Validator>`_\n\n* `Lazy validation <https://python-jsonschema.readthedocs.io/en/latest/api/jsonschema/protocols/#jsonschema.protocols.Validator.iter_errors>`_ that can iteratively report *all* validation errors.\n\n* `Programmatic querying <https://python-jsonschema.readthedocs.io/en/latest/errors/>`_ of which properties or items failed validation.\n\n\nInstallation\n------------\n\n``jsonschema`` is available on `PyPI <https://pypi.org/project/jsonschema/>`_. You can install using `pip <https://pip.pypa.io/en/stable/>`_:\n\n.. code:: bash\n\n    $ pip install jsonschema\n\n\nExtras\n======\n\nTwo extras are available when installing the package, both currently related to ``format`` validation:\n\n    * ``format``\n    * ``format-nongpl``\n\nThey can be used when installing in order to include additional dependencies, e.g.:\n\n.. code:: bash\n\n    $ pip install jsonschema'[format]'\n\nBe aware that the mere presence of these dependencies – or even the specification of ``format`` checks in a schema – do *not* activate format checks (as per the specification).\nPlease read the `format validation documentation <https://python-jsonschema.readthedocs.io/en/latest/validate/#validating-formats>`_ for further details.\n\nAbout\n-----\n\nI'm Julian Berman.\n\n``jsonschema`` is on `GitHub <https://github.com/python-jsonschema/jsonschema>`_.\n\nGet in touch, via GitHub or otherwise, if you've got something to contribute, it'd be most welcome!\n\nIf you feel overwhelmingly grateful, you can also `sponsor me <https://github.com/sponsors/Julian/>`_.\n\nAnd for companies who appreciate ``jsonschema`` and its continued support and growth, ``jsonschema`` is also now supportable via `TideLift <https://tidelift.com/subscription/pkg/pypi-jsonschema?utm_source=pypi-jsonschema&utm_medium=referral&utm_campaign=readme>`_.\n\n\nRelease Information\n-------------------\n\nv4.26.0\n=======\n\n* Decrease import time by delaying importing of ``urllib.request`` (#1416).\n",
+        "description_content_type": "text/x-rst",
+        "keywords": [
+          "data validation",
+          "json",
+          "json schema",
+          "jsonschema",
+          "validation"
+        ],
+        "author_email": "Julian Berman <Julian+jsonschema@GrayVines.com>",
+        "license_expression": "MIT",
+        "license_file": [
+          "COPYING"
+        ],
+        "classifier": [
+          "Development Status :: 5 - Production/Stable",
+          "Intended Audience :: Developers",
+          "Operating System :: OS Independent",
+          "Programming Language :: Python",
+          "Programming Language :: Python :: 3.10",
+          "Programming Language :: Python :: 3.11",
+          "Programming Language :: Python :: 3.12",
+          "Programming Language :: Python :: 3.13",
+          "Programming Language :: Python :: 3.14",
+          "Programming Language :: Python :: Implementation :: CPython",
+          "Programming Language :: Python :: Implementation :: PyPy",
+          "Topic :: File Formats :: JSON",
+          "Topic :: File Formats :: JSON :: JSON Schema"
+        ],
+        "requires_dist": [
+          "attrs>=22.2.0",
+          "jsonschema-specifications>=2023.03.6",
+          "referencing>=0.28.4",
+          "rpds-py>=0.25.0",
+          "fqdn; extra == 'format'",
+          "idna; extra == 'format'",
+          "isoduration; extra == 'format'",
+          "jsonpointer>1.13; extra == 'format'",
+          "rfc3339-validator; extra == 'format'",
+          "rfc3987; extra == 'format'",
+          "uri-template; extra == 'format'",
+          "webcolors>=1.11; extra == 'format'",
+          "fqdn; extra == 'format-nongpl'",
+          "idna; extra == 'format-nongpl'",
+          "isoduration; extra == 'format-nongpl'",
+          "jsonpointer>1.13; extra == 'format-nongpl'",
+          "rfc3339-validator; extra == 'format-nongpl'",
+          "rfc3986-validator>0.1.0; extra == 'format-nongpl'",
+          "rfc3987-syntax>=1.1.0; extra == 'format-nongpl'",
+          "uri-template; extra == 'format-nongpl'",
+          "webcolors>=24.6.0; extra == 'format-nongpl'"
+        ],
+        "requires_python": ">=3.10",
+        "project_url": [
+          "Homepage, https://github.com/python-jsonschema/jsonschema",
+          "Documentation, https://python-jsonschema.readthedocs.io/",
+          "Issues, https://github.com/python-jsonschema/jsonschema/issues/",
+          "Funding, https://github.com/sponsors/Julian",
+          "Tidelift, https://tidelift.com/subscription/pkg/pypi-jsonschema?utm_source=pypi-jsonschema&utm_medium=referral&utm_campaign=pypi-link",
+          "Changelog, https://github.com/python-jsonschema/jsonschema/blob/main/CHANGELOG.rst",
+          "Source, https://github.com/python-jsonschema/jsonschema"
+        ],
+        "provides_extra": [
+          "format",
+          "format-nongpl"
+        ]
+      }
+    },
+    {
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/64/b4/17d4b0b2a2dc85a6df63d1157e028ed19f90d4cd97c36717afef2bc2f395/attrs-26.1.0-py3-none-any.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309"
+          },
+          "hash": "sha256=c647aa4a12dfbad9333ca4e71fe62ddc36f4e63b2d260a37a8b83d2f043ac309"
+        }
+      },
+      "is_direct": false,
+      "is_yanked": false,
+      "requested": false,
+      "metadata": {
+        "metadata_version": "2.4",
+        "name": "attrs",
+        "version": "26.1.0",
+        "summary": "Classes Without Boilerplate",
+        "description": "<p align=\"center\">\n  <a href=\"https://www.attrs.org/\">\n    <img src=\"https://raw.githubusercontent.com/python-attrs/attrs/main/docs/_static/attrs_logo.svg\" width=\"35%\" alt=\"attrs\" />\n  </a>\n</p>\n\n\n*attrs* is the Python package that will bring back the **joy** of **writing classes** by relieving you from the drudgery of implementing object protocols (aka [dunder methods](https://www.attrs.org/en/latest/glossary.html#term-dunder-methods)).\nTrusted by NASA for [Mars missions since 2020](https://github.com/readme/featured/nasa-ingenuity-helicopter)!\n\nIts main goal is to help you to write **concise** and **correct** software without slowing down your code.\n\n\n## Sponsors\n\n*attrs* would not be possible without our [amazing sponsors](https://github.com/sponsors/hynek).\nEspecially those generously supporting us at the *The Organization* tier and higher:\n\n<!-- sponsor-break-begin -->\n\n<p align=\"center\">\n\n<!-- [[[cog\nimport pathlib, tomllib\n\nfor sponsor in tomllib.loads(pathlib.Path(\"pyproject.toml\").read_text())[\"tool\"][\"sponcon\"][\"sponsors\"]:\n      print(f'<a href=\"{sponsor[\"url\"]}\"><img title=\"{sponsor[\"title\"]}\" src=\"https://www.attrs.org/en/26.1.0/_static/sponsors/{sponsor[\"img\"]}\" width=\"190\" /></a>')\n]]] -->\n<a href=\"https://www.variomedia.de/\"><img title=\"Variomedia AG\" src=\"https://www.attrs.org/en/26.1.0/_static/sponsors/Variomedia.svg\" width=\"190\" /></a>\n<a href=\"https://tidelift.com/?utm_source=lifter&utm_medium=referral&utm_campaign=hynek\"><img title=\"Tidelift\" src=\"https://www.attrs.org/en/26.1.0/_static/sponsors/Tidelift.svg\" width=\"190\" /></a>\n<a href=\"https://kraken.tech/\"><img title=\"Kraken Tech\" src=\"https://www.attrs.org/en/26.1.0/_static/sponsors/Kraken.svg\" width=\"190\" /></a>\n<a href=\"https://privacy-solutions.org/\"><img title=\"Privacy Solutions\" src=\"https://www.attrs.org/en/26.1.0/_static/sponsors/Privacy-Solutions.svg\" width=\"190\" /></a>\n<a href=\"https://filepreviews.io/\"><img title=\"FilePreviews\" src=\"https://www.attrs.org/en/26.1.0/_static/sponsors/FilePreviews.svg\" width=\"190\" /></a>\n<a href=\"https://www.testmuai.com/?utm_medium=sponsor&utm_source=structlog\"><img title=\"TestMu AI\" src=\"https://www.attrs.org/en/26.1.0/_static/sponsors/TestMu-AI.svg\" width=\"190\" /></a>\n<a href=\"https://polar.sh/\"><img title=\"Polar\" src=\"https://www.attrs.org/en/26.1.0/_static/sponsors/Polar.svg\" width=\"190\" /></a>\n<!-- [[[end]]] -->\n\n</p>\n\n<!-- sponsor-break-end -->\n\n<p align=\"center\">\n   <strong>Please consider <a href=\"https://github.com/sponsors/hynek\">joining them</a> to help make <em>attrs</em>’s maintenance more sustainable!</strong>\n</p>\n\n<!-- teaser-end -->\n\n## Example\n\n*attrs* gives you a class decorator and a way to declaratively define the attributes on that class:\n\n<!-- code-begin -->\n\n```pycon\n>>> from attrs import asdict, define, make_class, Factory\n\n>>> @define\n... class SomeClass:\n...     a_number: int = 42\n...     list_of_numbers: list[int] = Factory(list)\n...\n...     def hard_math(self, another_number):\n...         return self.a_number + sum(self.list_of_numbers) * another_number\n\n\n>>> sc = SomeClass(1, [1, 2, 3])\n>>> sc\nSomeClass(a_number=1, list_of_numbers=[1, 2, 3])\n\n>>> sc.hard_math(3)\n19\n>>> sc == SomeClass(1, [1, 2, 3])\nTrue\n>>> sc != SomeClass(2, [3, 2, 1])\nTrue\n\n>>> asdict(sc)\n{'a_number': 1, 'list_of_numbers': [1, 2, 3]}\n\n>>> SomeClass()\nSomeClass(a_number=42, list_of_numbers=[])\n\n>>> C = make_class(\"C\", [\"a\", \"b\"])\n>>> C(\"foo\", \"bar\")\nC(a='foo', b='bar')\n```\n\nAfter *declaring* your attributes, *attrs* gives you:\n\n- a concise and explicit overview of the class's attributes,\n- a nice human-readable `__repr__`,\n- equality-checking methods,\n- an initializer,\n- and much more,\n\n*without* writing dull boilerplate code again and again and *without* runtime performance penalties.\n\n---\n\nThis example uses *attrs*'s modern APIs that have been introduced in version 20.1.0, and the *attrs* package import name that has been added in version 21.3.0.\nThe classic APIs (`@attr.s`, `attr.ib`, plus their serious-business aliases) and the `attr` package import name will remain **indefinitely**.\n\nCheck out [*On The Core API Names*](https://www.attrs.org/en/latest/names.html) for an in-depth explanation!\n\n\n### Hate Type Annotations!?\n\nNo problem!\nTypes are entirely **optional** with *attrs*.\nSimply assign `attrs.field()` to the attributes instead of annotating them with types:\n\n```python\nfrom attrs import define, field\n\n@define\nclass SomeClass:\n    a_number = field(default=42)\n    list_of_numbers = field(factory=list)\n```\n\n\n## Data Classes\n\nOn the tin, *attrs* might remind you of `dataclasses` (and indeed, `dataclasses` [are a descendant](https://hynek.me/articles/import-attrs/) of *attrs*).\nIn practice it does a lot more and is more flexible.\nFor instance, it allows you to define [special handling of NumPy arrays for equality checks](https://www.attrs.org/en/stable/comparison.html#customization), allows more ways to [plug into the initialization process](https://www.attrs.org/en/stable/init.html#hooking-yourself-into-initialization), has a replacement for `__init_subclass__`, and allows for stepping through the generated methods using a debugger.\n\nFor more details, please refer to our [comparison page](https://www.attrs.org/en/stable/why.html#data-classes), but generally speaking, we are more likely to commit crimes against nature to make things work that one would expect to work, but that are quite complicated in practice.\n\n\n## Project Information\n\n- [**Changelog**](https://www.attrs.org/en/stable/changelog.html)\n- [**Documentation**](https://www.attrs.org/)\n- [**PyPI**](https://pypi.org/project/attrs/)\n- [**Source Code**](https://github.com/python-attrs/attrs)\n- [**Contributing**](https://github.com/python-attrs/attrs/blob/main/.github/CONTRIBUTING.md)\n- [**Third-party Extensions**](https://github.com/python-attrs/attrs/wiki/Extensions-to-attrs)\n- **Get Help**: use the `python-attrs` tag on [Stack Overflow](https://stackoverflow.com/questions/tagged/python-attrs)\n\n\n### *attrs* for Enterprise\n\nAvailable as part of the [Tidelift Subscription](https://tidelift.com/?utm_source=lifter&utm_medium=referral&utm_campaign=hynek).\n\nThe maintainers of *attrs* and thousands of other packages are working with Tidelift to deliver commercial support and maintenance for the open source packages you use to build your applications.\nSave time, reduce risk, and improve code health, while paying the maintainers of the exact packages you use.\n\n## Release Information\n\n### Backwards-incompatible Changes\n\n- Field aliases are now resolved *before* calling `field_transformer`, so transformers receive fully populated `Attribute` objects with usable `alias` values instead of `None`.\n  The new `Attribute.alias_is_default` flag indicates whether the alias was auto-generated (`True`) or explicitly set by the user (`False`).\n  [#1509](https://github.com/python-attrs/attrs/issues/1509)\n\n\n### Changes\n\n- Fix type annotations for `attrs.validators.optional()`, so it no longer rejects tuples with more than one validator.\n  [#1496](https://github.com/python-attrs/attrs/issues/1496)\n- The `attrs.validators.disabled()` contextmanager can now be nested.\n  [#1513](https://github.com/python-attrs/attrs/issues/1513)\n- Frozen classes can set `on_setattr=attrs.setters.NO_OP` in addition to `None`.\n  [#1515](https://github.com/python-attrs/attrs/issues/1515)\n- It's now possible to pass *attrs* **instances** in addition to *attrs* **classes** to `attrs.fields()`.\n  [#1529](https://github.com/python-attrs/attrs/issues/1529)\n\n\n\n---\n\n[Full changelog →](https://www.attrs.org/en/stable/changelog.html)\n",
+        "description_content_type": "text/markdown",
+        "keywords": [
+          "attribute",
+          "boilerplate",
+          "class"
+        ],
+        "author_email": "Hynek Schlawack <hs@ox.cx>",
+        "license_expression": "MIT",
+        "license_file": [
+          "LICENSE"
+        ],
+        "classifier": [
+          "Development Status :: 5 - Production/Stable",
+          "Programming Language :: Python :: 3.9",
+          "Programming Language :: Python :: 3.10",
+          "Programming Language :: Python :: 3.11",
+          "Programming Language :: Python :: 3.12",
+          "Programming Language :: Python :: 3.13",
+          "Programming Language :: Python :: 3.14",
+          "Programming Language :: Python :: Implementation :: CPython",
+          "Programming Language :: Python :: Implementation :: PyPy",
+          "Typing :: Typed"
+        ],
+        "requires_python": ">=3.9",
+        "project_url": [
+          "Documentation, https://www.attrs.org/",
+          "Changelog, https://www.attrs.org/en/stable/changelog.html",
+          "GitHub, https://github.com/python-attrs/attrs",
+          "Funding, https://github.com/sponsors/hynek",
+          "Tidelift, https://tidelift.com/subscription/pkg/pypi-attrs?utm_source=pypi-attrs&utm_medium=pypi"
+        ]
+      }
+    },
+    {
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/41/45/1a4ed80516f02155c51f51e8cedb3c1902296743db0bbc66608a0db2814f/jsonschema_specifications-2025.9.1-py3-none-any.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "98802fee3a11ee76ecaca44429fda8a41bff98b00a0f2838151b113f210cc6fe"
+          },
+          "hash": "sha256=98802fee3a11ee76ecaca44429fda8a41bff98b00a0f2838151b113f210cc6fe"
+        }
+      },
+      "is_direct": false,
+      "is_yanked": false,
+      "requested": false,
+      "metadata": {
+        "metadata_version": "2.4",
+        "name": "jsonschema-specifications",
+        "version": "2025.9.1",
+        "summary": "The JSON Schema meta-schemas and vocabularies, exposed as a Registry",
+        "description": "=============================\n``jsonschema-specifications``\n=============================\n\n|PyPI| |Pythons| |CI| |ReadTheDocs|\n\nJSON support files from the `JSON Schema Specifications <https://json-schema.org/specification.html>`_ (metaschemas, vocabularies, etc.), packaged for runtime access from Python as a `referencing-based Schema Registry <https://referencing.readthedocs.io/en/stable/api/#referencing.Registry>`_.\n\n.. |PyPI| image:: https://img.shields.io/pypi/v/jsonschema-specifications.svg\n  :alt: PyPI version\n  :target: https://pypi.org/project/jsonschema-specifications/\n\n.. |Pythons| image:: https://img.shields.io/pypi/pyversions/jsonschema-specifications.svg\n  :alt: Supported Python versions\n  :target: https://pypi.org/project/jsonschema-specifications/\n\n.. |CI| image:: https://github.com/python-jsonschema/jsonschema-specifications/workflows/CI/badge.svg\n  :alt: Build status\n  :target: https://github.com/python-jsonschema/jsonschema-specifications/actions?query=workflow%3ACI\n\n.. |ReadTheDocs| image:: https://readthedocs.org/projects/jsonschema-specifications/badge/?version=stable&style=flat\n  :alt: ReadTheDocs status\n  :target: https://jsonschema-specifications.readthedocs.io/en/stable/\n",
+        "description_content_type": "text/x-rst",
+        "keywords": [
+          "data validation",
+          "json",
+          "json schema",
+          "jsonschema",
+          "validation"
+        ],
+        "author_email": "Julian Berman <Julian+jsonschema-specifications@GrayVines.com>",
+        "license_expression": "MIT",
+        "license_file": [
+          "COPYING"
+        ],
+        "classifier": [
+          "Development Status :: 5 - Production/Stable",
+          "Intended Audience :: Developers",
+          "Operating System :: OS Independent",
+          "Programming Language :: Python",
+          "Programming Language :: Python :: 3.9",
+          "Programming Language :: Python :: 3.10",
+          "Programming Language :: Python :: 3.11",
+          "Programming Language :: Python :: 3.12",
+          "Programming Language :: Python :: 3.13",
+          "Programming Language :: Python :: Implementation :: CPython",
+          "Programming Language :: Python :: Implementation :: PyPy",
+          "Topic :: File Formats :: JSON",
+          "Topic :: File Formats :: JSON :: JSON Schema"
+        ],
+        "requires_dist": [
+          "referencing>=0.31.0"
+        ],
+        "requires_python": ">=3.9",
+        "project_url": [
+          "Documentation, https://jsonschema-specifications.readthedocs.io/",
+          "Homepage, https://github.com/python-jsonschema/jsonschema-specifications",
+          "Issues, https://github.com/python-jsonschema/jsonschema-specifications/issues/",
+          "Funding, https://github.com/sponsors/Julian",
+          "Tidelift, https://tidelift.com/subscription/pkg/pypi-jsonschema-specifications?utm_source=pypi-jsonschema-specifications&utm_medium=referral&utm_campaign=pypi-link",
+          "Source, https://github.com/python-jsonschema/jsonschema-specifications"
+        ]
+      }
+    },
+    {
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/2c/58/ca301544e1fa93ed4f80d724bf5b194f6e4b945841c5bfd555878eea9fcb/referencing-0.37.0-py3-none-any.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "381329a9f99628c9069361716891d34ad94af76e461dcb0335825aecc7692231"
+          },
+          "hash": "sha256=381329a9f99628c9069361716891d34ad94af76e461dcb0335825aecc7692231"
+        }
+      },
+      "is_direct": false,
+      "is_yanked": false,
+      "requested": false,
+      "metadata": {
+        "metadata_version": "2.4",
+        "name": "referencing",
+        "version": "0.37.0",
+        "summary": "JSON Referencing + Python",
+        "description": "===============\n``referencing``\n===============\n\n|PyPI| |Pythons| |CI| |ReadTheDocs| |pre-commit|\n\n.. |PyPI| image:: https://img.shields.io/pypi/v/referencing.svg\n  :alt: PyPI version\n  :target: https://pypi.org/project/referencing/\n\n.. |Pythons| image:: https://img.shields.io/pypi/pyversions/referencing.svg\n  :alt: Supported Python versions\n  :target: https://pypi.org/project/referencing/\n\n.. |CI| image:: https://github.com/python-jsonschema/referencing/workflows/CI/badge.svg\n  :alt: Build status\n  :target: https://github.com/python-jsonschema/referencing/actions?query=workflow%3ACI\n\n.. |ReadTheDocs| image:: https://readthedocs.org/projects/referencing/badge/?version=stable&style=flat\n   :alt: ReadTheDocs status\n   :target: https://referencing.readthedocs.io/en/stable/\n\n.. |pre-commit| image:: https://results.pre-commit.ci/badge/github/python-jsonschema/referencing/main.svg\n  :alt: pre-commit.ci status\n  :target: https://results.pre-commit.ci/latest/github/python-jsonschema/referencing/main\n\n\nAn implementation-agnostic implementation of JSON reference resolution.\n\nSee `the documentation <https://referencing.readthedocs.io/>`_ for more details.\n",
+        "description_content_type": "text/x-rst",
+        "keywords": [
+          "asyncapi",
+          "json",
+          "jsonschema",
+          "openapi",
+          "referencing"
+        ],
+        "author_email": "Julian Berman <Julian+referencing@GrayVines.com>",
+        "license_expression": "MIT",
+        "license_file": [
+          "COPYING"
+        ],
+        "classifier": [
+          "Development Status :: 3 - Alpha",
+          "Intended Audience :: Developers",
+          "Operating System :: OS Independent",
+          "Programming Language :: Python",
+          "Programming Language :: Python :: 3.10",
+          "Programming Language :: Python :: 3.11",
+          "Programming Language :: Python :: 3.12",
+          "Programming Language :: Python :: 3.13",
+          "Programming Language :: Python :: 3.14",
+          "Programming Language :: Python :: Implementation :: CPython",
+          "Programming Language :: Python :: Implementation :: PyPy",
+          "Topic :: File Formats :: JSON",
+          "Topic :: File Formats :: JSON :: JSON Schema"
+        ],
+        "requires_dist": [
+          "attrs>=22.2.0",
+          "rpds-py>=0.7.0",
+          "typing-extensions>=4.4.0; python_version < '3.13'"
+        ],
+        "requires_python": ">=3.10",
+        "project_url": [
+          "Documentation, https://referencing.readthedocs.io/",
+          "Homepage, https://github.com/python-jsonschema/referencing",
+          "Issues, https://github.com/python-jsonschema/referencing/issues/",
+          "Funding, https://github.com/sponsors/Julian",
+          "Tidelift, https://tidelift.com/subscription/pkg/pypi-referencing?utm_source=pypi-referencing&utm_medium=referral&utm_campaign=pypi-link",
+          "Changelog, https://referencing.readthedocs.io/en/stable/changes/",
+          "Source, https://github.com/python-jsonschema/referencing"
+        ]
+      }
+    },
+    {
+      "download_info": {
+        "url": "https://files.pythonhosted.org/packages/85/62/a3892ba945f4e24c78f352e5de3c7620d8479f73f211406a97263d13c7d2/rpds_py-2026.6.3-cp314-cp314-win_amd64.whl",
+        "archive_info": {
+          "hashes": {
+            "sha256": "0be972be84cfcaf46c8c6edf690ca0f154ac17babf1f6a955a51579b34ad2dc5"
+          },
+          "hash": "sha256=0be972be84cfcaf46c8c6edf690ca0f154ac17babf1f6a955a51579b34ad2dc5"
+        }
+      },
+      "is_direct": false,
+      "is_yanked": false,
+      "requested": false,
+      "metadata": {
+        "metadata_version": "2.4",
+        "name": "rpds-py",
+        "version": "2026.6.3",
+        "summary": "Python bindings to Rust's persistent data structures (rpds)",
+        "description": "===========\n``rpds.py``\n===========\n\n|PyPI| |Pythons| |CI|\n\n.. |PyPI| image:: https://img.shields.io/pypi/v/rpds-py.svg\n  :alt: PyPI version\n  :target: https://pypi.org/project/rpds-py/\n\n.. |Pythons| image:: https://img.shields.io/pypi/pyversions/rpds-py.svg\n  :alt: Supported Python versions\n  :target: https://pypi.org/project/rpds-py/\n\n.. |CI| image:: https://github.com/crate-py/rpds/workflows/CI/badge.svg\n  :alt: Build status\n  :target: https://github.com/crate-py/rpds/actions?query=workflow%3ACI\n\n.. |ReadTheDocs| image:: https://readthedocs.org/projects/referencing/badge/?version=stable&style=flat\n   :alt: ReadTheDocs status\n   :target: https://referencing.readthedocs.io/en/stable/\n\n\nPython bindings to the `Rust rpds crate <https://docs.rs/rpds/>`_ for persistent data structures.\n\nWhat's here is quite minimal (in transparency, it was written initially to support replacing ``pyrsistent`` in the `referencing library <https://github.com/python-jsonschema/referencing>`_).\nIf you see something missing (which is very likely), a PR is definitely welcome to add it.\n\nInstallation\n------------\n\nThe distribution on PyPI is named ``rpds.py`` (equivalently ``rpds-py``), and thus can be installed via e.g.:\n\n.. code:: sh\n\n    $ pip install rpds-py\n\nNote that if you install ``rpds-py`` from source, you will need a Rust toolchain installed, as it is a build-time dependency.\nAn example of how to do so in a ``Dockerfile`` can be found `here <https://github.com/bowtie-json-schema/bowtie/blob/e77fd93598cb6e7dc1b8b1f53c00e5aa410c201a/implementations/python-jsonschema/Dockerfile#L1-L8>`_.\n\nIf you believe you are on a common platform which should have wheels built (i.e. and not need to compile from source), feel free to file an issue or pull request modifying the GitHub action used here to build wheels via ``maturin``.\n\nUsage\n-----\n\nMethods in general are named similarly to their ``rpds`` counterparts (rather than ``pyrsistent``\\ 's conventions, though probably a full drop-in ``pyrsistent``\\ -compatible wrapper module is a good addition at some point).\n\n.. code:: python\n\n    >>> from rpds import HashTrieMap, HashTrieSet, List\n\n    >>> m = HashTrieMap({\"foo\": \"bar\", \"baz\": \"quux\"})\n    >>> m.insert(\"spam\", 37) == HashTrieMap({\"foo\": \"bar\", \"baz\": \"quux\", \"spam\": 37})\n    True\n    >>> m.remove(\"foo\") == HashTrieMap({\"baz\": \"quux\"})\n    True\n\n    >>> s = HashTrieSet({\"foo\", \"bar\", \"baz\", \"quux\"})\n    >>> s.insert(\"spam\") == HashTrieSet({\"foo\", \"bar\", \"baz\", \"quux\", \"spam\"})\n    True\n    >>> s.remove(\"foo\") == HashTrieSet({\"bar\", \"baz\", \"quux\"})\n    True\n\n    >>> L = List([1, 3, 5])\n    >>> L.push_front(-1) == List([-1, 1, 3, 5])\n    True\n    >>> L.rest == List([3, 5])\n    True\n\n",
+        "description_content_type": "text/x-rst; charset=UTF-8",
+        "keywords": [
+          "data structures",
+          "rust",
+          "persistent"
+        ],
+        "author_email": "Julian Berman <Julian+rpds@GrayVines.com>",
+        "license_expression": "MIT",
+        "license_file": [
+          "LICENSE"
+        ],
+        "classifier": [
+          "Development Status :: 3 - Alpha",
+          "Intended Audience :: Developers",
+          "Operating System :: OS Independent",
+          "Programming Language :: Rust",
+          "Programming Language :: Python :: 3.11",
+          "Programming Language :: Python :: 3.12",
+          "Programming Language :: Python :: 3.13",
+          "Programming Language :: Python :: 3.14",
+          "Programming Language :: Python :: 3.15",
+          "Programming Language :: Python :: 3",
+          "Programming Language :: Python :: Implementation :: CPython",
+          "Programming Language :: Python :: Implementation :: PyPy"
+        ],
+        "requires_python": ">=3.11",
+        "project_url": [
+          "Documentation, https://rpds.readthedocs.io/",
+          "Funding, https://github.com/sponsors/Julian",
+          "Homepage, https://github.com/crate-py/rpds",
+          "Issues, https://github.com/crate-py/rpds/issues/",
+          "Source, https://github.com/crate-py/rpds",
+          "Tidelift, https://tidelift.com/subscription/pkg/pypi-rpds-py?utm_source=pypi-rpds-py&utm_medium=referral&utm_campaign=pypi-link",
+          "Upstream, https://github.com/orium/rpds"
+        ]
+      }
+    }
+  ],
+  "environment": {
+    "implementation_name": "cpython",
+    "implementation_version": "3.14.7",
+    "os_name": "nt",
+    "platform_machine": "AMD64",
+    "platform_release": "2025Server",
+    "platform_system": "Windows",
+    "platform_version": "10.0.26100",
+    "python_full_version": "3.14.7",
+    "platform_python_implementation": "CPython",
+    "python_version": "3.14",
+    "sys_platform": "win32"
+  }
+}

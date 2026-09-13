@@ -1,0 +1,2456 @@
+{
+  "development_flags_absent": true,
+  "cases": {
+    "create-only/repository-maintainer/create/generated/new.md": {
+      "executed": true,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:3a9d9bbb1e57a6671461e5ce1df065e3da843ad75ca6abeb4543fdf8e325200f",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:77b14624ad0b63b9481d9c6286afc72de6a942c062dce27043c1c28ccdfa4386",
+          "compiled_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "contract_id": "repository-create-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:be6ced1145454e1c0b0b10efbbbe2610460b5700a63edec0f6b1bbc803172e75",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:f22f2f0b0b4d855df25c7f2c0d6da429815b35eb7472b6ce2a11031d91b71a74"
+        },
+        "callback_completed": true,
+        "callback_invoked": true,
+        "decision": "admissible",
+        "decision_outcome_hash": "sha256:36f5a3bccba1fadcfa7d56691661ffa13b2eb9d4201ad6b545fc1fecae2ea697",
+        "execution_request": {
+          "action": "create",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_f20d407fc5a244968322fec1c9bb8610",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "generated/new.md"
+        },
+        "execution_request_hash": "sha256:68f26b4ad31dc7f17874db6e834ef78a20f431b32823b1a1f18325f6cbe0655f",
+        "execution_status": "succeeded",
+        "guard_receipt_hash": "sha256:11cc873d61bd8c1fbed4c43f8016b001b4ce7d0a7110e49240c490d31876067f",
+        "mutation_executed": true,
+        "mutation_status": "executed",
+        "repository_operation": {
+          "bytes_written": 7,
+          "created": true,
+          "error": null,
+          "operation": "create",
+          "schema_version": "guard_repository_operation.v1",
+          "status": "succeeded",
+          "target": "generated/new.md"
+        },
+        "run_id": "guard_run_76e19a955cb5143e252ad154",
+        "schema_version": "guard_execution_attestation.v3",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_e9cdb5c2ad154c48b120c6ff2bccbb9a"
+        },
+        "target_binding_hash": "sha256:3c96db3a588150961e581ead636368efd7577f7ed786fb22713e6cef68bf18e2"
+      }
+    },
+    "create-only/repository-maintainer/modify/README.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:11d895fff66c8c25a7f54573b93f1dae43efd3ab556a468bc0e55b1795484e86",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:fbf5403ff9399d80a708989731c3fc2f93c9531c16024781f6236a96d54c283c",
+          "compiled_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "contract_id": "repository-create-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:be6ced1145454e1c0b0b10efbbbe2610460b5700a63edec0f6b1bbc803172e75",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:6f6580f0df8275374ec1787ba489baf1a7644af5959cf2fbf4894886152a4e1d"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:a2aeef84abc339bde50ecc7751134fed7fac08de21a3e87cc283eb10308c2394",
+        "execution_request": {
+          "action": "modify",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_9f688191fb9741e5af146a2a718e608b",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "README.md"
+        },
+        "execution_request_hash": "sha256:2764307bf77e5cae0d481071fa3aa20dc97781a8ee7170a741f80b53a0bec1ac",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:ee6f5b25d7f9dd39095a1d4685950ed886d4f9b08874ebcf5e00312e9e320f7c",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_0a4dd4634ae6cd64cf155577",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_e9cdb5c2ad154c48b120c6ff2bccbb9a"
+        },
+        "target_binding_hash": "sha256:3c96db3a588150961e581ead636368efd7577f7ed786fb22713e6cef68bf18e2"
+      }
+    },
+    "create-only/repository-maintainer/create/README.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:de6dab24a9d5f119774e9e854981dfbeed110f7891a88f60fd6e5a7a07258f55",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:21237426ca23bdaedc33021dfac83d0c82b7f1cb7648b7d7064a282d9305402b",
+          "compiled_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "contract_id": "repository-create-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:be6ced1145454e1c0b0b10efbbbe2610460b5700a63edec0f6b1bbc803172e75",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:84f6b3e4bd1af9a0699f07a6538cd1c72ee2e2be3ff31119c774dbb9fd1799dd"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:201efebe231a7316adcc47484f721e1af0b5c055d347282a055993ad5d710593",
+        "execution_request": {
+          "action": "create",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_2d254dc2d1444a7dadafa430edc538ac",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "README.md"
+        },
+        "execution_request_hash": "sha256:3ceac7d196eb083c3e047413f300439db029e7f7d8a5cac1402cd0f9bc0dc614",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:fb801a0cc16e5c969776e220a2e1a4c04e9d71e2c8cd4d63c84a18e71af5a17c",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_122450f9a01c5123c3dc3bd3",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_e9cdb5c2ad154c48b120c6ff2bccbb9a"
+        },
+        "target_binding_hash": "sha256:3c96db3a588150961e581ead636368efd7577f7ed786fb22713e6cef68bf18e2"
+      }
+    },
+    "create-only/repository-maintainer/modify/generated/new.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:accaa94796af443f8a0e6fc8c4c6d7c519a88f13265f9b9d165934bc429310c6",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:f793ba0829b3241511269448dd55d4e1aaa80934f4e7d925f4a6f4804fc3f9ac",
+          "compiled_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "contract_id": "repository-create-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:be6ced1145454e1c0b0b10efbbbe2610460b5700a63edec0f6b1bbc803172e75",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:daaebb6870775dba14d8857b98158ef327a93481dd64246a76b3dae81d989c88"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:a2aeef84abc339bde50ecc7751134fed7fac08de21a3e87cc283eb10308c2394",
+        "execution_request": {
+          "action": "modify",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_1f38b98d023a43a19cc57b6c7cb07556",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "generated/new.md"
+        },
+        "execution_request_hash": "sha256:56b85c4b5603f2a424bcfdb095d52e16199480005841e7d2e9f40892abc7fc7c",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:b84c0fdea3d1fbdd89cf851fdca354c5cdf835eb65c4df12b9e6750e31921a4d",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_aaed43a823fcff2194f0dc9a",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_e9cdb5c2ad154c48b120c6ff2bccbb9a"
+        },
+        "target_binding_hash": "sha256:3c96db3a588150961e581ead636368efd7577f7ed786fb22713e6cef68bf18e2"
+      }
+    },
+    "create-only/repository-maintainer/create/generated/private/secret": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:541848ba7cf0fbca6eba5d7d38ffe21509a90c187044f36c899da78a1a265a50",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:4c0e6c05afa1f03288c6c75d7a2b8830a0c63ccb3d979062610b23c280b83912",
+          "compiled_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "contract_id": "repository-create-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:be6ced1145454e1c0b0b10efbbbe2610460b5700a63edec0f6b1bbc803172e75",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:b9aaa55ceba7137322fd2fc07fa52a49554cded809c97daaa5d001432f6db305"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:46f13d85877d6c11436dbbb447d29ff4719ce9a85912c9e8aca58105c8fc9da6",
+        "execution_request": {
+          "action": "create",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_50d7d873c65e4ca18f70f2b04d5ef985",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "generated/private/secret"
+        },
+        "execution_request_hash": "sha256:c679b5221fef94c137fd1fbff400f8abe0eb21a59990202a4e78ae3183a5bf2e",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:7ff97d2622ece2cdb860399f722d746976b339803e8eb6d40455467b48733835",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_365c3c22919d72bc70b0cd45",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_e9cdb5c2ad154c48b120c6ff2bccbb9a"
+        },
+        "target_binding_hash": "sha256:3c96db3a588150961e581ead636368efd7577f7ed786fb22713e6cef68bf18e2"
+      }
+    },
+    "create-only/repository-maintainer/modify/docs/locked.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:10fa6cb923236a75a0a8715466f4fc79c38cf4dc43a869816d35a720235dd66b",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:82167d2de9c71c1a931ee2d9341fe50e4de1fff693ed52b8f0694c20db2e7d4d",
+          "compiled_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "contract_id": "repository-create-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:be6ced1145454e1c0b0b10efbbbe2610460b5700a63edec0f6b1bbc803172e75",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:c7e4e2866683ca9a5eb68c1d5eb1e6f02c582fb4331ad57a2972a217ea1277ad"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:a2aeef84abc339bde50ecc7751134fed7fac08de21a3e87cc283eb10308c2394",
+        "execution_request": {
+          "action": "modify",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_4fdb64c340be4969ac13d1b7fc981725",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "docs/locked.md"
+        },
+        "execution_request_hash": "sha256:1b057e6bcd1749c2541f2da82e6351d556ca303a64c30504d98e985689a5c658",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:2221f801d5e7e8c601bb7a82eaee83f3efac265e96f00fa8a177ccf7fce5d237",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_6ba92abe1bc214f68116e28c",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_e9cdb5c2ad154c48b120c6ff2bccbb9a"
+        },
+        "target_binding_hash": "sha256:3c96db3a588150961e581ead636368efd7577f7ed786fb22713e6cef68bf18e2"
+      }
+    },
+    "create-only/repository-maintainer/collision": "rejected; bytes preserved",
+    "create-only/security-reviewer/create/generated/new.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:85946388ac38e65f579673be5cbed07c65a2af7a633cf1620cb882ef60283507",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:8ee5953c9abdf429b3927462411a9db3de200b85586ea5b371fea2940917bfc0",
+          "compiled_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "contract_id": "repository-create-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:be6ced1145454e1c0b0b10efbbbe2610460b5700a63edec0f6b1bbc803172e75",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:12e24cb4d38a5178b86bf5a47043707071698d06271342d102da7addc7cd5610"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:faa7c8d1a8d8e151fcbe05a9d031e2f7f41f37da63b4266be2dc03d9e5ea5abc",
+        "execution_request": {
+          "action": "create",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_c787ee4bcecc40d29787a3214e1aa741",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "generated/new.md"
+        },
+        "execution_request_hash": "sha256:2cb56bcb96c759e598d29170575f151a429487799d9d714ae360de6361efa5ce",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:146c8fd404ce2ab4ff145da63f432ddfc4482fa6282b59421ff3f321a19898ba",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_5fd745b8506d73bb40a36138",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_2155d0840f9348de98cb822273536a2e"
+        },
+        "target_binding_hash": "sha256:95f96c2c1cd302297356535e6a53a2c2acb42aeeb476d5b44a6e108bb5902643"
+      }
+    },
+    "create-only/security-reviewer/modify/README.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:c67c899daad0d16687256107799d2061a5b15f53ea3eb45bf89fb7be58a71737",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:37230f5b5bb83aa3710d367f8c7709e0f9d3af013642a09c2abf9242f09f5597",
+          "compiled_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "contract_id": "repository-create-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:be6ced1145454e1c0b0b10efbbbe2610460b5700a63edec0f6b1bbc803172e75",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:ef1a57ca21e942306cf2fbc89552800a601ddfee7464835db389a1eec061c604"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:a2aeef84abc339bde50ecc7751134fed7fac08de21a3e87cc283eb10308c2394",
+        "execution_request": {
+          "action": "modify",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_c48a7ec891de4dbfb6e10744c0645afa",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "README.md"
+        },
+        "execution_request_hash": "sha256:61b5545812e75ce9e67cf3b07755c56060a4a8033c9b75137c0efe4a626a0bd1",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:961381a99bd727b1d121ab9fce0cad898c3779d8fd0af980aa07a7cbab9883bd",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_433cc95e8072edb5a0c2d634",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_2155d0840f9348de98cb822273536a2e"
+        },
+        "target_binding_hash": "sha256:95f96c2c1cd302297356535e6a53a2c2acb42aeeb476d5b44a6e108bb5902643"
+      }
+    },
+    "create-only/security-reviewer/create/README.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:dfdbde08d01cb14d763153d91cf218d59b394b60014115703d856403e969382b",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:d34c0377e4f4567f6e5c973b8521b7447d6ec5c3a4538a950ab6f8f12a6cde74",
+          "compiled_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "contract_id": "repository-create-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:be6ced1145454e1c0b0b10efbbbe2610460b5700a63edec0f6b1bbc803172e75",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:5aa085660449062a00f7c2c8f2a1eac8061c718395986a1910569b8f68bb0940"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:c4f51b78e9b9dcd2000b60ecd30acd35015731449f0b7559df2b69ce90988b8c",
+        "execution_request": {
+          "action": "create",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_73c809833b8d495e84f4ee73a14b65b3",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "README.md"
+        },
+        "execution_request_hash": "sha256:a81b7af6973ef2d3f221b4ebbe9209f04f8bd8db1c073ae212336efdc0adc3ff",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:829e219f726c8d2d9ba99413a71197444e42cb15ecdcfedc340959a4e559748b",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_a6258a2b1d116bb5595768eb",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_2155d0840f9348de98cb822273536a2e"
+        },
+        "target_binding_hash": "sha256:95f96c2c1cd302297356535e6a53a2c2acb42aeeb476d5b44a6e108bb5902643"
+      }
+    },
+    "create-only/security-reviewer/modify/generated/new.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:f06e5a631fce545967b7811b1eee51e02ecb4b27b9bf48e4f84e366b4ff907a9",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:b512caa9737f648a9e96848a41d7fcb607fa98c54656e274e8810113445c18d9",
+          "compiled_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "contract_id": "repository-create-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:be6ced1145454e1c0b0b10efbbbe2610460b5700a63edec0f6b1bbc803172e75",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:accf06d4e127335b4412cf757c9531e9a4818fcc674cb31c6275aa57058e632d"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:a2aeef84abc339bde50ecc7751134fed7fac08de21a3e87cc283eb10308c2394",
+        "execution_request": {
+          "action": "modify",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_d506ee5ed9e446629c0b9412471d1bca",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "generated/new.md"
+        },
+        "execution_request_hash": "sha256:20a4c80c6fef130017da4395430b8e5208f240894a185005342250a8f2d2621f",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:46531024d9247216074463204bc8a68ade37a002e7a4439af7103f1b677d4b29",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_cd6901b288e229884abd623d",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_2155d0840f9348de98cb822273536a2e"
+        },
+        "target_binding_hash": "sha256:95f96c2c1cd302297356535e6a53a2c2acb42aeeb476d5b44a6e108bb5902643"
+      }
+    },
+    "create-only/security-reviewer/create/generated/private/secret": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:b830b696894e1f31c3eea2a34f4a1843b236969cc7081dfb86f066cda90151f3",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:d477fefc2426b6aa368c44ce55c760b0b0ba46f76fff00469011aada4e6820ea",
+          "compiled_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "contract_id": "repository-create-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:be6ced1145454e1c0b0b10efbbbe2610460b5700a63edec0f6b1bbc803172e75",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:cfe4314d0d86169607c3320af822b35a09b25661bcac1ec27e8715134bafa1cf"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:112d79cf20b522731d6edacc61f2531faa466ee0040bd27ecc273df791c86b85",
+        "execution_request": {
+          "action": "create",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_79edd0cc44f14a44b86e20ec4ded7ff9",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "generated/private/secret"
+        },
+        "execution_request_hash": "sha256:c429cb34af479f21f824d48681993248704be997f147c3a10c3ce8aa3fd9b1aa",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:ff590a138d86e8ed8698ea645d16375e18399ec9164ffb93ed05002d20cb3d9f",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_6bc1480782597608dc3dcae7",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_2155d0840f9348de98cb822273536a2e"
+        },
+        "target_binding_hash": "sha256:95f96c2c1cd302297356535e6a53a2c2acb42aeeb476d5b44a6e108bb5902643"
+      }
+    },
+    "create-only/security-reviewer/modify/docs/locked.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:3829a5d017546b0bce6a452bd2465f3fd5a416ac4238cab499b3beed86ed7582",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:18f40abd9660549081323f9b5713f771fd6fd058d13a882ef91af7320e8b9985",
+          "compiled_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "contract_id": "repository-create-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:be6ced1145454e1c0b0b10efbbbe2610460b5700a63edec0f6b1bbc803172e75",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:3ed189655cbe759a5664292fe953b736c8be62cf333cc77cc9e195504fc0f190"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:a2aeef84abc339bde50ecc7751134fed7fac08de21a3e87cc283eb10308c2394",
+        "execution_request": {
+          "action": "modify",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_05128f22b02a412f9e2ce2ee3dc04a63",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "docs/locked.md"
+        },
+        "execution_request_hash": "sha256:da0095a2dd0781a1e4d97cc83d5dce63b458404611cfd4cf5e5d1bfe075c1ef2",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:4aa3471e6b363a85b23c96d75574133b77e75bbdc10ded4a68567bfb43e2f5d2",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_82d82b10aabd61246e21794c",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_2155d0840f9348de98cb822273536a2e"
+        },
+        "target_binding_hash": "sha256:95f96c2c1cd302297356535e6a53a2c2acb42aeeb476d5b44a6e108bb5902643"
+      }
+    },
+    "create-only/repository-reviewer/create/generated/new.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:8a5a281f1a0fefaf17d95d4544b49e61e2b1b279050855e0644396579cb430ec",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:55bbb6b6b5a683b0fe878b1ddcdddd396138b28872ab2b7f98e5de3f2f66d825",
+          "compiled_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "contract_id": "repository-create-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:be6ced1145454e1c0b0b10efbbbe2610460b5700a63edec0f6b1bbc803172e75",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:73de19707196f23b0c8223a2a7990e751bda18b82a3a7bbc3b7352cd93925e2e"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:039f2d0e72997928c55c03dc9708cad6b3e76816b616f76f9ae14457c2b4d769",
+        "execution_request": {
+          "action": "create",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_7e32a922bc7c4b0083c2f47c483c7990",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "generated/new.md"
+        },
+        "execution_request_hash": "sha256:4d1f290f0aac171377db1204d3c3b5f536e0d8bd4070cd593918f8d00ea02f72",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:105eadf9d83a9ecf9e330d608fef441a9b2c6dd59b2d542b86b079074c13528e",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_ef659bc2bdaee4e7da8f219a",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_547329dce96241bc9c42edf76c9fd096"
+        },
+        "target_binding_hash": "sha256:a458cbccccaa8a77c7268c97503e4a6b1a6a487bf696fd8e8b3373096eae5064"
+      }
+    },
+    "create-only/repository-reviewer/modify/README.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:9dd32bdc4657784a484f110c9aae9c616e78f314a06677435049ac8f671edcac",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:faaf1c00481b8e0c4328aa9fea66e317064e5dfbe6b48f44fa822c67d432f872",
+          "compiled_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "contract_id": "repository-create-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:be6ced1145454e1c0b0b10efbbbe2610460b5700a63edec0f6b1bbc803172e75",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:ffc65ec474f7277ad73a1877f80f42bf65622a9a2fd64843d093778923965cd9"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:a2aeef84abc339bde50ecc7751134fed7fac08de21a3e87cc283eb10308c2394",
+        "execution_request": {
+          "action": "modify",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_f6baf0e008ab43dbb270113a02be2aa0",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "README.md"
+        },
+        "execution_request_hash": "sha256:a1abe9590891bea8edb7df22d426c3242887b5cb7b592b24ec3dac8a236dfad6",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:4d05c12c2527751f71ff117ef6d6015b562f46b5ec878cb8a36e70ab04bbdaf3",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_5721667649850dcabf807594",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_547329dce96241bc9c42edf76c9fd096"
+        },
+        "target_binding_hash": "sha256:a458cbccccaa8a77c7268c97503e4a6b1a6a487bf696fd8e8b3373096eae5064"
+      }
+    },
+    "create-only/repository-reviewer/create/README.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:7f152ae1124f9e459a5394800c60ea80aafb4a9ff15c8b8ca5ba5ab3bf725641",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:0dd04101dcf4bdb83ea5f26184beec1c47d10ad34fc8764354382fe01fd2bda6",
+          "compiled_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "contract_id": "repository-create-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:be6ced1145454e1c0b0b10efbbbe2610460b5700a63edec0f6b1bbc803172e75",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:33e1a0dd3319062e325d12431d329db02cb9efe43356015d4c4f00f420d9c454"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:7d36efa3aafd70d349be3a17314b6bb645ce9e66dc5595c86389dfa882b70d44",
+        "execution_request": {
+          "action": "create",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_851f7708be5a4250914610447b09eee0",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "README.md"
+        },
+        "execution_request_hash": "sha256:88a84fd9df058010770976d460f52758eb9de7ee9bf6ff58d353835e16c77336",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:03d8cf9d488f36df2355bdf0581c0b7249c92e339708d039cf7aa97368cc2544",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_f595518fbe99f91d536568a1",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_547329dce96241bc9c42edf76c9fd096"
+        },
+        "target_binding_hash": "sha256:a458cbccccaa8a77c7268c97503e4a6b1a6a487bf696fd8e8b3373096eae5064"
+      }
+    },
+    "create-only/repository-reviewer/modify/generated/new.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:6b9eb65a952179c7be17940ea42bd56655a74b9b8701d4c7771e31fa5ba7b90e",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:3710503ab7cd4d8aee63f964224fb1df8abe22a0c2db0c32357328a2efcdde19",
+          "compiled_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "contract_id": "repository-create-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:be6ced1145454e1c0b0b10efbbbe2610460b5700a63edec0f6b1bbc803172e75",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:c818f2bfaeb067495622894acb8be0eda4a7f428e6d2bdde533f41d59b7095c1"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:a2aeef84abc339bde50ecc7751134fed7fac08de21a3e87cc283eb10308c2394",
+        "execution_request": {
+          "action": "modify",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_39e5efcdcfea48b89452f91395b129a5",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "generated/new.md"
+        },
+        "execution_request_hash": "sha256:f372092963f8fc7a4329304275af9cfb87c8ab4ded0958aecd553c21aeda4f58",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:bb087d38b085a7f0daa90adef60dafd4a7a8d41d2ed2b16a9aaa55ba64c1921c",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_2a6837cafe60c8d1b3f32cab",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_547329dce96241bc9c42edf76c9fd096"
+        },
+        "target_binding_hash": "sha256:a458cbccccaa8a77c7268c97503e4a6b1a6a487bf696fd8e8b3373096eae5064"
+      }
+    },
+    "create-only/repository-reviewer/create/generated/private/secret": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:125a3efb07e525e44b8693cbae91786951103dc3363242036e802f000ddbbd73",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:b4e1895b9ea0acabdf6f4200805a63e40e495ba38678c2bdf25cdbc3abb61dbe",
+          "compiled_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "contract_id": "repository-create-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:be6ced1145454e1c0b0b10efbbbe2610460b5700a63edec0f6b1bbc803172e75",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:41963d4bf71eccc1a0ed53fa1bb8defd3114f5f4fe99f997d538cb422cd347c6"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:1705c1ec261e7a159004cae6c36780166c73de6682049981ed216440f2055154",
+        "execution_request": {
+          "action": "create",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_d28dcf681a2c4f668d0ada674ef24a39",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "generated/private/secret"
+        },
+        "execution_request_hash": "sha256:296265451abbb24c74019a60069d4e93d367d11c773d40b6dbd6545aef58ecd8",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:c60f1da706a61e4d198cec22cac283a180a6b0a19fbd445a0d2dd02c28200662",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_05d6448365a4b5c991598a4e",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_547329dce96241bc9c42edf76c9fd096"
+        },
+        "target_binding_hash": "sha256:a458cbccccaa8a77c7268c97503e4a6b1a6a487bf696fd8e8b3373096eae5064"
+      }
+    },
+    "create-only/repository-reviewer/modify/docs/locked.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:28af46416133e74cb51542315fd3ed12b6db5cb34a954a6918b2535d034a6d0d",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:19443046d7ae694d6fc381068fa0dc04a78a62fa2c5ef462d6f1ad1f69a069a1",
+          "compiled_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "contract_id": "repository-create-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:be6ced1145454e1c0b0b10efbbbe2610460b5700a63edec0f6b1bbc803172e75",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:a1de6f90b486808f806c2471e892b110b5a4fece9041fad47c16f93dd11d9aa2"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:a2aeef84abc339bde50ecc7751134fed7fac08de21a3e87cc283eb10308c2394",
+        "execution_request": {
+          "action": "modify",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_aca64e0cfd9a4df39cce0dd29eddd46a",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "docs/locked.md"
+        },
+        "execution_request_hash": "sha256:675a3c5d4ebe548c6b0198079b8a7e3a65274be5cb81f684a735fd2dbc2bdb42",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:140f574213aee30fbb6bf31d95fb4742f95b18043fc88e8998cec8ae3ac60a27",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_1a6fac02d44fc2d1565b627d",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_547329dce96241bc9c42edf76c9fd096"
+        },
+        "target_binding_hash": "sha256:a458cbccccaa8a77c7268c97503e4a6b1a6a487bf696fd8e8b3373096eae5064"
+      }
+    },
+    "modify-only/repository-maintainer/create/generated/new.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:a7d331a3571e225573fedf9a809e5c4a7556f274c977a60253454394b44a9288",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:db30aa28250e447e83f32b39d19cf6775a82bb371e271cc946580e4b089bb228",
+          "compiled_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "contract_id": "repository-modify-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:708238ca387de13b3507e90a7621fc0cca5632e47524e5b4ba89ef0c04690783",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:f22f2f0b0b4d855df25c7f2c0d6da429815b35eb7472b6ce2a11031d91b71a74"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:c84290794a92d962e1bf507a9911e9ed17158dc1784f4a611e29e738eb39667c",
+        "execution_request": {
+          "action": "create",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_e3df630bb7e949d9b9b2e01a8c1455ff",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "generated/new.md"
+        },
+        "execution_request_hash": "sha256:b0689c7053479a786febe4f7ed2b35f4da8a3ad5369516158da6dc3e0d596baa",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:7567556e83ab1f61e83cb6f2df0aefc04228e9f266c250dcca82ff38933a4bb4",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_c632b789778093d727da499e",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_a6af199a6c5c4767b5a7f9fb3241e451"
+        },
+        "target_binding_hash": "sha256:e996fca97aa0457e8e6356079b31e4378e0bf2e2c3cbb73dc537aa86638a43b6"
+      }
+    },
+    "modify-only/repository-maintainer/modify/docs/open.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:88a8b73afcc8ebe62eb1959cedac4519d1ea2c1d435b03316c42ee4a6d4f2c58",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:01228950c2b2281d290d8d37b8f412b121720c67ac9cd68ae96ce0c520aedccf",
+          "compiled_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "contract_id": "repository-modify-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:708238ca387de13b3507e90a7621fc0cca5632e47524e5b4ba89ef0c04690783",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:fdded3fb6abf61f0d12da235abdfc47bde6b7ab274f6a8f0aad2ce7a0c8fa430"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:f076aaf819917f69f90df502edea04c3eb79d8ecd524ec632b41ca8707b31458",
+        "execution_request": {
+          "action": "modify",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_16705a576fab4386936b7cdb77312c4d",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "docs/open.md"
+        },
+        "execution_request_hash": "sha256:c5e881c76994d20ae532c284254b4dab982a25aba889e245248aa4a662f3965d",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:f83477d1b9ea20718d2dd25ddca9fb8bab5bc91c4266dc2bb5f3d86475439e11",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_03df2b403146d83a59fc9634",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_a6af199a6c5c4767b5a7f9fb3241e451"
+        },
+        "target_binding_hash": "sha256:e996fca97aa0457e8e6356079b31e4378e0bf2e2c3cbb73dc537aa86638a43b6"
+      }
+    },
+    "modify-only/repository-maintainer/create/README.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:a6b760d0e2d0d0ea1348167251363a48541a485675f7d4b6413c709c065f282a",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:8a4c7894f269d12edb3d742b8b76b466dd3cb727fbdf9bfc92aab4af91e60616",
+          "compiled_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "contract_id": "repository-modify-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:708238ca387de13b3507e90a7621fc0cca5632e47524e5b4ba89ef0c04690783",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:84f6b3e4bd1af9a0699f07a6538cd1c72ee2e2be3ff31119c774dbb9fd1799dd"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:c84290794a92d962e1bf507a9911e9ed17158dc1784f4a611e29e738eb39667c",
+        "execution_request": {
+          "action": "create",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_db60ca667385497286afe3108ca8662b",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "README.md"
+        },
+        "execution_request_hash": "sha256:0ab6f7706416cd5f990af35af8962875a6d3b245220c6bd0f715dd2d7cae71b5",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:b99d07b1e4daabb6f4d8128e6ea4ed7f3b4c83b1a6360815cf3dc82cdd31645e",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_1dd364b8a7c502bad5b23976",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_a6af199a6c5c4767b5a7f9fb3241e451"
+        },
+        "target_binding_hash": "sha256:e996fca97aa0457e8e6356079b31e4378e0bf2e2c3cbb73dc537aa86638a43b6"
+      }
+    },
+    "modify-only/repository-maintainer/modify/generated/new.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:4b528f0e22839eae4d224f245388a5cd9221ccfd9e6a581448477daee39f11d8",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:730dcab4720701ec6086d38b624d293f64ccd03e63a368f2b5b83ab35c7b3379",
+          "compiled_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "contract_id": "repository-modify-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:708238ca387de13b3507e90a7621fc0cca5632e47524e5b4ba89ef0c04690783",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:daaebb6870775dba14d8857b98158ef327a93481dd64246a76b3dae81d989c88"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:a0bcf64b1cb6601919b9c6fe5b07fdd66175c6675cbaa8258c5409be21ac228d",
+        "execution_request": {
+          "action": "modify",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_9f5a2e887c364561b0b52c9ecbfc6001",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "generated/new.md"
+        },
+        "execution_request_hash": "sha256:625828a9963cef1a33ca2e8efa634f8624dfa268dc544c4960cc6c5d58b58a24",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:04f20eb3ee8f49a4dffe6e25212658cdad66d4a35ebceda1a99eb9e8aedfa730",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_dbeb95917c0b9c20e1b229f9",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_a6af199a6c5c4767b5a7f9fb3241e451"
+        },
+        "target_binding_hash": "sha256:e996fca97aa0457e8e6356079b31e4378e0bf2e2c3cbb73dc537aa86638a43b6"
+      }
+    },
+    "modify-only/repository-maintainer/create/generated/private/secret": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:3ec91d47ecbb56ca70da9921aac0785bdd0b3d91c61e692c6d6bd789aac6d2c4",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:92dc1c4bb2ebc2f38cb1c9622f022c6809f79b4e8840960f5e95bd3ab915bc72",
+          "compiled_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "contract_id": "repository-modify-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:708238ca387de13b3507e90a7621fc0cca5632e47524e5b4ba89ef0c04690783",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:b9aaa55ceba7137322fd2fc07fa52a49554cded809c97daaa5d001432f6db305"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:c84290794a92d962e1bf507a9911e9ed17158dc1784f4a611e29e738eb39667c",
+        "execution_request": {
+          "action": "create",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_14cb8db2dc784e87b9ef883cb603cc4e",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "generated/private/secret"
+        },
+        "execution_request_hash": "sha256:2b7afb5f822ff1adca301b2e641fab8122dae7ed5f1b20df18628891983c819d",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:69713f026804edd6bdc19df668e211395aec899ec51ea65d5472589379312b7e",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_78a4e9051a1c3240b56c4e57",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_a6af199a6c5c4767b5a7f9fb3241e451"
+        },
+        "target_binding_hash": "sha256:e996fca97aa0457e8e6356079b31e4378e0bf2e2c3cbb73dc537aa86638a43b6"
+      }
+    },
+    "modify-only/repository-maintainer/modify/docs/locked.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:9c6c5be308a3ca5a396a915445f08807f792f21e1e5aadd7117275069689c548",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:1fcdfb817394358b630f5704f46d3e5ef87cd4c64e5adada487b0b11f0766cfb",
+          "compiled_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "contract_id": "repository-modify-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:708238ca387de13b3507e90a7621fc0cca5632e47524e5b4ba89ef0c04690783",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:c7e4e2866683ca9a5eb68c1d5eb1e6f02c582fb4331ad57a2972a217ea1277ad"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:a98f5be2459940f6c503801c48e50e31f9c43fc73df2865fe7d0bc89cc92f06b",
+        "execution_request": {
+          "action": "modify",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_23257ed21ce3403f8d92291e04a6ef1c",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "docs/locked.md"
+        },
+        "execution_request_hash": "sha256:fac4413934626576c170eff8d7a357af4a9745b7f161c5b1ec150558c7160696",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:1a6922d825c26845559e4cfa927592df4003b8d8099cf51c56844a82bd534669",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_980db6e690a87ec0b32e0c86",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_a6af199a6c5c4767b5a7f9fb3241e451"
+        },
+        "target_binding_hash": "sha256:e996fca97aa0457e8e6356079b31e4378e0bf2e2c3cbb73dc537aa86638a43b6"
+      }
+    },
+    "modify-only/security-reviewer/create/generated/new.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:30dd07b4fd8b3f316418b42747b7339b4adb5dadf26ae9e832080bbea28ac669",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:095549141c4c0bdf1353d4aa1a85feb364d003f1f63e6be8c5c9c080b0a2c523",
+          "compiled_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "contract_id": "repository-modify-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:708238ca387de13b3507e90a7621fc0cca5632e47524e5b4ba89ef0c04690783",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:12e24cb4d38a5178b86bf5a47043707071698d06271342d102da7addc7cd5610"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:c84290794a92d962e1bf507a9911e9ed17158dc1784f4a611e29e738eb39667c",
+        "execution_request": {
+          "action": "create",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_93f31b567a5e4bb8adf630861461b744",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "generated/new.md"
+        },
+        "execution_request_hash": "sha256:0b2a13ed65a8c9e9785e9c37589a50c1e872d5caa66edb4e8fc4f01af84a2820",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:1867174e68eb78ae3171defdf0cb37c5dcb87104224bbb087dd1c4529eb0037f",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_f73d25e5fee46e91fa66bc3f",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_e7b459d315c5478aac2f002f33a19a9e"
+        },
+        "target_binding_hash": "sha256:51d408ee7344ed72b2df6249742e670752187d108e18597e28acf2154d805bec"
+      }
+    },
+    "modify-only/security-reviewer/modify/docs/open.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:15d45284d9ad4acdc4e7915dc71ce59aa5159379dc616893ff21b56d838c41e9",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:1170f05c4ff4729c0f73331d8cf423d2da2d8529689e5fac04fd48a2df645054",
+          "compiled_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "contract_id": "repository-modify-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:708238ca387de13b3507e90a7621fc0cca5632e47524e5b4ba89ef0c04690783",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:c4628ceaefe31f8105b91df0abdec47c20724d9044e9caeb83679ade2fa46db2"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:674343c8b78dd316cb2f575e7008c1b25c5949f2b66d7d193fc78542ea8cf0b4",
+        "execution_request": {
+          "action": "modify",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_e1f7834794474980a435c4002463f32c",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "docs/open.md"
+        },
+        "execution_request_hash": "sha256:f56a7fac8e5c3d9be572d86f208a1f1a0e7215fbf82066eb95ae3248ba9c4e1e",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:de8d7f26eea961d8aa4b46512de1df10cd2dfd1bcc811bd7f6b90bfbc4ac8680",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_b8f9838bd4325720c5a7bd7d",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_e7b459d315c5478aac2f002f33a19a9e"
+        },
+        "target_binding_hash": "sha256:51d408ee7344ed72b2df6249742e670752187d108e18597e28acf2154d805bec"
+      }
+    },
+    "modify-only/security-reviewer/create/README.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:994af8d7d5fcabc65eb6bad7f1cbed89b819bd0be509a482eddad9bf8df42f14",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:4d8d99690864056aeca97b5db3e3ba6384972788fd5877c2712927d99aa4e4b7",
+          "compiled_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "contract_id": "repository-modify-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:708238ca387de13b3507e90a7621fc0cca5632e47524e5b4ba89ef0c04690783",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:5aa085660449062a00f7c2c8f2a1eac8061c718395986a1910569b8f68bb0940"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:c84290794a92d962e1bf507a9911e9ed17158dc1784f4a611e29e738eb39667c",
+        "execution_request": {
+          "action": "create",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_e691a8fff1df4de5b00e42de73d50b7f",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "README.md"
+        },
+        "execution_request_hash": "sha256:c18f3716fe3483d82c6d48a3b34d93915617669821a6a6440339719be5874958",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:76d6435cd3b0bcd752f436717cfe9e6f47552bc4e078c3ef257edcc07b9dc23a",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_88e722b6e620a5d04c042d2e",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_e7b459d315c5478aac2f002f33a19a9e"
+        },
+        "target_binding_hash": "sha256:51d408ee7344ed72b2df6249742e670752187d108e18597e28acf2154d805bec"
+      }
+    },
+    "modify-only/security-reviewer/modify/generated/new.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:219bb7dfae3c919c366d150fddb786d9fc1a6b5b33a2c177e5365007fba29acd",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:07db6f2500c76a5f1061b4f7e3f040cbbbad38549c18bb38ebd6a052c8209df5",
+          "compiled_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "contract_id": "repository-modify-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:708238ca387de13b3507e90a7621fc0cca5632e47524e5b4ba89ef0c04690783",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:accf06d4e127335b4412cf757c9531e9a4818fcc674cb31c6275aa57058e632d"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:ae4d01567d319ccc67540eaae2ec831d93da1bce17a7929cb10e843a824ce137",
+        "execution_request": {
+          "action": "modify",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_0b96698d7aa9430d948837c41def29b9",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "generated/new.md"
+        },
+        "execution_request_hash": "sha256:675de17269eab7806a4b6fed4c97d3062d1423ec8592591bd1c4f23331809d39",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:9693775d12fa6a646a5bf50447533fba1449fdba34f643cf0d5f4a7afaf6adcc",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_ea831b6e84cb8e643bc308c5",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_e7b459d315c5478aac2f002f33a19a9e"
+        },
+        "target_binding_hash": "sha256:51d408ee7344ed72b2df6249742e670752187d108e18597e28acf2154d805bec"
+      }
+    },
+    "modify-only/security-reviewer/create/generated/private/secret": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:edd26e46a55704985296fb8a6bd9743a0da6d3379ffe15c970143c4b36219d7a",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:47735e29874103690c28548d9498cb2fe2adeeebec77790e5303ad4d989cbf43",
+          "compiled_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "contract_id": "repository-modify-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:708238ca387de13b3507e90a7621fc0cca5632e47524e5b4ba89ef0c04690783",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:cfe4314d0d86169607c3320af822b35a09b25661bcac1ec27e8715134bafa1cf"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:c84290794a92d962e1bf507a9911e9ed17158dc1784f4a611e29e738eb39667c",
+        "execution_request": {
+          "action": "create",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_b25b47b75ee041638163c2a5c6413e7c",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "generated/private/secret"
+        },
+        "execution_request_hash": "sha256:189b49f6a2e246cad00d3c10bf4090d35fbc24df1f85641e6574313935c1e9b9",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:3cb2a0d86b231cb570446b32eec7853d42b782f73900007ecd8322f72b99a6f0",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_c490fa431c775e8b7248ef37",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_e7b459d315c5478aac2f002f33a19a9e"
+        },
+        "target_binding_hash": "sha256:51d408ee7344ed72b2df6249742e670752187d108e18597e28acf2154d805bec"
+      }
+    },
+    "modify-only/security-reviewer/modify/docs/locked.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:ea58833b9c7acc427327b0ce549c15bd9a3f1f4be33e66cc14959d3bdff5eb43",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:e1aacca6dcbd4567987f0a5f8bb1e2490aff9de75e5f1d3c5870722d7908e006",
+          "compiled_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "contract_id": "repository-modify-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:708238ca387de13b3507e90a7621fc0cca5632e47524e5b4ba89ef0c04690783",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:3ed189655cbe759a5664292fe953b736c8be62cf333cc77cc9e195504fc0f190"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:702b4c1c92912eccd1dd3c18cfd2d1c74c2a95a451def68c358279c4dff16564",
+        "execution_request": {
+          "action": "modify",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_1abee6c6546d49cebdba42cf9edc35fc",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "docs/locked.md"
+        },
+        "execution_request_hash": "sha256:67e1d1633916d6f4564b4e9777ca0ae5898e232efc6c5aa40f310305f1896383",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:2ad373e25effd366d97d6cdea402f8d9f506f3573a8445870569e6b580b203b5",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_212efc897218b127358ea1d4",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_e7b459d315c5478aac2f002f33a19a9e"
+        },
+        "target_binding_hash": "sha256:51d408ee7344ed72b2df6249742e670752187d108e18597e28acf2154d805bec"
+      }
+    },
+    "modify-only/repository-reviewer/create/generated/new.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:6e3309f416763707a4443347c0201900b71b539d86317fde4b4dc29dcdc8ac47",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:97d59e10569ba8a37f2af8340e3cb54cf6e36134acab4893829173a8a0b20d1f",
+          "compiled_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "contract_id": "repository-modify-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:708238ca387de13b3507e90a7621fc0cca5632e47524e5b4ba89ef0c04690783",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:73de19707196f23b0c8223a2a7990e751bda18b82a3a7bbc3b7352cd93925e2e"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:c84290794a92d962e1bf507a9911e9ed17158dc1784f4a611e29e738eb39667c",
+        "execution_request": {
+          "action": "create",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_ad644dcac65b44699e37b669b9d509c1",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "generated/new.md"
+        },
+        "execution_request_hash": "sha256:916fadbdb5271aafcc5e8f4d5407f8f9b600a1413182100697a3a427df697d59",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:3af672e64b9b0e2c84b47b5c50ecacc2ab0c508723a19c2cba53033484bd0791",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_890396ecca7d2512e30b2550",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_4497b878fa3641c38f7e9d9f8a5e3a3c"
+        },
+        "target_binding_hash": "sha256:ed40efd71b4d8eb9a2b3f0d2656686e0a59a304dbcbe72deb7e26bbbf2b0d848"
+      }
+    },
+    "modify-only/repository-reviewer/modify/docs/open.md": {
+      "executed": true,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:4e50a7673d074b4f46e591578ab68802ded7d0bd4890cc116f58e69dadbdea62",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:8e2447f2b90ce9cadd8a2adb194b9ffeae0c9b3e8f2de02171795e44a32b01b6",
+          "compiled_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "contract_id": "repository-modify-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:708238ca387de13b3507e90a7621fc0cca5632e47524e5b4ba89ef0c04690783",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:6893a091ded73e78a4b4d89d94f5390f412253dc5419c3417e1eb6eb902fb31d"
+        },
+        "callback_completed": true,
+        "callback_invoked": true,
+        "decision": "admissible",
+        "decision_outcome_hash": "sha256:017cbbd6bea3f59d6195a5108397c1ab07e5b534eddb5720d8ddccc1022f3c35",
+        "execution_request": {
+          "action": "modify",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_b1e15e75c4ee4912967bc192aca392aa",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "docs/open.md"
+        },
+        "execution_request_hash": "sha256:ae3119315863be537087ff49482cff9cac26eed124ef3b41cef575e912c77699",
+        "execution_status": "succeeded",
+        "guard_receipt_hash": "sha256:2f752e44843d4de13f7eb70a478951d157a251ac0f914166db5694cf3470ffdc",
+        "mutation_executed": true,
+        "mutation_status": "executed",
+        "run_id": "guard_run_792099234d5829ab75eb41e6",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_4497b878fa3641c38f7e9d9f8a5e3a3c"
+        },
+        "target_binding_hash": "sha256:ed40efd71b4d8eb9a2b3f0d2656686e0a59a304dbcbe72deb7e26bbbf2b0d848"
+      }
+    },
+    "modify-only/repository-reviewer/create/README.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:c6669ea25c85176e90743b51bc9ff73adb72c4c6262c860a93c492e27eb12bb6",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:9fdba0527c708869b12c9d7a0349c68ee460a9ff272f7630d2ca13fece081067",
+          "compiled_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "contract_id": "repository-modify-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:708238ca387de13b3507e90a7621fc0cca5632e47524e5b4ba89ef0c04690783",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:33e1a0dd3319062e325d12431d329db02cb9efe43356015d4c4f00f420d9c454"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:c84290794a92d962e1bf507a9911e9ed17158dc1784f4a611e29e738eb39667c",
+        "execution_request": {
+          "action": "create",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_26bd234ddd0247858f7bfb694aea92cf",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "README.md"
+        },
+        "execution_request_hash": "sha256:ecc3305c4e206674919a18f393a9418c5d10aa633d1303fa5c016ac08a8eba55",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:e0f00a97c07d16f2e4fe3b51552219492e620d58a4a7506a1350ef75160210f0",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_3835481c17c2d7ac7b27a95d",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_4497b878fa3641c38f7e9d9f8a5e3a3c"
+        },
+        "target_binding_hash": "sha256:ed40efd71b4d8eb9a2b3f0d2656686e0a59a304dbcbe72deb7e26bbbf2b0d848"
+      }
+    },
+    "modify-only/repository-reviewer/modify/generated/new.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:16a07adb17c0edbe75f69b919df6a9736d64e861c5bce6245e9bf5de7e43da7d",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:5d3ca911b5140587e9d15c2074ba8989b5b2cdcf2acb1e7257477d5327746209",
+          "compiled_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "contract_id": "repository-modify-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:708238ca387de13b3507e90a7621fc0cca5632e47524e5b4ba89ef0c04690783",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:c818f2bfaeb067495622894acb8be0eda4a7f428e6d2bdde533f41d59b7095c1"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:001ceaa73cc971e236ecfe4448fd02c364a4e45e5049cd1effa651d15d1dcb07",
+        "execution_request": {
+          "action": "modify",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_9ccc72629b674f3a9657aab327108756",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "generated/new.md"
+        },
+        "execution_request_hash": "sha256:6feaa88c504a29e872e685e735905c570a242668066ed7695fdab58637a40b10",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:962ed792929e1dc8e428a73304bfe773fecd550495c982432bf20529e94e8037",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_6ce706bb59bb23ab8b66f707",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_4497b878fa3641c38f7e9d9f8a5e3a3c"
+        },
+        "target_binding_hash": "sha256:ed40efd71b4d8eb9a2b3f0d2656686e0a59a304dbcbe72deb7e26bbbf2b0d848"
+      }
+    },
+    "modify-only/repository-reviewer/create/generated/private/secret": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:eaff4d5fc7653019a45ee4aefbb258de87975cb0b4e8989fdababd8765631006",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:c4c42534feae1f92b346272f2c928ac66cf8d0ab58a84317fddc1e533eff3892",
+          "compiled_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "contract_id": "repository-modify-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:708238ca387de13b3507e90a7621fc0cca5632e47524e5b4ba89ef0c04690783",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:41963d4bf71eccc1a0ed53fa1bb8defd3114f5f4fe99f997d538cb422cd347c6"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:c84290794a92d962e1bf507a9911e9ed17158dc1784f4a611e29e738eb39667c",
+        "execution_request": {
+          "action": "create",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_5717b2f9fbfb47fd913b5a3115d5ab0e",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "generated/private/secret"
+        },
+        "execution_request_hash": "sha256:a6f4445710bcf7f72e74960c3f2725b9a6b3c9c89cc6d71d7b414107d0f1d8e8",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:579fc51ba60c1c7bda7b5a80190891569924a8dd7494cc4e68692586a7536feb",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_3f0460937e96232395129444",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_4497b878fa3641c38f7e9d9f8a5e3a3c"
+        },
+        "target_binding_hash": "sha256:ed40efd71b4d8eb9a2b3f0d2656686e0a59a304dbcbe72deb7e26bbbf2b0d848"
+      }
+    },
+    "modify-only/repository-reviewer/modify/docs/locked.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:9040a53c8d6b02267480328c7224526c70faa468c974a704e2916587a5559d54",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:d0d773efb5e9c34a18d75739865c57a29cb4af8445c0354ff72cd9a6f11bc798",
+          "compiled_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "contract_id": "repository-modify-only",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:708238ca387de13b3507e90a7621fc0cca5632e47524e5b4ba89ef0c04690783",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:a1de6f90b486808f806c2471e892b110b5a4fece9041fad47c16f93dd11d9aa2"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:0e6e3b9e6c5fdaf153d93c6436d51c54bf14065ce23a4d36d93ce9cb9f7d4f55",
+        "execution_request": {
+          "action": "modify",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_262fd5d4afa74f99a697c92034e40a06",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "docs/locked.md"
+        },
+        "execution_request_hash": "sha256:29a69a17581527dbdb25dfab725a6a0356d9163360f4e22a1ac321ec349f0400",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:e02d998b1a97e07bbcb9bc86952e170393058fc46353f98cce7c51ea02adc82b",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_6c527ce58eb459c19d21757f",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_4497b878fa3641c38f7e9d9f8a5e3a3c"
+        },
+        "target_binding_hash": "sha256:ed40efd71b4d8eb9a2b3f0d2656686e0a59a304dbcbe72deb7e26bbbf2b0d848"
+      }
+    },
+    "mixed/repository-maintainer/create/generated/new.md": {
+      "executed": true,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:d8d16f864c89e3e16bff95ce086cbf60e93586e54401ef687beca3b64229810e",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:243bb1a586e45a2f60af6b4054312603849a3bcba2e7fa56f6d2a080e1ab6301",
+          "compiled_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "contract_id": "repository-mixed",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:00df2385728e0e48c415e5df40d5c7a7ccaa1285d0452848578b2a544b254432",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:f22f2f0b0b4d855df25c7f2c0d6da429815b35eb7472b6ce2a11031d91b71a74"
+        },
+        "callback_completed": true,
+        "callback_invoked": true,
+        "decision": "admissible",
+        "decision_outcome_hash": "sha256:71cc3ab0616b8f768afd0a77b243c33e55b8f49fd7acf248569ba19b06d9a4c0",
+        "execution_request": {
+          "action": "create",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_6b40005c00df42ed8f083201844760e1",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "generated/new.md"
+        },
+        "execution_request_hash": "sha256:f124a366ff220302d92aff2d8fc8102a85bdd4800c70d02ae274f839363b22d7",
+        "execution_status": "succeeded",
+        "guard_receipt_hash": "sha256:34c2e73ff808fdcb52869675da827da9712a866121d54fd71b9c91e63cec978d",
+        "mutation_executed": true,
+        "mutation_status": "executed",
+        "repository_operation": {
+          "bytes_written": 7,
+          "created": true,
+          "error": null,
+          "operation": "create",
+          "schema_version": "guard_repository_operation.v1",
+          "status": "succeeded",
+          "target": "generated/new.md"
+        },
+        "run_id": "guard_run_a256fb514e9c2cef34114f4d",
+        "schema_version": "guard_execution_attestation.v3",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_189ea17c17c24c54a9e7fbc9aef3cfdf"
+        },
+        "target_binding_hash": "sha256:07372426834cc072af3174b5afd545d8a33b33c71c92f39876ad6197234be778"
+      }
+    },
+    "mixed/repository-maintainer/modify/README.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:06dcdc1de1df8e498382667324cc8172cf93f58bca49153bd1ebdeed29bd0ffe",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:344e790fe1ccc37861d6e86e4c112b313bb3622119e077b352e45878a9643053",
+          "compiled_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "contract_id": "repository-mixed",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:00df2385728e0e48c415e5df40d5c7a7ccaa1285d0452848578b2a544b254432",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:6f6580f0df8275374ec1787ba489baf1a7644af5959cf2fbf4894886152a4e1d"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:ef227afb85d276222285d9992c2d8d45eac95a96c0e893abb3fea1dcd68906d2",
+        "execution_request": {
+          "action": "modify",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_d50b2c9443624bdf9b7d48a98a618bc4",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "README.md"
+        },
+        "execution_request_hash": "sha256:80203702bff555337007ed67030768bbec22283ed13fb6109446b44e2726ef2d",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:fc593a80c86110fcd3c011d36fe6fc8a439ce122cf361cd5496b433645f31047",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_2225978ac46bc2bb0c63fd7b",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_189ea17c17c24c54a9e7fbc9aef3cfdf"
+        },
+        "target_binding_hash": "sha256:07372426834cc072af3174b5afd545d8a33b33c71c92f39876ad6197234be778"
+      }
+    },
+    "mixed/repository-maintainer/create/README.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:6b350c0e07a9b2be08add2249c5d85f312c97c7fe4b646a5067b17579a24e17b",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:9ea88476cf7d075e8fd72030c4c85ce0f2180a9973a22561d1488fdea22aca22",
+          "compiled_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "contract_id": "repository-mixed",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:00df2385728e0e48c415e5df40d5c7a7ccaa1285d0452848578b2a544b254432",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:84f6b3e4bd1af9a0699f07a6538cd1c72ee2e2be3ff31119c774dbb9fd1799dd"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:d4669ec3184d701048512b1a37dd6d60117a19b04ddb9091d5d4fb07a38913e1",
+        "execution_request": {
+          "action": "create",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_a02a664c1b3a4882924481fb7752ae79",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "README.md"
+        },
+        "execution_request_hash": "sha256:ba3b55f906da98fc0a0021f0048a68aed1a0945d3fbe52963d4094df291a61a1",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:2ef236be966f399434d54779e1aea4679ecb266c3022550610e08f1758652303",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_dcea53aa049bfe07c63e619f",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_189ea17c17c24c54a9e7fbc9aef3cfdf"
+        },
+        "target_binding_hash": "sha256:07372426834cc072af3174b5afd545d8a33b33c71c92f39876ad6197234be778"
+      }
+    },
+    "mixed/repository-maintainer/modify/generated/new.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:d5f00c6657e9267c4c5fd92c8126ce46bd88d2b3a93363243c35e4da2cad9532",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:3feb6ec51943b8c2f7925e4537602671462cf96ac01e62dfe9755c657be4535b",
+          "compiled_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "contract_id": "repository-mixed",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:00df2385728e0e48c415e5df40d5c7a7ccaa1285d0452848578b2a544b254432",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:daaebb6870775dba14d8857b98158ef327a93481dd64246a76b3dae81d989c88"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:eebce5f71a79370522fcb8ba331623965d79eb2ee86e5d327452defb29c71cc6",
+        "execution_request": {
+          "action": "modify",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_900feb50c5704d72bed436850bd0ca6a",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "generated/new.md"
+        },
+        "execution_request_hash": "sha256:223f7afaca52c39ad8928c81faa7e8540e0e63e857e3da9acf7d339284c5794c",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:5bd1cb5aa5bdb888da569a3306b0fb90cee34a0e96fca009941078c8085ef7c3",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_780d3f1957307214734ef750",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_189ea17c17c24c54a9e7fbc9aef3cfdf"
+        },
+        "target_binding_hash": "sha256:07372426834cc072af3174b5afd545d8a33b33c71c92f39876ad6197234be778"
+      }
+    },
+    "mixed/repository-maintainer/create/generated/private/secret": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:d7656aa772fca80222f8ddad8898cb6a4f8394e3884167879a953e37b07f7ca0",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:2b307f0f21bc837cbe7da6dfb759d7193fa3c8157b11d5d9d643ab48a03fd8d9",
+          "compiled_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "contract_id": "repository-mixed",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:00df2385728e0e48c415e5df40d5c7a7ccaa1285d0452848578b2a544b254432",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:b9aaa55ceba7137322fd2fc07fa52a49554cded809c97daaa5d001432f6db305"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:8d006c6138d7203299ebd75e1dcc563f416d65eb0c5e73030b5d5edae0e393ca",
+        "execution_request": {
+          "action": "create",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_1e4840163d91415b89464b3e2c525f7b",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "generated/private/secret"
+        },
+        "execution_request_hash": "sha256:0351152a2b6e0d0b5fb2d37977bd30b6ef9d068fd95e3b7a4d5d32ca6d30f5e8",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:3a106dfca3e647b13dc121d34056efa66078a3bfd92d07a51e725a2379a2e2d6",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_d6878e9d7a082afc54282220",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_189ea17c17c24c54a9e7fbc9aef3cfdf"
+        },
+        "target_binding_hash": "sha256:07372426834cc072af3174b5afd545d8a33b33c71c92f39876ad6197234be778"
+      }
+    },
+    "mixed/repository-maintainer/modify/docs/locked.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:eb5883b9fb6e78103925a4210e521d9681c3eca24b000a3c73c55dd6d1171a17",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:a92318c1f8b4663c5d1c9e636f5a8a81ec6153a10a7b85799069ec35253e69ef",
+          "compiled_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "contract_id": "repository-mixed",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:00df2385728e0e48c415e5df40d5c7a7ccaa1285d0452848578b2a544b254432",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:c7e4e2866683ca9a5eb68c1d5eb1e6f02c582fb4331ad57a2972a217ea1277ad"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:ea7e8cd8640fff110536f77234d391d35bb0ee7bdb4d719819f056f44d6b2a5a",
+        "execution_request": {
+          "action": "modify",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_efc102ea3f894d83ab54a15430e7484b",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "docs/locked.md"
+        },
+        "execution_request_hash": "sha256:a1ca29c957faebcbeae880a7e81e250e2da59a6b8a1cc412e4c42629404d147f",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:430a23ae787a5bba796152e7bcb7a4f9351e10437303b88ed6284d4cb09d84cf",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_719e1cec1e67028f32f95278",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_189ea17c17c24c54a9e7fbc9aef3cfdf"
+        },
+        "target_binding_hash": "sha256:07372426834cc072af3174b5afd545d8a33b33c71c92f39876ad6197234be778"
+      }
+    },
+    "mixed/repository-maintainer/collision": "rejected; bytes preserved",
+    "mixed/security-reviewer/create/generated/new.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:45100316c30d4a920ba63ee1ad44996104d54c2eaadfe7b6892df6d628f29771",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:b933be287716549c68f6fbd4e1cd577eb3c9a7222537584a522d0428be0adfba",
+          "compiled_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "contract_id": "repository-mixed",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:00df2385728e0e48c415e5df40d5c7a7ccaa1285d0452848578b2a544b254432",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:12e24cb4d38a5178b86bf5a47043707071698d06271342d102da7addc7cd5610"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:28a52afbda39f04b2d3a27bc445e34135114b9806696a310b2d1d26ca6ba5573",
+        "execution_request": {
+          "action": "create",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_ace71166bebd423b89e51bdcbead9364",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "generated/new.md"
+        },
+        "execution_request_hash": "sha256:2ec9a42db789bab3acc53a48aadde95d39a8430a7f5768edb7964e63df327f77",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:3f1b16b6e43267db05ddda95f76060b73ef43ccd504932295d2fb6fe5c0efb18",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_357243fef26951c1711b39da",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_0fe4dcea77af45689c044e979fcc0786"
+        },
+        "target_binding_hash": "sha256:1342ce5fd34fe143c90e04b4722fea86ceb137115ac274f6d53d7d4cccffde91"
+      }
+    },
+    "mixed/security-reviewer/modify/README.md": {
+      "executed": true,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:2dc23611e6f802ddcb4e1f20f5e45b9600fb30c5d6fc8301a625175f80d280e4",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:9d971d50e0db63074ae87ea1907e96cee454b12fbd2f900f01ce8d12883aa23b",
+          "compiled_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "contract_id": "repository-mixed",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:00df2385728e0e48c415e5df40d5c7a7ccaa1285d0452848578b2a544b254432",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:ef1a57ca21e942306cf2fbc89552800a601ddfee7464835db389a1eec061c604"
+        },
+        "callback_completed": true,
+        "callback_invoked": true,
+        "decision": "admissible",
+        "decision_outcome_hash": "sha256:71cc3ab0616b8f768afd0a77b243c33e55b8f49fd7acf248569ba19b06d9a4c0",
+        "execution_request": {
+          "action": "modify",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_b8df5cc091ec4e9cbe8a4194dfef21d8",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "README.md"
+        },
+        "execution_request_hash": "sha256:9f98f3906da4a651c11c9d2db89bee9e9edec3e35ebc2904cfc6f2c79c47a52a",
+        "execution_status": "succeeded",
+        "guard_receipt_hash": "sha256:0e3ab6317719da6668ab993a88ad4c22dd9e00c5d017195022a4d3e29631b495",
+        "mutation_executed": true,
+        "mutation_status": "executed",
+        "run_id": "guard_run_f83415e03fde09092d6129b3",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_0fe4dcea77af45689c044e979fcc0786"
+        },
+        "target_binding_hash": "sha256:1342ce5fd34fe143c90e04b4722fea86ceb137115ac274f6d53d7d4cccffde91"
+      }
+    },
+    "mixed/security-reviewer/create/README.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:a5306ccc6cdc364cb5b48dd0360773fa9e59a987ff2419bbf1b84dc68c9c197d",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:69769f9f22f8c670e7bc4b5d60adf39130b84f82a5696c53639e1f9118f26227",
+          "compiled_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "contract_id": "repository-mixed",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:00df2385728e0e48c415e5df40d5c7a7ccaa1285d0452848578b2a544b254432",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:5aa085660449062a00f7c2c8f2a1eac8061c718395986a1910569b8f68bb0940"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:ae315968bdad0784b75c30e076ddc32ebdc491a0d1e50c46836cc7182c844dc2",
+        "execution_request": {
+          "action": "create",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_91145441d7534a6aa3ed589a71e2cc15",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "README.md"
+        },
+        "execution_request_hash": "sha256:0dffa2d3da012d3ac6aafe303a33c37f93818792b4ab4da20cdfae45cf1f9389",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:1481df65dc8c1314e1410987f665ee36860966967183019e12df6cf78140c983",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_6526df5bdc79be223e34a9c4",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_0fe4dcea77af45689c044e979fcc0786"
+        },
+        "target_binding_hash": "sha256:1342ce5fd34fe143c90e04b4722fea86ceb137115ac274f6d53d7d4cccffde91"
+      }
+    },
+    "mixed/security-reviewer/modify/generated/new.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:c45f74bb982104ddb68f8e51a44aeed2e721d419cb808fab45c84607edacbed3",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:63693a84874f3d8c5afef42bceb7bcb5338926a9acc235c7013f28d1a25d44cc",
+          "compiled_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "contract_id": "repository-mixed",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:00df2385728e0e48c415e5df40d5c7a7ccaa1285d0452848578b2a544b254432",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:accf06d4e127335b4412cf757c9531e9a4818fcc674cb31c6275aa57058e632d"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:80a854834008e937b0fdde8b920dc311f576f6eebad2b5268ccb483089cad1ca",
+        "execution_request": {
+          "action": "modify",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_08c22e192a7e4ec88a5fccd2310b9d76",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "generated/new.md"
+        },
+        "execution_request_hash": "sha256:5755b7a7d5655459d5156004b8a34f72baa12c39b3f808b4d78bee37c722cf3e",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:98c893a21878db4219680f23f9f25284b5a7c36ed8dcb0c5dc4e12e60a44785f",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_4b4da1d08a64c482225250b6",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_0fe4dcea77af45689c044e979fcc0786"
+        },
+        "target_binding_hash": "sha256:1342ce5fd34fe143c90e04b4722fea86ceb137115ac274f6d53d7d4cccffde91"
+      }
+    },
+    "mixed/security-reviewer/create/generated/private/secret": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:bc70361522c718140894df418e5600f5d6585706f32411f093d47963b4e06220",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:d7ca557cc381e5cbee0479767ce1a5573b320f93838cbd7b0e9bddb772294ef0",
+          "compiled_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "contract_id": "repository-mixed",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:00df2385728e0e48c415e5df40d5c7a7ccaa1285d0452848578b2a544b254432",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:cfe4314d0d86169607c3320af822b35a09b25661bcac1ec27e8715134bafa1cf"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:957bf26d1b0da643057b49e295d18c9d5eb7ecbf1b12cc0476e51e4e4d3c30dd",
+        "execution_request": {
+          "action": "create",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_ff182192919f4631960d562fcf6ddfef",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "generated/private/secret"
+        },
+        "execution_request_hash": "sha256:6dc46127ebb773d524224b43dcc17bea616313f970b07d78fc4d3ba4bebb25ca",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:f71231d929d8a943802e7cf50e401be972d942d52f313b3adec5ce60ce0c0b6b",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_0033fd1db3a188f1d4480e74",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_0fe4dcea77af45689c044e979fcc0786"
+        },
+        "target_binding_hash": "sha256:1342ce5fd34fe143c90e04b4722fea86ceb137115ac274f6d53d7d4cccffde91"
+      }
+    },
+    "mixed/security-reviewer/modify/docs/locked.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:f690a7d195f5c7ede8218364f81240c4ba091f8ca3b3548d0aabef960e38d0ea",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:18b5732fc061196648813260857e195d24da1b0cc6d34bd6a85b77d4492f98d9",
+          "compiled_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "contract_id": "repository-mixed",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:00df2385728e0e48c415e5df40d5c7a7ccaa1285d0452848578b2a544b254432",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:3ed189655cbe759a5664292fe953b736c8be62cf333cc77cc9e195504fc0f190"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:805259f9e90f937db9c381448f6ca0b0e455a8658e8eba4a9eaf290b0a2a1f9b",
+        "execution_request": {
+          "action": "modify",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_340a9e37711f41a596a58fea5412e92b",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "docs/locked.md"
+        },
+        "execution_request_hash": "sha256:0a58e82aa14c797ffbc59e58ec45730db8bb74eb6403cc96052f5bcf3f38b6c0",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:96967abe0bc19c64435b2170036c176dbafb0b5131d3ec3ee242cb486f11fdd2",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_a4a3f48b2eb5e29fdd32703a",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_0fe4dcea77af45689c044e979fcc0786"
+        },
+        "target_binding_hash": "sha256:1342ce5fd34fe143c90e04b4722fea86ceb137115ac274f6d53d7d4cccffde91"
+      }
+    },
+    "mixed/repository-reviewer/create/generated/new.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:be39bcbbebb21ccf0094d60e95be4e4b15f5bf325c4cbe4dc4ced859ccc0222b",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:c27b8136d6bb38103262a84662964ce83a6b304ca430dc1729cb323dbe2437b4",
+          "compiled_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "contract_id": "repository-mixed",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:00df2385728e0e48c415e5df40d5c7a7ccaa1285d0452848578b2a544b254432",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:73de19707196f23b0c8223a2a7990e751bda18b82a3a7bbc3b7352cd93925e2e"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:57518f12ce80ac653e6df2dc87aecfc35b3f26d30539a232841eb8874c854edc",
+        "execution_request": {
+          "action": "create",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_7c09068ce84844468d1c58606154ec60",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "generated/new.md"
+        },
+        "execution_request_hash": "sha256:1b95d682331b4d6d41ab3507a3b260b758fc1570b97f1362f6f3d4159212cdf1",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:46ef59ddc41e37ce82caa8749e80ec66ba936e42eea5e95c5c6e34a08b54b799",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_55bd50caaa59bac9096e96ee",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_d54b7c019f684a2a87f2a703dc7294df"
+        },
+        "target_binding_hash": "sha256:69489a762b52e6786cc3373a4e3a2abff8704a2cb626100c9420fe03a585619c"
+      }
+    },
+    "mixed/repository-reviewer/modify/README.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:a57d52bd70738c2436641eecb44dcd496a8d4da8cccf10bc78f61caf96451c77",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:840bd55e20bd214a42b5158aefc0c84a95add00a8d81c4f0bfd25619bb50edd6",
+          "compiled_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "contract_id": "repository-mixed",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:00df2385728e0e48c415e5df40d5c7a7ccaa1285d0452848578b2a544b254432",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:ffc65ec474f7277ad73a1877f80f42bf65622a9a2fd64843d093778923965cd9"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:3778449139a133ce3a88fbcfd1eae51941518a2e45dc02d87e7eb62373927810",
+        "execution_request": {
+          "action": "modify",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_eb006135693a45b5a41265477617fd4b",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "README.md"
+        },
+        "execution_request_hash": "sha256:f0165af6fe7d1e5a012ee36bc4ee1adcc50073a6ca6a9785a4eda43378e8af5b",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:df66ad21e513ab4248a12ca1710f1b249f5a5b3883f161c38dbf08fd27be5b4d",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_c7eef1bed1e00d7254ca6366",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_d54b7c019f684a2a87f2a703dc7294df"
+        },
+        "target_binding_hash": "sha256:69489a762b52e6786cc3373a4e3a2abff8704a2cb626100c9420fe03a585619c"
+      }
+    },
+    "mixed/repository-reviewer/create/README.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:1f53351ac3f2d53891cef80241c226f07e62225951c5e6d7756c66367804c88b",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:36402c83e72e038f5d3393d83152e14410c3d802ee24355e45907e9dd71d7b8d",
+          "compiled_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "contract_id": "repository-mixed",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:00df2385728e0e48c415e5df40d5c7a7ccaa1285d0452848578b2a544b254432",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:33e1a0dd3319062e325d12431d329db02cb9efe43356015d4c4f00f420d9c454"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:c4ed74a6b4a48c080efb23af7d0b896cefce9d298c612a33bba3ecaccb5019ac",
+        "execution_request": {
+          "action": "create",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_48ae69133e254d4da257a192d97c8401",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "README.md"
+        },
+        "execution_request_hash": "sha256:7f4386e9169cd69211fcdb3b6751c3dfaa5a43ed277ae9c8d64c83d87acbb1cf",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:ebe0457b6c9377504f99ecd5c21890c083371b722711b740f859617a588616f4",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_51bbb8d027b87a513a67fdfd",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_d54b7c019f684a2a87f2a703dc7294df"
+        },
+        "target_binding_hash": "sha256:69489a762b52e6786cc3373a4e3a2abff8704a2cb626100c9420fe03a585619c"
+      }
+    },
+    "mixed/repository-reviewer/modify/generated/new.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:dfd6b6c5260b9e0a5beece0440176695de3dbbcf633babb21a1cb4ff6254c735",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:b8d12e30aa3686396edf779c41eb17d47132091209be42a489f233f2f52769d4",
+          "compiled_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "contract_id": "repository-mixed",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:00df2385728e0e48c415e5df40d5c7a7ccaa1285d0452848578b2a544b254432",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:c818f2bfaeb067495622894acb8be0eda4a7f428e6d2bdde533f41d59b7095c1"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:a77cd08a0019fdc68cebeecaa747a4f9ffefdd2118a838ca17678f285e7cdac4",
+        "execution_request": {
+          "action": "modify",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_f5cbcb5b324b4d6a88cdb84e6e53b6af",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "generated/new.md"
+        },
+        "execution_request_hash": "sha256:14b543b6c899142883e3e1e53f46b8152b455efea17c454822a16f1f72f51bd4",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:67ebd473911e21b5f895ea83a5c83d3cb86e608136859cd944f2654ccebee9f9",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_501b26a08a3d6d5aa774b830",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_d54b7c019f684a2a87f2a703dc7294df"
+        },
+        "target_binding_hash": "sha256:69489a762b52e6786cc3373a4e3a2abff8704a2cb626100c9420fe03a585619c"
+      }
+    },
+    "mixed/repository-reviewer/create/generated/private/secret": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:492a79eb59f13491001e135decdc1f6c63c3f3881e5fa2440366f6647415117a",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:79e6b907cd8b8261d920b3a5340a7c0958e1765517679f950861354a8e6378e9",
+          "compiled_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "contract_id": "repository-mixed",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:00df2385728e0e48c415e5df40d5c7a7ccaa1285d0452848578b2a544b254432",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:41963d4bf71eccc1a0ed53fa1bb8defd3114f5f4fe99f997d538cb422cd347c6"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:fd7f2f3c095c405e58dcd6805d97c6ee824e80790a44fc09e5c83e8043bac836",
+        "execution_request": {
+          "action": "create",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_a5e6ee40d8a7490099a505aebfa1b131",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "generated/private/secret"
+        },
+        "execution_request_hash": "sha256:8080e67540197f25be10cc89c9d10aaf3609af638822f0186dc6f6091e34e5a3",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:c97010006ae2dca0f8f799839da0940848d337c5f176cd5a73ec0f46661e3f74",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_425b7aede66e0fe25189da31",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_d54b7c019f684a2a87f2a703dc7294df"
+        },
+        "target_binding_hash": "sha256:69489a762b52e6786cc3373a4e3a2abff8704a2cb626100c9420fe03a585619c"
+      }
+    },
+    "mixed/repository-reviewer/modify/docs/locked.md": {
+      "executed": false,
+      "replay_matches": true,
+      "attestation": {
+        "attestation_hash": "sha256:e435b7b40113f07c538bacca9aa78bfacc8dd809b9c0f2cdd6a5d6ed42f7a046",
+        "authority_basis": {
+          "authority_evidence_hash": "sha256:94885dc0b94264831445c3181a868f6a3c10dd159d2107555c96bf9473a643bf",
+          "compiled_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "contract_id": "repository-mixed",
+          "contract_version": "3.0.0",
+          "declared_contract_hash": "sha256:00df2385728e0e48c415e5df40d5c7a7ccaa1285d0452848578b2a544b254432",
+          "kind": "published_authority",
+          "runtime_facts_hash": "sha256:a1de6f90b486808f806c2471e892b110b5a4fece9041fad47c16f93dd11d9aa2"
+        },
+        "callback_completed": false,
+        "callback_invoked": false,
+        "decision": "blocked",
+        "decision_outcome_hash": "sha256:4d2cee9fb37bb093a52e08555d59115de95cdb7a1671e13d046f6f65e83a800f",
+        "execution_request": {
+          "action": "modify",
+          "arguments": {},
+          "artifacts": [],
+          "request_id": "repository_a1909ac7a5b84e22a831c724c816be10",
+          "schema_version": "normalized_execution_request.v1",
+          "target": "docs/locked.md"
+        },
+        "execution_request_hash": "sha256:4eba51a809c8131b2429833118b4303d1de215b7c59ddcb69f75bad02d0bc449",
+        "execution_status": "not_run",
+        "guard_receipt_hash": "sha256:a8e9fcdf96e932bb8451cdc67fdd6dc5152b32254cf49d29d250cf3d9e826d64",
+        "mutation_executed": false,
+        "mutation_status": "not_performed",
+        "run_id": "guard_run_09961474b5ce2613861b92e2",
+        "schema_version": "guard_execution_attestation.v2",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_d54b7c019f684a2a87f2a703dc7294df"
+        },
+        "target_binding_hash": "sha256:69489a762b52e6786cc3373a4e3a2abff8704a2cb626100c9420fe03a585619c"
+      }
+    }
+  },
+  "runtime_activation_ready": false
+}

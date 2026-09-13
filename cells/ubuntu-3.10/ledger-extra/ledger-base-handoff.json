@@ -1,0 +1,820 @@
+{
+  "pr": "https://github.com/Waveframe-Labs/Waveframe-Ledger/pull/24",
+  "head": "3cc34e7b3cb6efca5102e0e22d559ec0c0fd583f",
+  "base_branch": "feat/issue-21-release-catalog",
+  "base": "40e0875ee9a973254bb3a4d0c228cad4fdce2bc0",
+  "proposed_tag": "v0.9.0",
+  "version": "0.9.0",
+  "requires_python": ">=3.10",
+  "compiler_commit": "ae590dee058d3481e384dea850d5b7d980f533ff",
+  "compiler_requirement": "cricore-contract-compiler>=0.5.0,<0.6.0",
+  "guard_extra": "waveframe-guard>=0.19.0,<0.20.0",
+  "planned_guard_ledger_requirement": "governance-ledger>=0.9.0,<0.10.0",
+  "gates": {
+    "base_matrix": "passed",
+    "combined_extra_matrix": "pending",
+    "cloud_final": "pending",
+    "publication_authorization": "pending",
+    "post_publication_index_checks": "pending",
+    "activation": "pending"
+  },
+  "combined_extra": {
+    "status": "pending",
+    "executed": false,
+    "reason": "Separate real Guard 0.19.0 candidate required"
+  },
+  "release_ready": false,
+  "runtime_activation_ready": false,
+  "matrix_run": "https://github.com/Waveframe-Labs/Waveframe-Ledger/actions/runs/34769253406",
+  "additional_run": "https://github.com/Waveframe-Labs/Waveframe-Ledger/actions/runs/34769253423",
+  "environments": {
+    "ubuntu-3.10": {
+      "python": "3.10.21 (main, Aug 13 2026, 02:42:48) [GCC 13.3.0]",
+      "job_url": "https://github.com/Waveframe-Labs/Waveframe-Ledger/actions/runs/34769253406/job/103755715269",
+      "ci_artifact_url": "https://github.com/Waveframe-Labs/Waveframe-Ledger/actions/runs/34769253406/artifacts/10321277550",
+      "durable_archive": "artifacts/ubuntu-3.10.zip",
+      "durable_archive_sha256": "b7c60991f904c10044a44192e281c4dc1e115fdea6dcc8ec7e884c1979ba769d",
+      "suites": {
+        "source-default": {
+          "passed": 655,
+          "skipped": 47,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "explicit action-policy development opt-in required; see docs/ACTION_POLICY_DEVELOPMENT.md": 44,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 0
+        },
+        "source-native": {
+          "passed": 699,
+          "skipped": 3,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 44
+        },
+        "installed-default": {
+          "passed": 655,
+          "skipped": 47,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "explicit action-policy development opt-in required; see docs/ACTION_POLICY_DEVELOPMENT.md": 44,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 0
+        },
+        "installed-native": {
+          "passed": 699,
+          "skipped": 3,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 44
+        }
+      },
+      "package_sha256": {
+        "governance_ledger-0.9.0-py3-none-any.whl": "733defe98588b846a6e90454fa0e07b289ede3af0c9c25ba377f53423c7e4ffb",
+        "governance_ledger-0.9.0.tar.gz": "07ed5608ce0b7f8b7c51ad9cf658f867fced43767a5e72ec1affe03d55111327"
+      },
+      "compiler_wheel": {
+        "filename": "cricore_contract_compiler-0.5.0-py3-none-any.whl",
+        "sha256": "03b9077cbfb1e5b54f4203b8d45fdd9021a773fc08688945a0dd4fd7694f92d0",
+        "origin": {
+          "url": "https://github.com/Waveframe-Labs/cricore-contract-compiler.git",
+          "vcs_info": {
+            "commit_id": "ae590dee058d3481e384dea850d5b7d980f533ff",
+            "requested_revision": "ae590dee058d3481e384dea850d5b7d980f533ff",
+            "vcs": "git"
+          }
+        },
+        "kind": "locally built pip-cached VCS wheel",
+        "supplied_archive_hash_verified": false,
+        "note": "Archive hashes can differ across builds; complete compiled fixture outputs must remain identical."
+      },
+      "imports": {
+        "source": {
+          "ledger_import": "/home/runner/work/Waveframe-Ledger/Waveframe-Ledger/governance_ledger/__init__.py",
+          "compiler_import": "/home/runner/work/Waveframe-Ledger/Waveframe-Ledger/runtime/issue23-ci/source/lib/python3.10/site-packages/compiler/__init__.py",
+          "executable": "/home/runner/work/Waveframe-Ledger/Waveframe-Ledger/runtime/issue23-ci/source/bin/python"
+        },
+        "installed": {
+          "ledger_import": "/home/runner/work/Waveframe-Ledger/Waveframe-Ledger/runtime/issue23-ci/installed/lib/python3.10/site-packages/governance_ledger/__init__.py",
+          "compiler_import": "/home/runner/work/Waveframe-Ledger/Waveframe-Ledger/runtime/issue23-ci/installed/lib/python3.10/site-packages/compiler/__init__.py",
+          "executable": "/home/runner/work/Waveframe-Ledger/Waveframe-Ledger/runtime/issue23-ci/installed/bin/python"
+        }
+      },
+      "compiler_040_resolver_rejected": true,
+      "old_runtime_rejections": {
+        "0.7.0/development": 24,
+        "0.7.0/release": 24,
+        "0.8.0/development": 24,
+        "0.8.0/release": 24
+      },
+      "legacy_operations": {
+        "ledger": "0.8.0",
+        "guard": "0.18.0",
+        "modify_matching_allow": "executed",
+        "modify_missing_allow": "blocked",
+        "create_on_modify_authority": "blocked",
+        "create_reason": "runtime fact proposal.action has incorrect type or value",
+        "callbacks": [
+          [
+            "modify",
+            "README.md"
+          ]
+        ],
+        "filesystem_operations_implemented": false
+      }
+    },
+    "ubuntu-3.14": {
+      "python": "3.14.7 (main, Aug  6 2026, 02:19:46) [GCC 13.3.0]",
+      "job_url": "https://github.com/Waveframe-Labs/Waveframe-Ledger/actions/runs/34769253406/job/103755715188",
+      "ci_artifact_url": "https://github.com/Waveframe-Labs/Waveframe-Ledger/actions/runs/34769253406/artifacts/10322120006",
+      "durable_archive": "artifacts/ubuntu-3.14.zip",
+      "durable_archive_sha256": "5f9812843c16a4456dbbb2780ca13d7ac5848c733d5a6a7dcc2d31eda7488dfd",
+      "suites": {
+        "source-default": {
+          "passed": 655,
+          "skipped": 47,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "explicit action-policy development opt-in required; see docs/ACTION_POLICY_DEVELOPMENT.md": 44,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 0
+        },
+        "source-native": {
+          "passed": 699,
+          "skipped": 3,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 44
+        },
+        "installed-default": {
+          "passed": 655,
+          "skipped": 47,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "explicit action-policy development opt-in required; see docs/ACTION_POLICY_DEVELOPMENT.md": 44,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 0
+        },
+        "installed-native": {
+          "passed": 699,
+          "skipped": 3,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 44
+        }
+      },
+      "package_sha256": {
+        "governance_ledger-0.9.0-py3-none-any.whl": "ae239faf211bb6bd0885f7873f17a8dfd893a5fb961aac8d6917e4ee4af704be",
+        "governance_ledger-0.9.0.tar.gz": "1aa8a67f2846e064e39476b6af449e1401170c975b39d286fb73eadb93d4deb4"
+      },
+      "compiler_wheel": {
+        "filename": "cricore_contract_compiler-0.5.0-py3-none-any.whl",
+        "sha256": "1bc689d2885e32641ac3ade7e710a4d0fe079c089f1a2160e2d86f328bbb7c44",
+        "origin": {
+          "url": "https://github.com/Waveframe-Labs/cricore-contract-compiler.git",
+          "vcs_info": {
+            "commit_id": "ae590dee058d3481e384dea850d5b7d980f533ff",
+            "requested_revision": "ae590dee058d3481e384dea850d5b7d980f533ff",
+            "vcs": "git"
+          }
+        },
+        "kind": "locally built pip-cached VCS wheel",
+        "supplied_archive_hash_verified": false,
+        "note": "Archive hashes can differ across builds; complete compiled fixture outputs must remain identical."
+      },
+      "imports": {
+        "source": {
+          "ledger_import": "/home/runner/work/Waveframe-Ledger/Waveframe-Ledger/governance_ledger/__init__.py",
+          "compiler_import": "/home/runner/work/Waveframe-Ledger/Waveframe-Ledger/runtime/issue23-ci/source/lib/python3.14/site-packages/compiler/__init__.py",
+          "executable": "/home/runner/work/Waveframe-Ledger/Waveframe-Ledger/runtime/issue23-ci/source/bin/python"
+        },
+        "installed": {
+          "ledger_import": "/home/runner/work/Waveframe-Ledger/Waveframe-Ledger/runtime/issue23-ci/installed/lib/python3.14/site-packages/governance_ledger/__init__.py",
+          "compiler_import": "/home/runner/work/Waveframe-Ledger/Waveframe-Ledger/runtime/issue23-ci/installed/lib/python3.14/site-packages/compiler/__init__.py",
+          "executable": "/home/runner/work/Waveframe-Ledger/Waveframe-Ledger/runtime/issue23-ci/installed/bin/python"
+        }
+      },
+      "compiler_040_resolver_rejected": true,
+      "old_runtime_rejections": {
+        "0.7.0/development": 24,
+        "0.7.0/release": 24,
+        "0.8.0/development": 24,
+        "0.8.0/release": 24
+      },
+      "legacy_operations": {
+        "ledger": "0.8.0",
+        "guard": "0.18.0",
+        "modify_matching_allow": "executed",
+        "modify_missing_allow": "blocked",
+        "create_on_modify_authority": "blocked",
+        "create_reason": "runtime fact proposal.action has incorrect type or value",
+        "callbacks": [
+          [
+            "modify",
+            "README.md"
+          ]
+        ],
+        "filesystem_operations_implemented": false
+      }
+    },
+    "windows-3.10": {
+      "python": "3.10.11 (tags/v3.10.11:7d4cc5a, Apr  5 2023, 00:38:17) [MSC v.1929 64 bit (AMD64)]",
+      "job_url": "https://github.com/Waveframe-Labs/Waveframe-Ledger/actions/runs/34769253406/job/103755715257",
+      "ci_artifact_url": "https://github.com/Waveframe-Labs/Waveframe-Ledger/actions/runs/34769253406/artifacts/10321780580",
+      "durable_archive": "artifacts/windows-3.10.zip",
+      "durable_archive_sha256": "f2a4a854b4c0e7a493029553d7e32a5e65bdead0bf0e45fb214d8510f5658146",
+      "suites": {
+        "source-default": {
+          "passed": 655,
+          "skipped": 47,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "explicit action-policy development opt-in required; see docs/ACTION_POLICY_DEVELOPMENT.md": 44,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 0
+        },
+        "source-native": {
+          "passed": 699,
+          "skipped": 3,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 44
+        },
+        "installed-default": {
+          "passed": 655,
+          "skipped": 47,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "explicit action-policy development opt-in required; see docs/ACTION_POLICY_DEVELOPMENT.md": 44,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 0
+        },
+        "installed-native": {
+          "passed": 699,
+          "skipped": 3,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 44
+        }
+      },
+      "package_sha256": {
+        "governance_ledger-0.9.0-py3-none-any.whl": "9d16d0befe27378d14aa033067ae4426c370c091a3205457ba35bb30ceb69502",
+        "governance_ledger-0.9.0.tar.gz": "d60eb84a735a2aaf2c38dfc867d7f8eb5526781cd97289ee11776ae86c48e33e"
+      },
+      "compiler_wheel": {
+        "filename": "cricore_contract_compiler-0.5.0-py3-none-any.whl",
+        "sha256": "f0d7aa912d0453ea6da2c63c084cc5b8e9ee5507bd05b482086e8c837da7b1d6",
+        "origin": {
+          "url": "https://github.com/Waveframe-Labs/cricore-contract-compiler.git",
+          "vcs_info": {
+            "commit_id": "ae590dee058d3481e384dea850d5b7d980f533ff",
+            "requested_revision": "ae590dee058d3481e384dea850d5b7d980f533ff",
+            "vcs": "git"
+          }
+        },
+        "kind": "locally built pip-cached VCS wheel",
+        "supplied_archive_hash_verified": false,
+        "note": "Archive hashes can differ across builds; complete compiled fixture outputs must remain identical."
+      },
+      "imports": {
+        "source": {
+          "ledger_import": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\governance_ledger\\__init__.py",
+          "compiler_import": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue23-ci\\source\\lib\\site-packages\\compiler\\__init__.py",
+          "executable": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue23-ci\\source\\Scripts\\python.exe"
+        },
+        "installed": {
+          "ledger_import": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue23-ci\\installed\\lib\\site-packages\\governance_ledger\\__init__.py",
+          "compiler_import": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue23-ci\\installed\\lib\\site-packages\\compiler\\__init__.py",
+          "executable": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue23-ci\\installed\\Scripts\\python.exe"
+        }
+      },
+      "compiler_040_resolver_rejected": true,
+      "old_runtime_rejections": {
+        "0.7.0/development": 24,
+        "0.7.0/release": 24,
+        "0.8.0/development": 24,
+        "0.8.0/release": 24
+      },
+      "legacy_operations": {
+        "ledger": "0.8.0",
+        "guard": "0.18.0",
+        "modify_matching_allow": "executed",
+        "modify_missing_allow": "blocked",
+        "create_on_modify_authority": "blocked",
+        "create_reason": "runtime fact proposal.action has incorrect type or value",
+        "callbacks": [
+          [
+            "modify",
+            "README.md"
+          ]
+        ],
+        "filesystem_operations_implemented": false
+      }
+    },
+    "windows-3.14": {
+      "python": "3.14.7 (tags/v3.14.7:823f032, Aug  5 2026, 10:51:32) [MSC v.1944 64 bit (AMD64)]",
+      "job_url": "https://github.com/Waveframe-Labs/Waveframe-Ledger/actions/runs/34769253406/job/103755715321",
+      "ci_artifact_url": "https://github.com/Waveframe-Labs/Waveframe-Ledger/actions/runs/34769253406/artifacts/10321272846",
+      "durable_archive": "artifacts/windows-3.14.zip",
+      "durable_archive_sha256": "1604456920424ab7171d87a2f7e1453413dcd27c07446ac710a571a27ee8eb82",
+      "suites": {
+        "source-default": {
+          "passed": 655,
+          "skipped": 47,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "explicit action-policy development opt-in required; see docs/ACTION_POLICY_DEVELOPMENT.md": 44,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 0
+        },
+        "source-native": {
+          "passed": 699,
+          "skipped": 3,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 44
+        },
+        "installed-default": {
+          "passed": 655,
+          "skipped": 47,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "explicit action-policy development opt-in required; see docs/ACTION_POLICY_DEVELOPMENT.md": 44,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 0
+        },
+        "installed-native": {
+          "passed": 699,
+          "skipped": 3,
+          "skip_reasons": {
+            "collection skipped": 1,
+            "could not import 'waveframe_guard': No module named 'waveframe_guard'": 2
+          },
+          "release_passed": 70,
+          "native_passed": 44
+        }
+      },
+      "package_sha256": {
+        "governance_ledger-0.9.0-py3-none-any.whl": "f76242c190275034b33faff4477ef0144dd83e779b832878de7467d483c7076c",
+        "governance_ledger-0.9.0.tar.gz": "c6088fed8d130a91befbe62eb741d7f30c1f2b9d3fdd2d208ce3ea834b3d51ac"
+      },
+      "compiler_wheel": {
+        "filename": "cricore_contract_compiler-0.5.0-py3-none-any.whl",
+        "sha256": "d694470d77f8806b883255d8810a780de4f92824a8daa80b885d315d1198dd60",
+        "origin": {
+          "url": "https://github.com/Waveframe-Labs/cricore-contract-compiler.git",
+          "vcs_info": {
+            "commit_id": "ae590dee058d3481e384dea850d5b7d980f533ff",
+            "requested_revision": "ae590dee058d3481e384dea850d5b7d980f533ff",
+            "vcs": "git"
+          }
+        },
+        "kind": "locally built pip-cached VCS wheel",
+        "supplied_archive_hash_verified": false,
+        "note": "Archive hashes can differ across builds; complete compiled fixture outputs must remain identical."
+      },
+      "imports": {
+        "source": {
+          "ledger_import": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\governance_ledger\\__init__.py",
+          "compiler_import": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue23-ci\\source\\Lib\\site-packages\\compiler\\__init__.py",
+          "executable": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue23-ci\\source\\Scripts\\python.exe"
+        },
+        "installed": {
+          "ledger_import": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue23-ci\\installed\\Lib\\site-packages\\governance_ledger\\__init__.py",
+          "compiler_import": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue23-ci\\installed\\Lib\\site-packages\\compiler\\__init__.py",
+          "executable": "D:\\a\\Waveframe-Ledger\\Waveframe-Ledger\\runtime\\issue23-ci\\installed\\Scripts\\python.exe"
+        }
+      },
+      "compiler_040_resolver_rejected": true,
+      "old_runtime_rejections": {
+        "0.7.0/development": 24,
+        "0.7.0/release": 24,
+        "0.8.0/development": 24,
+        "0.8.0/release": 24
+      },
+      "legacy_operations": {
+        "ledger": "0.8.0",
+        "guard": "0.18.0",
+        "modify_matching_allow": "executed",
+        "modify_missing_allow": "blocked",
+        "create_on_modify_authority": "blocked",
+        "create_reason": "runtime fact proposal.action has incorrect type or value",
+        "callbacks": [
+          [
+            "modify",
+            "README.md"
+          ]
+        ],
+        "filesystem_operations_implemented": false
+      }
+    }
+  },
+  "historical_fixtures_and_runtime_source_unchanged": true,
+  "catalog_3": {
+    "catalog": {
+      "catalog_id": "waveframe.coding-agent.repository-change",
+      "catalog_version": "3.0.0",
+      "catalog_hash": "sha256:bd7fd23eb59b5521ef6780edec0667ce9b7ba9b5738dfa2701a575fb3efce930"
+    },
+    "domain_pack": {
+      "domain_pack_id": "repository-changes",
+      "domain_pack_version": "3.0.0",
+      "canonical_hash": "sha256:78783654a8131cb7a6547ee2ed9507e1dced640aebe32d35057c385bb1dc4459"
+    },
+    "runtime": {
+      "schema_id": "repository-changes-runtime",
+      "schema_version_number": "3.0.0",
+      "schema_hash": "sha256:3fcf3af0a61f91a78b171ccd6247db9f0f908e1baf44aa50ece12349c44bb582"
+    },
+    "enforcement_point": "waveframe.guard.repository-change.v2",
+    "fixtures": {
+      "create-only": {
+        "full_artifact_hashes": {
+          "source": "sha256:dafdb6ce0a9f45af65197b93ee77d599439beabc51e9e55683b6a872d17a4742",
+          "source-interpretation": "sha256:09958d5f33d60ad4506a950782a7301861042a2af0210dd0c5089d241720ee56",
+          "proposal": "sha256:049244a917543f28672c4b3007eaa52207490e3e9aaeb618ea16a58ecf64b1e0",
+          "confirmation": "sha256:819e96d8fee5ce42ac404c97f677e35b0efe2cc70e0dea979644c87d173f48d6",
+          "review": "sha256:9cdfcc929571ac8cb55ef0a3f517b2d2f766742aefdca71c6c384d77616865fc",
+          "approval": "sha256:abad49faf61645544860a399a63d3880ab017adafa5c188ef5ba4ebda4f4dca1",
+          "constraint-ir": "sha256:a99050a31d7b029768b8f6aacaace188373a5ec2824c38d9ffb2945e68885f95",
+          "compiler-input": "sha256:dc3b81e03b259c84c954aae8c012f2cdcfc9a7b066d39bb246fbf85f7beceb99",
+          "compiler-output": "sha256:4f3bf5a1fce29d8debbf412402b68a3b2178fda0530d7f261d157f55bfc3f18b",
+          "compiled-authority": "sha256:a9ec418f20f62d8126f72f3a210841e296e5f0fafe199fd5d1f8870b81bf28f8",
+          "authority-bundle": "sha256:2cb5334633340b57c6756e1ac3e2175dcbd674ddde396d853c235d61da04bf2f",
+          "publication-receipt": "sha256:ddc5a6f59b4c1e7e96afa609e6ee03fd5047a8d2555420e5198d32587d77b830"
+        },
+        "bundle_hash": "sha256:52ee5594c92d37ccaf9c46c4f9b9072d254636a52c5eb1efa8851d9102aff66f",
+        "receipt_hash": "sha256:daf28dc75e5cf5b3efc6d25dbe4748e48b5c0fc06d9d6756021d54407fd354f0",
+        "approval_id": "policy-translation-approval-83daa65cc3d1ee294f71df2acb76ae90fa7a82e09ae72da8ae825cd16901aac5"
+      },
+      "modify-only": {
+        "full_artifact_hashes": {
+          "source": "sha256:dcfa3fb14882b68df45344665f1be2fb16eca4222a1e57e45b86082f8f3955d3",
+          "source-interpretation": "sha256:b1dd09fbae89763a12d9b5f1d879afc904592082f3cad09cb44d9d8b420f28eb",
+          "proposal": "sha256:51206ffbd5d938d94819660e57f29206a4e7c4ae491b2d3cb9d989049466e08e",
+          "confirmation": "sha256:e5fecd001e7602976d951e8cd103d64fe1f37271cbd09d9f3df7074fbf21ed6e",
+          "review": "sha256:57d522a0ff4ecddc0c0a340e74d037e6e46b9967134860b058512c555e0200e8",
+          "approval": "sha256:a11bbc2adccc90c9e29fb7913189032c8220072c1f81b90d123a4844f70d6ef5",
+          "constraint-ir": "sha256:971ce5d24f91f1f8d02fb3d478df9f9574cf2d4fb7a2a1c54c7382efecff8718",
+          "compiler-input": "sha256:90253d7807e71b377256c094c4b322e9845f65768bf83ada2f7fdcc4d3858e24",
+          "compiler-output": "sha256:9d645102ef5f16e97e2813c922f4dfa7fac3329613aa8e735c2e8fb766666b53",
+          "compiled-authority": "sha256:00a5bfb9d22de0de6bc3e9cc36601c1b0374926f4241d41d1a270746d7d03f0f",
+          "authority-bundle": "sha256:050bd8f0c059a6695e22f46f6e537508b992ec858c913887de19fc39a99d5182",
+          "publication-receipt": "sha256:c5c2303300cc86094dae22ad6ea6d632f790f80821d97bfaab6920efd3e5e90b"
+        },
+        "bundle_hash": "sha256:154baec899f567cd5e14135a160a8770c8c0abfecb40e94172fd012bf741b83c",
+        "receipt_hash": "sha256:2a64e22cd7b70335d8707deecdb30a3eaf3086c92856fb7d11974c6aab941be3",
+        "approval_id": "policy-translation-approval-5494e5c33021aac5acb98f648a1ec195d4fbdaa19373f0551e7763d5f3f561b5"
+      },
+      "mixed": {
+        "full_artifact_hashes": {
+          "source": "sha256:69bb279d0969666fed0d60ce99f4e711c7079aefb798edcbf2d61baf6d220402",
+          "source-interpretation": "sha256:094d882fbfd345499fee0b294aecbc716318f17ecfc795ac4a194803b07f8dd0",
+          "proposal": "sha256:b062806ec3d8da5f0fa1b6c2d378fca6fb476d6baf811ae02d884272c3af9313",
+          "confirmation": "sha256:4c422fd442fc824913d1c2048b7ba058058bc801058b07c10b9d995ecc8e58c3",
+          "review": "sha256:1eec0bbcfba9b89dee88291d480b03bf15ca85beca36cac329a42f31e7bdc782",
+          "approval": "sha256:3269d9c6929c9180b043cef047ab16cbe9296ae66703adab08543321c5d9bd22",
+          "constraint-ir": "sha256:8fe74baba0e82fd75a1eb413641506caa1f024d867886dda0a193b75efa25344",
+          "compiler-input": "sha256:f80dd1d533349d7dbf0981cd9c147356f541d6e8ffa2188e711cf27af5d2249e",
+          "compiler-output": "sha256:fa481a29e433a64064b688d92067f07e24781bb1a569cfd35a0c85229b5c149e",
+          "compiled-authority": "sha256:c242fa7f22f680d26988a0d1d09659c06a7f54cbaf8ae0077d6952f224a88e07",
+          "authority-bundle": "sha256:e58b9f4e9e715e53b93d2be9f1ef602d6d9aa372df13b7f31c3d3102b922988b",
+          "publication-receipt": "sha256:3ef0e2fb179a61f0da943839baab59ecfb661291f5b25a3ff29c64a366ba5482"
+        },
+        "bundle_hash": "sha256:8e5796b5435b2f8f7644c089907e86d64c1686309fc89b80965874e22a8aa285",
+        "receipt_hash": "sha256:55ae85360e7afd0da75d645e2ba7138b5dafd93ac2584a3e6c8cb9d375c40e02",
+        "approval_id": "policy-translation-approval-06862ce2eac434dd88a9a8b9a76b4411e5e5b9a0f87340fcc781619a765dbbe9"
+      }
+    }
+  },
+  "historical_artifact_hashes": {
+    "catalog-1": "sha256:038ebf6716e18d208ae2479319619dea2bcbb38b72999e25810b7dcaf6213f16",
+    "pack-1": "sha256:0897f50438256067140304579ee35c07e2a2e5154758ed67b5e99396ad9a5318",
+    "proposal": "sha256:3c53ea2bbb22890887c338cbc2afb98800014e401ed6433263e0f4e5c1e70b8b",
+    "confirmation": "sha256:cce89e68ec7ba7eebc0211df47076e64171b53f20601ae9e6644ac0dc77e7138",
+    "approval": "sha256:6042fe9c06022364f23cba56fec282382b5c92f765d86b25c88d886f5821d260",
+    "review-wording": "sha256:27e1ed854e20b45e63ba470aa0b09e5ab4da558f3292a070804d0df92ddce512",
+    "v2-publication": "sha256:97913fc0a10fad08267712e20c564220db8e2ac5734f7685994ae37cf874901c",
+    "v3-publication": "sha256:6ee18c49cefb4d6fdd95e2fed258a3614259fba2380d4fc98a29bc7b4cc86251"
+  },
+  "catalog_2": {
+    "domain_pack": {
+      "domain_pack_id": "repository-changes",
+      "domain_pack_version": "2.0.0",
+      "domain_pack_hash": "sha256:ec260daef10cdb3f97ca0a5137deb658a0fc997f22997299153cd848a12323a0"
+    },
+    "runtime_fact_schema": {
+      "schema_version": "runtime_fact_schema.v1",
+      "schema_id": "repository-changes-runtime",
+      "schema_version_number": "2.0.0",
+      "name": "Repository change proposal facts",
+      "facts": [
+        {
+          "fact_id": "actor.subject_kind",
+          "type": "enum",
+          "enum_values": [
+            "agent"
+          ],
+          "canonical_unit": null,
+          "required": true,
+          "derivation": {
+            "kind": "proposal_field",
+            "field_path": "/actor/subject_kind"
+          },
+          "comparison_operators": [
+            "==",
+            "!="
+          ]
+        },
+        {
+          "fact_id": "actor.principal_id",
+          "type": "string",
+          "enum_values": null,
+          "canonical_unit": null,
+          "required": false,
+          "derivation": {
+            "kind": "proposal_field",
+            "field_path": "/actor/principal_id"
+          },
+          "comparison_operators": [
+            "==",
+            "!="
+          ]
+        },
+        {
+          "fact_id": "actor.role",
+          "type": "enum",
+          "enum_values": [
+            "repository-maintainer",
+            "repository-reviewer",
+            "security-reviewer"
+          ],
+          "canonical_unit": null,
+          "required": false,
+          "derivation": {
+            "kind": "proposal_field",
+            "field_path": "/actor/role"
+          },
+          "comparison_operators": [
+            "==",
+            "!="
+          ]
+        },
+        {
+          "fact_id": "proposal.action",
+          "type": "enum",
+          "enum_values": [
+            "create",
+            "modify"
+          ],
+          "canonical_unit": null,
+          "required": true,
+          "derivation": {
+            "kind": "proposal_field",
+            "field_path": "/action"
+          },
+          "comparison_operators": [
+            "==",
+            "!="
+          ]
+        },
+        {
+          "fact_id": "proposal.resource.kind",
+          "type": "enum",
+          "enum_values": [
+            "repository_change",
+            "repository_path"
+          ],
+          "canonical_unit": null,
+          "required": true,
+          "derivation": {
+            "kind": "proposal_field",
+            "field_path": "/resource/kind"
+          },
+          "comparison_operators": [
+            "==",
+            "!="
+          ]
+        },
+        {
+          "fact_id": "proposal.resource.path",
+          "type": "string",
+          "enum_values": null,
+          "canonical_unit": null,
+          "required": false,
+          "derivation": {
+            "kind": "proposal_field",
+            "field_path": "/resource/path"
+          },
+          "comparison_operators": [
+            "==",
+            "!=",
+            "starts_with"
+          ]
+        }
+      ],
+      "schema_hash": "sha256:bd79503e01d79583ab564be98890fddaa8124e935e7eb81a8a40786cc6d2c01d"
+    },
+    "catalog": {
+      "catalog_id": "waveframe.coding-agent.repository-change",
+      "catalog_version": "2.0.0",
+      "catalog_hash": "sha256:8530e82761a333c5e7e8cc0ccb0b2949310ea91b470d548613c98078896f030a"
+    }
+  },
+  "preserved_git_blob_sha256": {
+    "schemas/approval_chain_semantics.v1.json": "9a7adad66ab716115bb2165f8c424028a7ffb5918ae67ba816998760bbebcee9",
+    "schemas/authority_bundle.v1.json": "26b2d0e87a2ac6a47101526b5507b0153ac1c26d3f585ed6766a076a2ff5f9eb",
+    "schemas/authority_bundle.v2.json": "d7ff65d5497f94e26d9804b439b9b69909f1af38ea20e9a89aa6331170d3ea2a",
+    "schemas/authority_bundle.v3.json": "1cd2ba9b4a76da8451ad37d72fc869a891dea6b8a0048eca4d1aaa80db838e3a",
+    "schemas/authority_bundle.v4.json": "ff33364b3783d619a58d8ecd0180aabbb21d4f0bc77096bf9ef50a19db22e17c",
+    "schemas/authority_diff_impact.v1.json": "f6399021c8f4c97d65ab23b20d662bc509fc9ccc4e129e25a26ae2eec004e151",
+    "schemas/authority_execution_projection.v1.json": "589502d6a56463d078b3aa7c866908d99dfc9b0b104b6b6eeac2ebcbb651e5e4",
+    "schemas/authority_lifecycle_event.v1.json": "ba711554a83bcb608aa4271c1791a9bcbf4adfe43b357217bec36d845098c82e",
+    "schemas/authority_role_binding.v1.json": "b43684b69c01baa7d13861f8cada7257733bcc612df67d00602f0ecce7222034",
+    "schemas/capability_continuity_semantics.v1.json": "fbf8705dc20efba6fb8b061fdfd79b832f0cb2c4213813e1e04583b2c3399470",
+    "schemas/capability_evidence_requirement.v1.json": "87912c66a9ec26cd1bd20d7d68adfea99388b550f745509cb23ed05ccdab7a20",
+    "schemas/capability_execution_constraint.v1.json": "0efb825a1a9b40a93cd6822f4d6a8efb06b02d116af01527682a015a73f8dbb4",
+    "schemas/capability_identity_requirement.v1.json": "5c83d18c9105e17dad874b6f7519eb589ef871e42261ae8e6832e99ebe982d1e",
+    "schemas/capability_requirement.v1.json": "e8186c6d184ff3ee3c02b778ae1a89a1757c6fbb68b9278a9ee249268fdbcc83",
+    "schemas/compiled_authority_contract.v1.json": "8039ac9312bf900b384c50e2b4b496ed784581bcc08445e830b0402d74907d1f",
+    "schemas/compiled_authority_contract.v2.json": "7843a865aaf20366a8f78fbb08f21ccf9b76c9f233b47910a358e627b127a909",
+    "schemas/compiled_authority_contract.v3.json": "60bf5e5c5c33655632fb0117f4c03e519c7c700d9c61a99a8f1d1b63eaa31624",
+    "schemas/constraint_ir.v1.json": "481c7138481a68b490c57bf392be724570e4ea6832ecad27dc8a6041dd1d4c0a",
+    "schemas/continuity_transition_event.v1.json": "9ae7817576dd171d0aed402ae0071e3d0dacde344b119a04b9d2930d3a780a55",
+    "schemas/contract_registry.schema.json": "49493734f205356a1c505b1a24838a970ca3e579ce9048bede0ff661b810e318",
+    "schemas/cricore_policy.schema.json": "ad110ba5ddbbf2434cedb161494011eebb83e084dab91053c12c05ded5b25a59",
+    "schemas/deployment.schema.json": "1bb648488309d61a2918024053975f6e68a9a071cba5e6d996e999530c8a91d4",
+    "schemas/domain_pack.v1.json": "a7d5980b618254c0a91a880f47b4ae7c6253642d61463df1745ac3c98f3959e3",
+    "schemas/execution_admissibility_projection.v1.json": "76f27de5cffca8b5ab2333166c1b10f907cc1862a3c24cf2cf7e16a8b85c5a1b",
+    "schemas/execution_context_semantics.v1.json": "fc3f943786cf5586f094fcac929659550a871c10fba2be99614eb509e2d0224c",
+    "schemas/execution_requirement_projection.v1.json": "f565edd1f17dc56bff90dd44b29de4614fd876ac3d50dca7aad3f3046d042789",
+    "schemas/governance_actor.v1.json": "54734f1eee5ce1ccc33afad3ed5f476d0871d81e0b4273385826563102f93301",
+    "schemas/governance_capability.v1.json": "7188b85071edf4058603958bef049557799919f438d072698bb955fd0d95009a",
+    "schemas/governance_compilation_report.v1.json": "8daf2cfa5923b361d8b42923ffe2857ef7303fbc4086c73486011492adb35b03",
+    "schemas/governance_diagnostic.v1.json": "1f588f972b8fc0acfc17d9d0c12eb293262f05c1623cf358259380c69338da4d",
+    "schemas/governance_event.v1.json": "70f56de206a651012408b2b30d2e265ad80c8fc9836636704c8a57f3a501e217",
+    "schemas/governance_impact_preview.v1.json": "b3f7a7ee42b784e0325415dbd8c97277217bee9488c7581a9d7d48e19bc2e051",
+    "schemas/governance_lineage_verification.v1.json": "618dd077dfff1e9dc7e7fa177917f32e06fe20b650b091e72a3af0dfe64d289c",
+    "schemas/governance_quality_diagnostic.v1.json": "96bb719bc8dfd93d04840bc05df71a0ddbfc125e8533d13f299b86def07e915c",
+    "schemas/governance_replay_diff.v1.json": "782a9b7fb9d0e44487b5daa287d9374171f423f1701e1ae3b0facdb51c5457fd",
+    "schemas/governance_replay_state.v1.json": "89acf900249593acb37041a71497fea278d7cf231f78060b4ffc6153daed8657",
+    "schemas/governance_review_packet.v1.json": "4ccf67105a07d7421c1b1094319477003ed1f3431add09ee429cf0ec21867ec4",
+    "schemas/governance_semantic_extraction.v1.json": "5a3fdd24c0c49727e4d0c68660507fd2b8186da96f7e6382dfbae92e69998f3d",
+    "schemas/governance_semantic_provenance.v1.json": "b7915ef01532b419877682c101385e2a17d4374bde63d20e4f0ecd969e9de0bf",
+    "schemas/governance_semantic_reconciliation.v1.json": "3107aabbd86bbc1cb4c058a348c74db42d59c8b9abb05cd91eeca6480e1004e1",
+    "schemas/governance_source.v1.json": "f2735f821173b18a15c47a414d7540d843003bc2f8e93c070752de0f0c28e76f",
+    "schemas/guard_enforcement_projection.v1.json": "7ca7004c87047f55c8442d5354b0f07b5dd621d45c909e8921ecdaa5246cacd7",
+    "schemas/identity_continuity_semantics.v1.json": "7d5de5b212104ad91c7c3f1855e435b696906470aea5f1520e95187eaf5077b6",
+    "schemas/policy_mapping_decision.v1.json": "64fbf82e6bb6f1ff8fd3bad1b388b8c4aaf9ac5d8c3d1a34ed165517f0743f45",
+    "schemas/policy_translation_approval.v1.json": "680088f5d796a434172234896bf9061e65b4fd4b3fe216e234e59c2a09625565",
+    "schemas/policy_translation_capability_catalog.v1.json": "0c3bed179795034f60e9721998bcc42912a3777ef7c44382971dc1fc5468be32",
+    "schemas/policy_translation_capability_catalog.v2.json": "3db940aacebb490fa2521435e75a94e41efe3c5ac87b9af7a9c662d586ea542e",
+    "schemas/policy_translation_commitment.v1.json": "25d47642b5263ef3247b0f05544a3d4f508af142a33d5db517e4d710d9473a5d",
+    "schemas/policy_translation_confirmation.v1.json": "a2f33390fd81c05ec1d64ff01e67760023e68c7a16cdead7a3b60264fcc2a062",
+    "schemas/policy_translation_proposal.v1.json": "c8cf06b8022f6e812470cba621fb39a1027859be2f66219948cadcb85f4a641a",
+    "schemas/policy_translation_review.v1.json": "cd9dd7e8b6811bc168ac09c0f48bb85c22fae3cce976d6081e1e74374687e994",
+    "schemas/policy_translation_run_evidence.v1.json": "47dbf89ba05ba91fe07428336f4358251778c8fe9bd355d2fb06d6a366f2a78f",
+    "schemas/projection_generation_event.v1.json": "9dce578231b30911c66197239625db555cca3e573cebc3010e3d800ea6c49846",
+    "schemas/projection_invalidation_event.v1.json": "7ad192d89057eced5e3f9a95102987282beef213d0751682a10b8fffb0872d66",
+    "schemas/publication_manifest.schema.json": "8c18cc3c31351c02271246d4b3a72392b0da64f0e3238b7d36688bf6bc4e1bf4",
+    "schemas/publication_manifest.v1.json": "3708581373144181f8cf25862d3e2c86185d1275c9f8c18a16dcf3270059163d",
+    "schemas/publication_receipt.v1.json": "49765aa9ee40fd1fc21c8b5ed59fe6e40890b0bea0dcea71a232cb39a9f8df59",
+    "schemas/publication_receipt.v2.json": "b86461c960bfe6ab351a90f741c7d7e19420c68266898c6908b7a2851fb7f12d",
+    "schemas/publication_receipt.v3.json": "556971077edb0edfbd3fb70512beff630303e33459f7b7d4c33a4330cc4efc5c",
+    "schemas/publication_receipt.v4.json": "1b36ce18ad3b4e773d9aa83b0a3bc65cbb1f309651294d2a4e4420363bbb7c60",
+    "schemas/replay_authority_request.v1.json": "9c5fb3f76ba9878ed22ca6bee9a3fb75d9268af70f38beb9a1442886542f6a92",
+    "schemas/replay_execution_request.v1.json": "36961a1e0bece2a297e761f89c255520a5b2e511f4629cfb8592770712791296",
+    "schemas/review.schema.json": "f9a38fa4c205d93ab7264a61f6d51386e66e363e91f725b56ab0c630e24e956f",
+    "schemas/runtime_consequence_projection.v1.json": "329a495df30e191ed9821b216cc9744542fdd1dde0117d9b1adb5fac2dd931f7",
+    "schemas/runtime_fact_schema.v1.json": "e1bb147c949822c99d1e05d55e8fbc361dc9398b0996046b0c1e61aad0ddb5b2",
+    "schemas/semantic_ambiguity.v1.json": "32fcabfacd1aa2649081f58717befa7fbfa249f6c7427c18b927b888aad27771",
+    "schemas/semantic_authority_diff.v1.json": "3150ac0ba22e7b3cf97f4693aab5d7ff123ce97aebc4fa1b7a9bc837ee1c3f78",
+    "schemas/semantic_commit_bundle.v1.json": "079c107aeab577f546ceffb0ba4310fb01db5b63d61b1c9563b0afb27cee267b",
+    "schemas/semantic_conflict.v1.json": "866d2e98869be2fe87cd51ffed7501898434ec929877403b25ca2cd89c817771",
+    "schemas/semantic_interpretation_decision.v1.json": "7303065d6243e987ad0f11ecb3c05adb9c100542b3a91bf4f56801bbcbac2713",
+    "schemas/semantic_lifecycle_enforcement_projection.v1.json": "03fb47228e2184fdae45b218a5f09aaf8335884304f714f8f659b2a3cdbd8791",
+    "schemas/semantic_reconciliation_projection.v1.json": "38c4ef8c0fdb7bffdddd14f15165b5971129ef486601ba1254e650f8eac00660",
+    "schemas/semantic_stability_projection.v1.json": "6aa164f62b5ca1e4baaec6ffdcb96558c368090a367b97bc009a4220650b6160",
+    "schemas/snapshot.schema.json": "84bc3dd6da9f6b672de159bd1821d8b431d7da82a72dd15347213e810f429ebf",
+    "schemas/state_posture_snapshot_semantics.v1.json": "9df6503de7389b5fcaf27b3fe870aa7a132f0838b0639c3d69785c834ae96ec5",
+    "schemas/temporal_authority_semantics.v1.json": "16b156ccfa965bd8fbf178cd7f1d275e762f60a35331bf333a1f1c371dbc3a8c",
+    "tests/fixtures/action_policy_release_v4/catalog.json": "505f47310489c5c008877ac9a53a56a32691253f04c95286350fb23cb4987150",
+    "tests/fixtures/action_policy_release_v4/create-only/approval.json": "4adec85e8da6fe1e873796212dfa47cc15153143f9ad41a771a98b9bc376cfc1",
+    "tests/fixtures/action_policy_release_v4/create-only/authority-bundle.json": "02fed59761c4e8e911111e207ff51b15b8a69beb3769ce96e3bc9dc8f2f04d30",
+    "tests/fixtures/action_policy_release_v4/create-only/compiled-authority.json": "34447eb34fa6ca1f0c7c26743f99d9582781409cf6b8c6c266cf5d7fdc46d8e0",
+    "tests/fixtures/action_policy_release_v4/create-only/compiler-input.json": "19e5b01e239167f5a5cb19cef7de8d5d09c0f852d81831b4c319f71ad054302f",
+    "tests/fixtures/action_policy_release_v4/create-only/compiler-output.json": "04a6cd1dc98433e41b6104d13f3c6926ed853ec88a21380b8170bc327b3664f9",
+    "tests/fixtures/action_policy_release_v4/create-only/confirmation.json": "cb18d805fd5395e3a3abc3fba6c82f76d712ac3f3c03c7442aa7c2d5600d4463",
+    "tests/fixtures/action_policy_release_v4/create-only/constraint-ir.json": "a4a6ff5a2d4070ab0f1cb6c6026d6d32e3811f2da856d860cb0571fe85fd9d28",
+    "tests/fixtures/action_policy_release_v4/create-only/proposal.json": "429c85ce41fec151c87999eefa705412c662d4cf378e3d09715634e7d34ddd98",
+    "tests/fixtures/action_policy_release_v4/create-only/publication-receipt.json": "e262f61e714ada4eccea15ad4f4a3d17ba60542704366320c32a25cd03f0c6d3",
+    "tests/fixtures/action_policy_release_v4/create-only/review.json": "9818e45e437129fd0982ee6791dcc521a280d83c89be1b8458a10f2132bdfc90",
+    "tests/fixtures/action_policy_release_v4/create-only/source-interpretation.json": "4691762ca5e4fcc2cea446ffb021be4ec1bc69d536b4f9654e6bf9ce52f0c093",
+    "tests/fixtures/action_policy_release_v4/create-only/source.txt": "ff5601216d1505cc8d8c9fb73fe3276d3a7852a083f302e8767e592ca1b3727f",
+    "tests/fixtures/action_policy_release_v4/domain-pack.json": "5547748641c8adba707303127f9e7273343516567b547467d20c5ef8ea21f40a",
+    "tests/fixtures/action_policy_release_v4/mixed/approval.json": "dd577abddf1c2635ba184f346cbbe140e9538ee7120b356c63979061be055c9d",
+    "tests/fixtures/action_policy_release_v4/mixed/authority-bundle.json": "784719ff22ced940a6d100bb6e141d7a71341fd4565f42918bbba7f418b94d2c",
+    "tests/fixtures/action_policy_release_v4/mixed/compiled-authority.json": "f2e679f0eed5bdd59dcb02952096bb253aab390ff0c3cded6292d4aca4bbed3b",
+    "tests/fixtures/action_policy_release_v4/mixed/compiler-input.json": "480f2216ab2790eb35740f098687711da285bfba1f959b3af70fd38acf687d1e",
+    "tests/fixtures/action_policy_release_v4/mixed/compiler-output.json": "a74cd524f68834489e0e107e5feb4635ff91ced4b2446d4e8bc1b06906029edc",
+    "tests/fixtures/action_policy_release_v4/mixed/confirmation.json": "4b034a2f92828de1814ebe518d2f53a8c24ec32db14cef85bdae6b5255ef468a",
+    "tests/fixtures/action_policy_release_v4/mixed/constraint-ir.json": "d324eb9c2823eede6b58d09f8c34f6951731f99865a68405b49879e76fc8b5e1",
+    "tests/fixtures/action_policy_release_v4/mixed/proposal.json": "3cc5634d2059c1d6b0d69e31307876d6d28387d229f8839bf5f555d288cc637e",
+    "tests/fixtures/action_policy_release_v4/mixed/publication-receipt.json": "dc83f61298e2e1315e9956114f28a4ee1f11c76f1f98b585d3a6ef63e7d4271f",
+    "tests/fixtures/action_policy_release_v4/mixed/review.json": "d5651cd2e37b5703a4d3aada6498aed90fcdf65320feb416ca8f6eddd141b9f0",
+    "tests/fixtures/action_policy_release_v4/mixed/source-interpretation.json": "152be4810b8a6ae7fd8a0dec88ee89f8f6eac0fffde6d8c50f4a23627ec1e897",
+    "tests/fixtures/action_policy_release_v4/mixed/source.txt": "d09939a41b7e335165ecebffc714064c816c6465dc5afee8ee3702946d1d94bf",
+    "tests/fixtures/action_policy_release_v4/modify-only/approval.json": "07fe4a3ecb747d7b807b07b48d4f537ef280faa504311843af7e15da5172ca49",
+    "tests/fixtures/action_policy_release_v4/modify-only/authority-bundle.json": "493ff75a3ca12901ef74b8b0a50cf5b62fe9e3321dd5efb2e2058ef85e3a99eb",
+    "tests/fixtures/action_policy_release_v4/modify-only/compiled-authority.json": "5b8484373b1460097dfe0e9c92dabec116fb4d11c8d3124a2bbbdfe9ebf3e6f6",
+    "tests/fixtures/action_policy_release_v4/modify-only/compiler-input.json": "32be154c3dd145367acbf794dd2ff222998b083e07153a272c617fd70bdc4bf9",
+    "tests/fixtures/action_policy_release_v4/modify-only/compiler-output.json": "5c826b174bc861e8ad05a3a56c8c12421f827d72fe4cd29315502c11c8d2411e",
+    "tests/fixtures/action_policy_release_v4/modify-only/confirmation.json": "3c7898493ed77b21d85c388027eba039f77fa25db802271d50ca73918838429e",
+    "tests/fixtures/action_policy_release_v4/modify-only/constraint-ir.json": "02c6d1c9a7c3897bfce56a4d4c8f8568ea69759436c415d0b79cb9fd1118efb4",
+    "tests/fixtures/action_policy_release_v4/modify-only/proposal.json": "0fbaebc1bb78d27762c6702733bc11a04e7d6fed07cf00733f45cbd161beeab0",
+    "tests/fixtures/action_policy_release_v4/modify-only/publication-receipt.json": "536b5f76686b2b84f901a2d569e2dc9fec8b0e2fa1b579e6f2a0ddd424b4a925",
+    "tests/fixtures/action_policy_release_v4/modify-only/review.json": "0fb71f56f6a22b3068543d2bbc8e09623250e42ed9d9d7807871c38566019386",
+    "tests/fixtures/action_policy_release_v4/modify-only/source-interpretation.json": "10a1008b24d7f8d137757559223ec043b0f92853d74b748612b57cb5c44340af",
+    "tests/fixtures/action_policy_release_v4/modify-only/source.txt": "deae0122f01197c2a6a1b1277ae5c0a6d0443a3f2c4d88daf7c6321e61a67934",
+    "tests/fixtures/action_policy_release_v4/runtime-fact-schema.json": "987bf4572e4f370290f7e47bffaa7c56a489688eaa76f129690eafe8c6148535",
+    "tests/fixtures/action_policy_v4/create-only/approval.json": "5e22b99ed3afae512c5ff22313784f388eb62ba43e10c404d816ad169451aa54",
+    "tests/fixtures/action_policy_v4/create-only/authority-bundle.json": "7864a61d4fa3d898b174f6c0b1201fb24a54be09b901409faad903e6ae158cf2",
+    "tests/fixtures/action_policy_v4/create-only/compiled-authority.json": "f3d20348f178c631bf506f57a4bc8ecfd2cd2e77e1f00e62cb957f7a0fd4bc0f",
+    "tests/fixtures/action_policy_v4/create-only/compiler-input.json": "50599dddc09c49a883066a251a94bdae588e945691124d83879617150805b534",
+    "tests/fixtures/action_policy_v4/create-only/compiler-output.json": "c0d4dcd7d3f3579cebb5458ebd07927cbc558b7ee5cadfff736ec811a3084f76",
+    "tests/fixtures/action_policy_v4/create-only/confirmation.json": "079cc796ea6535cc8c5f7b2ae0c3af4fbec2e7f6d990a3e4cf3b4572ffb94370",
+    "tests/fixtures/action_policy_v4/create-only/constraint-ir.json": "a76feed1f98aba1dea66aa729fa6206ecf0ced4ea99731c916c164e05b6b6267",
+    "tests/fixtures/action_policy_v4/create-only/proposal.json": "d52b6c54c13bc529e1e431aee81cac2a424e5e2c510a6f9491bbd1ede94f0468",
+    "tests/fixtures/action_policy_v4/create-only/publication-receipt.json": "81fc18df15acdc8b325879ee62df803f33cd8ef3f42f281d851321ebb783789f",
+    "tests/fixtures/action_policy_v4/create-only/review.json": "ac2b3f516a321c5fd7629360a0b1035cdbc33bea42c3f4ed72246ce056780f43",
+    "tests/fixtures/action_policy_v4/create-only/source-interpretation.json": "63a04e043bd81ae59e6062cbae020d37152c33bcb362f1b847d8e4e79a956415",
+    "tests/fixtures/action_policy_v4/create-only/source.txt": "ff5601216d1505cc8d8c9fb73fe3276d3a7852a083f302e8767e592ca1b3727f",
+    "tests/fixtures/action_policy_v4/mixed/approval.json": "802cbeee0c033c3a13f3bfec06f439e908165ba87a98f4b673a04ff8c537aae2",
+    "tests/fixtures/action_policy_v4/mixed/authority-bundle.json": "352ac4b718772359da98d161d2742ee18d408ac2ea6cdb0b00982979416f951d",
+    "tests/fixtures/action_policy_v4/mixed/compiled-authority.json": "ba70aa080c6c4382e6d46cdfc85660e2f080565dc282086d7a806fe080eac7d1",
+    "tests/fixtures/action_policy_v4/mixed/compiler-input.json": "04648bfea334c16d38988bfb2020bc38b7020b6200157692a95468b1c1a16e36",
+    "tests/fixtures/action_policy_v4/mixed/compiler-output.json": "80d2bc52612d4492b29166c6c6cca6071a47acfebc32085c3f9c031cd20b37eb",
+    "tests/fixtures/action_policy_v4/mixed/confirmation.json": "37abc9073ac0e589a7a16d1fe44c8784e72c24d44c873e3cc0da155f6e63dca8",
+    "tests/fixtures/action_policy_v4/mixed/constraint-ir.json": "c2d5157eef0824f83e9b3638f7593d6b3e222de786531f2f207bb933ef857fa6",
+    "tests/fixtures/action_policy_v4/mixed/proposal.json": "017911644890acaa52f9ab701f3019c4fb71ce40795d9b5d77763c7d5b5fe334",
+    "tests/fixtures/action_policy_v4/mixed/publication-receipt.json": "45294bb481535af86a2bf3b7eeef3c344f81ab291114649178a99e71be8f2773",
+    "tests/fixtures/action_policy_v4/mixed/review.json": "623de256f215faad0a4dc7b722b0a71d538cee06fc11d58ddf65d73d8b91e59e",
+    "tests/fixtures/action_policy_v4/mixed/source-interpretation.json": "deabbf22ef3133dcbb301481541db18a335ec27189771810ffc5cece14d71ddb",
+    "tests/fixtures/action_policy_v4/mixed/source.txt": "d09939a41b7e335165ecebffc714064c816c6465dc5afee8ee3702946d1d94bf",
+    "tests/fixtures/action_policy_v4/modify-only/approval.json": "35a4beee9cb2be8de448bef8ea4139a0b78772bb16677cd544446ed01c2febe6",
+    "tests/fixtures/action_policy_v4/modify-only/authority-bundle.json": "270c8f66d28298058cd56936555b228551f8656bdd57b9ce3265a87a4b473a70",
+    "tests/fixtures/action_policy_v4/modify-only/compiled-authority.json": "009dd861cf10703cb2451d00c72714a613ac48385254ed768720fa5404a5151c",
+    "tests/fixtures/action_policy_v4/modify-only/compiler-input.json": "4334805092939c73d042e1739756e9ee86fcc7a4bbe4f9c756cf23f81e4815b4",
+    "tests/fixtures/action_policy_v4/modify-only/compiler-output.json": "aee87ac7e113bfe0c67ba47fa0a78b2a96389e952fbcd0930f2105917c16bf57",
+    "tests/fixtures/action_policy_v4/modify-only/confirmation.json": "ed938a1d120e7cdbd13e8711c5ee5ed5cb2c5e11ac6f129c2261aca861cce7a1",
+    "tests/fixtures/action_policy_v4/modify-only/constraint-ir.json": "efa67c43af3e2fb7ac3630a0467a462a3d0c447f7c8d828c64ee194879395cd1",
+    "tests/fixtures/action_policy_v4/modify-only/proposal.json": "e8449096664e48ddd69718de7c4dcf2b3d30b4f843f3c97827f712b312fbc296",
+    "tests/fixtures/action_policy_v4/modify-only/publication-receipt.json": "5b0790b9f0c2ab70b077ee7bceecc01cf1b43266c5924a911d34c5e6109894d3",
+    "tests/fixtures/action_policy_v4/modify-only/review.json": "cea697dcb0571984b1ff56db6cc1d45fd78817c189007703581688827bb435cc",
+    "tests/fixtures/action_policy_v4/modify-only/source-interpretation.json": "f96dff4a80e462562c14641eaa8ce7f110bb704aa5cf1a87e20e5ad5bf91d624",
+    "tests/fixtures/action_policy_v4/modify-only/source.txt": "deae0122f01197c2a6a1b1277ae5c0a6d0443a3f2c4d88daf7c6321e61a67934",
+    "tests/fixtures/golden_path/README.md": "d38d3ce3eb4794adcbaa24de52c6d031f93e4889d31b5999872f7da3eb302c61",
+    "tests/fixtures/golden_path/contracts/finance-policy-1.0.0.authority-bundle.json": "8733272f57c1a436137ea1c03a7384b3b41e7ee0162f828c71ffee3977d76c4c",
+    "tests/fixtures/golden_path/contracts/finance-policy-1.0.0.contract.json": "75f3e3acaa5cfbbd912dbf279ed16af3dd528e9a0e52fc3ac7bf3c3262c14715",
+    "tests/fixtures/golden_path/contracts/finance-policy-1.0.0.publication-receipt.json": "a60fdf01ab1bb1ab3650e0cfcaa0b184cd6ef58440ccf048e2f347c67db19e05",
+    "tests/fixtures/golden_path/contracts/index.json": "1051ab0cecb1c786fedcbeab65f5cc657ab2512f2792a00c0299cbab4a1121ad",
+    "tests/fixtures/provenance_complete/publication-inputs.json": "38e0cbd048baf16004a678cf5de64f9b19915c7b16543a56d5e65a10d5b4c004",
+    "tests/fixtures/provenance_complete/repository-change-policy.base64": "2243724be93bc3439749e85046dcb2531cd1ffad6321c9e4bd44b0ef33201283"
+  }
+}

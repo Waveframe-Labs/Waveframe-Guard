@@ -1,0 +1,149 @@
+{
+  "python": "3.14.7 (main, Aug  6 2026, 02:19:46) [GCC 13.3.0]",
+  "commands": [
+    {
+      "label": "head",
+      "command": [
+        "git",
+        "rev-parse",
+        "HEAD"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/.candidate50/ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "clean-checkout",
+      "command": [
+        "git",
+        "diff",
+        "--exit-code",
+        "HEAD"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/.candidate50/ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "combined-extra-pip",
+      "command": [
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/combined-extra/bin/python",
+        "-m",
+        "pip",
+        "install",
+        "pip==25.3"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/.candidate50/ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "combined-extra-install",
+      "command": [
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/combined-extra/bin/python",
+        "-m",
+        "pip",
+        "install",
+        "-r",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/.candidate50/ledger/requirements-ci.txt",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/wheelhouse/governance_ledger-0.9.0-py3-none-any.whl[dev,guard]",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/wheelhouse/cricore_contract_compiler-0.5.0-py3-none-any.whl",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/wheelhouse/waveframe_guard-0.19.0-py3-none-any.whl",
+        "--report",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/combined-extra-install.json"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/.candidate50/ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "combined-extra-check",
+      "command": [
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/combined-extra/bin/python",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/.candidate50/ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "combined-extra-freeze",
+      "command": [
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/combined-extra/bin/python",
+        "-m",
+        "pip",
+        "freeze",
+        "--all"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/.candidate50/ledger",
+      "exit_code": 0
+    },
+    {
+      "label": "combined-provenance",
+      "command": [
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/combined-extra/bin/python",
+        "-I",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/installed-support/tools/check_installed_wheel_set.py",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/wheel-set.json"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/installed-support",
+      "exit_code": 0
+    },
+    {
+      "label": "combined-extra-default",
+      "command": [
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/combined-extra/bin/python",
+        "-I",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/installed-support/tools/acceptance_pytest.py",
+        "-q",
+        "-ra",
+        "--junitxml",
+        "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/combined-extra-default.xml",
+        "tests"
+      ],
+      "cwd": "/home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/installed-support",
+      "exit_code": 1
+    }
+  ],
+  "suites": {},
+  "gates": {
+    "base": "passed",
+    "combined_extra": "failed"
+  },
+  "combined_extra": {
+    "status": "incomplete",
+    "executed": true
+  },
+  "release_ready": false,
+  "runtime_activation_ready": false,
+  "head": "3cc34e7b3cb6efca5102e0e22d559ec0c0fd583f",
+  "expected_head": "3cc34e7b3cb6efca5102e0e22d559ec0c0fd583f",
+  "base_evidence_sha256": "62a2000b8462fbb20c2a65e0a64c8f30b2407da51955ebb4d03d63f0f0285beb",
+  "guard_candidate": {
+    "source_url": "https://github.com/Waveframe-Labs/Waveframe-Guard",
+    "source_commit": "0161ef8a52e052d1bc1366cdc93ce13a9bd535ed",
+    "provenance_kind": "coordinator-supplied-exact-candidate",
+    "wheel": "waveframe_guard-0.19.0-py3-none-any.whl",
+    "wheel_sha256": "2b78374416635ca551ee5470fcd1e9e390d3f08141a53c91bcba7d42516b046e"
+  },
+  "compiler_origin": {
+    "filename": "cricore_contract_compiler-0.5.0-py3-none-any.whl",
+    "sha256": "1bc689d2885e32641ac3ade7e710a4d0fe079c089f1a2160e2d86f328bbb7c44",
+    "origin": {
+      "url": "https://github.com/Waveframe-Labs/cricore-contract-compiler.git",
+      "vcs_info": {
+        "commit_id": "ae590dee058d3481e384dea850d5b7d980f533ff",
+        "requested_revision": "ae590dee058d3481e384dea850d5b7d980f533ff",
+        "vcs": "git"
+      }
+    },
+    "kind": "locally built pip-cached VCS wheel",
+    "supplied_archive_hash_verified": false,
+    "note": "Archive hashes can differ across builds; complete compiled fixture outputs must remain identical."
+  },
+  "package_sha256": {
+    "governance_ledger-0.9.0-py3-none-any.whl": "ae239faf211bb6bd0885f7873f17a8dfd893a5fb961aac8d6917e4ee4af704be",
+    "governance_ledger-0.9.0.tar.gz": "1aa8a67f2846e064e39476b6af449e1401170c975b39d286fb73eadb93d4deb4",
+    "cricore_contract_compiler-0.5.0-py3-none-any.whl": "1bc689d2885e32641ac3ade7e710a4d0fe079c089f1a2160e2d86f328bbb7c44",
+    "waveframe_guard-0.19.0-py3-none-any.whl": "2b78374416635ca551ee5470fcd1e9e390d3f08141a53c91bcba7d42516b046e"
+  },
+  "status": "failed",
+  "error": "combined-extra-default: unexpected exit 1"
+}

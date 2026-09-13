@@ -1,0 +1,171 @@
+F....................................................................... [ 10%]
+........................................................................ [ 20%]
+........................................................................ [ 30%]
+.............................F.......................................... [ 41%]
+..............................................F......................... [ 51%]
+........................................................................ [ 61%]
+........................................................................ [ 71%]
+........................................................................ [ 82%]
+........................................................................ [ 92%]
+......................................................                   [100%]
+=================================== FAILURES ===================================
+______________________ test_candidate_package_provenance _______________________
+
+    def test_candidate_package_provenance():
+        dist = importlib.metadata.distribution("cricore-contract-compiler")
+        assert dist.version == "0.5.0"
+        provenance = json.loads(dist.read_text("direct_url.json"))
+>       assert provenance["url"] == "https://github.com/Waveframe-Labs/cricore-contract-compiler.git"
+E       AssertionError: assert 'file:///home...-none-any.whl' == 'https://gith...-compiler.git'
+E         
+E         - https://github.com/Waveframe-Labs/cricore-contract-compiler.git
+E         + file:///home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/wheelhouse/cricore_contract_compiler-0.5.0-py3-none-any.whl
+
+tests/test_action_policy_v4.py:54: AssertionError
+_____ test_released_guard_integration_preserves_allowed_and_blocked_replay _____
+
+    def test_released_guard_integration_preserves_allowed_and_blocked_replay() -> None:
+        version = importlib.metadata.version("waveframe-guard")
+        assert version == "0.19.0"
+        authority_contract = _authority_contract()
+        blocked_state = _execution_state(approvals=[])
+        allowed_state = _execution_state(
+            approvals=[{"role": "manager", "approved_by": "manager-1"}]
+        )
+        inputs_before = copy.deepcopy(
+            [authority_contract, blocked_state, allowed_state]
+        )
+    
+>       blocked = replay_admissibility(
+            authority_contract=authority_contract,
+            execution_state=blocked_state,
+        )
+
+tests/test_guard_optional_compatibility.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../combined-extra/lib/python3.14/site-packages/governance_ledger/replay.py:110: in replay_admissibility
+    decision = admissibility_evaluator(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+contract = {'approval_requirements': {'required': [{'condition': {'field': 'amount', 'operator': '>', 'value': 1000000}, 'role': 'manager'}]}, 'contract_hash': 'sha256:contract', 'contract_id': 'finance-policy', 'contract_version': '0.1.0', ...}
+execution_state = {'action': 'transfer', 'actor': {'id': 'employee-1', 'role': 'employee', 'type': 'human'}, 'approvals': [], 'arguments': {'amount': 1250000}, ...}
+
+    def evaluate_admissibility(contract, execution_state):
+        """Deprecated permission API; migrate to Guard.local()/Guard.cloud() tools."""
+>       raise LegacyExecutionError("waveframe_guard.evaluate_admissibility()")
+E       waveframe_guard.execute.LegacyExecutionError: GUARD_LEGACY_EXECUTION_UNSUPPORTED: waveframe_guard.evaluate_admissibility() cannot establish strict execution evidence (integrity/publication prerequisites). Migrate to Guard.local() or Guard.cloud() and guarded tools. Guard execution is never advisory.
+
+../combined-extra/lib/python3.14/site-packages/waveframe_guard/runtime.py:773: LegacyExecutionError
+_ test_guard_0170_loads_native_v3_after_private_evidence_deletion_and_enforces _
+
+tmp_path = PosixPath('/tmp/pytest-of-runner/pytest-5/test_guard_0170_loads_native_v0')
+
+    def test_guard_0170_loads_native_v3_after_private_evidence_deletion_and_enforces(
+        tmp_path: Path,
+    ) -> None:
+        pytest.importorskip("waveframe_guard")
+        from importlib.metadata import version
+    
+        from guard.sdk import Guard, GuardExecutionBlocked
+        from waveframe_guard.authority.adapters import LocalRegistryResolver
+    
+        assert version("waveframe-guard") == "0.19.0"
+        assert version("governance-ledger") == "0.9.0"
+    
+        publication = _publish(
+            _proposal(b"Agents may modify README.md and CHANGELOG.md.")
+        )
+        private_evidence = tmp_path / "private-translation-evidence.json"
+        private_evidence.write_text(
+            '{"provider":"private","request":"private","response":"private"}',
+            encoding="utf-8",
+        )
+        private_evidence.unlink()
+        assert not private_evidence.exists()
+    
+        public_root = tmp_path / "publication"
+        contracts = public_root / "contracts"
+        contracts.mkdir(parents=True)
+        bundle_ref = "contracts/repository-authority-1.0.0.authority-bundle.json"
+        receipt_ref = "contracts/repository-authority-1.0.0.publication-receipt.json"
+        bundle = publication["authority_bundle"]
+        receipt = publication["publication_receipt"]
+        (public_root / bundle_ref).write_text(json.dumps(bundle), encoding="utf-8")
+        (public_root / receipt_ref).write_text(json.dumps(receipt), encoding="utf-8")
+        registry = {
+            "schema_version": "contract_registry.v1",
+            "contracts": [
+                {
+                    "authority_ref": "repository-authority@1.0.0",
+                    "contract_id": "repository-authority",
+                    "contract_version": "1.0.0",
+                    "contract_hash": publication["compiled_authority_contract"][
+                        "contract_hash"
+                    ],
+                    "bundle_path": bundle_ref,
+                    "bundle_hash": bundle["bundle_hash"],
+                    "receipt_path": receipt_ref,
+                    "receipt_hash": receipt["receipt_hash"],
+                    "publication_id": receipt["publication_id"],
+                    "published_at": receipt["published_at"],
+                    "published_by": receipt["published_by"],
+                    "lifecycle_state": "active",
+                }
+            ],
+        }
+        registry["registry_hash"] = canonical_sha256(registry)
+        registry_path = contracts / "index.json"
+        registry_path.write_text(json.dumps(registry), encoding="utf-8")
+    
+        guard = Guard.local(
+            workspace=tmp_path / "guard-evidence",
+            authority="repository-authority@1.0.0",
+            authority_resolver=LocalRegistryResolver(
+                registry_path=registry_path,
+                workspace_root=public_root,
+            ),
+            actor_identity={"id": "release-agent", "type": "agent"},
+        )
+        mutations: list[str] = []
+    
+        @guard.tool(action="modify", target="path", return_result=True)
+        def modify(path: str) -> str:
+            mutations.append(path)
+            return path
+    
+>       assert modify("README.md")["executed"] is True
+               ^^^^^^^^^^^^^^^^^^^
+
+tests/test_policy_translation_publication_v3.py:516: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../combined-extra/lib/python3.14/site-packages/guard/sdk/guard.py:385: in wrapped
+    result = boundary.execute(
+../combined-extra/lib/python3.14/site-packages/guard/sdk/execution.py:375: in execute
+    evaluation = self.evaluate(execution_request, save=False, **{
+../combined-extra/lib/python3.14/site-packages/guard/sdk/execution.py:196: in evaluate
+    with self._require_workspace().bind(
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <guard.sdk.execution.GuardRuntimeBoundary object at 0x7fa6405cba10>
+
+    def _require_workspace(self):
+        self._check_target_binding()
+        if self._repository_workspace is None:
+>           raise RepositoryBoundaryError(
+                "repository authority requires repository_root=<absolute protected workspace> "
+                "and repository_tool(); untyped v1 non-repository targets must explicitly "
+                "select target_domain='literal'"
+            )
+E           guard.sdk.repository_boundary.RepositoryBoundaryError: repository authority requires repository_root=<absolute protected workspace> and repository_tool(); untyped v1 non-repository targets must explicitly select target_domain='literal'
+
+../combined-extra/lib/python3.14/site-packages/guard/sdk/execution.py:179: RepositoryBoundaryError
+- generated xml file: /home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/supplemental-native.xml -
+=========================== short test summary info ============================
+FAILED tests/test_action_policy_v4.py::test_candidate_package_provenance - AssertionError: assert 'file:///home...-none-any.whl' == 'https://gith...-compiler.git'
+  
+  - https://github.com/Waveframe-Labs/cricore-contract-compiler.git
+  + file:///home/runner/work/Waveframe-Guard/Waveframe-Guard/acceptance-output/ledger-extra/combined/wheelhouse/cricore_contract_compiler-0.5.0-py3-none-any.whl
+FAILED tests/test_guard_optional_compatibility.py::test_released_guard_integration_preserves_allowed_and_blocked_replay - waveframe_guard.execute.LegacyExecutionError: GUARD_LEGACY_EXECUTION_UNSUPPORTED: waveframe_guard.evaluate_admissibility() cannot establish strict execution evidence (integrity/publication prerequisites). Migrate to Guard.local() or Guard.cloud() and guarded tools. Guard execution is never advisory.
+FAILED tests/test_policy_translation_publication_v3.py::test_guard_0170_loads_native_v3_after_private_evidence_deletion_and_enforces - guard.sdk.repository_boundary.RepositoryBoundaryError: repository authority requires repository_root=<absolute protected workspace> and repository_tool(); untyped v1 non-repository targets must explicitly select target_domain='literal'
+3 failed, 699 passed in 20.00s
