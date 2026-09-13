@@ -7,7 +7,7 @@ from typing import Any, Mapping
 
 from .exceptions import AuthorityVerificationError
 from .types import LoadedAuthority
-from .development import require_action_policy_development
+from .generations import require_action_generation
 from .verifier import (_compute_runtime_integrity_hash, _PROCESS_VERIFICATION_MARKER,
                        _publication_integrity_hash)
 
@@ -56,7 +56,7 @@ class VerifiedRuntimeAuthority:
         if authority.contract.get("schema_version") == "compiled_authority_contract.v3" and authority.schema_version != "authority_bundle.v4":
             raise RuntimeFactError("action contract requires native v4 authority")
         if authority.schema_version == "authority_bundle.v4":
-            require_action_policy_development()
+            require_action_generation(authority.contract)
             if (authority.publication_integrity_hash != _publication_integrity_hash(
                     authority.authority_bundle, authority.publication_receipt)
                 or authority.authority_bundle.get("compiled_authority_contract") != authority.contract):
@@ -99,13 +99,13 @@ class VerifiedRuntimeAuthority:
         if self._verification_marker is not _PROCESS_VERIFICATION_MARKER:
             raise RuntimeFactError("runtime authority is not process verified")
         if candidate.get("schema_version") == "compiled_authority_contract.v3":
-            require_action_policy_development()
+            require_action_generation(candidate)
         if _canonical_json(candidate) != self.contract_json:
             raise RuntimeFactError("verified v2 compiled contract changed after activation")
 
 
 class RepositoryChangesFactProvider:
-    """Trusted deterministic binding for repository-changes/1.0.0 only."""
+    """Trusted deterministic binding for explicitly registered repository packs."""
 
     def derive(
         self,
@@ -312,7 +312,12 @@ def _reject_fact_injection(
 
 def _trusted_repository_provider_keys():
     keys = {_trusted_repository_provider_key()}
-    # The new identity is reachable only with both explicit development gates.
+    keys.add(RuntimeFactProviderKey(
+        domain_pack_id="repository-changes", domain_pack_version="3.0.0",
+        domain_pack_hash="sha256:78783654a8131cb7a6547ee2ed9507e1dced640aebe32d35057c385bb1dc4459",
+        schema_id="repository-changes-runtime", schema_version="3.0.0",
+        schema_hash="sha256:3fcf3af0a61f91a78b171ccd6247db9f0f908e1baf44aa50ece12349c44bb582"))
+    # The retained development identity still requires both opt-ins.
     import os
     if all(os.environ.get(name) == "1" for name in (
         "WAVEFRAME_GUARD_ACTION_POLICY_DEV", "WAVEFRAME_LEDGER_ACTION_POLICY_DEV"

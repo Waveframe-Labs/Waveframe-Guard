@@ -33,14 +33,14 @@ waveframe-guard-external-agent = "waveframe_guard.quickstarts.external_agent:mai
 [project.optional-dependencies]
 test = [
     "build",
-    "cricore-contract-compiler==0.4.0",
+    "cricore-contract-compiler>=0.4.0,<0.6.0",
     "pytest",
     'tomli>=2.0.0; python_version < "3.11"',
     "twine",
 ]
 dev = [
     "build",
-    "cricore-contract-compiler==0.4.0",
+    "cricore-contract-compiler>=0.4.0,<0.6.0",
     "pytest",
     'tomli>=2.0.0; python_version < "3.11"',
     "twine",

@@ -1,0 +1,362 @@
+{
+  "schema_version": "domain_pack.v1",
+  "domain_pack_id": "repository-changes",
+  "domain_pack_version": "3.0.0",
+  "name": "Repository changes",
+  "description": "Independent create and modify policy grammar for a compatible Guard runtime.",
+  "supported_actions": [
+    "create",
+    "modify"
+  ],
+  "resource_kinds": [
+    "repository_change",
+    "repository_path"
+  ],
+  "resource_contracts": [
+    {
+      "resource_kind": "repository_change",
+      "permitted_match_modes": [
+        "any"
+      ],
+      "value_type": "string",
+      "enum_values": null,
+      "null_allowed": true,
+      "format_id": null,
+      "value_fact_id": null
+    },
+    {
+      "resource_kind": "repository_path",
+      "permitted_match_modes": [
+        "exact",
+        "prefix"
+      ],
+      "value_type": "string",
+      "enum_values": null,
+      "null_allowed": false,
+      "format_id": "waveframe.repository-changes.format.repository-relative-path.v1",
+      "value_fact_id": "proposal.resource.path"
+    }
+  ],
+  "subject_kinds": [
+    "agent"
+  ],
+  "role_kinds": [
+    "repository-maintainer",
+    "repository-reviewer",
+    "security-reviewer"
+  ],
+  "vocabulary": {
+    "effects": [
+      "allow",
+      "deny",
+      "require"
+    ],
+    "resource_matches": [
+      "any",
+      "exact",
+      "prefix"
+    ],
+    "evidence_types": []
+  },
+  "synonyms": {
+    "create": [
+      "create"
+    ],
+    "modify": [
+      "modify"
+    ]
+  },
+  "types_and_units": [
+    {
+      "type": "enum",
+      "canonical_units": []
+    },
+    {
+      "type": "string",
+      "canonical_units": []
+    }
+  ],
+  "runtime_fact_schema": {
+    "schema_version": "runtime_fact_schema.v1",
+    "schema_id": "repository-changes-runtime",
+    "schema_version_number": "3.0.0",
+    "name": "Repository change proposal facts",
+    "facts": [
+      {
+        "fact_id": "actor.subject_kind",
+        "type": "enum",
+        "enum_values": [
+          "agent"
+        ],
+        "canonical_unit": null,
+        "required": true,
+        "derivation": {
+          "kind": "proposal_field",
+          "field_path": "/actor/subject_kind"
+        },
+        "comparison_operators": [
+          "==",
+          "!="
+        ]
+      },
+      {
+        "fact_id": "actor.principal_id",
+        "type": "string",
+        "enum_values": null,
+        "canonical_unit": null,
+        "required": false,
+        "derivation": {
+          "kind": "proposal_field",
+          "field_path": "/actor/principal_id"
+        },
+        "comparison_operators": [
+          "==",
+          "!="
+        ]
+      },
+      {
+        "fact_id": "actor.role",
+        "type": "enum",
+        "enum_values": [
+          "repository-maintainer",
+          "repository-reviewer",
+          "security-reviewer"
+        ],
+        "canonical_unit": null,
+        "required": false,
+        "derivation": {
+          "kind": "proposal_field",
+          "field_path": "/actor/role"
+        },
+        "comparison_operators": [
+          "==",
+          "!="
+        ]
+      },
+      {
+        "fact_id": "proposal.action",
+        "type": "enum",
+        "enum_values": [
+          "create",
+          "modify"
+        ],
+        "canonical_unit": null,
+        "required": true,
+        "derivation": {
+          "kind": "proposal_field",
+          "field_path": "/action"
+        },
+        "comparison_operators": [
+          "==",
+          "!="
+        ]
+      },
+      {
+        "fact_id": "proposal.resource.kind",
+        "type": "enum",
+        "enum_values": [
+          "repository_change",
+          "repository_path"
+        ],
+        "canonical_unit": null,
+        "required": true,
+        "derivation": {
+          "kind": "proposal_field",
+          "field_path": "/resource/kind"
+        },
+        "comparison_operators": [
+          "==",
+          "!="
+        ]
+      },
+      {
+        "fact_id": "proposal.resource.path",
+        "type": "string",
+        "enum_values": null,
+        "canonical_unit": null,
+        "required": false,
+        "derivation": {
+          "kind": "proposal_field",
+          "field_path": "/resource/path"
+        },
+        "comparison_operators": [
+          "==",
+          "!=",
+          "starts_with"
+        ]
+      }
+    ],
+    "schema_hash": "sha256:3fcf3af0a61f91a78b171ccd6247db9f0f908e1baf44aa50ece12349c44bb582"
+  },
+  "grammar_compiler": {
+    "compiler_id": "waveframe.repository-changes.grammar.v2",
+    "compiler_version": "2.0.0"
+  },
+  "allowed_mapping_controls": [
+    {
+      "control_id": "create-acting-role",
+      "name": "Create Acting role requirement",
+      "description": "Independent create control for a compatible Guard runtime.",
+      "selection_schema": {
+        "role": {
+          "type": "enum",
+          "enum_values": [
+            "repository-maintainer",
+            "repository-reviewer",
+            "security-reviewer"
+          ],
+          "canonical_unit": null,
+          "format_id": null
+        }
+      },
+      "emitter_id": "waveframe.repository-changes.emitter.create-acting-role.v2"
+    },
+    {
+      "control_id": "create-exact-path-access",
+      "name": "Create Exact-path access",
+      "description": "Independent create control for a compatible Guard runtime.",
+      "selection_schema": {
+        "effect": {
+          "type": "enum",
+          "enum_values": [
+            "allow",
+            "deny"
+          ],
+          "canonical_unit": null,
+          "format_id": null
+        },
+        "path": {
+          "type": "string",
+          "enum_values": null,
+          "canonical_unit": null,
+          "format_id": "waveframe.repository-changes.format.repository-relative-path.v1"
+        }
+      },
+      "emitter_id": "waveframe.repository-changes.emitter.create-exact-path-access.v2"
+    },
+    {
+      "control_id": "create-prefix-path-access",
+      "name": "Create Path-prefix access",
+      "description": "Independent create control for a compatible Guard runtime.",
+      "selection_schema": {
+        "effect": {
+          "type": "enum",
+          "enum_values": [
+            "allow",
+            "deny"
+          ],
+          "canonical_unit": null,
+          "format_id": null
+        },
+        "path": {
+          "type": "string",
+          "enum_values": null,
+          "canonical_unit": null,
+          "format_id": "waveframe.repository-changes.format.repository-relative-path.v1"
+        }
+      },
+      "emitter_id": "waveframe.repository-changes.emitter.create-prefix-path-access.v2"
+    },
+    {
+      "control_id": "modify-acting-role",
+      "name": "Modify Acting role requirement",
+      "description": "Independent modify control for a compatible Guard runtime.",
+      "selection_schema": {
+        "role": {
+          "type": "enum",
+          "enum_values": [
+            "repository-maintainer",
+            "repository-reviewer",
+            "security-reviewer"
+          ],
+          "canonical_unit": null,
+          "format_id": null
+        }
+      },
+      "emitter_id": "waveframe.repository-changes.emitter.modify-acting-role.v2"
+    },
+    {
+      "control_id": "modify-exact-path-access",
+      "name": "Modify Exact-path access",
+      "description": "Independent modify control for a compatible Guard runtime.",
+      "selection_schema": {
+        "effect": {
+          "type": "enum",
+          "enum_values": [
+            "allow",
+            "deny"
+          ],
+          "canonical_unit": null,
+          "format_id": null
+        },
+        "path": {
+          "type": "string",
+          "enum_values": null,
+          "canonical_unit": null,
+          "format_id": "waveframe.repository-changes.format.repository-relative-path.v1"
+        }
+      },
+      "emitter_id": "waveframe.repository-changes.emitter.modify-exact-path-access.v2"
+    },
+    {
+      "control_id": "modify-prefix-path-access",
+      "name": "Modify Path-prefix access",
+      "description": "Independent modify control for a compatible Guard runtime.",
+      "selection_schema": {
+        "effect": {
+          "type": "enum",
+          "enum_values": [
+            "allow",
+            "deny"
+          ],
+          "canonical_unit": null,
+          "format_id": null
+        },
+        "path": {
+          "type": "string",
+          "enum_values": null,
+          "canonical_unit": null,
+          "format_id": "waveframe.repository-changes.format.repository-relative-path.v1"
+        }
+      },
+      "emitter_id": "waveframe.repository-changes.emitter.modify-prefix-path-access.v2"
+    }
+  ],
+  "semantic_validation_rules": [
+    "bounded-symbols",
+    "canonical-types-and-units",
+    "explicit-boolean-grouping",
+    "explicit-exception-precedence",
+    "no-contradictory-effects",
+    "nonempty-enforceable-rule-set",
+    "runtime-fact-publication-gate",
+    "independent-actions",
+    "same-action-deny-precedence",
+    "action-wide-roles-only"
+  ],
+  "compiler_lowering": {
+    "lowering_id": "waveframe.repository-changes.lowering.v2",
+    "lowering_version": "2.0.0"
+  },
+  "test_vectors": {
+    "positive": [
+      {
+        "source": "Agents may create README.md and modify CHANGELOG.md.",
+        "expected": "direct:independent-actions"
+      }
+    ],
+    "negative": [
+      {
+        "source": "Agents may write README.md.",
+        "expected": "requires-decision"
+      }
+    ],
+    "invalid": [
+      {
+        "source": "Agents may create ../secret.",
+        "expected": "reject:unsafe-path"
+      }
+    ]
+  },
+  "canonical_hash": "sha256:78783654a8131cb7a6547ee2ed9507e1dced640aebe32d35057c385bb1dc4459"
+}

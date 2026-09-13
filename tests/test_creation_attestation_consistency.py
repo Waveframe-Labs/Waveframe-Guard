@@ -9,9 +9,9 @@ from guard.runtime.identity import stable_hash
 from guard.sdk import RepositoryBoundaryError
 from guard.sdk.local_persistence import GuardArtifactError, validate_execution_attestation
 from guard.sdk.repository_evidence import validate_repository_attestation
-from test_action_policy_creation import development, request, runtime
+from test_action_policy_creation import native, request, runtime
 
-pytestmark = development
+pytestmark = native
 
 OUTER_STATES = {
     "not_run": (False, False, "not_run", "not_performed", False),

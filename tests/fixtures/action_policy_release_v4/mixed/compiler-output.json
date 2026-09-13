@@ -1,0 +1,38 @@
+{
+  "action_requirements": {
+    "create": {
+      "allow": [
+        {
+          "match": "exact",
+          "value": "generated/new.md"
+        }
+      ],
+      "deny": [
+        {
+          "match": "exact",
+          "value": "README.md"
+        }
+      ],
+      "required_role": "repository-maintainer"
+    },
+    "modify": {
+      "allow": [
+        {
+          "match": "exact",
+          "value": "README.md"
+        }
+      ],
+      "deny": [
+        {
+          "match": "exact",
+          "value": "generated/new.md"
+        }
+      ],
+      "required_role": "security-reviewer"
+    }
+  },
+  "contract_hash": "38c5e313dc909979844c0c65a374f1adcb29b673f358a4334be3e8d89ac40579",
+  "contract_id": "repository-mixed",
+  "contract_version": "3.0.0",
+  "schema_version": "compiled_action_contract.v1"
+}

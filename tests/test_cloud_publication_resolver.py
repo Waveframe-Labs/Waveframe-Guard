@@ -101,12 +101,15 @@ class _Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         length = int(self.headers.get("Content-Length") or "0")
-        if length:
-            self.rfile.read(length)
+        body = json.loads(self.rfile.read(length)) if length else None
         self.server.state.setdefault("requests", []).append(
-            {"method": "POST", "path": self.path, "headers": dict(self.headers)}
+            {"method": "POST", "path": self.path, "headers": dict(self.headers), "body": body}
         )
-        self._respond(200, b'{"ok":true}', {"Content-Type": "application/json"})
+        state = self.server.state
+        fault = state.get("preserve_fault" if self.path.endswith("/preserve") else "report_fault")
+        status = fault if isinstance(fault, int) else 200
+        response = state.get("post_response", {"ok": True}) if status == 200 else {"error": "rejected"}
+        self._respond(status, json.dumps(response).encode(), {"Content-Type": "application/json"})
 
     def _respond(self, status: int, body: bytes, headers: dict[str, str]):
         self.send_response(status)

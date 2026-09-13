@@ -45,7 +45,7 @@ def main():
         venv.EnvBuilder(with_pip=True).create(environment)
         python = environment / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
         run([python, "-m", "pip", "install", wheel, "-r",
-             ROOT / ".github/requirements/action-policy-development.txt"], scratch)
+             ROOT / ".github/requirements/action-policy-release.txt"], scratch)
         run([python, "-m", "pip", "check"], scratch)
         runner = scratch / "acceptance.py"
         shutil.copyfile(ROOT / "tools/acceptance/action_policy_creation.py", runner)
