@@ -36,6 +36,13 @@ artifact, with raw upstream bytes recorded in `SHA256SUMS`. The original
 Their original Ledger/Compiler provenance remains in that README; reproducing
 their compiler outputs with the new client candidates is recorded separately.
 No approval wording, actor, timestamp or identity is migrated or rewritten.
+The unchanged upstream `examples/native_v4_release.py` is retained as
+`tools/acceptance/ledger_release_fixture.py` at the same Ledger commit, under
+Apache-2.0. Tests use its public authoring calls for additional explicitly
+synthetic role-only and deny-only approvals, proving that restrictions without
+an allow grant no creation. These do not replace the supplied release fixtures.
+Its raw SHA-256 is
+`6878c6c500ca06c1e786be3ffd54483921d37b37eb805c821db4dc02349ba6c5`.
 
 ## Working public example
 
@@ -111,3 +118,11 @@ same-device mount-namespace result must be reviewed alongside the CI platform
 skips; an unavailable mount test is never a pass. Final coordinated package
 versions/ranges and complete `Ledger[guard]` installation remain release gates.
 No merge, tag, publication, deployment or activation is included here.
+
+The real isolated mount test executed successfully with zero skips on Linux
+`6.6.114.1-microsoft-standard-WSL2`, Python 3.14.7, Docker's `python:3.14-slim`,
+with `/tmp` on supported tmpfs, `SYS_ADMIN` and an unconfined seccomp profile.
+The existing test creates its bind mount inside a child user/mount namespace.
+A preceding overlay-filesystem attempt failed closed during workspace setup;
+it did not test mount containment. Neither result broadens supported filesystems.
+The final-head artifact review records the tested wheel hash and repeated result.

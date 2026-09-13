@@ -18,10 +18,10 @@ REF = "repository-create-only@3.0.0"
 
 @pytest.fixture(autouse=True)
 def release_environment(monkeypatch):
-    from governance_ledger.policy_translation import get_policy_translation_capability_catalog
     try:
+        from governance_ledger.policy_translation import get_policy_translation_capability_catalog
         get_policy_translation_capability_catalog(catalog_version="3.0.0")
-    except (TypeError, ValueError):
+    except (ImportError, TypeError, ValueError):
         pytest.skip("historical dependency baseline lacks catalog 3; release CI requires these cases")
     for name in ("WAVEFRAME_GUARD_ACTION_POLICY_DEV", "WAVEFRAME_LEDGER_ACTION_POLICY_DEV"):
         monkeypatch.delenv(name, raising=False)
@@ -96,3 +96,35 @@ def test_release_cached_substitution(field):
     with pytest.raises(AuthorityVerificationError):
         cache.put(loaded)
         load_authority(REF, resolver=source, cache=cache)
+
+
+@pytest.mark.parametrize("restriction", ["role-only", "deny-only"])
+def test_approved_restrictions_without_allow_grant_no_creation(tmp_path, restriction):
+    from tools.acceptance.ledger_release_fixture import build_fixture
+    from waveframe_guard import Guard
+    rows = ([('Agents must use role repository-maintainer to create repository files.',
+              [('create', 'acting_role', 'require', 'repository-maintainer')])]
+        if restriction == "role-only" else
+        [('Agents must not create files under generated/private/.',
+          [('create', 'prefix_path_access', 'deny', 'generated/private/')])])
+    # A grant for modify must not leak into the create block without an allow.
+    rows.append(('Agents may modify README.md.', [('modify', 'exact_path_access', 'allow', 'README.md')]))
+    # New, explicitly synthetic approvals through Ledger's supplied fixture author.
+    fixture = build_fixture(restriction, rows)
+    directory = tmp_path / "publications" / restriction
+    directory.mkdir(parents=True)
+    for name in ("authority-bundle", "publication-receipt"):
+        (directory / (name + ".json")).write_text(json.dumps(fixture[name]))
+    source = resolver(restriction, directory.parent)
+    (tmp_path / "generated").mkdir()
+    instance = Guard.local(repository_root=tmp_path, workspace=tmp_path / "evidence",
+        authority=f"repository-{restriction}@3.0.0", authority_resolver=source,
+        actor_identity={"id": "example-agent", "type": "agent", "role": "repository-maintainer"})
+    try:
+        @instance.repository_tool(action="create", target="path", return_result=True, raise_on_block=False)
+        def create(path): pytest.fail("restriction without allow invoked callback")
+        result = create("generated/file.md")
+        assert result["evaluation"]["status"] == "blocked" and not result["executed"]
+        assert not (tmp_path / "generated/file.md").exists()
+    finally:
+        instance.close()

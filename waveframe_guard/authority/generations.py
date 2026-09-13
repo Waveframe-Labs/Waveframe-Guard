@@ -1,7 +1,5 @@
 """Exact SDK support bindings; Ledger still verifies the complete approval chain."""
 
-from collections.abc import Mapping
-
 from .development import require_action_policy_development
 from .exceptions import AuthorityVerificationError
 

@@ -26,17 +26,21 @@ def native_generation(request, monkeypatch):
         )):
             pytest.skip("catalog 2 requires explicit Guard and Ledger development opt-ins")
     else:
-        from governance_ledger.policy_translation import get_policy_translation_capability_catalog
         try:
+            from governance_ledger.policy_translation import get_policy_translation_capability_catalog
             get_policy_translation_capability_catalog(catalog_version="3.0.0")
-        except (TypeError, ValueError):
+        except (ImportError, TypeError, ValueError):
             pytest.skip("historical dependency baseline lacks catalog 3; release CI requires these cases")
         for name in ("WAVEFRAME_GUARD_ACTION_POLICY_DEV", "WAVEFRAME_LEDGER_ACTION_POLICY_DEV"):
             monkeypatch.delenv(name, raising=False)
         fixtures = FIXTURES.parent / "action_policy_release_v4"
-        monkeypatch.setattr(request.module, "VERSION", "3.0.0")
-        monkeypatch.setattr(request.module, "FIXTURES", fixtures)
-        monkeypatch.setattr(request.module, "resolver", lambda kind: resolver(kind, fixtures))
+        module = request.module
+        if not hasattr(module, "VERSION"):
+            # The attestation consistency suite reuses the execution fixture.
+            import test_action_policy_creation as module
+        monkeypatch.setattr(module, "VERSION", "3.0.0")
+        monkeypatch.setattr(module, "FIXTURES", fixtures)
+        monkeypatch.setattr(module, "resolver", lambda kind: resolver(kind, fixtures))
     return request.param
 
 
