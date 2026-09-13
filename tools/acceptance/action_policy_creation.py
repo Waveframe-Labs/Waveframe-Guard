@@ -21,7 +21,7 @@ ORIGINAL_COMMITS = {
 }
 COMMITS = {
     "cricore-contract-compiler": "ae590dee058d3481e384dea850d5b7d980f533ff",
-    "governance-ledger": "3cc34e7b3cb6efca5102e0e22d559ec0c0fd583f",
+    "governance-ledger": "a34c11d81b85963794cf28b4adad091fac15e130",
 }
 FIXTURES = Path(__file__).resolve().parents[2] / "tests/fixtures/action_policy_v4"
 

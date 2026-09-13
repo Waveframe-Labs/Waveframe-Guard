@@ -302,7 +302,8 @@ CRI-CORE Contract Compiler v0.4.0 defines deterministic target requirements;
 Guard consumes the compiled authority artifact unchanged and enforces it. It
 does not compile policy. The native Ledger v2 path uses the base
 `governance-ledger>=0.9.0,<0.10.0` base package for publication verification; it
-tests the public 0.7.0 minimum and never uses Ledger's `guard` extra. Immutable
+requires Ledger 0.9.0 as its minimum and uses the base package. Older Guard /
+Ledger 0.7 and 0.8 pairs are historical compatibility coverage. Immutable
 artifact schema versions, not a single patch-level package pin, define the v2
 validation boundary.
 
