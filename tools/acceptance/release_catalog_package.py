@@ -99,9 +99,7 @@ def main():
             work = scratch / ("smoke-" + mode)
             work.mkdir()
             run([python, "-c", package_acceptance.REPOSITORY_SMOKE_SCRIPT, mode], work, probe_env)
-        cli = environment / ("Scripts/waveframe-guard-external-agent.exe" if os.name == "nt" else "bin/waveframe-guard-external-agent")
-        with (output / "cli-help.txt").open("w", encoding="utf-8") as log:
-            subprocess.run([str(cli), "--help"], cwd=isolated, env=env, stdout=log, stderr=subprocess.STDOUT, check=True)
+        run([python, "tools/acceptance/cli_package.py", "--output", output / "cli.json"], isolated, env)
         example_root = output / "example-workspace"
         (example_root / "generated").mkdir(parents=True)
         with (output / "example.json").open("w", encoding="utf-8") as log:
