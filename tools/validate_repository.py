@@ -64,11 +64,11 @@ APPROVED_JSON_FILES.update(['tests/fixtures/action_policy_release_v4/catalog.jso
 EXPECTED_PUBLIC_RUNTIME_REQUIREMENTS = {
     "cricore>=0.13.0,<0.15.0",
     "cricore-proposal-normalizer>=0.2.0,<0.3.0",
-    "governance-ledger>=0.7.0,<0.9.0",
+    "governance-ledger>=0.9.0,<0.10.0",
     "requests>=2.33.0,<3.0.0",
 }
 PINNED_TEST_DEPENDENCIES = {
-    "cricore-contract-compiler>=0.4.0,<0.6.0",
+    "cricore-contract-compiler>=0.5.0,<0.6.0",
 }
 SECRET_PATTERNS = {
     "AWS access key": re.compile(rb"AKIA[0-9A-Z]{16}"),

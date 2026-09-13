@@ -69,7 +69,7 @@ REQUIRED_SDIST_FILES = {
 EXPECTED_RUNTIME_REQUIREMENTS = {
     "cricore>=0.13.0,<0.15.0",
     "cricore-proposal-normalizer>=0.2.0,<0.3.0",
-    "governance-ledger>=0.7.0,<0.9.0",
+    "governance-ledger>=0.9.0,<0.10.0",
     "requests>=2.33.0,<3.0.0",
 }
 FORBIDDEN_PARTS = {
@@ -333,7 +333,7 @@ def _clean_wheel_smoke(wheel: Path, expected_version: str) -> None:
                 "install",
                 "--index-url",
                 "https://pypi.org/simple",
-                str(wheel),
+                str(wheel), "-r", str(REPO_ROOT / ".github/requirements/action-policy-release.txt"),
             ],
             cwd=smoke_dir,
         )

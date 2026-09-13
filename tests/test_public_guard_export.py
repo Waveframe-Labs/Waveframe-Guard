@@ -30,17 +30,18 @@ def test_public_guard_export_is_sdk_facade():
 
 
 def test_public_version_matches_release():
-    assert __version__ == "0.18.0"
+    assert __version__ == "0.19.0"
 
 
-def test_release_metadata_matches_v0180_release():
+def test_release_metadata_matches_v0190_candidate():
     pyproject = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
     citation = (REPO_ROOT / "CITATION.cff").read_text(encoding="utf-8")
     changelog = (REPO_ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
 
-    assert 'version = "0.18.0"' in pyproject
-    assert 'version: "0.18.0"' in citation
-    assert 'date-released: "2026-09-08"' in citation
+    assert 'version = "0.19.0"' in pyproject
+    assert 'version: "0.19.0"' in citation
+    assert 'date-released:' not in citation
+    assert '## [0.19.0] - Unreleased candidate' in changelog
     assert "## [0.18.0] - 2026-09-08" in changelog
     assert "## [0.17.0] - 2026-09-04" in changelog
     assert "## [0.16.1] - 2026-09-01" in changelog
@@ -105,43 +106,21 @@ def test_v0180_cloud_source_support_is_distinct_from_hosted_availability():
         ) is None, path
 
 
-def test_v0180_artifacts_use_final_release_state():
-    for path in RELEASE_SURFACES:
+def test_candidate_docs_keep_publication_and_extra_gated():
+    for path in ("README.md", "RELEASE_NOTES.md", "docs/getting-started/README.md"):
         text = _current_release_text(path).lower()
-        for stale in ("prepared release", "prepared security release",
-                      "publication is pending", "publication remains pending",
-                      "publication pending", "not yet published",
-                      "after 0.18.0 publication", "during release review",
-                      "0.18.0 release candidate", "must be published",
-                      "must be publishable", "the release is prepared"):
-            assert stale not in text, (path, stale)
-    assert "Current release: 0.18.0." in _current_release_text("README.md")
-    for path in ("README.md", "RELEASE_NOTES.md", "docs/getting-started/README.md"):
-        assert "pip install waveframe-guard==0.18.0" in _current_release_text(path)
-
-
-def test_v0180_ledger_extra_requires_direct_guard_installation():
-    required = (
-        "Published governance-ledger==0.8.0 has a [guard] extra pinned to waveframe-guard==0.17.0.",
-        "Ledger's base package remains compatible with Guard 0.18.0 through governance-ledger>=0.7.0,<0.9.0.",
-        "Install waveframe-guard==0.18.0 directly for this release rather than relying on governance-ledger[guard]==0.8.0; that extra does not install Guard 0.18.0.",
-    )
-    for path in ("README.md", "RELEASE_NOTES.md", "docs/getting-started/README.md"):
+        assert "0.19.0" in text and "unreleased" in text
+        assert "publication" in text
+    for path in ("README.md", "docs/getting-started/README.md"):
         text = _current_release_text(path)
-        for claim in required:
-            assert claim in text, (path, claim)
-        assert "governance-ledger[guard]==0.7.0" not in text, path
-        assert re.search(
-            r"(?:that extra|Ledger(?:'s)? 0\.8(?:\.0)?(?: \[guard\])? extra) "
-            r"(?:already )?(?:installs|supplies) (?:Guard|waveframe-guard==) ?0\.18(?:\.0)?",
-            text, re.IGNORECASE,
-        ) is None, path
+        assert "pip install waveframe-guard==0.19.0" in text
+        assert "Do not advertise Ledger's" in text
 
 
 def test_release_quickstart_urls_match_package_and_example_versions():
     project = package_acceptance.tomllib.loads((REPO_ROOT / "pyproject.toml").read_text())["project"]
     release = project["version"]
-    assert release == __version__ == "0.18.0"
+    assert release == __version__ == "0.19.0"
     assert f"## [{release}]" in (REPO_ROOT / "CHANGELOG.md").read_text()
     prefix = "https://raw.githubusercontent.com/Waveframe-Labs/Waveframe-Guard/"
     # Audit tracked customer surfaces only, preserving ignored/user-owned files.
@@ -166,18 +145,18 @@ def test_release_quickstart_urls_match_package_and_example_versions():
                          text) is None, name
 
 
-@pytest.mark.parametrize("ref", ["main", "v0.17.0", "v0.18.0"])
+@pytest.mark.parametrize("ref", ["main", "v0.17.0", "v0.19.0"])
 def test_release_download_contract_rejects_mutable_or_mismatched_examples(ref):
     text = (
-        "pip install waveframe-guard==0.18.0\n"
+        "pip install waveframe-guard==0.19.0\n"
         "https://raw.githubusercontent.com/Waveframe-Labs/Waveframe-Guard/"
         f"{ref}/examples/external_agent_quickstart.py"
     )
-    if ref == "v0.18.0":
-        package_acceptance._validate_quickstart_downloads(text, "0.18.0", "release", require_example=True)
+    if ref == "v0.19.0":
+        package_acceptance._validate_quickstart_downloads(text, "0.19.0", "release", require_example=True)
     else:
-        with pytest.raises(AssertionError, match="must use v0.18.0"):
-            package_acceptance._validate_quickstart_downloads(text, "0.18.0", "release", require_example=True)
+        with pytest.raises(AssertionError, match="must use v0.19.0"):
+            package_acceptance._validate_quickstart_downloads(text, "0.19.0", "release", require_example=True)
 
 
 @pytest.mark.parametrize("kind", ["wheel", "sdist"])
@@ -190,11 +169,11 @@ def test_packaged_quickstart_rejects_main_example_in_docs_and_long_description(t
 
     files, _ = archive_files(kind)
     if surface == "metadata":
-        name = "waveframe_guard-0.18.0.dist-info/METADATA" if kind == "wheel" else "PKG-INFO"
+        name = "waveframe_guard-0.19.0.dist-info/METADATA" if kind == "wheel" else "PKG-INFO"
     else:
-        prefix = "waveframe_guard-0.18.0.data/data/share/doc/waveframe-guard/" if kind == "wheel" else ""
+        prefix = "waveframe_guard-0.19.0.data/data/share/doc/waveframe-guard/" if kind == "wheel" else ""
         name = prefix + surface
-    old = b"Waveframe-Guard/v0.18.0/examples/external_agent_quickstart.py"
+    old = b"Waveframe-Guard/v0.19.0/examples/external_agent_quickstart.py"
     assert old in files[name]
     files[name] = files[name].replace(old, b"Waveframe-Guard/main/examples/external_agent_quickstart.py")
     if kind == "wheel":
@@ -207,9 +186,9 @@ def test_packaged_quickstart_rejects_main_example_in_docs_and_long_description(t
         path = tmp_path / "bad.tar.gz"
         with tarfile.open(path, "w:gz") as archive:
             for member, value in files.items():
-                info = tarfile.TarInfo("waveframe_guard-0.18.0/" + member)
+                info = tarfile.TarInfo("waveframe_guard-0.19.0/" + member)
                 info.size = len(value)
                 archive.addfile(info, io.BytesIO(value))
         inspect = package_acceptance._inspect_sdist
-    with pytest.raises(AssertionError, match="must use v0.18.0"):
-        inspect(path, "0.18.0")
+    with pytest.raises(AssertionError, match="must use v0.19.0"):
+        inspect(path, "0.19.0")

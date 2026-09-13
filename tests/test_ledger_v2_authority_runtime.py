@@ -802,7 +802,7 @@ def test_logical_artifact_ref_traversal_and_ambiguous_normalization_fail_closed(
 def test_dependency_supports_ledger_v07_and_v08_without_guard_extra_or_ai_packages():
     metadata = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
     dependencies = metadata["project"]["dependencies"]
-    assert "governance-ledger>=0.7.0,<0.9.0" in dependencies
+    assert "governance-ledger>=0.9.0,<0.10.0" in dependencies
     assert not any("governance-ledger[guard]" in dependency for dependency in dependencies)
     assert not any(
         token in dependency.lower()

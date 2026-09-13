@@ -1,3 +1,7 @@
+> Historical development and acceptance record. For the current Guard 0.19.0
+> client setup, use [release acceptance](../RELEASE_019_ACCEPTANCE.md); the
+> original fixture and Cloud server provenance below remains unchanged.
+
 # Native Cloud SDK development connection
 
 Issue #46 connects the existing `Guard.cloud()` API to the complete native

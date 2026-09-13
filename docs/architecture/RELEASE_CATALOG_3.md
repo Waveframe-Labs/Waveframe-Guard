@@ -1,3 +1,7 @@
+> Historical development and acceptance record. For the current Guard 0.19.0
+> client setup, use [release acceptance](../RELEASE_019_ACCEPTANCE.md); the
+> original fixture and Cloud server provenance below remains unchanged.
+
 # Catalog 3 SDK and Cloud handoff
 
 Issue #48 stacks on `feat/46-native-cloud-connection` at

@@ -1,3 +1,32 @@
+# Waveframe Guard v0.19.0 candidate release notes
+
+**Unreleased candidate. Proposed tag: v0.19.0.** Publication and activation require
+coordinated authorization; the commands below apply after package availability.
+
+Install `waveframe-guard==0.19.0`, supply an approved authority, protect create and
+modify callbacks with `repository_tool(action="create" or "modify", target="path")`,
+and inspect the returned outcome, saved attestation and replay. Creation uses
+`path.create_bytes()`; modification uses `path.write_bytes()`. Supported historical
+authorities retain their existing permissions and cannot acquire creation grants.
+See the [public example](examples/sdk/repository_creation_release.py).
+
+Runtime dependencies: `cricore>=0.13.0,<0.15.0`,
+`cricore-proposal-normalizer>=0.2.0,<0.3.0`,
+`governance-ledger>=0.9.0,<0.10.0`, `requests>=2.33.0,<3.0.0`.
+Python >=3.10; acceptance covers Windows/Linux with Python 3.10/3.14.
+Ledger 0.9 requires Compiler >=0.5.0,<0.6.0. Ordinary resolution must upgrade older
+Ledger installations; the mandatory action API has no fallback.
+
+Catalog-3 approved authorities work without development flags. Catalog-2 remains
+explicitly opted in. This release changes no catalog identity or filesystem
+boundary. macOS, deletion, rename and new domains remain subsequent work.
+
+Candidate provenance, matrix results and the separate Cloud/release gates belong
+in [release acceptance](docs/RELEASE_019_ACCEPTANCE.md). Final Cloud package-set and
+Console acceptance remain separate from the retained Cloud #147 regression.
+
+---
+
 # Waveframe Guard v0.18.0 Release Notes
 
 Release date: **2026-09-08**.

@@ -16,7 +16,10 @@ Guard enforces actions that pass through its wrapped tool boundary. Actions
 that reach the same capability through another function, tool, process,
 credential, or API path are outside that enforcement guarantee.
 
-Current release: 0.18.0.
+Candidate: 0.19.0 (unreleased; proposed tag v0.19.0). Published release: 0.18.0.
+
+The 0.19.0 install and versioned download commands below apply after coordinated
+publication. See [candidate acceptance and remaining gates](docs/RELEASE_019_ACCEPTANCE.md).
 
 ```text
 Guard does not generate actions.
@@ -28,14 +31,14 @@ Guard decides whether this action may run now.
 ## Install
 
 ```powershell
-pip install waveframe-guard==0.18.0
+pip install waveframe-guard==0.19.0
 ```
 
-Published Guard 0.17.0 has an unbounded CRI dependency and must not be paired
-with CRI 0.14. Guard 0.18.0 supports `cricore>=0.13.0,<0.15.0`.
-Upgrade/install Guard 0.18.0 before CRI 0.14.0. Ordinary installation works
-with published CRI 0.13.0 and needs no unpublished dependency. See the
-[compatibility matrix](docs/getting-started/README.md#dependency-compatibility-matrix).
+After installation, provide your approved authority, wrap the protected create
+and modify tools, then inspect the outcome and saved proof. The
+[repository creation example](examples/sdk/repository_creation_release.py) shows
+`repository_tool(action="create")`, `create_bytes()` and replay. Separate create
+and modify permissions are required; historical modify grants never grant create.
 
 
 No Ollama installation or Waveframe repository checkout is required. Keep the
@@ -110,8 +113,8 @@ mkdir guard-quickstart
 cd guard-quickstart
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install waveframe-guard==0.18.0
-Invoke-WebRequest https://raw.githubusercontent.com/Waveframe-Labs/Waveframe-Guard/v0.18.0/examples/external_agent_quickstart.py -OutFile quickstart.py
+python -m pip install waveframe-guard==0.19.0
+Invoke-WebRequest https://raw.githubusercontent.com/Waveframe-Labs/Waveframe-Guard/v0.19.0/examples/external_agent_quickstart.py -OutFile quickstart.py
 ```
 
 The example expects an active published authority that allows a 500-unit
@@ -298,7 +301,7 @@ no target requirements retain their legacy target-free behavior.
 CRI-CORE Contract Compiler v0.4.0 defines deterministic target requirements;
 Guard consumes the compiled authority artifact unchanged and enforces it. It
 does not compile policy. The native Ledger v2 path uses the base
-`governance-ledger>=0.7.0,<0.9.0` base package for publication verification; it
+`governance-ledger>=0.9.0,<0.10.0` base package for publication verification; it
 tests the public 0.7.0 minimum and never uses Ledger's `guard` extra. Immutable
 artifact schema versions, not a single patch-level package pin, define the v2
 validation boundary.
@@ -364,11 +367,10 @@ domain packs and deterministic fact providers. For the distinction between
 merged Cloud source and hosted availability at this release date, see
 [Cloud availability](#cloud-availability).
 
-Published `governance-ledger==0.8.0` has a `[guard]` extra pinned to
-`waveframe-guard==0.17.0`. Ledger's base package remains compatible with
-Guard 0.18.0 through `governance-ledger>=0.7.0,<0.9.0`. Install
-`waveframe-guard==0.18.0` directly for this release rather than relying on
-`governance-ledger[guard]==0.8.0`; that extra does not install Guard 0.18.0.
+Guard 0.19.0 requires `governance-ledger>=0.9.0,<0.10.0`, which requires
+Compiler >=0.5.0,<0.6.0. Install Guard directly after coordinated publication.
+Do not advertise Ledger's new optional Guard extra until Guard is uploaded and
+ordinary index installation has been verified.
 
 ## Local development path
 

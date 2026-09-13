@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [0.19.0] - Unreleased candidate
+
+- Prepare protected repository create/modify with verified catalog-3 authorities.
+- Require Ledger >=0.9.0,<0.10.0 and test the real Compiler/Ledger/Guard package set.
+- Preserve catalog-2 development gates, historical authority identities and filesystem semantics.
+- Proposed tag v0.19.0; publication, Cloud rollout and activation remain gated.
+
 ## [0.18.0] - 2026-09-08 - Repository-Bound Mediated Mutation
 
 This release collects the merged changes in #30, #31, #32, #33 and #39. See the

@@ -1,3 +1,7 @@
+> Guard 0.19.0 is an unreleased candidate (proposed tag v0.19.0). The install
+> and download commands apply after coordinated publication. See
+> [release acceptance](../RELEASE_019_ACCEPTANCE.md).
+
 # Getting Started with Waveframe Guard
 
 Guard 0.18.0 security migration: **Guard execution is never advisory**. Local/cloud
@@ -17,7 +21,7 @@ credential, or API path are outside that enforcement guarantee.
 For application use:
 
 ```bash
-pip install waveframe-guard==0.18.0
+pip install waveframe-guard==0.19.0
 ```
 
 For local development and clean-checkout test runs:
@@ -73,8 +77,8 @@ From an empty directory:
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install waveframe-guard==0.18.0
-Invoke-WebRequest https://raw.githubusercontent.com/Waveframe-Labs/Waveframe-Guard/v0.18.0/examples/external_agent_quickstart.py -OutFile quickstart.py
+python -m pip install waveframe-guard==0.19.0
+Invoke-WebRequest https://raw.githubusercontent.com/Waveframe-Labs/Waveframe-Guard/v0.19.0/examples/external_agent_quickstart.py -OutFile quickstart.py
 ```
 
 Configure the hosted boundary:
@@ -134,7 +138,7 @@ acceptance runner:
 
 ```powershell
 python -m build
-$wheel=(Resolve-Path .\dist\waveframe_guard-0.18.0-py3-none-any.whl).Path
+$wheel=(Resolve-Path .\dist\waveframe_guard-0.19.0-py3-none-any.whl).Path
 python .\tools\acceptance\external_agent_clean_machine.py --install-spec $wheel
 ```
 
@@ -154,36 +158,22 @@ and [licensing details](../LICENSING.md).
 
 ## Dependency Compatibility Matrix
 
-These bounds apply to Guard 0.18.0 (2026-09-08). Ordinary installation resolves
-published dependencies; the CRI 0.14.0 source candidate is used only for
-compatibility validation.
+Guard 0.19.0 requires Python >=3.10 and the following runtime ranges.
+Candidate acceptance covers Windows/Linux with Python 3.10 and 3.14.
 
-| Component | Declared runtime range | Python 3.10 minimum matrix | Python 3.14 candidate matrix |
-| --- | --- | --- | --- |
-| Guard | 0.18.0 | Built and installed wheel | Built and installed wheel |
-| CRI-CORE | `>=0.13.0,<0.15.0` | Published 0.13.0 | Unpublished 0.14.0 candidate at `411dfaa976fd4b37efc5fd3e39076edcd3603e1b` |
-| Proposal Normalizer | `>=0.2.0,<0.3.0` | 0.2.0 | 0.2.0 |
-| Governance Ledger | `>=0.7.0,<0.9.0` | Published 0.7.0 (v1/v2; v3 fails closed) | Published 0.8.0 (v1/v2/v3) |
-| requests | `>=2.33.0,<3.0.0` | 2.33.0 | 2.34.2 |
+| Component | Runtime range | Acceptance version |
+| --- | --- | --- |
+| CRI-CORE | `>=0.13.0,<0.15.0` | 0.13.0 minimum; 0.14.0 candidate |
+| Proposal Normalizer | `>=0.2.0,<0.3.0` | 0.2.0 |
+| Governance Ledger | `>=0.9.0,<0.10.0` | 0.9.0 |
+| requests | `>=2.33.0,<3.0.0` | 2.33.0 minimum; 2.34.2 candidate |
 
-The tested endpoints establish the supported release lines; they do not claim
-that every future patch has already been tested. Upper bounds are widened only
-in a future Guard change after compatibility review, complete behavioral tests,
-and installed-package/resolver acceptance. Installation success alone is not
-compatibility evidence. Public dependencies use ranges; exact CI constraints
-are environment-specific and do not pin transitive dependencies in the library.
-
-Published **Guard 0.17.0 has unbounded CRI, Normalizer, and requests metadata**
-and **must not be paired with CRI 0.14**. Its artifacts cannot acquire these
-bounds retroactively. Guard 0.18.0 supports CRI 0.13.0 and the exact CRI 0.14.0
-candidate. Upgrade/install Guard 0.18.0 **before** CRI 0.14.0 to avoid an
-incompatible resolver window. Ordinary installation works with published CRI 0.13.0.
-
-Published `governance-ledger==0.8.0` has a `[guard]` extra pinned to
-`waveframe-guard==0.17.0`. Ledger's base package remains compatible with
-Guard 0.18.0 through `governance-ledger>=0.7.0,<0.9.0`. Install
-`waveframe-guard==0.18.0` directly for this release rather than relying on
-`governance-ledger[guard]==0.8.0`; that extra does not install Guard 0.18.0.
+Ledger 0.9 requires Compiler >=0.5.0,<0.6.0. Ordinary installation upgrades
+older Ledger; the new SDK cannot run with Ledger 0.8. Compatible runtimes still
+verify supported historical authorities without granting new permissions.
+Do not advertise Ledger's optional Guard extra until Guard is uploaded and
+ordinary index installation has been verified. See the release acceptance
+record for exact candidate sources and independent historical environments.
 
 Requests 2.32.0 was considered but is
 [yanked on PyPI](https://pypi.org/project/requests/2.32.0/).
