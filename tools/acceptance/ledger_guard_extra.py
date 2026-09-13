@@ -40,7 +40,11 @@ for name, version, module in (("governance-ledger", "0.9.0", "governance_ledger"
     wheel, = [Path(p) for p in expected["wheels"] if Path(p).name.startswith(name.replace("-", "_") + "-")]
     digest = hashlib.sha256(wheel.read_bytes()).hexdigest()
     install, = [i for i in report["install"] if i["metadata"]["name"].replace("_", "-") == name]
-    assert install["download_info"]["archive_info"]["hashes"]["sha256"] == digest
+    archive_info = install["download_info"]["archive_info"]
+    installed_digest = archive_info.get("hashes", {}).get("sha256")
+    if installed_digest is None:
+        installed_digest = archive_info.get("hash", "").removeprefix("sha256=")
+    assert installed_digest == digest
     checked = {}
     with zipfile.ZipFile(wheel) as archive:
         for member in archive.namelist():
