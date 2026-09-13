@@ -274,8 +274,11 @@ def main() -> None:
         environment = root / ".venv"
         _run([sys.executable, "-m", "venv", str(environment)], cwd=root)
         python = environment / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
-        _run([str(python), "-m", "pip", "install", guard_spec, ledger_spec, "-r",
-              str(Path(__file__).resolve().parents[2] / ".github/requirements/action-policy-release.txt")], cwd=root)
+        requirements = (Path(__file__).resolve().parents[2] / ".github/requirements/action-policy-release.txt").read_text(encoding="utf-8").splitlines()
+        compiler = next(line for line in requirements if line.startswith("cricore-contract-compiler @"))
+        if ledger_spec == "governance-ledger==0.9.0":
+            ledger_spec = next(line for line in requirements if line.startswith("governance-ledger @"))
+        _run([str(python), "-m", "pip", "install", guard_spec, ledger_spec, compiler], cwd=root)
         runner = root / "acceptance.py"
         runner.write_text(textwrap.dedent(RUNNER), encoding="utf-8")
         completed = _run([str(python), str(runner)], cwd=root, capture_output=True)

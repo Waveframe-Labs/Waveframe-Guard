@@ -24,8 +24,8 @@ UPGRADE_PROBE = r'''
 import hashlib, importlib, json, sys, zipfile
 from importlib.metadata import distribution
 from pathlib import Path
-expected = json.loads(Path(sys.argv[1]).read_text())
-report = json.loads(Path(sys.argv[2]).read_text())
+expected = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+report = json.loads(Path(sys.argv[2]).read_text(encoding="utf-8"))
 result = {}
 for name, version, module in (("governance-ledger", "0.9.0", "governance_ledger"),
                              ("cricore-contract-compiler", "0.5.0", "compiler"),
@@ -72,10 +72,10 @@ def main():
     def save():
         (output / "guard-coordination.json").write_text(json.dumps(report, indent=2) + "\n")
 
-    def run(label, command, cwd=source, check=True):
+    def run(label, command, cwd=source, check=True, env=None):
         command = list(map(str, command))
         with (output / f"{label}.log").open("w", encoding="utf-8") as log:
-            result = subprocess.run(command, cwd=cwd, stdout=log, stderr=subprocess.STDOUT)
+            result = subprocess.run(command, cwd=cwd, stdout=log, stderr=subprocess.STDOUT, env=env)
         report["commands"].append({"label": label, "command": command, "cwd": str(cwd), "exit_code": result.returncode})
         save()
         if check and result.returncode:
@@ -107,6 +107,30 @@ def main():
     result = run("supplied-combined", [sys.executable, "tools/run_guard_extra_acceptance.py", "--expected-head", LEDGER,
                  "--base-evidence", base, "--guard-candidate", manifest_path, "--output", combined], check=False)
     report["combined_exit_code"] = result
+    # The supplied entry point stops at the first failed suite. Preserve that
+    # failed gate and run its remaining unchanged probes as supplemental evidence.
+    support = combined / "installed-support"
+    combined_python = combined / "combined-extra" / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
+    if result and combined_python.exists():
+        probe_env = os.environ.copy()
+        for key in ("PYTHONPATH", "WAVEFRAME_GUARD_ACTION_POLICY_DEV", "WAVEFRAME_LEDGER_ACTION_POLICY_DEV"):
+            probe_env.pop(key, None)
+        probe_env.update(PYTHONUTF8="1", LEDGER_EXPECT_IMPORT_ROOT=str(combined_python.parent.parent),
+                         WAVEFRAME_LEDGER_TEST_WHEEL=str(combined / "wheelhouse/governance_ledger-0.9.0-py3-none-any.whl"))
+        native_env = dict(probe_env, WAVEFRAME_LEDGER_ACTION_POLICY_DEV="1")
+        report["supplemental_probes"] = {}
+        probes = [
+            ("native-suite", [support / "tools/acceptance_pytest.py", "-q", "-ra", "--junitxml",
+                              output / "supplemental-native.xml", "tests"], native_env),
+            ("release-package", [support / "tools/check_release_catalog_package.py"], probe_env),
+            ("development-package", [support / "tools/check_action_policy_package.py"], native_env),
+            ("legacy-example", [support / "examples/native_v3_multi_control.py", "--candidate"], probe_env),
+            ("catalog-3-execution", [support / "tools/check_guard_release_execution.py"], probe_env),
+        ]
+        for label, command, env in probes:
+            report["supplemental_probes"][label] = run("supplemental-" + label,
+                [combined_python, "-I", *command], support, check=False, env=env)
+        save()
     # This independent check remains useful even when the supplied combined tool fails.
     base_record = json.loads((base / "acceptance.json").read_text())
     ledger = base / "dist/governance_ledger-0.9.0-py3-none-any.whl"
