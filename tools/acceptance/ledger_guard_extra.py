@@ -116,6 +116,7 @@ def main():
         for key in ("PYTHONPATH", "WAVEFRAME_GUARD_ACTION_POLICY_DEV", "WAVEFRAME_LEDGER_ACTION_POLICY_DEV"):
             probe_env.pop(key, None)
         probe_env.update(PYTHONUTF8="1", LEDGER_EXPECT_IMPORT_ROOT=str(combined_python.parent.parent),
+                         LEDGER_IMPORT_REPORT=str(output / "supplemental-native-imports.json"),
                          WAVEFRAME_LEDGER_TEST_WHEEL=str(combined / "wheelhouse/governance_ledger-0.9.0-py3-none-any.whl"))
         native_env = dict(probe_env, WAVEFRAME_LEDGER_ACTION_POLICY_DEV="1")
         report["supplemental_probes"] = {}
