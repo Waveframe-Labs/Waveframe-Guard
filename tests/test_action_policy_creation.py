@@ -17,6 +17,9 @@ from waveframe_guard.authority.verifier import AuthorityVerifier
 from tools.acceptance.action_policy_creation import resolver, FIXTURES, provenance, run
 
 ENABLED = os.environ.get("WAVEFRAME_GUARD_ACTION_POLICY_DEV") == "1"
+VERSION = "2.0.0"
+native = pytest.mark.usefixtures("native_generation")
+
 development = pytest.mark.skipif(not ENABLED, reason="requires explicit action policy development environment")
 
 
@@ -26,13 +29,15 @@ def request(path="generated/new.md", action="create"):
 
 
 @pytest.fixture
-def runtime(tmp_path):
+def runtime(tmp_path, request):
+    if request.node.get_closest_marker("usefixtures"):
+        request.getfixturevalue("native_generation")
     instances = []
     (tmp_path / "generated").mkdir()
     (tmp_path / "README.md").write_bytes(b"original")
     def make(kind="create-only", role="repository-maintainer", **kwargs):
         instance = Guard.local(repository_root=tmp_path, workspace=tmp_path / "evidence",
-            authority=f"repository-{kind}@2.0.0", authority_resolver=resolver(kind),
+            authority=f"repository-{kind}@{VERSION}", authority_resolver=resolver(kind),
             actor_identity={"id": "agent", "type": "agent", "role": role}, **kwargs)
         instances.append(instance)
         return instance
@@ -45,7 +50,7 @@ def runtime(tmp_path):
 def test_default_gate_rejects_native_publication(monkeypatch, gate):
     monkeypatch.delenv(gate, raising=False)
     with pytest.raises(AuthorityVerificationError, match="development"):
-        load_authority("repository-create-only@2.0.0", resolver=resolver("create-only"))
+        load_authority(f"repository-create-only@{VERSION}", resolver=resolver("create-only"))
 
 
 def test_standalone_contract_and_caller_verified_flag_rejected():
@@ -55,13 +60,13 @@ def test_standalone_contract_and_caller_verified_flag_rejected():
             intake_compiled_authority(contract, **kwargs)
 
 
-@development
+@native
 def test_exact_dependencies_and_installed_public_api_acceptance():
     assert provenance()
-    assert run()["creation"]["repository_operation"]["created"]
+    assert run(FIXTURES)["creation"]["repository_operation"]["created"]
 
 
-@development
+@native
 @pytest.mark.parametrize("kind,role,action,path,status", [
     ("create-only", "repository-maintainer", "create", "generated/new.md", "admissible"),
     ("create-only", "repository-maintainer", "modify", "generated/new.md", "blocked"),
@@ -87,7 +92,7 @@ def test_action_roles_paths_and_evaluation_only(runtime, kind, role, action, pat
         assert result["evaluation"]["execution_attestation"]["mutation_executed"] is False
 
 
-@development
+@native
 def test_creation_once_expiry_and_modify_separation(runtime):
     make, root = runtime
     instance = make()
@@ -110,7 +115,7 @@ def test_creation_once_expiry_and_modify_separation(runtime):
         instance.boundary_for().execute_repository(lambda t: None, execution_request=request())
 
 
-@development
+@native
 def test_missing_parent_preserves_allowed_decision(runtime):
     make, root = runtime
     with pytest.raises(RepositoryBoundaryError) as error:
@@ -121,7 +126,7 @@ def test_missing_parent_preserves_allowed_decision(runtime):
     assert not (root / "generated/missing").exists()
 
 
-@development
+@native
 def test_partial_write_failure_is_not_rollback(runtime, monkeypatch):
     import guard.sdk.repository_boundary as filesystem
     make, root = runtime
@@ -160,7 +165,7 @@ def test_gate_revocation_contract_and_cache_substitution(runtime, monkeypatch):
     boundary.compiled_authority["action_requirements"]["create"]["required_role"] = None
     with pytest.raises(AuthorityVerificationError):
         boundary.evaluate(request())
-    loaded = load_authority("repository-create-only@2.0.0", resolver=resolver("create-only"), cache=cache)
+    loaded = load_authority(f"repository-create-only@{VERSION}", resolver=resolver("create-only"), cache=cache)
     loaded.authority_bundle["compiled_authority_contract"]["action_requirements"]["create"]["allow"] = []
     cache.put(loaded)
     with pytest.raises(AuthorityVerificationError):
@@ -170,10 +175,10 @@ def test_gate_revocation_contract_and_cache_substitution(runtime, monkeypatch):
         instance.boundary_for().evaluate(request())
 
 
-@development
+@native
 @pytest.mark.parametrize("schema", ["authority_bundle.v1", "authority_bundle.v2", "authority_bundle.v3", "authority_bundle.v5"])
 def test_downgraded_or_unknown_envelopes_rejected(schema):
-    entry = resolver("mixed").resolve("repository-mixed@2.0.0")
+    entry = resolver("mixed").resolve(f"repository-mixed@{VERSION}")
     bundle = BundleLoader().load(entry)
     payload = copy.deepcopy(bundle.payload)
     payload["schema_version"] = schema
@@ -181,7 +186,7 @@ def test_downgraded_or_unknown_envelopes_rejected(schema):
         AuthorityVerifier().verify(replace(bundle, payload=payload))
 
 
-@development
+@native
 def test_replay_revalidates_retained_publication(runtime):
     make, root = runtime
     instance = make()
@@ -194,7 +199,7 @@ def test_replay_revalidates_retained_publication(runtime):
     assert (root / "generated/new.md").read_bytes() == b"created"
 
 
-@development
+@native
 @pytest.mark.parametrize("injected", ["facts", "runtime_facts", "proposal.action", "actor.role"])
 def test_injected_facts_rejected(runtime, injected):
     make, root = runtime
@@ -209,7 +214,7 @@ def test_injected_facts_rejected(runtime, injected):
     assert not (root / "generated/new.md").exists()
 
 
-@development
+@native
 @pytest.mark.parametrize("path", ["../escape", "generated/../escape", "generated/new.md:stream", "generated/NUL",
     "generated/./new.md", "generated/new.md.", "generated\\new.md", "/absolute", "C:/absolute"])
 def test_unsupported_creation_paths_fail_closed(runtime, path):
@@ -220,7 +225,7 @@ def test_unsupported_creation_paths_fail_closed(runtime, path):
     assert list((root / "generated").iterdir()) == []
 
 
-@development
+@native
 def test_parent_replacement_between_evaluation_and_binding(runtime, monkeypatch):
     make, root = runtime
     boundary = make().boundary_for()
@@ -238,7 +243,7 @@ def test_parent_replacement_between_evaluation_and_binding(runtime, monkeypatch)
     assert not (root / "old-parent/new.md").exists()
 
 
-@development
+@native
 def test_parent_substitution_inside_callback(runtime):
     make, root = runtime
     instance = make()
@@ -261,7 +266,7 @@ def test_parent_substitution_inside_callback(runtime):
         assert not (root / "old-parent/new.md").exists()
 
 
-@development
+@native
 def test_real_indirection_and_case_alias_rejected(runtime):
     import subprocess
     make, root = runtime
@@ -281,7 +286,7 @@ def test_real_indirection_and_case_alias_rejected(runtime):
     assert not (root / "outside/file").exists()
 
 
-@development
+@native
 def test_escalated_no_callback_or_creation(runtime):
     make, root = runtime
     boundary = make(continuity_state={"requires_revalidation": True}).boundary_for()
@@ -291,7 +296,7 @@ def test_escalated_no_callback_or_creation(runtime):
     assert not result["executed"] and not (root / "generated/new.md").exists()
 
 
-@development
+@native
 def test_modify_grant_cannot_create_missing_file(runtime):
     make, root = runtime
     instance = make("mixed", "security-reviewer")
@@ -314,10 +319,10 @@ def test_legacy_contract_cannot_authorize_creation(tmp_path):
         instance.close()
 
 
-@development
+@native
 @pytest.mark.parametrize("change", ["receipt_schema", "contract_action", "contract_field", "pack_hash", "schema_hash"])
 def test_malformed_native_publication_rejected(change):
-    entry = resolver("mixed").resolve("repository-mixed@2.0.0")
+    entry = resolver("mixed").resolve(f"repository-mixed@{VERSION}")
     bundle = BundleLoader().load(entry)
     payload, receipt = copy.deepcopy(bundle.payload), copy.deepcopy(bundle.receipt_payload)
     if change == "receipt_schema":
@@ -334,13 +339,13 @@ def test_malformed_native_publication_rejected(change):
         AuthorityVerifier().verify(replace(bundle, payload=payload, receipt_payload=receipt))
 
 
-@development
+@native
 def test_cache_marker_registry_lifecycle_and_loaded_substitution(runtime):
     from waveframe_guard.authority.runtime_facts import VerifiedRuntimeAuthority
     make, root = runtime
     cache = MemoryAuthorityCache()
     source = resolver("create-only")
-    ref = "repository-create-only@2.0.0"
+    ref = f"repository-create-only@{VERSION}"
     loaded = load_authority(ref, resolver=source, cache=cache)
     assert load_authority(ref, resolver=source, cache=cache).contract == loaded.contract
     with pytest.raises(AuthorityVerificationError):

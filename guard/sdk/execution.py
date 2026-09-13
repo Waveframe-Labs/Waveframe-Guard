@@ -418,10 +418,14 @@ class GuardRuntimeBoundary:
                                  _evaluation=evaluation)
         with ExitStack() as stack:
             try:
-                target = stack.enter_context(workspace.bind(
+                binding = (workspace._bind_verified(
+                    request.get("target"), self._verified_runtime_authority,
+                    operation=operation, requirements=self._path_requirements(request),
+                ) if operation == "create" else workspace.bind(
                     request.get("target"), mutation=True, operation=operation,
                     requirements=self._path_requirements(request),
                 ))
+                target = stack.enter_context(binding)
                 if preflight_bindings != [target._namespace_identity]:
                     raise RepositoryBoundaryError("repository parent changed after evaluation")
             except RepositoryBoundaryError as exc:

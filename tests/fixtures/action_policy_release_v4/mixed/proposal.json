@@ -1,0 +1,259 @@
+{
+  "schema_version": "policy_translation_proposal.v1",
+  "source_policy": {
+    "source_policy_id": "repository-policy",
+    "source_revision": "revision-1",
+    "source_policy_ref": "repository-policy@revision-1",
+    "content_encoding": "base64",
+    "source_bytes_base64": "QWdlbnRzIG11c3QgdXNlIHJvbGUgcmVwb3NpdG9yeS1tYWludGFpbmVyIHRvIGNyZWF0ZSByZXBvc2l0b3J5IGZpbGVzLgpBZ2VudHMgbXVzdCB1c2Ugcm9sZSBzZWN1cml0eS1yZXZpZXdlciB0byBtb2RpZnkgcmVwb3NpdG9yeSBmaWxlcy4KQWdlbnRzIG1heSBjcmVhdGUgZ2VuZXJhdGVkL25ldy5tZCBhbmQgbW9kaWZ5IFJFQURNRS5tZC4KQWdlbnRzIG11c3Qgbm90IG1vZGlmeSBnZW5lcmF0ZWQvbmV3Lm1kIGFuZCBjcmVhdGUgUkVBRE1FLm1kLg==",
+    "snapshot_hash": "sha256:d09939a41b7e335165ecebffc714064c816c6465dc5afee8ee3702946d1d94bf"
+  },
+  "authority": {
+    "authority_id": "repository-mixed",
+    "authority_version": "3.0.0",
+    "authority_ref": "repository-mixed@3.0.0"
+  },
+  "capability_catalog": {
+    "catalog_id": "waveframe.coding-agent.repository-change",
+    "catalog_version": "3.0.0",
+    "catalog_hash": "sha256:bd7fd23eb59b5521ef6780edec0667ce9b7ba9b5738dfa2701a575fb3efce930"
+  },
+  "clauses": [
+    {
+      "clause_id": "policy-clause-e38579a681cc87255a86cf2002066e261ade188c021703b0308a60c84e4e6b17",
+      "index": 0,
+      "start_byte": 0,
+      "end_byte": 71,
+      "clause_bytes_base64": "QWdlbnRzIG11c3QgdXNlIHJvbGUgcmVwb3NpdG9yeS1tYWludGFpbmVyIHRvIGNyZWF0ZSByZXBvc2l0b3J5IGZpbGVzLgo=",
+      "clause_hash": "sha256:061b27ecadd28facae2e6768910fb8c76e5c09852dee17721dcbcd1eaa80b17f",
+      "coverage_status": "fully_represented",
+      "candidate_controls": [
+        {
+          "control_type": "acting_role",
+          "actor_kind": "autonomous_agent",
+          "action": "create",
+          "resource_kind": "repository_change",
+          "fact_id": "actor.role",
+          "operator": "==",
+          "effect": "require",
+          "enforcement_point": "waveframe.guard.repository-change.v2",
+          "required_runtime_facts": [
+            "actor.role",
+            "actor.subject_kind",
+            "proposal.action",
+            "proposal.resource.kind"
+          ],
+          "value": {
+            "kind": "source_literal",
+            "value": "repository-maintainer",
+            "canonical_value": "repository-maintainer",
+            "start_byte": 21,
+            "end_byte": 42,
+            "literal_hash": "sha256:9d083daf15d2c3fceffeed7515861c9203bb5eef06dd0bbda744c1d5de1c02f1"
+          },
+          "candidate_control_id": "candidate-control-acfa80e799e3db5661214bd4b2c2a48275a0621af0a5963356d7436174ffa254"
+        }
+      ],
+      "unresolved_binding_ids": [],
+      "limitation_code": null,
+      "residual_unsupported_spans": []
+    },
+    {
+      "clause_id": "policy-clause-6fc291af01a8ab86f68a9b1fe071cac101a60e227f59105a2730d23b3464f7d5",
+      "index": 1,
+      "start_byte": 71,
+      "end_byte": 138,
+      "clause_bytes_base64": "QWdlbnRzIG11c3QgdXNlIHJvbGUgc2VjdXJpdHktcmV2aWV3ZXIgdG8gbW9kaWZ5IHJlcG9zaXRvcnkgZmlsZXMuCg==",
+      "clause_hash": "sha256:ae5c2cb7a7cfa48e8ae009fe4d689321a2cac23a556ff0c8b2971f60b756813c",
+      "coverage_status": "fully_represented",
+      "candidate_controls": [
+        {
+          "control_type": "acting_role",
+          "actor_kind": "autonomous_agent",
+          "action": "modify",
+          "resource_kind": "repository_change",
+          "fact_id": "actor.role",
+          "operator": "==",
+          "effect": "require",
+          "enforcement_point": "waveframe.guard.repository-change.v2",
+          "required_runtime_facts": [
+            "actor.role",
+            "actor.subject_kind",
+            "proposal.action",
+            "proposal.resource.kind"
+          ],
+          "value": {
+            "kind": "source_literal",
+            "value": "security-reviewer",
+            "canonical_value": "security-reviewer",
+            "start_byte": 92,
+            "end_byte": 109,
+            "literal_hash": "sha256:8a78bab66f6a0d499d511dd0b0f7671129ca34fa81fe69e9e4196d616fd28c17"
+          },
+          "candidate_control_id": "candidate-control-33a5384cc47198210bfd75465cbf451b135ec0d13578507179fd8985e7010044"
+        }
+      ],
+      "unresolved_binding_ids": [],
+      "limitation_code": null,
+      "residual_unsupported_spans": []
+    },
+    {
+      "clause_id": "policy-clause-fefc0b584bdba506d1761b8b675e9842078865af87b7c0feef0f0f8eff3b2393",
+      "index": 2,
+      "start_byte": 138,
+      "end_byte": 195,
+      "clause_bytes_base64": "QWdlbnRzIG1heSBjcmVhdGUgZ2VuZXJhdGVkL25ldy5tZCBhbmQgbW9kaWZ5IFJFQURNRS5tZC4K",
+      "clause_hash": "sha256:ef7d7e6bbae50024ab05587f162aa4338210eb52e00c6f9cd57c8f43014c1f8e",
+      "coverage_status": "fully_represented",
+      "candidate_controls": [
+        {
+          "control_type": "exact_path_access",
+          "actor_kind": "autonomous_agent",
+          "action": "create",
+          "resource_kind": "repository_path",
+          "fact_id": "proposal.resource.path",
+          "operator": "==",
+          "effect": "allow",
+          "enforcement_point": "waveframe.guard.repository-change.v2",
+          "required_runtime_facts": [
+            "actor.subject_kind",
+            "proposal.action",
+            "proposal.resource.kind",
+            "proposal.resource.path"
+          ],
+          "value": {
+            "kind": "source_literal",
+            "value": "generated/new.md",
+            "canonical_value": "generated/new.md",
+            "start_byte": 156,
+            "end_byte": 172,
+            "literal_hash": "sha256:0c86b438cfa87064246c159cfcbfac65953894cd19b4bdb955a8d272ff02e3fb"
+          },
+          "candidate_control_id": "candidate-control-beb128cd19d359fbf40ca5104bd0757d097a33e8b9a6c161b56791edc80359c9"
+        },
+        {
+          "control_type": "exact_path_access",
+          "actor_kind": "autonomous_agent",
+          "action": "modify",
+          "resource_kind": "repository_path",
+          "fact_id": "proposal.resource.path",
+          "operator": "==",
+          "effect": "allow",
+          "enforcement_point": "waveframe.guard.repository-change.v2",
+          "required_runtime_facts": [
+            "actor.subject_kind",
+            "proposal.action",
+            "proposal.resource.kind",
+            "proposal.resource.path"
+          ],
+          "value": {
+            "kind": "source_literal",
+            "value": "README.md",
+            "canonical_value": "README.md",
+            "start_byte": 184,
+            "end_byte": 193,
+            "literal_hash": "sha256:b335630551682c19a781afebcf4d07bf978fb1f8ac04c6bf87428ed5106870f5"
+          },
+          "candidate_control_id": "candidate-control-9d8f4262083edfc055f5703f1d0887e1cd78321fa17beaab0d111ad7704b7236"
+        }
+      ],
+      "unresolved_binding_ids": [],
+      "limitation_code": null,
+      "residual_unsupported_spans": []
+    },
+    {
+      "clause_id": "policy-clause-6a8787eb6d743b90dcebe4677bb49ef4975819a6ca5bd1c70d1cef56f31b1642",
+      "index": 3,
+      "start_byte": 195,
+      "end_byte": 256,
+      "clause_bytes_base64": "QWdlbnRzIG11c3Qgbm90IG1vZGlmeSBnZW5lcmF0ZWQvbmV3Lm1kIGFuZCBjcmVhdGUgUkVBRE1FLm1kLg==",
+      "clause_hash": "sha256:6eb2e2668a8a72c0bc55edc854f4ea810df8d2d2e91a6b7e1d665070cc723ca3",
+      "coverage_status": "fully_represented",
+      "candidate_controls": [
+        {
+          "control_type": "exact_path_access",
+          "actor_kind": "autonomous_agent",
+          "action": "modify",
+          "resource_kind": "repository_path",
+          "fact_id": "proposal.resource.path",
+          "operator": "==",
+          "effect": "deny",
+          "enforcement_point": "waveframe.guard.repository-change.v2",
+          "required_runtime_facts": [
+            "actor.subject_kind",
+            "proposal.action",
+            "proposal.resource.kind",
+            "proposal.resource.path"
+          ],
+          "value": {
+            "kind": "source_literal",
+            "value": "generated/new.md",
+            "canonical_value": "generated/new.md",
+            "start_byte": 218,
+            "end_byte": 234,
+            "literal_hash": "sha256:0c86b438cfa87064246c159cfcbfac65953894cd19b4bdb955a8d272ff02e3fb"
+          },
+          "candidate_control_id": "candidate-control-5818dddb8ca9ca91676458c4a1276d181c03847d1e6f0a2592a07b54ddaa1396"
+        },
+        {
+          "control_type": "exact_path_access",
+          "actor_kind": "autonomous_agent",
+          "action": "create",
+          "resource_kind": "repository_path",
+          "fact_id": "proposal.resource.path",
+          "operator": "==",
+          "effect": "deny",
+          "enforcement_point": "waveframe.guard.repository-change.v2",
+          "required_runtime_facts": [
+            "actor.subject_kind",
+            "proposal.action",
+            "proposal.resource.kind",
+            "proposal.resource.path"
+          ],
+          "value": {
+            "kind": "source_literal",
+            "value": "README.md",
+            "canonical_value": "README.md",
+            "start_byte": 246,
+            "end_byte": 255,
+            "literal_hash": "sha256:b335630551682c19a781afebcf4d07bf978fb1f8ac04c6bf87428ed5106870f5"
+          },
+          "candidate_control_id": "candidate-control-351f4024866c6cbfd669d66f76135ecb2c38805b080b9aecba037e264c7d3bf6"
+        }
+      ],
+      "unresolved_binding_ids": [],
+      "limitation_code": null,
+      "residual_unsupported_spans": []
+    }
+  ],
+  "organizational_bindings": [],
+  "translation_runs": [
+    {
+      "run_id": "translation-run-7348f25297c0e4c17ae4d7e42c5aaa079183ba1263c5ae75f39010fda95fd7ac",
+      "sequence_number": 0,
+      "source_policy_ref": "repository-policy@revision-1",
+      "source_revision": "revision-1",
+      "source_snapshot_hash": "sha256:d09939a41b7e335165ecebffc714064c816c6465dc5afee8ee3702946d1d94bf",
+      "capability_catalog": {
+        "catalog_id": "waveframe.coding-agent.repository-change",
+        "catalog_version": "3.0.0",
+        "catalog_hash": "sha256:bd7fd23eb59b5521ef6780edec0667ce9b7ba9b5738dfa2701a575fb3efce930"
+      },
+      "provider_class": "guided_deterministic",
+      "provider_identifier": "release-example-fixture-author",
+      "translation_template_version": "fixture-v1",
+      "translation_template_hash": "sha256:fc1c0e0c7ae8690bf702ade724d2543f81603a03b3956338f76ddef54ad713b9",
+      "request_configuration_id": "fixture-v1",
+      "request_configuration_hash": "sha256:fc1c0e0c7ae8690bf702ade724d2543f81603a03b3956338f76ddef54ad713b9",
+      "request_hash": "sha256:d09939a41b7e335165ecebffc714064c816c6465dc5afee8ee3702946d1d94bf",
+      "response_hash": "sha256:09eedc19a416d92ad24c21d104f93d8005d99571cb9f4415f2b0e5154d9dbed6",
+      "explanation_hash": null,
+      "created_at": "2026-09-12T12:00:00Z",
+      "completed_at": "2026-09-12T12:00:01Z",
+      "previous_run_hash": null,
+      "run_hash": "sha256:2ed1dd4293999ace02fd9b4acf9988c7d45bf84d76159fd3059007fad45e3ed1"
+    }
+  ],
+  "proposal_id": "policy-translation-proposal-f474f56fbdbd9a7dfa0a2b904272d3aa3b181b62b1be717bc3a4d867e4da01eb",
+  "proposal_hash": "sha256:f474f56fbdbd9a7dfa0a2b904272d3aa3b181b62b1be717bc3a4d867e4da01eb"
+}

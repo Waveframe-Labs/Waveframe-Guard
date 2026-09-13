@@ -185,12 +185,32 @@ class RepositoryWorkspace:
 
     @contextmanager
     def bind(self, value, *, mutation=False, requirements=None, operation="modify"):
-        if operation not in {"create", "modify"}:
-            raise RepositoryBoundaryError("unsupported repository operation")
         if mutation and operation == "create":
             from waveframe_guard.authority.development import require_action_policy_development
 
             require_action_policy_development()
+        with self._bind(value, mutation=mutation, requirements=requirements, operation=operation) as target:
+            yield target
+
+    @contextmanager
+    def _bind_verified(self, value, authority, *, requirements, operation):
+        from waveframe_guard.authority.runtime_facts import VerifiedRuntimeAuthority
+
+        if not isinstance(authority, VerifiedRuntimeAuthority):
+            raise RepositoryBoundaryError("creation requires a verified runtime authority")
+        contract = authority.contract()
+        authority.verify_candidate_contract(contract)
+        if (contract.get("schema_version") != "compiled_authority_contract.v3"
+            or authority.evidence()["authority_bundle"]["schema_version"] != "authority_bundle.v4"
+            or requirements != contract["action_requirements"].get(operation)):
+            raise RepositoryBoundaryError("creation requires its verified native action binding")
+        with self._bind(value, mutation=True, requirements=requirements, operation=operation) as target:
+            yield target
+
+    @contextmanager
+    def _bind(self, value, *, mutation=False, requirements=None, operation="modify"):
+        if operation not in {"create", "modify"}:
+            raise RepositoryBoundaryError("unsupported repository operation")
         relative = canonical_repository_path(value)
         fds = []
         yielded = False

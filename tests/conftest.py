@@ -15,8 +15,39 @@ for module_name, module in list(sys.modules.items()):
 from waveframe_guard.context import clear_context
 
 
+@pytest.fixture(params=["development", "release"])
+def native_generation(request, monkeypatch):
+    """Run the same boundary/fault contract against both unmodified publications."""
+    from tools.acceptance.action_policy_creation import resolver, FIXTURES
+    if request.param == "development":
+        import os
+        if any(os.environ.get(name) != "1" for name in (
+            "WAVEFRAME_GUARD_ACTION_POLICY_DEV", "WAVEFRAME_LEDGER_ACTION_POLICY_DEV"
+        )):
+            pytest.skip("catalog 2 requires explicit Guard and Ledger development opt-ins")
+    else:
+        from governance_ledger.policy_translation import get_policy_translation_capability_catalog
+        try:
+            get_policy_translation_capability_catalog(catalog_version="3.0.0")
+        except (TypeError, ValueError):
+            pytest.skip("historical dependency baseline lacks catalog 3; release CI requires these cases")
+        for name in ("WAVEFRAME_GUARD_ACTION_POLICY_DEV", "WAVEFRAME_LEDGER_ACTION_POLICY_DEV"):
+            monkeypatch.delenv(name, raising=False)
+        fixtures = FIXTURES.parent / "action_policy_release_v4"
+        monkeypatch.setattr(request.module, "VERSION", "3.0.0")
+        monkeypatch.setattr(request.module, "FIXTURES", fixtures)
+        monkeypatch.setattr(request.module, "resolver", lambda kind: resolver(kind, fixtures))
+    return request.param
+
+
 @pytest.fixture(autouse=True)
 def reset_guard_context():
+    import os
+    if os.environ.get("GUARD_EXPECT_INSTALLED") == "1":
+        import waveframe_guard
+        import guard
+        assert Path(waveframe_guard.__file__).is_relative_to(Path(sys.prefix))
+        assert Path(guard.__file__).is_relative_to(Path(sys.prefix))
     clear_context()
     yield
     clear_context()

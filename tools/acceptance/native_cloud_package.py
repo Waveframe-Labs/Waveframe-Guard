@@ -45,7 +45,7 @@ def main():
         venv.EnvBuilder(with_pip=True).create(client_env)
         client_python = python_at(client_env)
         run([client_python, "-m", "pip", "install", args.wheel.resolve(), "-r",
-             ROOT / ".github/requirements/action-policy-development.txt"], scratch)
+             ROOT / ".github/requirements/action-policy-release.txt"], scratch)
         server_python = args.server_python.resolve() if args.server_python else python_at(scratch / "server")
         if not args.server_python:
             server_base = args.server_base_python.resolve() if args.server_base_python else Path(sys.executable)
