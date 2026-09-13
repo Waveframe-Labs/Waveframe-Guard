@@ -12,6 +12,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
     sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tests"))
     from test_external_agent_quickstart import _serve_cloud_boundary
     import waveframe_guard
