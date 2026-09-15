@@ -60,6 +60,7 @@ APPROVED_JSON_FILES.update(
                      "compiler-output", "confirmation", "constraint-ir", "proposal",
                      "publication-receipt", "review", "source-interpretation")
 )
+APPROVED_JSON_FILES.update(['tests/fixtures/action_policy_release_v4/catalog.json', 'tests/fixtures/action_policy_release_v4/create-only/approval.json', 'tests/fixtures/action_policy_release_v4/create-only/authority-bundle.json', 'tests/fixtures/action_policy_release_v4/create-only/compiled-authority.json', 'tests/fixtures/action_policy_release_v4/create-only/compiler-input.json', 'tests/fixtures/action_policy_release_v4/create-only/compiler-output.json', 'tests/fixtures/action_policy_release_v4/create-only/confirmation.json', 'tests/fixtures/action_policy_release_v4/create-only/constraint-ir.json', 'tests/fixtures/action_policy_release_v4/create-only/proposal.json', 'tests/fixtures/action_policy_release_v4/create-only/publication-receipt.json', 'tests/fixtures/action_policy_release_v4/create-only/review.json', 'tests/fixtures/action_policy_release_v4/create-only/source-interpretation.json', 'tests/fixtures/action_policy_release_v4/domain-pack.json', 'tests/fixtures/action_policy_release_v4/mixed/approval.json', 'tests/fixtures/action_policy_release_v4/mixed/authority-bundle.json', 'tests/fixtures/action_policy_release_v4/mixed/compiled-authority.json', 'tests/fixtures/action_policy_release_v4/mixed/compiler-input.json', 'tests/fixtures/action_policy_release_v4/mixed/compiler-output.json', 'tests/fixtures/action_policy_release_v4/mixed/confirmation.json', 'tests/fixtures/action_policy_release_v4/mixed/constraint-ir.json', 'tests/fixtures/action_policy_release_v4/mixed/proposal.json', 'tests/fixtures/action_policy_release_v4/mixed/publication-receipt.json', 'tests/fixtures/action_policy_release_v4/mixed/review.json', 'tests/fixtures/action_policy_release_v4/mixed/source-interpretation.json', 'tests/fixtures/action_policy_release_v4/modify-only/approval.json', 'tests/fixtures/action_policy_release_v4/modify-only/authority-bundle.json', 'tests/fixtures/action_policy_release_v4/modify-only/compiled-authority.json', 'tests/fixtures/action_policy_release_v4/modify-only/compiler-input.json', 'tests/fixtures/action_policy_release_v4/modify-only/compiler-output.json', 'tests/fixtures/action_policy_release_v4/modify-only/confirmation.json', 'tests/fixtures/action_policy_release_v4/modify-only/constraint-ir.json', 'tests/fixtures/action_policy_release_v4/modify-only/proposal.json', 'tests/fixtures/action_policy_release_v4/modify-only/publication-receipt.json', 'tests/fixtures/action_policy_release_v4/modify-only/review.json', 'tests/fixtures/action_policy_release_v4/modify-only/source-interpretation.json', 'tests/fixtures/action_policy_release_v4/runtime-fact-schema.json'])
 EXPECTED_PUBLIC_RUNTIME_REQUIREMENTS = {
     "cricore>=0.13.0,<0.15.0",
     "cricore-proposal-normalizer>=0.2.0,<0.3.0",
@@ -67,7 +68,7 @@ EXPECTED_PUBLIC_RUNTIME_REQUIREMENTS = {
     "requests>=2.33.0,<3.0.0",
 }
 PINNED_TEST_DEPENDENCIES = {
-    "cricore-contract-compiler==0.4.0",
+    "cricore-contract-compiler>=0.4.0,<0.6.0",
 }
 SECRET_PATTERNS = {
     "AWS access key": re.compile(rb"AKIA[0-9A-Z]{16}"),

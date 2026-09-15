@@ -6,7 +6,7 @@ from copy import deepcopy
 from time import perf_counter_ns
 from typing import Any, Mapping
 
-from .development import require_action_policy_development
+from .generations import require_action_generation, verify_publication_generation
 from .exceptions import AuthorityLifecycleError, AuthorityVerificationError
 from .types import Bundle, LoadedAuthority, RegistryEntry
 
@@ -31,7 +31,7 @@ class AuthorityVerifier:
     def verify(self, bundle: Bundle) -> LoadedAuthority:
         schema_version = bundle.payload.get("schema_version")
         if schema_version == "authority_bundle.v4":
-            require_action_policy_development()
+            verify_publication_generation(bundle.payload)
             return _verify_publication_authority(bundle, bundle_schema="authority_bundle.v4",
                 receipt_schema="publication_receipt.v4", major="v4")
         if schema_version == "authority_bundle.v3":
@@ -70,7 +70,7 @@ class AuthorityVerifier:
             raise AuthorityVerificationError(f"cached authority_ref mismatch for {registry_entry.authority_ref}")
         _reject_legacy_action_contract(authority.contract, authority.schema_version)
         if authority.schema_version == "authority_bundle.v4":
-            require_action_policy_development()
+            require_action_generation(authority.contract)
         if authority.schema_version in {"authority_bundle.v2", "authority_bundle.v3", "authority_bundle.v4"}:
             if revalidate_publication:
                 return _revalidate_cached_publication(self, registry_entry, authority)
@@ -363,7 +363,7 @@ def _verify_cached_publication_integrity(
     if not _is_process_verified_v3(authority):
         raise AuthorityVerificationError("cached publication is not process verified")
     if authority.schema_version == "authority_bundle.v4":
-        require_action_policy_development()
+        require_action_generation(authority.contract)
         if (authority.authority_bundle is None or authority.publication_receipt is None
             or authority.publication_integrity_hash != _publication_integrity_hash(
                 authority.authority_bundle, authority.publication_receipt)):

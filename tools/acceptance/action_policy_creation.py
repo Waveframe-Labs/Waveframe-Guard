@@ -15,9 +15,13 @@ from waveframe_guard.authority.types import RegistryEntry
 from guard.runtime.identity import stable_hash
 from guard.sdk.local_persistence import GuardArtifactError, validate_execution_attestation
 
-COMMITS = {
+ORIGINAL_COMMITS = {
     "cricore-contract-compiler": "3b91fcc03c804804b2ace7302f37340a787496d9",
     "governance-ledger": "54379d9c8044544fc1b8f32109bdfce35c1c6a05",
+}
+COMMITS = {
+    "cricore-contract-compiler": "ae590dee058d3481e384dea850d5b7d980f533ff",
+    "governance-ledger": "40e0875ee9a973254bb3a4d0c228cad4fdce2bc0",
 }
 FIXTURES = Path(__file__).resolve().parents[2] / "tests/fixtures/action_policy_v4"
 
@@ -52,7 +56,7 @@ def provenance():
 def run(fixtures=FIXTURES):
     from compiler import compile_action_policy
 
-    evidence = {"dependencies": provenance(), "fixture_source_commit": COMMITS["governance-ledger"]}
+    evidence = {"dependencies": provenance(), "fixture_source_commit": (COMMITS if fixtures.name == "action_policy_release_v4" else ORIGINAL_COMMITS)["governance-ledger"], "original_development_compiler": ORIGINAL_COMMITS["cricore-contract-compiler"]}
     for line in (fixtures / "SHA256SUMS").read_text().splitlines():
         digest, name = line.split("  ", 1)
         assert hashlib.sha256((fixtures / name).read_bytes()).hexdigest() == digest, name
@@ -66,7 +70,7 @@ def run(fixtures=FIXTURES):
         (root / "generated").mkdir()
         instance = Guard.local(
             repository_root=root, workspace=root / "evidence",
-            authority="repository-create-only@2.0.0", authority_resolver=resolver("create-only", fixtures),
+            authority=next(iter(resolver("create-only", fixtures).entries)), authority_resolver=resolver("create-only", fixtures),
             actor_identity={"id": "acceptance-agent", "type": "agent", "role": "repository-maintainer"},
         )
         try:
@@ -88,6 +92,7 @@ def run(fixtures=FIXTURES):
                 raise AssertionError("exclusive collision was not rejected")
             assert (root / "generated/new.md").read_bytes() == b"local development creation\n"
             evidence["saved_creation"] = instance.store.load_execution_attestation(result["evaluation"]["run_id"])
+            evidence["saved_run"] = instance.store.load_run(result["evaluation"]["run_id"])
             assert instance.store.replay(result["evaluation"]["run_id"])["matches"]
             import guard.sdk.repository_boundary as filesystem
 
@@ -148,6 +153,21 @@ def run(fixtures=FIXTURES):
                 finally:
                     path.write_text(json.dumps(original), encoding="utf-8")
             evidence["rehashed_contradictions_rejected"] = ["collision_created", "success_without_execution"]
+        finally:
+            instance.close()
+        (root / "README.md").write_bytes(b"original")
+        source = resolver("mixed", fixtures)
+        instance = Guard.local(repository_root=root, workspace=root / "modify-evidence",
+            authority=next(iter(source.entries)), authority_resolver=source,
+            actor_identity={"id": "acceptance-reviewer", "type": "agent", "role": "security-reviewer"})
+        try:
+            @instance.repository_tool(target="path", action="modify", return_result=True)
+            def modify(path):
+                return path.write_bytes(b"reviewed modification")
+            result = modify("README.md")
+            assert result["executed"] and (root / "README.md").read_bytes() == b"reviewed modification"
+            evidence["modification"] = instance.store.load_run(result["evaluation"]["run_id"])
+            assert instance.store.replay(result["evaluation"]["run_id"])["matches"]
         finally:
             instance.close()
     return evidence

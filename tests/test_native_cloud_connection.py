@@ -14,12 +14,15 @@ from tools.acceptance.action_policy_creation import FIXTURES, resolver
 from test_cloud_publication_resolver import _serve, _rehash
 
 
+VERSION = "2.0.0"
+native = pytest.mark.usefixtures("native_generation")
+
 development = pytest.mark.skipif(os.environ.get("WAVEFRAME_GUARD_ACTION_POLICY_DEV") != "1",
                                reason="requires explicit action policy development environment")
 
 
 def publication(kind="create-only"):
-    entry = resolver(kind).resolve(f"repository-{kind}@2.0.0")
+    entry = resolver(kind).resolve(f"repository-{kind}@{VERSION}")
     registry = {key: getattr(entry, key) for key in (
         "authority_ref", "contract_id", "contract_version", "contract_hash", "publication_id",
         "bundle_ref", "bundle_hash", "receipt_ref", "receipt_hash", "lifecycle_state", "published_at", "published_by")}
@@ -39,10 +42,14 @@ class Response:
 
 
 @pytest.fixture
-def connected(tmp_path, monkeypatch):
-    state = {"publication_body": json.dumps(publication()).encode()}
+def connected(tmp_path, monkeypatch, request):
+    if request.node.get_closest_marker("usefixtures"):
+        request.getfixturevalue("native_generation")
+    state = {"publication_body": json.dumps(publication()).encode(),
+             "post_response": {"package_id": "package", "receipt_id": "receipt", "sha256": "hash", "timestamp": "now"}}
     server, url = _serve(state)
     calls, instances = [], []
+    original_post = requests.post
     def post(url, **kwargs):
         calls.append((url, deepcopy(kwargs["json"])))
         assert kwargs["allow_redirects"] is False
@@ -50,12 +57,11 @@ def connected(tmp_path, monkeypatch):
         if fault:
             if isinstance(fault, Exception):
                 raise fault
-            return Response({"error": "rejected"}, fault)
-        return Response({"package_id": "package", "receipt_id": "receipt", "sha256": "hash", "timestamp": "now"})
+        return original_post(url, **kwargs)
     monkeypatch.setattr(requests, "post", post)
     (tmp_path / "generated").mkdir()
     def make(**kwargs):
-        options = dict(authority="repository-create-only@2.0.0", workspace=tmp_path / "evidence",
+        options = dict(authority=f"repository-create-only@{VERSION}", workspace=tmp_path / "evidence",
             repository_root=tmp_path, cloud_url=url, cloud_organization_id="test-org", runtime_id="assigned-runtime",
             runtime_credential="disposable-secret", actor_identity={"id": "actor", "type": "agent", "role": "repository-maintainer"})
         options.update(kwargs)
@@ -74,7 +80,7 @@ def request(path="generated/new.md"):
             "action": "create", "target": path, "arguments": {}, "artifacts": []}
 
 
-@development
+@native
 @pytest.mark.parametrize("case,status,mutation", [
     ("created", "succeeded", True), ("empty", "succeeded", True),
     ("collision", "failed", False), ("partial", "failed", True),
@@ -141,7 +147,7 @@ def test_automatic_reports_use_validated_operation(connected, case, status, muta
         assert proof["mutation_executed"] is None  # Historical local proof is unchanged.
 
 
-@development
+@native
 @pytest.mark.parametrize("field,value", [("runtime_id", "other"), ("organization_id", "other"), ("runtime_id", None)])
 @pytest.mark.parametrize("boundary", ["configuration", "boundary", "call"])
 def test_identity_overrides_fail_before_saved_run(connected, field, value, boundary):
@@ -159,7 +165,7 @@ def test_identity_overrides_fail_before_saved_run(connected, field, value, bound
     assert not any(url.endswith(("/preserve", "/attestations")) for url, _ in calls)
 
 
-@development
+@native
 @pytest.mark.parametrize("endpoint", ["preserve", "report"])
 @pytest.mark.parametrize("fault", [403, 503, 307, requests.Timeout("uncertain"), RuntimeError("secret must not escape")])
 @pytest.mark.parametrize("raises", [False, True])
@@ -213,14 +219,14 @@ def test_published_ledger_cannot_activate_native_cloud_even_with_flags(connected
     assert calls == []
 
 
-@development
+@native
 @pytest.mark.parametrize("change", ["tenant", "authority", "bundle", "receipt", "mixed", "downgrade", "registry",
                                     "revoked", "superseded", "reference", "provenance"])
 def test_native_intake_rejects_tampering_even_with_outer_hashes(connected, change):
     make, state, calls, root = connected
     payload = publication()
     if change == "tenant": payload["organization_id"] = "other"
-    elif change == "authority": payload["authority_ref"] = "wrong@2.0.0"
+    elif change == "authority": payload["authority_ref"] = f"wrong@{VERSION}"
     elif change == "bundle": payload["authority_bundle"]["compiled_authority_contract"]["action_requirements"]["create"]["required_role"] = None
     elif change == "receipt": payload["publication_receipt"]["publication_id"] = "wrong"
     elif change == "mixed": payload["publication_receipt"] = publication("mixed")["publication_receipt"]
@@ -238,7 +244,7 @@ def test_native_intake_rejects_tampering_even_with_outer_hashes(connected, chang
     assert not any(item["path"].startswith("/v1/contracts/") for item in state["requests"])
 
 
-@development
+@native
 def test_no_terminal_report_and_malformed_request(connected):
     make, state, calls, root = connected
     instance = make()
@@ -251,7 +257,7 @@ def test_no_terminal_report_and_malformed_request(connected):
     assert len(calls) == before
 
 
-@development
+@native
 def test_required_dependency_api_and_warm_identity_rejection(connected, monkeypatch):
     import governance_ledger
     make, state, calls, root = connected
@@ -287,7 +293,7 @@ def test_native_cloud_cache_revalidates_resolution(connected, monkeypatch, chang
             load_authority(instance.default_authority_ref, resolver=source, cache=cache)
 
 
-@development
+@native
 def test_generic_boundary_cannot_ignore_identity_override(connected):
     make, state, calls, root = connected
     instance = make()
@@ -297,7 +303,7 @@ def test_generic_boundary_cannot_ignore_identity_override(connected):
     assert not any(url.endswith("/preserve") for url, _ in calls)
 
 
-@development
+@native
 def test_matching_per_call_identity_and_other_context_are_saved(connected):
     make, state, calls, root = connected
     instance = make()
