@@ -34,7 +34,7 @@ def summarize(path, *, require_release=True):
     cases = ET.parse(path).findall(".//testcase")
     release = [c for c in cases if "[release" in c.get("name", "") or c.get("classname", "").endswith("test_release_catalog")]
     if require_release:
-        assert len(release) >= 100, len(release)
+        assert len(release) == 150, len(release)
         assert all(c.find("skipped") is None and c.find("failure") is None and c.find("error") is None for c in release)
     summary = {"cases": len(cases), "release_executed": sum(c.find("skipped") is None for c in release),
         "skips": [{"case": c.get("classname") + "." + c.get("name"), "reason": c.find("skipped").get("message")}
@@ -65,8 +65,11 @@ def main():
                   "clean_tracked_checkout": True}
         (output / "build-provenance.json").write_text(json.dumps(record, indent=2) + "\n")
         with (output / "build.log").open("w", encoding="utf-8") as log:
-            subprocess.run([sys.executable, "-m", "build", "--outdir", str(output)], cwd=source,
-                           stdout=log, stderr=subprocess.STDOUT, check=True)
+            built = subprocess.run([sys.executable, "-m", "build", "--outdir", str(output)], cwd=source,
+                                   stdout=log, stderr=subprocess.STDOUT)
+        record["build_exit_code"] = built.returncode
+        (output / "build-provenance.json").write_text(json.dumps(record, indent=2) + "\n")
+        built.check_returncode()
         wheel, sdist = next(output.glob("*.whl")), next(output.glob("*.tar.gz"))
         package_acceptance._inspect_wheel(wheel, "0.19.0")
         package_acceptance._inspect_sdist(sdist, "0.19.0")
@@ -91,6 +94,7 @@ def main():
         requirements = ["-r", ROOT / ".github/requirements/action-policy-release.txt"]
         run([python, "-m", "pip", "install", f"{wheel}[test]", *requirements,
              "--report", output / f"{profile}-install.json"], isolated, env)
+        run([python, "tools/acceptance/candidate_provenance.py", "--output", output / "installed-dependencies.json"], isolated, env)
         checked = subprocess.check_output([str(python), "-m", "pip", "check"], cwd=isolated, env=env).decode()
         (output / f"{profile}-pip-check.txt").write_text(checked)
         probe_env = dict(env, GUARD_EXPECTED_VERSION="0.19.0", GUARD_REPOSITORY_ROOT=str(ROOT))

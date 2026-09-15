@@ -45,12 +45,13 @@ def main():
         venv.EnvBuilder(with_pip=True).create(client_env)
         client_python = python_at(client_env)
         run([client_python, "-m", "pip", "install", args.wheel.resolve(), "-r",
-             ROOT / ".github/requirements/action-policy-release.txt"], scratch)
+             ROOT / ".github/requirements/action-policy-release.txt", "--report", output / "client-install.json"], scratch)
+        run([client_python, "-I", ROOT / "tools/acceptance/candidate_provenance.py", "--output", output / "client-dependencies.json"], scratch)
         server_python = args.server_python.resolve() if args.server_python else python_at(scratch / "server")
         if not args.server_python:
             server_base = args.server_base_python.resolve() if args.server_base_python else Path(sys.executable)
             run([server_base, "-m", "venv", scratch / "server"], scratch)
-            run([server_python, "-m", "pip", "install", "-r", cloud / "requirements-action-policy-dev.txt"], scratch)
+            run([server_python, "-m", "pip", "install", "-r", cloud / "requirements-action-policy-dev.txt", "--report", output / "server-install.json"], scratch)
         for name, python in (("client", client_python), ("server", server_python)):
             checked = subprocess.check_output([str(python), "-m", "pip", "check"], cwd=scratch).decode()
             (output / (name + "-pip-check.txt")).write_text(checked, encoding="utf-8")

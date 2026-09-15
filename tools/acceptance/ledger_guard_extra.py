@@ -1,174 +1,238 @@
-"""Run Ledger's unchanged combined gate and a separate real Guard-entry upgrade.
+"""Run Ledger #26's unchanged packaged suites against Guard's current clean wheel.
 
-All source checkouts are validation-only. Reports survive a dependency-tool failure.
+Guard authenticates its own build. Ledger's fixed old-Guard verifier and historical
+verified-inputs records are neither invoked nor altered by this coordinator.
 """
 import argparse
 import hashlib
 import json
 import os
 from pathlib import Path
-import platform
+import shutil
 import subprocess
 import sys
+import tarfile
 import urllib.request
-import venv
 import zipfile
 
-LEDGER = "3cc34e7b3cb6efca5102e0e22d559ec0c0fd583f"
-EVIDENCE = "44552c3fbedfffcc480c294d0b381eaecbc5017d"
+ROOT = Path(__file__).resolve().parents[2]
+BASE = "0161ef8a52e052d1bc1366cdc93ce13a9bd535ed"
+LEDGER = "a34c11d81b85963794cf28b4adad091fac15e130"
+COMPILER = "ae590dee058d3481e384dea850d5b7d980f533ff"
+EVIDENCE = "46cd4c5a9a2c17e2367d64b56803df92de69d8b3"
 URL = f"https://raw.githubusercontent.com/Waveframe-Labs/Waveframe-Ledger/{EVIDENCE}/"
-
-# find-links selections are not direct requirements: pip records their archive
-# origin in the install report rather than necessarily emitting PEP 610 metadata.
-UPGRADE_PROBE = r'''
-import hashlib, importlib, json, sys, zipfile
-from importlib.metadata import distribution
-from pathlib import Path
-expected = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
-report = json.loads(Path(sys.argv[2]).read_text(encoding="utf-8"))
-result = {}
-for name, version, module in (("governance-ledger", "0.9.0", "governance_ledger"),
-                             ("cricore-contract-compiler", "0.5.0", "compiler"),
-                             ("waveframe-guard", "0.19.0", "waveframe_guard")):
-    dist = distribution(name)
-    assert dist.version == version
-    imported = importlib.import_module(module)
-    path = Path(imported.__file__).resolve()
-    assert path.is_relative_to(Path(sys.prefix).resolve())
-    if name == "waveframe-guard":
-        assert imported.__version__ == version
-    wheel, = [Path(p) for p in expected["wheels"] if Path(p).name.startswith(name.replace("-", "_") + "-")]
-    digest = hashlib.sha256(wheel.read_bytes()).hexdigest()
-    install, = [i for i in report["install"] if i["metadata"]["name"].replace("_", "-") == name]
-    archive_info = install["download_info"]["archive_info"]
-    installed_digest = archive_info.get("hashes", {}).get("sha256")
-    if installed_digest is None:
-        installed_digest = archive_info.get("hash", "").removeprefix("sha256=")
-    assert installed_digest == digest
-    checked = {}
-    with zipfile.ZipFile(wheel) as archive:
-        for member in archive.namelist():
-            if member.endswith(".py"):
-                data = archive.read(member)
-                assert Path(dist.locate_file(member)).read_bytes() == data
-                checked[member] = hashlib.sha256(data).hexdigest()
-    result[name] = {"version": version, "module_path": str(path), "wheel_sha256": digest,
-                    "installer_origin": install["download_info"], "python_sha256": checked}
-print(json.dumps(result, indent=2))
-'''
 
 
 def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def read(path):
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def write(path, value):
+    path.write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")
+
+
+def runtime_bytes(wheel, prefixes):
+    with zipfile.ZipFile(wheel) as archive:
+        return {n: hashlib.sha256(archive.read(n)).hexdigest() for n in archive.namelist()
+                if n.startswith(prefixes) and not n.endswith("/")}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--ledger-source", type=Path, required=True)
     parser.add_argument("--guard-candidate", type=Path, required=True)
+    parser.add_argument("--dependency-snapshot", type=Path, action="append", default=[])
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     source, output = args.ledger_source.resolve(), args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
-    report = {"python": sys.version, "platform": platform.platform(), "ledger_head": LEDGER,
-              "base_evidence_commit": EVIDENCE, "commands": [], "release_ready": False}
+    report = {"ledger_head": LEDGER, "compiler_head": COMPILER, "guard_base": BASE,
+              "ledger_evidence_commit": EVIDENCE, "commands": [], "status": "incomplete",
+              "release_ready": False}
+    gate = None
 
     def save():
-        (output / "guard-coordination.json").write_text(json.dumps(report, indent=2) + "\n")
+        write(output / "guard-coordination.json", report)
 
-    def run(label, command, cwd=source, check=True, env=None):
-        command = list(map(str, command))
-        with (output / f"{label}.log").open("w", encoding="utf-8") as log:
-            result = subprocess.run(command, cwd=cwd, stdout=log, stderr=subprocess.STDOUT, env=env)
-        report["commands"].append({"label": label, "command": command, "cwd": str(cwd), "exit_code": result.returncode})
+    def git(label, cwd, *command):
+        result = subprocess.run(["git", *command], cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        (output / f"{label}.log").write_bytes(result.stdout)
+        report["commands"].append({"label": label, "command": ["git", *command],
+                                   "cwd": str(cwd), "exit_code": result.returncode})
         save()
-        if check and result.returncode:
-            raise RuntimeError(f"{label} failed: see {output / (label + '.log')}")
-        return result.returncode
+        assert result.returncode == 0, label
+        return result.stdout
 
-    assert subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=source).decode().strip() == LEDGER
-    assert not subprocess.check_output(["git", "status", "--porcelain", "--untracked-files=no"], cwd=source).strip()
-    cell = ("windows" if os.name == "nt" else "ubuntu") + f"-{sys.version_info.major}.{sys.version_info.minor}"
-    handoff_path = output / "ledger-base-handoff.json"
-    urllib.request.urlretrieve(URL + "handoff.json", handoff_path)
-    cell_record = json.loads(handoff_path.read_text())["environments"][cell]
-    archive = output / "retained-ledger-base.zip"
-    urllib.request.urlretrieve(URL + cell_record["durable_archive"], archive)
-    assert digest(archive) == cell_record["durable_archive_sha256"]
-    report["retained_base_archive_sha256"] = digest(archive)
-    base = output / "retained-base"
-    with zipfile.ZipFile(archive) as packed:
-        packed.extractall(base)
-    base = next(base.rglob("acceptance.json")).parent
-    original = json.loads((base / "acceptance.json").read_text())
-    report["original_base_python"] = original["python"]
-    if original["python"].split()[0] != sys.version.split()[0]:
-        base = output / "fresh-base"
-        run("fresh-base", [sys.executable, "tools/run_action_policy_acceptance.py", "--expected-head", LEDGER, "--output", base])
-    report["matching_base"] = str(base)
-    manifest_path = args.guard_candidate.resolve()
-    combined = output / "combined"
-    result = run("supplied-combined", [sys.executable, "tools/run_guard_extra_acceptance.py", "--expected-head", LEDGER,
-                 "--base-evidence", base, "--guard-candidate", manifest_path, "--output", combined], check=False)
-    report["combined_exit_code"] = result
-    # The supplied entry point stops at the first failed suite. Preserve that
-    # failed gate and run its remaining unchanged probes as supplemental evidence.
-    support = combined / "installed-support"
-    combined_python = combined / "combined-extra" / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
-    if result and combined_python.exists():
-        probe_env = os.environ.copy()
-        for key in ("PYTHONPATH", "WAVEFRAME_GUARD_ACTION_POLICY_DEV", "WAVEFRAME_LEDGER_ACTION_POLICY_DEV"):
-            probe_env.pop(key, None)
-        probe_env.update(PYTHONUTF8="1", LEDGER_EXPECT_IMPORT_ROOT=str(combined_python.parent.parent),
-                         LEDGER_IMPORT_REPORT=str(output / "supplemental-native-imports.json"),
-                         WAVEFRAME_LEDGER_TEST_WHEEL=str(combined / "wheelhouse/governance_ledger-0.9.0-py3-none-any.whl"))
-        native_env = dict(probe_env, WAVEFRAME_LEDGER_ACTION_POLICY_DEV="1")
-        report["supplemental_probes"] = {}
-        probes = [
-            ("native-suite", [support / "tools/acceptance_pytest.py", "-q", "-ra", "--junitxml",
-                              output / "supplemental-native.xml", "tests"], native_env),
-            ("release-package", [support / "tools/check_release_catalog_package.py"], probe_env),
-            ("development-package", [support / "tools/check_action_policy_package.py"], native_env),
-            ("legacy-example", [support / "examples/native_v3_multi_control.py", "--candidate"], probe_env),
-            ("catalog-3-execution", [support / "tools/check_guard_release_execution.py"], probe_env),
-        ]
-        for label, command, env in probes:
-            report["supplemental_probes"][label] = run("supplemental-" + label,
-                [combined_python, "-I", *command], support, check=False, env=env)
+    try:
+        assert git("ledger-head", source, "rev-parse", "HEAD").decode().strip() == LEDGER
+        assert not git("ledger-clean", source, "status", "--porcelain", "--untracked-files=no").strip()
+        head = git("guard-head", ROOT, "rev-parse", "HEAD").decode().strip()
+        assert not git("guard-clean", ROOT, "status", "--porcelain", "--untracked-files=no").strip()
+        git("guard-stack", ROOT, "merge-base", "--is-ancestor", BASE, head)
+        report["guard_head"] = head
+        manifest_path = args.guard_candidate.resolve()
+        manifest = read(manifest_path)
+        assert manifest["source_commit"] == head
+        assert manifest["source_url"] == "https://github.com/Waveframe-Labs/Waveframe-Guard"
+        guard = manifest_path.parent / manifest["wheel"]
+        assert guard.name == "waveframe_guard-0.19.0-py3-none-any.whl"
+        assert digest(guard) == manifest["wheel_sha256"]
+        build = read(manifest_path.parent / "build-provenance.json")
+        assert build["source_commit"] == head and build["clean_tracked_checkout"]
+        assert build["build_exit_code"] == 0
+        tracked = git("guard-build-inputs", ROOT, "ls-files", "-z").decode().split("\0")
+        assert build["tracked_files_sha256"] == {n: digest(ROOT / n) for n in tracked if n}
+        for filename, expected in read(manifest_path.parent / "package-hashes.json").items():
+            assert digest(manifest_path.parent / filename) == expected
+        report["guard_candidate"] = manifest
+        report["guard_build_provenance_sha256"] = digest(manifest_path.parent / "build-provenance.json")
+
+        # The immutable handoff and its independent checksum index bind the entire
+        # retained archive. Its old Guard evidence stays labeled as historical.
+        for name in ("handoff.json", "SHA256SUMS"):
+            urllib.request.urlretrieve(URL + name, output / ("ledger-" + name))
+        handoff = read(output / "ledger-handoff.json")
+        assert handoff["head"] == LEDGER and handoff["compiler_head"] == COMPILER
+        checksums = {name: sha for sha, name in (line.split("  ", 1)
+                     for line in (output / "ledger-SHA256SUMS").read_text().splitlines())}
+        assert digest(output / "ledger-handoff.json") == checksums["handoff.json"]
+        cell = ("windows" if os.name == "nt" else "ubuntu") + f"-{sys.version_info.major}.{sys.version_info.minor}"
+        selected = handoff["cells"][cell]
+        archive = output / "retained-ledger.zip"
+        urllib.request.urlretrieve(URL + selected["archive"], archive)
+        assert digest(archive) == handoff["archive_sha256"][selected["archive"]] == checksums[selected["archive"]]
+        report["archive_origin"] = {"url": URL + selected["archive"], "sha256": digest(archive), "cell": cell}
+        retained = output / "retained-ledger"
+        with zipfile.ZipFile(archive) as packed:
+            for name in packed.namelist():
+                path = Path(name)
+                assert not path.is_absolute() and ".." not in path.parts
+            packed.extractall(retained)
+        base_path = retained / "issue25-base"
+        base = read(base_path / "acceptance.json")
+        assert base["head"] == base["expected_head"] == LEDGER
+        assert base["gates"]["base"] == "passed"
+        report["historical_base"] = {"python": base["python"], "platform": base["platform"],
+            "acceptance_sha256": digest(base_path / "acceptance.json"),
+            "scope": "retained Ledger base evidence; current interpreter suites execute below"}
+        compiler_build = base["compiler_wheel"]
+        assert compiler_build["origin"]["vcs_info"]["commit_id"] == COMPILER
+        report["compiler_build"] = compiler_build
+        wheelhouse = output / "wheelhouse"
+        wheelhouse.mkdir()
+        for name, expected in base["package_sha256"].items():
+            package = base_path / "dist" / name
+            assert digest(package) == expected == selected["package_sha256"][name]
+            shutil.copyfile(package, wheelhouse / name)
+        compiler = base_path / compiler_build["filename"]
+        assert digest(compiler) == compiler_build["sha256"] == selected["package_sha256"][compiler.name]
+        shutil.copyfile(compiler, wheelhouse / compiler.name)
+        compiler = wheelhouse / compiler.name
+        shutil.copyfile(guard, wheelhouse / guard.name)
+        guard = wheelhouse / guard.name
+        ledger = wheelhouse / "governance_ledger-0.9.0-py3-none-any.whl"
+        report["package_sha256"] = {p.name: digest(p) for p in wheelhouse.iterdir()}
+
+        # Restore only the authenticated sdist support files. Import Acceptance
+        # from here so its ROOT/default cwd/constraints point outside the checkout.
+        support = output / "installed-support"
+        support.mkdir()
+        with tarfile.open(wheelhouse / "governance_ledger-0.9.0.tar.gz") as packed:
+            for member in packed.getmembers():
+                if not member.isfile():
+                    continue
+                path = Path(*Path(member.name).parts[1:])
+                assert path.parts and not path.is_absolute() and ".." not in path.parts
+                if path.parts[0] in {"tests", "schemas", "examples", "tools", "docs"} or len(path.parts) == 1:
+                    target = support / path
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    target.write_bytes(packed.extractfile(member).read())
+        for name, expected in base["sdist_resource_sha256"].items():
+            assert digest(support / name) == expected
+        assert not (support / "governance_ledger").exists()
+        (support / "runtime").mkdir()
+        report["packaged_support_sha256"] = base["sdist_resource_sha256"]
+        sys.path.insert(0, str(support / "tools"))
+        from run_action_policy_acceptance import Acceptance
+        gate = Acceptance(output / "combined")
+        gate.report.update(head=head, ledger_head=LEDGER, guard_candidate=manifest,
+                           archive_origin=report["archive_origin"])
+        gate.report["gates"] = {"combined_extra": "incomplete"}
+        gate.env["WAVEFRAME_LEDGER_TEST_WHEEL"] = str(ledger)
+        python = gate.environment("combined-extra", "--find-links", wheelhouse, f"{ledger}[dev,guard]")
+        expected = gate.archive_expectations("combined-extra", compiler, compiler_build,
+            {"governance-ledger": ledger, "waveframe-guard": guard})
+        gate.probe(python, support, "combined-provenance", "check_installed_wheel_set.py", expected)
+        gate.suites(python, support, "combined-extra", installed=True, guard=True)
+        for mode, passed, skipped in (("default", 678, 44), ("native", 722, 0)):
+            counts = gate.report["suites"]["combined-extra-" + mode]
+            assert counts["passed"] == passed and counts["skipped"] == skipped, counts
+        gate.probe(python, support, "release-package", "check_release_catalog_package.py")
+        gate.probe(python, support, "development-package", "check_action_policy_package.py", native=True)
+        gate.run("legacy-v3-example", python, "-I", support / "examples/native_v3_multi_control.py", "--candidate", cwd=support)
+        probes = gate.probe(python, support, "catalog-3-execution", "check_guard_release_execution.py")
+        assert len(probes["cases"]) == 56
+        gate.report["catalog_3_execution_cases"] = len(probes["cases"])
+        gate.env.pop("LEDGER_ARCHIVE_EXPECTATIONS", None)
+        for version in ("0.7.0", "0.8.0"):
+            failure = gate.run("reject-old-ledger-" + version, python, "-m", "pip", "install", "--dry-run",
+                guard, f"governance-ledger=={version}", compiler, negative=True)
+            assert "ResolutionImpossible" in failure
+        upgrade = gate.environment("guard-entry", "governance-ledger==0.8.0",
+                                   "waveframe-guard==0.18.0", "cricore-contract-compiler==0.4.0")
+        gate.run("guard-entry-upgrade", upgrade, "-m", "pip", "install", "--upgrade",
+                 "--find-links", wheelhouse, guard, "--report", gate.output / "guard-entry-install.json")
+        gate.run("guard-entry-upgrade-check", upgrade, "-m", "pip", "check")
+        expected = gate.archive_expectations("guard-entry", compiler, compiler_build,
+            {"governance-ledger": ledger, "waveframe-guard": guard})
+        gate.probe(upgrade, support, "guard-entry-provenance", "check_installed_wheel_set.py", expected)
+        gate.probe(upgrade, support, "guard-entry-catalog-3", "check_guard_release_execution.py")
+
+        # Source-built dependency checks remain separate, with exact runtime and
+        # resource equivalence to the accepted archives used by the full gate.
+        report["source_archive_equivalence"] = {}
+        for snapshot in args.dependency_snapshot:
+            current = read(snapshot)
+            for name, wheel, prefix, commit in (("governance-ledger", ledger, "governance_ledger/", LEDGER),
+                                                ("cricore-contract-compiler", compiler, "compiler/", COMPILER)):
+                item = current["distributions"][name]
+                assert item["origin"]["vcs_info"]["commit_id"] == commit
+                assert item["runtime_sha256"] == runtime_bytes(wheel, (prefix,)), (snapshot, name)
+            report["source_archive_equivalence"][str(snapshot)] = {"sha256": digest(snapshot), "runtime_resources_equal": True}
+
+        old_guard = retained / "issue25-combined/wheelhouse" / guard.name
+        assert digest(old_guard) == selected["guard_manifest"]["wheel_sha256"]
+        unchanged = runtime_bytes(guard, ("guard/", "waveframe_guard/"))
+        assert unchanged == runtime_bytes(old_guard, ("guard/", "waveframe_guard/"))
+        git("mount-input-equivalence", ROOT, "diff", "--exit-code", BASE, "HEAD", "--",
+            "guard", "waveframe_guard", "tests", "contracts", "pyproject.toml")
+        report["mount_equivalence"] = {"historical_guard_head": BASE,
+            "historical_cell_wheel_sha256": digest(old_guard), "current_wheel_sha256": digest(guard),
+            "runtime_sha256": unchanged,
+            "retained_mount_evidence_commit": "e6008345c9891ec6ffb5088f38177022e3cef4aa",
+            "actually_mount_tested_wheel_sha256": "2b78374416635ca551ee5470fcd1e9e390d3f08141a53c91bcba7d42516b046e",
+            "scope": "#51 Linux/Python 3.14 real same-device bind-mount proof; identical Guard runtime and mount-test inputs. Ledger #26 changes CLI/legacy mediation, not Guard filesystem enforcement. This current wheel was not newly mount-tested."}
+        assert git("final-guard-head", ROOT, "rev-parse", "HEAD").decode().strip() == head
+        assert not git("final-guard-clean", ROOT, "status", "--porcelain", "--untracked-files=no").strip()
+        assert not git("final-ledger-clean", source, "status", "--porcelain", "--untracked-files=no").strip()
+        gate.report.update(status="combined-extra-passed", combined_extra={"status": "passed", "executed": True})
+        gate.report["gates"]["combined_extra"] = "passed"
+        gate.save()
+        report.update(status="passed", guard_entry_upgrade="passed", old_ledger_resolver_rejection="passed")
+    except BaseException as exc:
+        report.update(status="failed", error=str(exc))
+        if gate is not None:
+            gate.report.update(status="failed", error=str(exc))
+            gate.report["gates"]["combined_extra"] = "failed"
+            gate.save()
+        raise
+    finally:
         save()
-    # This independent check remains useful even when the supplied combined tool fails.
-    base_record = json.loads((base / "acceptance.json").read_text())
-    ledger = base / "dist/governance_ledger-0.9.0-py3-none-any.whl"
-    compiler = base / base_record["compiler_wheel"]["filename"]
-    manifest = json.loads(manifest_path.read_text())
-    guard = manifest_path.parent / manifest["wheel"]
-    assert digest(guard) == manifest["wheel_sha256"]
-    assert digest(ledger) == base_record["package_sha256"][ledger.name]
-    assert digest(compiler) == base_record["compiler_wheel"]["sha256"]
-    environment = output / "upgrade-environment"
-    venv.EnvBuilder(with_pip=True).create(environment)
-    python = environment / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
-    work = output / "upgrade-work"
-    work.mkdir()
-    run("old-ledger-install", [python, "-m", "pip", "install", "governance-ledger==0.8.0", "--report", output / "old-install.json"], work)
-    run("old-ledger-version", [python, "-I", "-c", "from importlib.metadata import version; assert version('governance-ledger') == '0.8.0'"], work)
-    rejected = run("old-ledger-rejected", [python, "-m", "pip", "install", "--dry-run", "--ignore-installed",
-                   guard, "governance-ledger==0.8.0"], work, check=False)
-    assert rejected and "ResolutionImpossible" in (output / "old-ledger-rejected.log").read_text()
-    run("guard-entry-upgrade", [python, "-m", "pip", "install", guard, "--find-links", ledger.parent,
-                               "--find-links", compiler.parent, "--report", output / "upgrade-install.json"], work)
-    run("upgrade-pip-check", [python, "-m", "pip", "check"], work)
-    expected = output / "upgrade-wheels.json"
-    expected.write_text(json.dumps({"wheels": list(map(str, (ledger, compiler, guard)))}))
-    run("upgrade-installed-bytes", [python, "-I", "-c", UPGRADE_PROBE, expected, output / "upgrade-install.json"], work)
-    report["guard_entry_upgrade"] = "passed"
-    report["old_ledger_resolver_rejection"] = "passed"
-    report["dependency_tracked_tree_clean"] = not subprocess.check_output(
-        ["git", "status", "--porcelain", "--untracked-files=no"], cwd=source).strip()
-    assert report["dependency_tracked_tree_clean"]
-    save()
-    return result
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()

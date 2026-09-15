@@ -2,7 +2,7 @@ name: Action policy release and development acceptance
 
 on:
   pull_request:
-    branches: [main, feat/36-workspace-file-creation, feat/46-native-cloud-connection, feat/48-release-catalog-3]
+    branches: [main, feat/36-workspace-file-creation, feat/46-native-cloud-connection, feat/48-release-catalog-3, feat/50-guard-019-release]
   workflow_dispatch:
 
 permissions:
@@ -24,6 +24,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         id: sdk-python
@@ -39,19 +40,23 @@ jobs:
         run: python -m pytest -q --junitxml=acceptance-output/default.xml
       - name: Require every release source case
         run: python -c "from pathlib import Path; from tools.acceptance.release_catalog_package import summarize; summarize(Path('acceptance-output/default.xml'))"
+      - name: Record source dependency bytes
+        run: python tools/acceptance/candidate_provenance.py --output acceptance-output/source-dependencies.json
       - name: Run opted-in full suite
         env:
           WAVEFRAME_GUARD_ACTION_POLICY_DEV: "1"
           WAVEFRAME_LEDGER_ACTION_POLICY_DEV: "1"
         run: python -m pytest -q --junitxml=acceptance-output/development.xml
+      - name: Require every development-mode release source case
+        run: python -c "from pathlib import Path; from tools.acceptance.release_catalog_package import summarize; summarize(Path('acceptance-output/development.xml'))"
       - name: Verify fresh distributions and installed-wheel creation
         run: python tools/acceptance/release_catalog_package.py --output acceptance-output/package
       - name: Check out exact Ledger acceptance tools
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: Waveframe-Labs/Waveframe-Ledger
-          ref: 3cc34e7b3cb6efca5102e0e22d559ec0c0fd583f
-          path: .candidate50/ledger
+          ref: a34c11d81b85963794cf28b4adad091fac15e130
+          path: .candidate52/ledger
           persist-credentials: false
       - name: Fetch authorized private Cloud test dependency
         if: env.CLOUD_TEST_ACCESS == 'true'
@@ -76,12 +81,12 @@ jobs:
         run: python -c "import os,subprocess; subprocess.run([os.environ['SDK_PYTHON'], 'tools/acceptance/native_cloud_package.py', '--wheel', 'acceptance-output/package/waveframe_guard-0.19.0-py3-none-any.whl', '--output', 'acceptance-output/connected', '--cloud-source', '.cloud-test-source', '--server-base-python', os.environ['CLOUD_PYTHON']], check=True)"
       - name: Record private test dependency availability
         if: env.CLOUD_TEST_ACCESS != 'true'
-        run: python -c "from pathlib import Path; Path('acceptance-output/connected-ci-unavailable.txt').write_text('Connected CI requires read-only CLOUD_TEST_READ_TOKEN access to the pinned private Cloud test dependency. Run native_cloud_package.py in an authorized environment. This job does not claim real-server acceptance.\n')"
-      - name: Run supplied Ledger combined-extra and Guard-entry upgrade gates
+        run: python -c "from pathlib import Path; Path('acceptance-output/connected-ci-unavailable.txt').write_text('Connected CI requires read-only CLOUD_TEST_READ_TOKEN access to the pinned private Cloud test dependency. Run native_cloud_package.py in an authorized environment. This job does not claim real-server acceptance.\n'); raise SystemExit(1)"
+      - name: Run unchanged packaged Ledger suites with current Guard and Guard-entry upgrade
         if: ${{ !cancelled() }}
         env:
           SDK_PYTHON: ${{ steps.sdk-python.outputs.python-path }}
-        run: python -c "import os,subprocess; subprocess.run([os.environ['SDK_PYTHON'], 'tools/acceptance/ledger_guard_extra.py', '--ledger-source', '.candidate50/ledger', '--guard-candidate', 'acceptance-output/package/guard-candidate.json', '--output', 'acceptance-output/ledger-extra'], check=True)"
+        run: python -c "import os,subprocess; subprocess.run([os.environ['SDK_PYTHON'], 'tools/acceptance/ledger_guard_extra.py', '--ledger-source', '.candidate52/ledger', '--guard-candidate', 'acceptance-output/package/guard-candidate.json', '--output', 'acceptance-output/ledger-extra', '--dependency-snapshot', 'acceptance-output/source-dependencies.json', '--dependency-snapshot', 'acceptance-output/package/installed-dependencies.json', '--dependency-snapshot', 'acceptance-output/connected/client-dependencies.json'], check=True)"
       - name: Retain exact-run acceptance evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -91,7 +96,4 @@ jobs:
           path: |
             acceptance-output/
             !acceptance-output/ledger-extra/combined/combined-extra/
-            !acceptance-output/ledger-extra/upgrade-environment/
-            !acceptance-output/ledger-extra/fresh-base/source/
-            !acceptance-output/ledger-extra/fresh-base/installed/
-            !acceptance-output/ledger-extra/fresh-base/historical-*/
+            !acceptance-output/ledger-extra/combined/guard-entry/

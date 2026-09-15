@@ -1,8 +1,8 @@
 # Guard 0.19.0 candidate acceptance
 
-Issue #50 prepares an unreleased candidate, proposed tag `v0.19.0`. The draft
-stacks on `feat/48-release-catalog-3` at
-`473422b1220fa621cb7895d54f1e18e72ffaba58`, preserving PRs #45/#47/#49.
+Issue #52 validates the final unreleased package set, proposed tag `v0.19.0`.
+The draft stacks on `feat/50-guard-019-release` at
+`0161ef8a52e052d1bc1366cdc93ce13a9bd535ed`, preserving PRs #45/#47/#49/#51.
 No release or activation is authorized by this acceptance.
 
 ## Exact inputs and metadata
@@ -14,7 +14,7 @@ Runtime metadata uses only ordinary version requirements:
 - `governance-ledger>=0.9.0,<0.10.0` (0.9.0).
 - `requests>=2.33.0,<3.0.0`.
 
-Ledger candidate: `3cc34e7b3cb6efca5102e0e22d559ec0c0fd583f`.
+Ledger candidate: `a34c11d81b85963794cf28b4adad091fac15e130`.
 Compiler candidate: `ae590dee058d3481e384dea850d5b7d980f533ff`, version 0.5.0.
 Test/dev Compiler range is `>=0.5.0,<0.6.0`, matching Ledger's runtime range.
 The action API remains mandatory. Development/acceptance Git pins appear only
@@ -41,26 +41,38 @@ wheel; ordinary resolver success must never conceal a Guard downgrade.
 
 ## Ledger's supplied combined extra
 
-Check out Ledger into `.candidate50/ledger` at the exact head above for validation
+Check out Ledger into `.candidate52/ledger` at the exact head above for validation
 only. Do not edit its tracked files. Run each Windows/Linux x Python 3.10/3.14 cell:
 
 ```text
-python tools/acceptance/ledger_guard_extra.py --ledger-source .candidate50/ledger --guard-candidate acceptance-output/package/guard-candidate.json --output acceptance-output/ledger-extra
+python tools/acceptance/ledger_guard_extra.py --ledger-source .candidate52/ledger --guard-candidate acceptance-output/package/guard-candidate.json --output acceptance-output/ledger-extra
 ```
 
-The wrapper verifies the matching archived base evidence from Ledger evidence
-commit `44552c3fbedfffcc480c294d0b381eaecbc5017d`. If interpreter patch versions
-differ, it reruns Ledger's unchanged `tools/run_action_policy_acceptance.py`.
-It invokes the unchanged `tools/run_guard_extra_acceptance.py` with exact head,
-base evidence, actual Guard wheel manifest and a fresh output directory.
-It separately installs published Ledger 0.8, demonstrates resolver rejection
-with the new wheel, then installs through the Guard entry point using the real
-local compatible archives. Installed-byte checks and pip's archive provenance verify
-all three distributions (the supplied checker for combined installs and the
-Guard checker for automatically resolved find-links upgrades). Failures retain exact command, output and exit status;
-a defect in a supplied tool is a pending owner gate, never an invented pass.
-Ledger's base evidence retains independent published old Guard/Ledger behavior.
-The current Guard wheel is never installed into those incompatible environments.
+The wrapper authenticates each environment's archive against both `handoff.json`
+and `SHA256SUMS` at Ledger evidence commit
+`46cd4c5a9a2c17e2367d64b56803df92de69d8b3`. It verifies the actual clean Guard head,
+tracked build inputs, successful build record and wheel/sdist hashes. It restores
+support files from the verified Ledger sdist, without Ledger checkout source,
+and uses the unchanged `Acceptance.suites`, probes, `check_installed_wheel_set.py`
+and `package_provenance.py`. All commands, output and nonzero producer statuses
+survive failures. The historical base interpreter remains identified separately.
+
+Ledger #26's `--verified-inputs` entry point deliberately authenticates Guard #51.
+Guard does not invoke or modify that fixed-input verifier, forge its manifest,
+or attribute its historical results to the new wheel. The current combined gate
+installs the accepted archives with ordinary resolution through Ledger `[guard]`,
+requires **678 passed / 44 skipped** default and **722 passed / 0 skipped** opted in,
+all 70 release and 44 development cases, all optional integrations, package checks,
+the mediated v3 example and all 56 real catalog-3 execution probes.
+
+The Guard-entry upgrade starts with published Guard 0.18 / Ledger 0.8 / Compiler
+0.4, installs the actual Guard wheel using the accepted compatible archives,
+checks all installed module/resource bytes and pip reports, and runs `pip check`.
+Ledger 0.7 and 0.8 resolver rejections must retain `ResolutionImpossible` reasons.
+No dependency bypasses or synthetic distributions are used. Source/installed and
+connected Guard checks may build dependencies from exact Git commits; CI supplies
+`--dependency-snapshot` for all three environments to verify their installed
+runtime/resources against the accepted archives and retain their separate origins.
 
 ## Provenance, history and retention
 
@@ -80,14 +92,16 @@ Ledger `54379d9c8044544fc1b8f32109bdfce35c1c6a05`, with original Compiler
 `40e0875ee9a973254bb3a4d0c228cad4fdce2bc0`. Original bytes and hashes are preserved
 separately from their reproduction using the current client candidates.
 
-The prior #49 final-evidence document and raw isolated mount logs belong to the
-prior head/wheel, SHA-256
-`e220fd198f9b2106243346b110aea21ace56164ec048d49fc177c55d06601bc0`.
-Retain these with the original wheel and environment/command provenance, plus a
-Git comparison showing unchanged filesystem code. They are not a new 0.19 mount
-run. If the complete original command cannot be recovered, the evidence index
-must explicitly retain that follow-up as a release gate. Every actual platform
-or mount-namespace skip is reported, not counted as acceptance.
+The reviewed #51 Linux/Python 3.14 same-device bind-mount run is retained at
+Guard evidence commit `e6008345c9891ec6ffb5088f38177022e3cef4aa`, including
+`artifacts/final-head-mount.zip`. Its exact tested wheel SHA-256 is
+`2b78374416635ca551ee5470fcd1e9e390d3f08141a53c91bcba7d42516b046e`.
+The wrapper compares all current Guard runtime bytes against #51 and requires
+unchanged runtime, tests, contracts and dependency metadata. Ledger #26 repairs
+CLI/legacy mediation and validation; Guard's filesystem enforcement is unchanged.
+This is scoped reuse of that proof, not a claim that the new wheel was mount-tested.
+Historical #49 evidence remains separately identified. Platform and namespace
+skips retain their actual meanings and are never counted as mount passes.
 
 ## Cloud and release handoff
 
@@ -106,3 +120,9 @@ artifacts and recheck index/tag availability. Publication order remains Compiler
 and `pip check`, then separately authorized Cloud rollout and customer activation.
 Do not advertise the new Ledger extra during the interval before Guard upload
 and verification. No merge, tag, publication, deployment or activation is performed.
+
+The PR's immutable evidence branch provides a single `package-set.json` for Cloud:
+exact Guard head/base and per-cell fresh Guard archives, accepted Ledger/Compiler
+archives and origins, checksum index, final-head CI results, all four Guard/combined
+matrices, 92 connected cases, and scoped retained mount evidence. Older #49/#51
+and Ledger #24 sets are historical inputs. `release_ready=false` remains mandatory.
