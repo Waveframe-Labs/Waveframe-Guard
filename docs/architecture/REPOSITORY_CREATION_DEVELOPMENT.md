@@ -4,6 +4,9 @@ Linux openat2 boundaries. Both `WAVEFRAME_GUARD_ACTION_POLICY_DEV=1` and
 `WAVEFRAME_LEDGER_ACTION_POLICY_DEV=1` must be set by the invoking process.
 Guard never changes Ledger's environment. Hosted activation is unavailable.
 
+The stacked issue #46 SDK connection to an explicitly opted-in development Cloud
+server is documented in [NATIVE_CLOUD_DEVELOPMENT.md](NATIVE_CLOUD_DEVELOPMENT.md).
+
 Install the isolated candidates from
 `.github/requirements/action-policy-development.txt`. Compiler commit
 `3b91fcc03c804804b2ace7302f37340a787496d9` and Ledger commit

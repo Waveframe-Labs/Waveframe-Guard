@@ -214,6 +214,7 @@ class CloudPreservationClient:
             request_options: dict[str, Any] = {
                 "json": dict(payload),
                 "timeout": self.timeout_seconds,
+                "allow_redirects": False,
             }
             if self.organization_id is not None and self._api_key is not None:
                 request_options["headers"] = {
@@ -443,6 +444,7 @@ class CloudRuntimeClient:
                     "X-API-Key": self._api_key,
                 },
                 timeout=self.timeout_seconds,
+                allow_redirects=False,
             )
         except requests.Timeout as exc:
             return CloudRuntimeOperationResult(
