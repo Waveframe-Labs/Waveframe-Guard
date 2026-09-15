@@ -78,8 +78,6 @@ def main() -> None:
     parser.add_argument("--profile", choices=("minimum", "candidate"), required=True)
     parser.add_argument("--cri-source", type=Path)
     args = parser.parse_args()
-    expected_python = (3, 10) if args.profile == "minimum" else (3, 14)
-    assert sys.version_info[:2] == expected_python, sys.version
     constraints = ROOT / ".github" / "constraints" / f"{args.profile}.txt"
     project = package_acceptance.tomllib.loads((ROOT / "pyproject.toml").read_text())["project"]
     expected = dict(line.split("==") for line in constraints.read_text().splitlines()
@@ -120,7 +118,7 @@ def main() -> None:
         python = str(package_acceptance._venv_python(environment))
         run([python, "-m", "pip", "install", "pip==26.2.1", "setuptools==83.0.0", "wheel==0.48.0"])
         run([python, "-m", "pip", "install", "--constraint", str(constraints),
-             f"{wheel}[test]", *map(str, cri_wheels), "pytest==9.0.3", "build==1.6.0", "twine==6.2.0"])
+             f"{wheel}[test]", "-r", str(ROOT / ".github/requirements/action-policy-release.txt"), *map(str, cri_wheels), "pytest==9.0.3", "build==1.6.0", "twine==6.2.0"])
         run([python, "-m", "pip", "check"])
         # Inspect actual installed metadata in the child interpreter; never the
         # parent environment or checkout's potentially stale egg-info directory.

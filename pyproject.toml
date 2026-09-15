@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "waveframe-guard"
-version = "0.18.0"
+version = "0.19.0"
 description = "Execution-boundary SDK for allowing or blocking governed actions before they run."
 authors = [
     { name = "Shawn Wright", email = "swright@waveframelabs.org" }
@@ -23,7 +23,7 @@ license-files = ["LICENSE", "NOTICE"]
 dependencies = [
     "cricore>=0.13.0,<0.15.0",
     "cricore-proposal-normalizer>=0.2.0,<0.3.0",
-    "governance-ledger>=0.7.0,<0.9.0",
+    "governance-ledger>=0.9.0,<0.10.0",
     "requests>=2.33.0,<3.0.0",
 ]
 
@@ -33,14 +33,14 @@ waveframe-guard-external-agent = "waveframe_guard.quickstarts.external_agent:mai
 [project.optional-dependencies]
 test = [
     "build",
-    "cricore-contract-compiler>=0.4.0,<0.6.0",
+    "cricore-contract-compiler>=0.5.0,<0.6.0",
     "pytest",
     'tomli>=2.0.0; python_version < "3.11"',
     "twine",
 ]
 dev = [
     "build",
-    "cricore-contract-compiler>=0.4.0,<0.6.0",
+    "cricore-contract-compiler>=0.5.0,<0.6.0",
     "pytest",
     'tomli>=2.0.0; python_version < "3.11"',
     "twine",

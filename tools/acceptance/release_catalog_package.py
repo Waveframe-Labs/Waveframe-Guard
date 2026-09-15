@@ -49,18 +49,33 @@ def main():
     args = parser.parse_args()
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory(prefix="guard48-package-") as temp:
+    with tempfile.TemporaryDirectory(prefix="guard50-package-") as temp:
         scratch = Path(temp).resolve()
         source = scratch / "source"
         for name in filter(None, subprocess.check_output(["git", "ls-files", "-z"], cwd=ROOT).decode().split("\0")):
             target = source / name
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(ROOT / name, target)
-        run([sys.executable, "-m", "build", "--outdir", output], source)
+        head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT).decode().strip()
+        assert not subprocess.check_output(["git", "status", "--porcelain", "--untracked-files=no"], cwd=ROOT).strip()
+        record = {"source_commit": head, "python": sys.version,
+                  "tracked_files_sha256": {str(p.relative_to(source)).replace("\\", "/"): hashlib.sha256(p.read_bytes()).hexdigest()
+                                           for p in source.rglob("*") if p.is_file()},
+                  "build_command": [sys.executable, "-m", "build", "--outdir", str(output)],
+                  "clean_tracked_checkout": True}
+        (output / "build-provenance.json").write_text(json.dumps(record, indent=2) + "\n")
+        with (output / "build.log").open("w", encoding="utf-8") as log:
+            subprocess.run([sys.executable, "-m", "build", "--outdir", str(output)], cwd=source,
+                           stdout=log, stderr=subprocess.STDOUT, check=True)
         wheel, sdist = next(output.glob("*.whl")), next(output.glob("*.tar.gz"))
-        package_acceptance._inspect_wheel(wheel, "0.18.0")
-        package_acceptance._inspect_sdist(sdist, "0.18.0")
-        run([sys.executable, "-m", "twine", "check", wheel, sdist], scratch)
+        package_acceptance._inspect_wheel(wheel, "0.19.0")
+        package_acceptance._inspect_sdist(sdist, "0.19.0")
+        (output / "package-hashes.json").write_text(json.dumps({p.name: hashlib.sha256(p.read_bytes()).hexdigest()
+            for p in (wheel, sdist)}, indent=2) + "\n")
+        (output / "guard-candidate.json").write_text(json.dumps({"source_url": "https://github.com/Waveframe-Labs/Waveframe-Guard",
+            "source_commit": head, "provenance_kind": "coordinator-supplied-exact-candidate",
+            "wheel": wheel.name, "wheel_sha256": hashlib.sha256(wheel.read_bytes()).hexdigest()}, indent=2) + "\n")
+        run([sys.executable, "-m", "twine", "check", "--strict", wheel, sdist], scratch)
         isolated = scratch / "acceptance"
         for name in ("tests", "tools", "contracts", "examples", "docs", ".github"):
             shutil.copytree(source / name, isolated / name)
@@ -69,30 +84,39 @@ def main():
         env = dict(os.environ, GUARD_EXPECT_INSTALLED="1")
         for key in ("PYTHONPATH", "WAVEFRAME_GUARD_ACTION_POLICY_DEV", "WAVEFRAME_LEDGER_ACTION_POLICY_DEV"):
             env.pop(key, None)
-        for profile in ("release", "historical"):
-            environment = scratch / profile
-            venv.EnvBuilder(with_pip=True).create(environment)
-            python = environment / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
-            requirements = (["-r", ROOT / ".github/requirements/action-policy-release.txt"] if profile == "release"
-                else ["cricore==0.14.0", "governance-ledger==0.8.0", "cricore-contract-compiler==0.4.0"])
-            run([python, "-m", "pip", "install", f"{wheel}[test]", *requirements,
-                 "--report", output / f"{profile}-install.json"], isolated, env)
-            checked = subprocess.check_output([str(python), "-m", "pip", "check"], cwd=isolated, env=env).decode()
-            (output / f"{profile}-pip-check.txt").write_text(checked)
-            run([python, "-c", "import waveframe_guard,sys; from pathlib import Path; "
-                 "assert Path(waveframe_guard.__file__).is_relative_to(Path(sys.prefix))"], isolated, env)
-            xml = output / f"installed-{profile}.xml"
-            run([python, "-m", "pytest", "-q", "-ra", *["tests/" + name for name in TESTS], f"--junitxml={xml}"], isolated, env)
-            summarize(xml, require_release=profile == "release")
-            if profile == "release":
-                run([python, "tools/acceptance/action_policy_creation.py", "--fixtures",
-                     isolated / "tests/fixtures/action_policy_release_v4", "--output", output / "release-evidence.json"], isolated, env)
-                run([python, "tools/acceptance/release_cloud_protocol.py", "--output", output / "release-http.json"], isolated, env)
-                dev = dict(env, WAVEFRAME_GUARD_ACTION_POLICY_DEV="1", WAVEFRAME_LEDGER_ACTION_POLICY_DEV="1")
-                xml = output / "installed-development.xml"
-                run([python, "-m", "pytest", "-q", "-ra", *["tests/" + name for name in TESTS], f"--junitxml={xml}"], isolated, dev)
-                summarize(xml)
-                run([python, "tools/acceptance/action_policy_creation.py", "--output", output / "retained-development-evidence.json"], isolated, dev)
+        profile = "release"
+        environment = scratch / profile
+        venv.EnvBuilder(with_pip=True).create(environment)
+        python = environment / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
+        requirements = ["-r", ROOT / ".github/requirements/action-policy-release.txt"]
+        run([python, "-m", "pip", "install", f"{wheel}[test]", *requirements,
+             "--report", output / f"{profile}-install.json"], isolated, env)
+        checked = subprocess.check_output([str(python), "-m", "pip", "check"], cwd=isolated, env=env).decode()
+        (output / f"{profile}-pip-check.txt").write_text(checked)
+        probe_env = dict(env, GUARD_EXPECTED_VERSION="0.19.0", GUARD_REPOSITORY_ROOT=str(ROOT))
+        run([python, "-c", package_acceptance.SMOKE_SCRIPT], isolated, probe_env)
+        for mode in ("evaluation", "mutation"):
+            work = scratch / ("smoke-" + mode)
+            work.mkdir()
+            run([python, "-c", package_acceptance.REPOSITORY_SMOKE_SCRIPT, mode], work, probe_env)
+        run([python, "tools/acceptance/cli_package.py", "--output", output / "cli.json"], isolated, env)
+        example_root = output / "example-workspace"
+        (example_root / "generated").mkdir(parents=True)
+        with (output / "example.json").open("w", encoding="utf-8") as log:
+            subprocess.run([str(python), "examples/sdk/repository_creation_release.py", "--repository-root", str(example_root),
+                            "--evidence-root", str(output / "example-evidence")], cwd=isolated, env=env,
+                           stdout=log, stderr=subprocess.STDOUT, check=True)
+        xml = output / f"installed-{profile}.xml"
+        run([python, "-m", "pytest", "-q", "-ra", *["tests/" + name for name in TESTS], f"--junitxml={xml}"], isolated, env)
+        summarize(xml, require_release=profile == "release")
+        run([python, "tools/acceptance/action_policy_creation.py", "--fixtures",
+             isolated / "tests/fixtures/action_policy_release_v4", "--output", output / "release-evidence.json"], isolated, env)
+        run([python, "tools/acceptance/release_cloud_protocol.py", "--output", output / "release-http.json"], isolated, env)
+        dev = dict(env, WAVEFRAME_GUARD_ACTION_POLICY_DEV="1", WAVEFRAME_LEDGER_ACTION_POLICY_DEV="1")
+        xml = output / "installed-development.xml"
+        run([python, "-m", "pytest", "-q", "-ra", *["tests/" + name for name in TESTS], f"--junitxml={xml}"], isolated, dev)
+        summarize(xml)
+        run([python, "tools/acceptance/action_policy_creation.py", "--output", output / "retained-development-evidence.json"], isolated, dev)
         (output / "package-hashes.json").write_text(json.dumps({p.name: hashlib.sha256(p.read_bytes()).hexdigest()
             for p in (wheel, sdist)}, indent=2) + "\n")
 

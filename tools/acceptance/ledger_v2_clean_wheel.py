@@ -3,7 +3,7 @@
 # filetype: "python"
 # type: "acceptance-test"
 # domain: "guard-sdk"
-# version: "0.18.0"
+# version: "0.19.0"
 # status: "Active"
 # author:
 #   name: "Waveframe Labs"
@@ -160,7 +160,7 @@ def main() -> None:
     parser.add_argument("--install-spec", required=True, help="Guard wheel path or pip spec")
     parser.add_argument(
         "--ledger-install-spec",
-        default="governance-ledger==0.7.0",
+        default="governance-ledger==0.9.0",
         help="Ledger wheel path or pip spec to install before the Guard wheel",
     )
     args = parser.parse_args()
@@ -179,8 +179,11 @@ def main() -> None:
         environment = root / ".venv"
         _run([sys.executable, "-m", "venv", str(environment)], cwd=root)
         python = environment / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
-        _run([str(python), "-m", "pip", "install", resolved_ledger_spec], cwd=root)
-        _run([str(python), "-m", "pip", "install", resolved_spec], cwd=root)
+        requirements = (Path(__file__).resolve().parents[2] / ".github/requirements/action-policy-release.txt").read_text(encoding="utf-8").splitlines()
+        compiler = next(line for line in requirements if line.startswith("cricore-contract-compiler @"))
+        if resolved_ledger_spec == "governance-ledger==0.9.0":
+            resolved_ledger_spec = next(line for line in requirements if line.startswith("governance-ledger @"))
+        _run([str(python), "-m", "pip", "install", resolved_spec, resolved_ledger_spec, compiler], cwd=root)
         runner = root / "acceptance.py"
         runner.write_text(textwrap.dedent(RUNNER), encoding="utf-8")
         completed = _run([str(python), str(runner)], cwd=root, capture_output=True)

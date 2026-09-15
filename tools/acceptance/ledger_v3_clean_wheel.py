@@ -3,7 +3,7 @@
 # filetype: "python"
 # type: "acceptance-test"
 # domain: "guard-sdk"
-# version: "0.18.0"
+# version: "0.19.0"
 # status: "Active"
 # author:
 #   name: "Waveframe Labs"
@@ -257,7 +257,7 @@ def main() -> None:
         description="Run Ledger v3 Guard acceptance from a clean wheel-only environment."
     )
     parser.add_argument("--install-spec", required=True, help="Guard wheel path or pip spec")
-    parser.add_argument("--ledger-install-spec", required=True, help="Ledger 0.8 wheel path")
+    parser.add_argument("--ledger-install-spec", default="governance-ledger==0.9.0", help="Compatible Ledger wheel path or version spec")
     args = parser.parse_args()
     install_spec = Path(args.install_spec)
     guard_spec = str(install_spec.resolve()) if install_spec.exists() else args.install_spec
@@ -274,8 +274,11 @@ def main() -> None:
         environment = root / ".venv"
         _run([sys.executable, "-m", "venv", str(environment)], cwd=root)
         python = environment / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
-        _run([str(python), "-m", "pip", "install", ledger_spec], cwd=root)
-        _run([str(python), "-m", "pip", "install", guard_spec], cwd=root)
+        requirements = (Path(__file__).resolve().parents[2] / ".github/requirements/action-policy-release.txt").read_text(encoding="utf-8").splitlines()
+        compiler = next(line for line in requirements if line.startswith("cricore-contract-compiler @"))
+        if ledger_spec == "governance-ledger==0.9.0":
+            ledger_spec = next(line for line in requirements if line.startswith("governance-ledger @"))
+        _run([str(python), "-m", "pip", "install", guard_spec, ledger_spec, compiler], cwd=root)
         runner = root / "acceptance.py"
         runner.write_text(textwrap.dedent(RUNNER), encoding="utf-8")
         completed = _run([str(python), str(runner)], cwd=root, capture_output=True)

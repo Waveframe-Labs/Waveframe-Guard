@@ -1,3 +1,7 @@
+> Historical development and acceptance record. For the current Guard 0.19.0
+> client setup, use [release acceptance](../RELEASE_019_ACCEPTANCE.md); the
+> original fixture and Cloud server provenance below remains unchanged.
+
 Issue #36 adds local development support for one new regular file beneath an
 existing parent in a configured workspace, on the established Windows NTFS and
 Linux openat2 boundaries. Both `WAVEFRAME_GUARD_ACTION_POLICY_DEV=1` and

@@ -34,7 +34,7 @@ def main():
     origin = server["url"]
     dependencies = {}
     for name, commit in (("cricore-contract-compiler", "ae590dee058d3481e384dea850d5b7d980f533ff"),
-                         ("governance-ledger", "40e0875ee9a973254bb3a4d0c228cad4fdce2bc0")):
+                         ("governance-ledger", "3cc34e7b3cb6efca5102e0e22d559ec0c0fd583f")):
         direct = json.loads(distribution(name).read_text("direct_url.json"))
         assert direct["vcs_info"] == {"vcs": "git", "requested_revision": commit, "commit_id": commit}
         dependencies[name] = direct

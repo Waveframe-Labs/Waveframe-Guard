@@ -21,7 +21,7 @@ ORIGINAL_COMMITS = {
 }
 COMMITS = {
     "cricore-contract-compiler": "ae590dee058d3481e384dea850d5b7d980f533ff",
-    "governance-ledger": "40e0875ee9a973254bb3a4d0c228cad4fdce2bc0",
+    "governance-ledger": "3cc34e7b3cb6efca5102e0e22d559ec0c0fd583f",
 }
 FIXTURES = Path(__file__).resolve().parents[2] / "tests/fixtures/action_policy_v4"
 
@@ -56,7 +56,7 @@ def provenance():
 def run(fixtures=FIXTURES):
     from compiler import compile_action_policy
 
-    evidence = {"dependencies": provenance(), "fixture_source_commit": (COMMITS if fixtures.name == "action_policy_release_v4" else ORIGINAL_COMMITS)["governance-ledger"], "original_development_compiler": ORIGINAL_COMMITS["cricore-contract-compiler"]}
+    evidence = {"dependencies": provenance(), "fixture_source_commit": ("40e0875ee9a973254bb3a4d0c228cad4fdce2bc0" if fixtures.name == "action_policy_release_v4" else ORIGINAL_COMMITS["governance-ledger"]), "original_development_compiler": ORIGINAL_COMMITS["cricore-contract-compiler"]}
     for line in (fixtures / "SHA256SUMS").read_text().splitlines():
         digest, name = line.split("  ", 1)
         assert hashlib.sha256((fixtures / name).read_bytes()).hexdigest() == digest, name

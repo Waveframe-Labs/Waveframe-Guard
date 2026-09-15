@@ -38,8 +38,8 @@ def main():
         run([sys.executable, "-m", "build", "--outdir", output], source)
         wheel = next(output.glob("*.whl"))
         sdist = next(output.glob("*.tar.gz"))
-        package_acceptance._inspect_wheel(wheel, "0.18.0")
-        package_acceptance._inspect_sdist(sdist, "0.18.0")
+        package_acceptance._inspect_wheel(wheel, "0.19.0")
+        package_acceptance._inspect_sdist(sdist, "0.19.0")
         run([sys.executable, "-m", "twine", "check", wheel, sdist], scratch)
         environment = scratch / "installed"
         venv.EnvBuilder(with_pip=True).create(environment)

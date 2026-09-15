@@ -13,7 +13,7 @@ from tools.acceptance import package_acceptance
 APPROVED_RUNTIME_DEPENDENCIES = [
     "cricore>=0.13.0,<0.15.0",
     "cricore-proposal-normalizer>=0.2.0,<0.3.0",
-    "governance-ledger>=0.7.0,<0.9.0",
+    "governance-ledger>=0.9.0,<0.10.0",
     "requests>=2.33.0,<3.0.0",
 ]
 
