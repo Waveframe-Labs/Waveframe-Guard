@@ -53,6 +53,13 @@ APPROVED_JSON_FILES = {
     "examples/sdk/finance-policy.json",
     "tests/fixtures/cloud_authority_publication.v1.json",
 }
+APPROVED_JSON_FILES.update(
+    f"tests/fixtures/action_policy_v4/{kind}/{artifact}.json"
+    for kind in ("create-only", "modify-only", "mixed")
+    for artifact in ("approval", "authority-bundle", "compiled-authority", "compiler-input",
+                     "compiler-output", "confirmation", "constraint-ir", "proposal",
+                     "publication-receipt", "review", "source-interpretation")
+)
 EXPECTED_PUBLIC_RUNTIME_REQUIREMENTS = {
     "cricore>=0.13.0,<0.15.0",
     "cricore-proposal-normalizer>=0.2.0,<0.3.0",

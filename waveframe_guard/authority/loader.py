@@ -50,7 +50,7 @@ class BundleLoader:
             receipt_payload = _read_json(receipt_path, artifact="publication receipt")
             receipt_hash_value = receipt_payload.get("receipt_hash")
             receipt_hash = receipt_hash_value if isinstance(receipt_hash_value, str) else None
-        if schema_version in {"authority_bundle.v2", "authority_bundle.v3"} and receipt_payload is None:
+        if schema_version in {"authority_bundle.v2", "authority_bundle.v3", "authority_bundle.v4"} and receipt_payload is None:
             raise AuthorityVerificationError(
                 f"{schema_version} requires a publication receipt: {registry_entry.authority_ref}"
             )
@@ -60,7 +60,7 @@ class BundleLoader:
             bundle_path=registry_entry.bundle_path,
             bundle_hash=(
                 str(payload.get("bundle_hash") or "")
-                if schema_version in {"authority_bundle.v2", "authority_bundle.v3"}
+                if schema_version in {"authority_bundle.v2", "authority_bundle.v3", "authority_bundle.v4"}
                 else f"sha256:{_canonical_hash(payload)}"
             ),
             receipt_payload=receipt_payload,

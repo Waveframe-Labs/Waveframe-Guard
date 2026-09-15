@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Mapping
 
 from .exceptions import AuthorityVerificationError
 from .types import LoadedAuthority
-from .verifier import _compute_runtime_integrity_hash
+from .development import require_action_policy_development
+from .verifier import (_compute_runtime_integrity_hash, _PROCESS_VERIFICATION_MARKER,
+                       _publication_integrity_hash)
 
 
 class RuntimeFactError(AuthorityVerificationError):
@@ -45,8 +47,20 @@ class VerifiedRuntimeAuthority:
     integrity_hash: str
     cold_validation_duration_ns: int | None
 
+    _verification_marker: Any = field(default=None, repr=False, compare=False)
+
     @classmethod
     def from_loaded(cls, authority: LoadedAuthority) -> "VerifiedRuntimeAuthority":
+        if authority._verification_marker is not _PROCESS_VERIFICATION_MARKER:
+            raise RuntimeFactError("authority must complete process publication verification")
+        if authority.contract.get("schema_version") == "compiled_authority_contract.v3" and authority.schema_version != "authority_bundle.v4":
+            raise RuntimeFactError("action contract requires native v4 authority")
+        if authority.schema_version == "authority_bundle.v4":
+            require_action_policy_development()
+            if (authority.publication_integrity_hash != _publication_integrity_hash(
+                    authority.authority_bundle, authority.publication_receipt)
+                or authority.authority_bundle.get("compiled_authority_contract") != authority.contract):
+                raise RuntimeFactError("verified publication artifacts changed")
         if not isinstance(authority.authority_evidence, Mapping) or not isinstance(
             authority.runtime_fact_schema, Mapping
         ):
@@ -69,6 +83,7 @@ class VerifiedRuntimeAuthority:
             required_runtime_facts=tuple(authority.required_runtime_facts),
             integrity_hash=authority.runtime_integrity_hash,
             cold_validation_duration_ns=authority.validation_duration_ns,
+            _verification_marker=_PROCESS_VERIFICATION_MARKER,
         )
 
     def contract(self) -> dict[str, Any]:
@@ -81,6 +96,10 @@ class VerifiedRuntimeAuthority:
         return json.loads(self.runtime_fact_schema_json)
 
     def verify_candidate_contract(self, candidate: Mapping[str, Any]) -> None:
+        if self._verification_marker is not _PROCESS_VERIFICATION_MARKER:
+            raise RuntimeFactError("runtime authority is not process verified")
+        if candidate.get("schema_version") == "compiled_authority_contract.v3":
+            require_action_policy_development()
         if _canonical_json(candidate) != self.contract_json:
             raise RuntimeFactError("verified v2 compiled contract changed after activation")
 
@@ -102,7 +121,7 @@ class RepositoryChangesFactProvider:
         )
         schema = runtime_authority.runtime_fact_schema()
         key = runtime_fact_provider_key(authority)
-        if key != _trusted_repository_provider_key():
+        if key not in _trusted_repository_provider_keys():
             raise RuntimeFactError(
                 "unsupported runtime fact schema: "
                 f"{key.schema_id}@{key.schema_version} ({key.schema_hash})"
@@ -213,7 +232,7 @@ def resolve_target_domain_v1(authority: VerifiedRuntimeAuthority) -> str:
     The current released provider is explicitly mapped. Future domains, versions
     or hashes must be reviewed here; contract.v2 alone never implies repository.
     """
-    if runtime_fact_provider_key(authority) == _trusted_repository_provider_key():
+    if runtime_fact_provider_key(authority) in _trusted_repository_provider_keys():
         return "repository_path"
     raise RuntimeFactError("unsupported verified target domain in guard.target-domain-resolver.v1")
 
@@ -289,3 +308,18 @@ def _reject_fact_injection(
         raise RuntimeFactError(
             "caller-supplied enforcement facts are not accepted; Guard derives the fact set"
         )
+
+
+def _trusted_repository_provider_keys():
+    keys = {_trusted_repository_provider_key()}
+    # The new identity is reachable only with both explicit development gates.
+    import os
+    if all(os.environ.get(name) == "1" for name in (
+        "WAVEFRAME_GUARD_ACTION_POLICY_DEV", "WAVEFRAME_LEDGER_ACTION_POLICY_DEV"
+    )):
+        keys.add(RuntimeFactProviderKey(
+            domain_pack_id="repository-changes", domain_pack_version="2.0.0",
+            domain_pack_hash="sha256:ec260daef10cdb3f97ca0a5137deb658a0fc997f22997299153cd848a12323a0",
+            schema_id="repository-changes-runtime", schema_version="2.0.0",
+            schema_hash="sha256:bd79503e01d79583ab564be98890fddaa8124e935e7eb81a8a40786cc6d2c01d"))
+    return keys

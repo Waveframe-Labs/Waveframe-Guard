@@ -179,7 +179,7 @@ class LocalEvaluationStore:
         except json.JSONDecodeError as exc:
             raise GuardArtifactError(f"unreadable execution attestation: {exc.msg}") from exc
         validated = validate_execution_attestation(payload)
-        if validated["schema_version"] == "guard_execution_attestation.v2":
+        if validated["schema_version"] in {"guard_execution_attestation.v2", "guard_execution_attestation.v3"}:
             from .repository_evidence import validate_repository_attestation
 
             if validated["run_id"] != run_id:
@@ -200,6 +200,18 @@ class LocalEvaluationStore:
         inputs = record["inputs"]
         runtime_evidence = inputs["runtime_evidence"]
         original_reasons = _artifact_replay_failure_reasons(record)
+        verified_runtime = None
+        if inputs["compiled_authority"].get("schema_version") == "compiled_authority_contract.v3":
+            from waveframe_guard.authority.replay import verify_recorded_publication
+            from waveframe_guard.authority.runtime_facts import RepositoryChangesFactProvider
+
+            verified_runtime = verify_recorded_publication(
+                inputs.get("authority_publication"), inputs["authority_evidence"])
+            verified_runtime.verify_candidate_contract(inputs["compiled_authority"])
+            facts = RepositoryChangesFactProvider().derive(authority=verified_runtime,
+                execution_request=inputs["execution_request"], actor_identity=runtime_evidence["actor_identity"])
+            if dict(facts.facts) != inputs["runtime_facts"]:
+                raise GuardArtifactError("recorded runtime facts do not match Guard derivation")
         replayed = evaluate_runtime(
             compiled_authority=inputs["compiled_authority"],
             execution_request=inputs.get("evaluated_execution_request", inputs["execution_request"]),
@@ -217,6 +229,7 @@ class LocalEvaluationStore:
                 inputs["compiled_authority"].get("schema_version")
                 == "compiled_authority_contract.v2"
             ),
+            _verified_runtime_authority=verified_runtime,
         )
         outcome_matches = (
             replayed["enforcement_outcome"]["outcome_hash"]
@@ -325,7 +338,7 @@ def build_execution_attestation(
 def validate_execution_attestation(attestation: Any) -> dict[str, Any]:
     if not isinstance(attestation, dict):
         raise GuardArtifactError("execution attestation must be a JSON object")
-    if attestation.get("schema_version") == "guard_execution_attestation.v2":
+    if attestation.get("schema_version") in {"guard_execution_attestation.v2", "guard_execution_attestation.v3"}:
         from .repository_evidence import validate_repository_attestation
 
         return validate_repository_attestation(attestation)
@@ -666,6 +679,8 @@ def _input_hashes(inputs: dict[str, Any]) -> dict[str, str]:
     }
     if "target_binding" in inputs:
         hashes["target_binding_hash"] = stable_hash(inputs["target_binding"])
+    if "authority_publication" in inputs:
+        hashes["authority_publication_hash"] = stable_hash(inputs["authority_publication"])
     if "authority_evidence" in inputs:
         hashes["authority_evidence_hash"] = stable_hash(inputs["authority_evidence"])
         hashes["runtime_facts_hash"] = stable_hash(inputs.get("runtime_facts", {}))
@@ -693,6 +708,8 @@ def _replay_basis(inputs: dict[str, Any], evaluation: dict[str, Any]) -> dict[st
     }
     if "target_binding" in inputs:
         basis["target_binding"] = inputs["target_binding"]
+    if "authority_publication" in inputs:
+        basis["authority_publication"] = inputs["authority_publication"]
     if "authority_evidence" in inputs:
         basis["authority_evidence"] = inputs["authority_evidence"]
         basis["runtime_facts"] = inputs.get("runtime_facts", {})

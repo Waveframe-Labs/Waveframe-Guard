@@ -423,7 +423,8 @@ class Guard:
     ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
         """Supply a RepositoryTarget capability in place of the named path argument.
 
-        Trusted callbacks must use its read_bytes/write_bytes methods. The current
+        Trusted callbacks use read_bytes/write_bytes for modify, or create_bytes for
+        development-gated exclusive creation. The current
         adapter supports existing regular files on local Windows NTFS and
         supported Linux filesystems through securely opened descriptors.
         Only calls through this wrapper are mediated; independent filesystem
@@ -452,7 +453,7 @@ class Guard:
                     return fn(*bound.args, **bound.kwargs)
 
                 result = boundary.execute_repository(
-                    invoke, execution_request=request, raise_on_block=raise_on_block,
+                    invoke, execution_request=request, operation=action, raise_on_block=raise_on_block,
                 )
                 return result if return_result or not result["executed"] else result["value"]
 

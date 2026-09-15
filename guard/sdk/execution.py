@@ -74,7 +74,11 @@ class GuardRuntimeBoundary:
             "cold_load_validation_ns": None,
             "warm_integrity_and_fact_derivation_ns": None,
         }
-        if self.compiled_authority.get("schema_version") == "compiled_authority_contract.v2":
+        if self.compiled_authority.get("schema_version") in {"compiled_authority_contract.v2", "compiled_authority_contract.v3"}:
+            if self.compiled_authority.get("schema_version") == "compiled_authority_contract.v3" and (
+                cloud_preservation_client is not None or cloud_runtime_client is not None
+            ):
+                raise AuthorityVerificationError("action policy development is local only; Cloud activation is unavailable")
             if self.loaded_authority is None:
                 raise AuthorityVerificationError(
                     "compiled_authority_contract.v2 requires a verified authority bundle and publication receipt"
@@ -91,6 +95,7 @@ class GuardRuntimeBoundary:
                 self._verified_runtime_authority.cold_validation_duration_ns
             )
         self._activation_contract_hash = stable_hash(self.compiled_authority)
+        self._activation_runtime_authority = self._verified_runtime_authority
         self._activation_configuration = (repository_workspace, target_domain)
         scoped = repository_workspace is not None or self._verified_target_domain is not None or "target_requirements" in self.compiled_authority
         domain = self._verified_target_domain or (
@@ -127,6 +132,11 @@ class GuardRuntimeBoundary:
         return self._target_binding
 
     def _check_target_binding(self):
+        if self._verified_runtime_authority != self._activation_runtime_authority:
+            raise AuthorityVerificationError("verified runtime authority changed after activation")
+        if self.compiled_authority.get("schema_version") == "compiled_authority_contract.v3":
+            if VerifiedRuntimeAuthority.from_loaded(self.loaded_authority) != self._activation_runtime_authority:
+                raise AuthorityVerificationError("loaded authority changed after activation")
         if self._target_binding != self._activation_binding or (
             self._repository_workspace, self._target_domain
         ) != self._activation_configuration:
@@ -154,17 +164,24 @@ class GuardRuntimeBoundary:
             )
         return self._repository_workspace
 
-    def evaluate(self, execution_request: dict[str, Any], **kwargs: Any) -> dict[str, Any]:
+    def _path_requirements(self, request):
+        if self.compiled_authority.get("schema_version") == "compiled_authority_contract.v3":
+            return self.compiled_authority["action_requirements"].get(request["action"])
+        return self.compiled_authority.get("target_requirements")
+
+    def evaluate(self, execution_request: dict[str, Any], *, _capture_binding=None, **kwargs: Any) -> dict[str, Any]:
         if self._repository_required():
             validate_repository_request(execution_request)
         request = deepcopy(execution_request)
         if self._repository_required():
             with self._require_workspace().bind(
-                request.get("target"), requirements=self.compiled_authority.get("target_requirements")
+                request.get("target"), requirements=self._path_requirements(request)
             ) as target:
                 request["target"] = target.relative_path
                 result = self._evaluate(request, **kwargs)
                 target._validate()
+                if _capture_binding is not None:
+                    _capture_binding(target._namespace_identity)
                 return result
         return self._evaluate(request, **kwargs)
 
@@ -232,6 +249,7 @@ class GuardRuntimeBoundary:
             evaluation_time=evaluation_time or self.evaluation_time_source(),
             start_sequence=start_sequence,
             _verified_v2_authority=verified_v2,
+            _verified_runtime_authority=self._verified_runtime_authority,
         )
         if authority_evidence is not None:
             result["authority_evidence"] = deepcopy(authority_evidence)
@@ -283,6 +301,11 @@ class GuardRuntimeBoundary:
                     "runtime_facts": deepcopy(result["runtime_facts"]),
                 }
             )
+        if self.compiled_authority.get("schema_version") == "compiled_authority_contract.v3":
+            saved_inputs["authority_publication"] = {
+                "bundle": deepcopy(self.loaded_authority.authority_bundle),
+                "receipt": deepcopy(self.loaded_authority.publication_receipt),
+            }
         decision = deepcopy(result)
         decision.pop("execution_attestation", None)  # Preservation is decision-only.
         saved_record = self.store.save_evaluation(
@@ -341,18 +364,21 @@ class GuardRuntimeBoundary:
 
     def execute_repository(
         self, fn: Callable[..., Any], *, execution_request: dict[str, Any],
-        raise_on_block: bool = True, **evaluation_kwargs: Any,
+        raise_on_block: bool = True, operation: str = "modify", **evaluation_kwargs: Any,
     ) -> dict[str, Any]:
         # Malformed/unclosed requests are not admitted executions: no artifacts,
         # authority comparison, filesystem access or preservation is permitted.
         validate_repository_request(execution_request)
         request = deepcopy(execution_request)
+        if operation not in {"create", "modify"} or request["action"] != operation:
+            raise RepositoryBoundaryError("repository action does not match the mediated operation")
         workspace = self._require_workspace()
         # Evaluate before acquiring a writable capability so a denial never opens
         # a mutation handle, and unsupported forms cannot hide authority errors.
         preflight_kwargs = {**evaluation_kwargs, "save": False}
+        preflight_bindings = []
         try:
-            evaluation = self.evaluate(request, **preflight_kwargs)
+            evaluation = self.evaluate(request, _capture_binding=preflight_bindings.append, **preflight_kwargs)
         except RepositoryBoundaryError as exc:
             self._record_repository_refusal(exc, request, save=evaluation_kwargs.get("save", True))
             raise
@@ -363,9 +389,11 @@ class GuardRuntimeBoundary:
         with ExitStack() as stack:
             try:
                 target = stack.enter_context(workspace.bind(
-                    request.get("target"), mutation=True,
-                    requirements=self.compiled_authority.get("target_requirements"),
+                    request.get("target"), mutation=True, operation=operation,
+                    requirements=self._path_requirements(request),
                 ))
+                if preflight_bindings != [target._namespace_identity]:
+                    raise RepositoryBoundaryError("repository parent changed after evaluation")
             except RepositoryBoundaryError as exc:
                 self._record_repository_refusal(exc, request, evaluation,
                                                 save=evaluation_kwargs.get("save", True))
@@ -373,6 +401,15 @@ class GuardRuntimeBoundary:
             # The opened descriptor is the mutation target. Windows also holds
             # namespace locks; Linux relies on the trusted in-process adapter.
             locked = self._evaluate(request, **evaluation_kwargs)
+            if target._report is not None:
+                locked["repository_operation"] = target._report
+            validate_filesystem = target._validate
+
+            def validate_capability():
+                self._check_target_binding()
+                validate_filesystem()
+
+            target._validate = validate_capability
 
             def invoke():
                 target._active = True
@@ -380,12 +417,23 @@ class GuardRuntimeBoundary:
                 try:
                     value = fn(target)
                     callback_completed = True
+                    if operation == "create" and not target._report["created"]:
+                        raise RepositoryBoundaryError("creation callback returned without creating its bound file")
+                    if target._report is not None:
+                        target._report["status"] = "succeeded"
                     return value
+                except BaseException:
+                    if target._report is not None:
+                        target._report["status"] = "failed"
+                        target._report["error"] = target._report["error"] or "creation_or_callback_failed"
+                    raise
                 finally:
                     target._active = False
                     try:
                         target._validate()  # Failure here cannot undo written bytes.
-                    except RepositoryBoundaryError as exc:
+                    except Exception as exc:
+                        if target._report is not None:
+                            target._report.update(status="failed", error="post_callback_validation_failed")
                         exc.callback_completed = callback_completed
                         exc.validation_phase = "post_callback"
                         raise
@@ -406,6 +454,12 @@ class GuardRuntimeBoundary:
             }
         elif save and self.store is not None and not evaluation.get("run_id"):
             self._persist_evaluation(evaluation, request)
+        if request["action"] == "create":
+            evaluation["repository_operation"] = {
+                "schema_version": "guard_repository_operation.v1", "operation": "create",
+                "target": request["target"], "created": False, "bytes_written": 0,
+                "status": "not_run", "error": "operation_precondition_failed",
+            }
         self._record_execution_evidence(
             evaluation, callback_invoked=False, callback_completed=False,
             execution_status="not_run", mutation_status="not_performed", mutation_executed=False,
@@ -466,8 +520,7 @@ class GuardRuntimeBoundary:
                     evaluation, callback_invoked=False, callback_completed=False,
                     execution_status="not_run", mutation_status="not_performed", mutation_executed=False,
                 )
-                if isinstance(exc, RepositoryBoundaryError):
-                    exc.evaluation = evaluation
+                exc.evaluation = evaluation
                 raise
         self._record_execution_evidence(
             evaluation,
@@ -496,7 +549,7 @@ class GuardRuntimeBoundary:
             )
             if attestation is not None:
                 evaluation["cloud_runtime_attestation"] = attestation
-            if isinstance(exc, RepositoryBoundaryError):
+            if evaluation.get("target_binding", {}).get("target_domain") == "repository_path":
                 exc.evaluation = evaluation
             raise
         self._record_execution_evidence(
