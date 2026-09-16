@@ -1,0 +1,37 @@
+{
+  "before": {
+    "README.md": {
+      "sha256": "c99ecf3d6e18c394151d8da00c2f1444c32cc612f9e02af4c0149868119cc516",
+      "bytes": "23204164646974696f6e206578616d706c650a0a3e3e3e2032202b20330a350a0a417574686f72697a6564206c6f73742d726573706f6e7365206d61726b65722e0a"
+    },
+    "generated/new.md": {
+      "sha256": "8b3b7f83e83ad3965fd00a28c90abfe538961b659a6a3c59b2f8dbab83527fee",
+      "bytes": "23204164646974696f6e206578616d706c6520636f7272656374696f6e0a0a54686520524541444d45206578616d706c65206576616c7561746573206032202b2033602e2054686520636f727265637420726573756c74206973206035602c206e6f74206036602c20736f2074686520657870656374656420646f6374657374206f75747075742073686f756c64206265206035602e0a"
+    }
+  },
+  "results": {
+    "malformed": {
+      "scope": "supplemental deterministic MCP frame capture, not model chat",
+      "mode": "malformed",
+      "outcome": "unexpected-eof",
+      "elapsed_seconds": 0.004,
+      "frames": [
+        {
+          "sent": "{\"jsonrpc\": \"2.0\", \"id\": 1, \"method\": \"initialize\", \"params\": {\"protocolVersion\": \"2025-03-26\", \"capabilities\": {}, \"clientInfo\": {\"name\": \"supplemental-raw-transport\", \"version\": \"1\"}}}\n"
+        },
+        {
+          "received": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"capabilities\":{\"experimental\":{},\"prompts\":{\"listChanged\":false},\"resources\":{\"listChanged\":false,\"subscribe\":false},\"tools\":{\"listChanged\":false}},\"instructions\":\"Call connection_status for loaded fixture policy and fixed identities. Use repository_write for create/modify only. Never retry a mutation after a timeout, disconnect or lost response. Read source bytes and ask the operator to inspect saved SDK evidence; report unknown until reconciled. This is fixture approval and local SDK evidence, not Cloud.\",\"protocolVersion\":\"2025-03-26\",\"serverInfo\":{\"name\":\"waveframe-contained-proof\",\"version\":\"\"}}}\n"
+        },
+        {
+          "sent": "{\"jsonrpc\": \"2.0\", \"method\": \"notifications/initialized\"}\n"
+        },
+        {
+          "sent": "{\"jsonrpc\": \"2.0\", \"id\": 2, \"method\": \"tools/call\", \"params\": {\"name\": \"connection_status\", \"arguments\": {}}}\n"
+        },
+        {
+          "received": ""
+        }
+      ]
+    }
+  }
+}

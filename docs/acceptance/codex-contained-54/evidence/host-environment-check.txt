@@ -1,0 +1,238 @@
+................EEEEEEEEE.                                               [100%]
+=================================== ERRORS ====================================
+_______ ERROR at setup of test_released_capabilities_and_saved_evidence _______
+waveframe_guard\authority\generations.py:62: in verify_publication_generation
+    from governance_ledger.action_policy_publication import validate_compiled_authority_contract_v3
+E   ModuleNotFoundError: No module named 'governance_ledger.action_policy_publication'
+
+The above exception was the direct cause of the following exception:
+tests\test_codex_connection.py:22: in writer
+    value = MODULE.Writer(repo, tmp_path / "evidence", ROOT / "tests/fixtures/action_policy_release_v4/mixed")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+examples\codex_connection\writer.py:44: in __init__
+    self.guards[action] = Guard.local(
+guard\sdk\guard.py:133: in local
+    return cls(
+guard\sdk\guard.py:66: in __init__
+    authority_source = AuthoritySource.from_inputs(
+guard\sdk\authority_source.py:53: in from_inputs
+    loaded_authority = load_authority(
+waveframe_guard\authority\loader.py:44: in load_authority
+    authority = verifier.verify(loader.load(registry_entry))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+waveframe_guard\authority\verifier.py:34: in verify
+    verify_publication_generation(bundle.payload)
+waveframe_guard\authority\generations.py:72: in verify_publication_generation
+    raise AuthorityVerificationError(
+E   waveframe_guard.authority.exceptions.AuthorityVerificationError: action publication requires Ledger's exact catalog and complete public validators: No module named 'governance_ledger.action_policy_publication'
+__ ERROR at setup of test_denial_and_collision_are_different_and_zero_write ___
+waveframe_guard\authority\generations.py:62: in verify_publication_generation
+    from governance_ledger.action_policy_publication import validate_compiled_authority_contract_v3
+E   ModuleNotFoundError: No module named 'governance_ledger.action_policy_publication'
+
+The above exception was the direct cause of the following exception:
+tests\test_codex_connection.py:22: in writer
+    value = MODULE.Writer(repo, tmp_path / "evidence", ROOT / "tests/fixtures/action_policy_release_v4/mixed")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+examples\codex_connection\writer.py:44: in __init__
+    self.guards[action] = Guard.local(
+guard\sdk\guard.py:133: in local
+    return cls(
+guard\sdk\guard.py:66: in __init__
+    authority_source = AuthoritySource.from_inputs(
+guard\sdk\authority_source.py:53: in from_inputs
+    loaded_authority = load_authority(
+waveframe_guard\authority\loader.py:44: in load_authority
+    authority = verifier.verify(loader.load(registry_entry))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+waveframe_guard\authority\verifier.py:34: in verify
+    verify_publication_generation(bundle.payload)
+waveframe_guard\authority\generations.py:72: in verify_publication_generation
+    raise AuthorityVerificationError(
+E   waveframe_guard.authority.exceptions.AuthorityVerificationError: action publication requires Ledger's exact catalog and complete public validators: No module named 'governance_ledger.action_policy_publication'
+_ ERROR at setup of test_request_cannot_select_trust_or_unreleased_operations[change0] _
+waveframe_guard\authority\generations.py:62: in verify_publication_generation
+    from governance_ledger.action_policy_publication import validate_compiled_authority_contract_v3
+E   ModuleNotFoundError: No module named 'governance_ledger.action_policy_publication'
+
+The above exception was the direct cause of the following exception:
+tests\test_codex_connection.py:22: in writer
+    value = MODULE.Writer(repo, tmp_path / "evidence", ROOT / "tests/fixtures/action_policy_release_v4/mixed")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+examples\codex_connection\writer.py:44: in __init__
+    self.guards[action] = Guard.local(
+guard\sdk\guard.py:133: in local
+    return cls(
+guard\sdk\guard.py:66: in __init__
+    authority_source = AuthoritySource.from_inputs(
+guard\sdk\authority_source.py:53: in from_inputs
+    loaded_authority = load_authority(
+waveframe_guard\authority\loader.py:44: in load_authority
+    authority = verifier.verify(loader.load(registry_entry))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+waveframe_guard\authority\verifier.py:34: in verify
+    verify_publication_generation(bundle.payload)
+waveframe_guard\authority\generations.py:72: in verify_publication_generation
+    raise AuthorityVerificationError(
+E   waveframe_guard.authority.exceptions.AuthorityVerificationError: action publication requires Ledger's exact catalog and complete public validators: No module named 'governance_ledger.action_policy_publication'
+_ ERROR at setup of test_request_cannot_select_trust_or_unreleased_operations[change1] _
+waveframe_guard\authority\generations.py:62: in verify_publication_generation
+    from governance_ledger.action_policy_publication import validate_compiled_authority_contract_v3
+E   ModuleNotFoundError: No module named 'governance_ledger.action_policy_publication'
+
+The above exception was the direct cause of the following exception:
+tests\test_codex_connection.py:22: in writer
+    value = MODULE.Writer(repo, tmp_path / "evidence", ROOT / "tests/fixtures/action_policy_release_v4/mixed")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+examples\codex_connection\writer.py:44: in __init__
+    self.guards[action] = Guard.local(
+guard\sdk\guard.py:133: in local
+    return cls(
+guard\sdk\guard.py:66: in __init__
+    authority_source = AuthoritySource.from_inputs(
+guard\sdk\authority_source.py:53: in from_inputs
+    loaded_authority = load_authority(
+waveframe_guard\authority\loader.py:44: in load_authority
+    authority = verifier.verify(loader.load(registry_entry))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+waveframe_guard\authority\verifier.py:34: in verify
+    verify_publication_generation(bundle.payload)
+waveframe_guard\authority\generations.py:72: in verify_publication_generation
+    raise AuthorityVerificationError(
+E   waveframe_guard.authority.exceptions.AuthorityVerificationError: action publication requires Ledger's exact catalog and complete public validators: No module named 'governance_ledger.action_policy_publication'
+_ ERROR at setup of test_request_cannot_select_trust_or_unreleased_operations[change2] _
+waveframe_guard\authority\generations.py:62: in verify_publication_generation
+    from governance_ledger.action_policy_publication import validate_compiled_authority_contract_v3
+E   ModuleNotFoundError: No module named 'governance_ledger.action_policy_publication'
+
+The above exception was the direct cause of the following exception:
+tests\test_codex_connection.py:22: in writer
+    value = MODULE.Writer(repo, tmp_path / "evidence", ROOT / "tests/fixtures/action_policy_release_v4/mixed")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+examples\codex_connection\writer.py:44: in __init__
+    self.guards[action] = Guard.local(
+guard\sdk\guard.py:133: in local
+    return cls(
+guard\sdk\guard.py:66: in __init__
+    authority_source = AuthoritySource.from_inputs(
+guard\sdk\authority_source.py:53: in from_inputs
+    loaded_authority = load_authority(
+waveframe_guard\authority\loader.py:44: in load_authority
+    authority = verifier.verify(loader.load(registry_entry))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+waveframe_guard\authority\verifier.py:34: in verify
+    verify_publication_generation(bundle.payload)
+waveframe_guard\authority\generations.py:72: in verify_publication_generation
+    raise AuthorityVerificationError(
+E   waveframe_guard.authority.exceptions.AuthorityVerificationError: action publication requires Ledger's exact catalog and complete public validators: No module named 'governance_ledger.action_policy_publication'
+_ ERROR at setup of test_request_cannot_select_trust_or_unreleased_operations[change3] _
+waveframe_guard\authority\generations.py:62: in verify_publication_generation
+    from governance_ledger.action_policy_publication import validate_compiled_authority_contract_v3
+E   ModuleNotFoundError: No module named 'governance_ledger.action_policy_publication'
+
+The above exception was the direct cause of the following exception:
+tests\test_codex_connection.py:22: in writer
+    value = MODULE.Writer(repo, tmp_path / "evidence", ROOT / "tests/fixtures/action_policy_release_v4/mixed")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+examples\codex_connection\writer.py:44: in __init__
+    self.guards[action] = Guard.local(
+guard\sdk\guard.py:133: in local
+    return cls(
+guard\sdk\guard.py:66: in __init__
+    authority_source = AuthoritySource.from_inputs(
+guard\sdk\authority_source.py:53: in from_inputs
+    loaded_authority = load_authority(
+waveframe_guard\authority\loader.py:44: in load_authority
+    authority = verifier.verify(loader.load(registry_entry))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+waveframe_guard\authority\verifier.py:34: in verify
+    verify_publication_generation(bundle.payload)
+waveframe_guard\authority\generations.py:72: in verify_publication_generation
+    raise AuthorityVerificationError(
+E   waveframe_guard.authority.exceptions.AuthorityVerificationError: action publication requires Ledger's exact catalog and complete public validators: No module named 'governance_ledger.action_policy_publication'
+_ ERROR at setup of test_request_cannot_select_trust_or_unreleased_operations[change4] _
+waveframe_guard\authority\generations.py:62: in verify_publication_generation
+    from governance_ledger.action_policy_publication import validate_compiled_authority_contract_v3
+E   ModuleNotFoundError: No module named 'governance_ledger.action_policy_publication'
+
+The above exception was the direct cause of the following exception:
+tests\test_codex_connection.py:22: in writer
+    value = MODULE.Writer(repo, tmp_path / "evidence", ROOT / "tests/fixtures/action_policy_release_v4/mixed")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+examples\codex_connection\writer.py:44: in __init__
+    self.guards[action] = Guard.local(
+guard\sdk\guard.py:133: in local
+    return cls(
+guard\sdk\guard.py:66: in __init__
+    authority_source = AuthoritySource.from_inputs(
+guard\sdk\authority_source.py:53: in from_inputs
+    loaded_authority = load_authority(
+waveframe_guard\authority\loader.py:44: in load_authority
+    authority = verifier.verify(loader.load(registry_entry))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+waveframe_guard\authority\verifier.py:34: in verify
+    verify_publication_generation(bundle.payload)
+waveframe_guard\authority\generations.py:72: in verify_publication_generation
+    raise AuthorityVerificationError(
+E   waveframe_guard.authority.exceptions.AuthorityVerificationError: action publication requires Ledger's exact catalog and complete public validators: No module named 'governance_ledger.action_policy_publication'
+_ ERROR at setup of test_request_cannot_select_trust_or_unreleased_operations[change5] _
+waveframe_guard\authority\generations.py:62: in verify_publication_generation
+    from governance_ledger.action_policy_publication import validate_compiled_authority_contract_v3
+E   ModuleNotFoundError: No module named 'governance_ledger.action_policy_publication'
+
+The above exception was the direct cause of the following exception:
+tests\test_codex_connection.py:22: in writer
+    value = MODULE.Writer(repo, tmp_path / "evidence", ROOT / "tests/fixtures/action_policy_release_v4/mixed")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+examples\codex_connection\writer.py:44: in __init__
+    self.guards[action] = Guard.local(
+guard\sdk\guard.py:133: in local
+    return cls(
+guard\sdk\guard.py:66: in __init__
+    authority_source = AuthoritySource.from_inputs(
+guard\sdk\authority_source.py:53: in from_inputs
+    loaded_authority = load_authority(
+waveframe_guard\authority\loader.py:44: in load_authority
+    authority = verifier.verify(loader.load(registry_entry))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+waveframe_guard\authority\verifier.py:34: in verify
+    verify_publication_generation(bundle.payload)
+waveframe_guard\authority\generations.py:72: in verify_publication_generation
+    raise AuthorityVerificationError(
+E   waveframe_guard.authority.exceptions.AuthorityVerificationError: action publication requires Ledger's exact catalog and complete public validators: No module named 'governance_ledger.action_policy_publication'
+___ ERROR at setup of test_unknown_failure_never_retries_or_claims_rollback ___
+waveframe_guard\authority\generations.py:62: in verify_publication_generation
+    from governance_ledger.action_policy_publication import validate_compiled_authority_contract_v3
+E   ModuleNotFoundError: No module named 'governance_ledger.action_policy_publication'
+
+The above exception was the direct cause of the following exception:
+tests\test_codex_connection.py:22: in writer
+    value = MODULE.Writer(repo, tmp_path / "evidence", ROOT / "tests/fixtures/action_policy_release_v4/mixed")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+examples\codex_connection\writer.py:44: in __init__
+    self.guards[action] = Guard.local(
+guard\sdk\guard.py:133: in local
+    return cls(
+guard\sdk\guard.py:66: in __init__
+    authority_source = AuthoritySource.from_inputs(
+guard\sdk\authority_source.py:53: in from_inputs
+    loaded_authority = load_authority(
+waveframe_guard\authority\loader.py:44: in load_authority
+    authority = verifier.verify(loader.load(registry_entry))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+waveframe_guard\authority\verifier.py:34: in verify
+    verify_publication_generation(bundle.payload)
+waveframe_guard\authority\generations.py:72: in verify_publication_generation
+    raise AuthorityVerificationError(
+E   waveframe_guard.authority.exceptions.AuthorityVerificationError: action publication requires Ledger's exact catalog and complete public validators: No module named 'governance_ledger.action_policy_publication'
+=========================== short test summary info ===========================
+ERROR tests/test_codex_connection.py::test_released_capabilities_and_saved_evidence
+ERROR tests/test_codex_connection.py::test_denial_and_collision_are_different_and_zero_write
+ERROR tests/test_codex_connection.py::test_request_cannot_select_trust_or_unreleased_operations[change0]
+ERROR tests/test_codex_connection.py::test_request_cannot_select_trust_or_unreleased_operations[change1]
+ERROR tests/test_codex_connection.py::test_request_cannot_select_trust_or_unreleased_operations[change2]
+ERROR tests/test_codex_connection.py::test_request_cannot_select_trust_or_unreleased_operations[change3]
+ERROR tests/test_codex_connection.py::test_request_cannot_select_trust_or_unreleased_operations[change4]
+ERROR tests/test_codex_connection.py::test_request_cannot_select_trust_or_unreleased_operations[change5]
+ERROR tests/test_codex_connection.py::test_unknown_failure_never_retries_or_claims_rollback
+17 passed, 9 errors in 0.41s

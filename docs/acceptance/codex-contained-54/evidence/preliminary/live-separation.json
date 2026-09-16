@@ -1,0 +1,104 @@
+{
+  "scope": "deterministic supplemental live MCP/process test, not model chat",
+  "ready": {
+    "writer_local_pid": 33,
+    "loaded_status": {
+      "connection": "responding",
+      "observed_at": "2026-09-16T16:40:24.476495+00:00",
+      "workspace_enforcement": "external_container_boundary; see operator proof",
+      "scope": "local fixture approval; no Cloud connection; no permanent health claim",
+      "writer_pid": 33,
+      "policies": {
+        "create": {
+          "authority": "repository-mixed@3.0.0",
+          "publication_id": "release-example-mixed",
+          "contract_hash": "sha256:00df2385728e0e48c415e5df40d5c7a7ccaa1285d0452848578b2a544b254432",
+          "bundle_hash": "sha256:8e5796b5435b2f8f7644c089907e86d64c1686309fc89b80965874e22a8aa285",
+          "actor_identity": {
+            "id": "codex-54-create",
+            "type": "agent",
+            "role": "repository-maintainer"
+          }
+        },
+        "modify": {
+          "authority": "repository-mixed@3.0.0",
+          "publication_id": "release-example-mixed",
+          "contract_hash": "sha256:00df2385728e0e48c415e5df40d5c7a7ccaa1285d0452848578b2a544b254432",
+          "bundle_hash": "sha256:8e5796b5435b2f8f7644c089907e86d64c1686309fc89b80965874e22a8aa285",
+          "actor_identity": {
+            "id": "codex-54-modify",
+            "type": "agent",
+            "role": "security-reviewer"
+          }
+        }
+      },
+      "transport": "MCP stdio over private Unix socket; no connector bearer credential"
+    },
+    "agent_pid_namespace": "pid:[4026532761]"
+  },
+  "writer_pid_namespace": "pid:[4026532687]",
+  "writer_processes": "PID                 COMMAND\n2774                /sbin/docker-init -- python -I /opt/proof/contained/entry.py writer normal\n2786                socat UNIX-LISTEN:/ipc/mcp.sock,mode=0666,fork EXEC:python -I /opt/proof/contained/server.py normal\n4483                socat UNIX-LISTEN:/ipc/mcp.sock,mode=0666,fork EXEC:python -I /opt/proof/contained/server.py normal\n4484                python -I /opt/proof/contained/server.py normal\n",
+  "result": {
+    "challenge": {
+      "global_pid": 4484,
+      "address": 127676458221616,
+      "size": 87
+    },
+    "proc_reads": {
+      "mem": {
+        "errno": 2,
+        "error": "[Errno 2] No such file or directory: '/proc/4484/mem'"
+      },
+      "environ": {
+        "errno": 2,
+        "error": "[Errno 2] No such file or directory: '/proc/4484/environ'"
+      },
+      "root/secrets/writer-credential": {
+        "errno": 2,
+        "error": "[Errno 2] No such file or directory: '/proc/4484/root/secrets/writer-credential'"
+      }
+    },
+    "process_vm_readv": {
+      "read_bytes": -1,
+      "errno": 3
+    },
+    "unknown_tool": {
+      "jsonrpc": "2.0",
+      "id": 3,
+      "result": {
+        "content": [
+          {
+            "text": "Unknown tool: read_writer_credential",
+            "type": "text"
+          }
+        ],
+        "isError": true
+      }
+    },
+    "direct_identity_injection": {
+      "jsonrpc": "2.0",
+      "id": 4,
+      "result": {
+        "content": [
+          {
+            "text": "{\n  \"connection\": \"responding\",\n  \"outcome\": \"invalid_request\",\n  \"reason\": \"Use only action=create|modify, path and UTF-8 content (maximum 64 KiB).\",\n  \"mutation_status\": \"not_performed\",\n  \"automatic_retry\": false\n}",
+            "type": "text"
+          }
+        ],
+        "isError": false
+      }
+    }
+  },
+  "synthetic_credential_sha256": "e3d89db98b1765ad38579fb516789f7cb9ace1b174c271ed2c79d00535a3ea7d",
+  "synthetic_credential_bytes": 86,
+  "argv": [
+    "docker",
+    "exec",
+    "-i",
+    "wf54-contained-final-agent",
+    "python",
+    "-I",
+    "-c",
+    "\nimport ctypes,json,os,socket,sys\nfrom pathlib import Path\ns=socket.socket(socket.AF_UNIX); s.connect('/ipc/mcp.sock'); f=s.makefile('rwb',buffering=0)\ndef request(value):\n f.write((json.dumps(value)+'\\n').encode())\n while True:\n  result=json.loads(f.readline())\n  if result.get('id')==value['id']: return result\ninit=request({'jsonrpc':'2.0','id':1,'method':'initialize','params':{'protocolVersion':'2025-03-26','capabilities':{},'clientInfo':{'name':'labeled-supplemental-probe','version':'1'}}})\nf.write(b'{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}\\n')\nstatus=request({'jsonrpc':'2.0','id':2,'method':'tools/call','params':{'name':'connection_status','arguments':{}}})\nloaded=json.loads(status['result']['content'][0]['text'])\nprint(json.dumps({'writer_local_pid':loaded['writer_pid'],'loaded_status':loaded,'agent_pid_namespace':os.readlink('/proc/self/ns/pid')}),flush=True)\nchallenge=json.loads(sys.stdin.readline()); pid=challenge['global_pid']; address=challenge['address']; size=challenge['size']\nresult={'challenge':challenge,'proc_reads':{}}\nfor name in ('mem','environ','root/secrets/writer-credential'):\n try:\n  with open(f'/proc/{pid}/{name}','rb') as stream: count=len(stream.read(1))\n  result['proc_reads'][name]={'unexpected_read_bytes':count}\n except OSError as e: result['proc_reads'][name]={'errno':e.errno,'error':str(e)}\nclass IOVec(ctypes.Structure): _fields_=[('base',ctypes.c_void_p),('length',ctypes.c_size_t)]\nbuf=ctypes.create_string_buffer(size); local=IOVec(ctypes.cast(buf,ctypes.c_void_p),size); remote=IOVec(address,size)\nlibc=ctypes.CDLL(None,use_errno=True); call=libc.process_vm_readv; call.restype=ctypes.c_ssize_t\ncall.argtypes=[ctypes.c_int,ctypes.POINTER(IOVec),ctypes.c_ulong,ctypes.POINTER(IOVec),ctypes.c_ulong,ctypes.c_ulong]\ncount=call(pid,ctypes.byref(local),1,ctypes.byref(remote),1,0)\nresult['process_vm_readv']={'read_bytes':count,'errno':ctypes.get_errno()}\nresult['unknown_tool']=request({'jsonrpc':'2.0','id':3,'method':'tools/call','params':{'name':'read_writer_credential','arguments':{}}})\nresult['direct_identity_injection']=request({'jsonrpc':'2.0','id':4,'method':'tools/call','params':{'name':'repository_write','arguments':{'request':{'action':'modify','path':'README.md','content':'blocked','role':'admin','authority':'attacker@1','root':'/tmp'}}}})\nprint(json.dumps(result),flush=True)\nf.close();s.close()\n"
+  ]
+}

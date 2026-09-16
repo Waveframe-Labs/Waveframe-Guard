@@ -1,0 +1,70 @@
+{
+  "containers_before": [
+    "wf54-verified-writer",
+    "wf54-ui-agent",
+    "wf54-ui-writer",
+    "wf54-ui-proxy",
+    "wf54-verified-agent",
+    "wf54-verified-proxy",
+    "wf54-contained-final-writer",
+    "wf54-contained-final-agent",
+    "wf54-contained-final-proxy",
+    "wf54-preflight3-agent",
+    "wf54-preflight3-writer",
+    "wf54-preflight3-proxy"
+  ],
+  "cleanup": [
+    {
+      "command": [
+        "python",
+        "examples/codex_contained/run.py",
+        "cleanup",
+        "--name",
+        "wf54-preflight3",
+        "--output",
+        "acceptance-output/wf54-preflight3"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "python",
+        "examples/codex_contained/run.py",
+        "cleanup",
+        "--name",
+        "wf54-contained-final",
+        "--output",
+        "acceptance-output/wf54-contained-final"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "python",
+        "examples/codex_contained/run.py",
+        "cleanup",
+        "--name",
+        "wf54-verified",
+        "--output",
+        "acceptance-output/wf54-verified"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "python",
+        "examples/codex_contained/run.py",
+        "cleanup",
+        "--name",
+        "wf54-ui",
+        "--output",
+        "acceptance-output/wf54-ui"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "containers_after": [],
+  "volumes_after": [],
+  "remaining_running_containers": [],
+  "local_image_retained": "waveframe-guard-54-contained:local"
+}
