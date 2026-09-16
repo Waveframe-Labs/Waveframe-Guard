@@ -22,6 +22,59 @@ COMPILER = "ae590dee058d3481e384dea850d5b7d980f533ff"
 EVIDENCE = "46cd4c5a9a2c17e2367d64b56803df92de69d8b3"
 URL = f"https://raw.githubusercontent.com/Waveframe-Labs/Waveframe-Ledger/{EVIDENCE}/"
 
+# Keep the conservative #51 inventory, including every existing test/fixture.
+# Additional configuration paths are included even when absent at BASE so that
+# introducing pytest hooks or changing build/collection settings invalidates reuse.
+MOUNT_INPUTS = {
+    "guard": "complete legacy SDK runtime",
+    "waveframe_guard": "complete public SDK runtime",
+    "contracts": "runtime contracts and resources",
+    "tests": "all existing tests, fixtures and conftest hooks, including the real mount test",
+    "pyproject.toml": "build, dependencies and possible pytest settings",
+    "conftest.py": "possible root pytest hooks",
+    "pytest.ini": "possible pytest settings",
+    ".pytest.ini": "possible pytest settings",
+    "setup.cfg": "possible build and pytest settings",
+    "setup.py": "possible build settings",
+    "tox.ini": "possible pytest settings",
+    ".gitattributes": "checkout byte conversion rules",
+}
+MOUNT_UNRELATED_ADDITIONS = {
+    "tests/test_codex_connection.py":
+        "standalone fixture-backed MCP adapter tests; no shared hooks or mount-test imports",
+    "tests/test_ledger_guard_extra.py":
+        "standalone coordinator selection/inventory tests; no shared hooks or mount-test imports",
+}
+
+
+def selected_archives(ledger, guard, compiler, *, extras=False):
+    """Direct requirements prevent same-version index wheels winning resolution."""
+    return (str(ledger) + ("[dev,guard]" if extras else ""), str(guard), str(compiler))
+
+
+def mount_inventory(tree):
+    """Select exact tracked path/mode/object IDs from git ls-tree -r -z output."""
+    entries = {}
+    for entry in tree.decode("utf-8").split("\0"):
+        if entry:
+            identity, path = entry.split("\t", 1)
+            if any(path == root or path.startswith(root + "/") for root in MOUNT_INPUTS):
+                entries[path] = identity
+    return entries
+
+
+def verify_mount_inputs(before, after):
+    before, after = mount_inventory(before), mount_inventory(after)
+    unrelated = {}
+    for path, reason in MOUNT_UNRELATED_ADDITIONS.items():
+        assert path not in before, f"mount exemption must be an addition: {path}"
+        if path in after:
+            unrelated[path] = {"git_identity": after.pop(path), "reason": reason}
+    changed = sorted(path for path in before.keys() | after.keys() if before.get(path) != after.get(path))
+    assert not changed, f"mount-relevant inputs changed; retained proof cannot be reused: {changed}"
+    return {"inventory": MOUNT_INPUTS, "unchanged_git_inputs": after,
+            "unrelated_test_additions": unrelated}
+
 
 def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -163,7 +216,7 @@ def main():
                            archive_origin=report["archive_origin"])
         gate.report["gates"] = {"combined_extra": "incomplete"}
         gate.env["WAVEFRAME_LEDGER_TEST_WHEEL"] = str(ledger)
-        python = gate.environment("combined-extra", "--find-links", wheelhouse, f"{ledger}[dev,guard]")
+        python = gate.environment("combined-extra", *selected_archives(ledger, guard, compiler, extras=True))
         expected = gate.archive_expectations("combined-extra", compiler, compiler_build,
             {"governance-ledger": ledger, "waveframe-guard": guard})
         gate.probe(python, support, "combined-provenance", "check_installed_wheel_set.py", expected)
@@ -185,7 +238,7 @@ def main():
         upgrade = gate.environment("guard-entry", "governance-ledger==0.8.0",
                                    "waveframe-guard==0.18.0", "cricore-contract-compiler==0.4.0")
         gate.run("guard-entry-upgrade", upgrade, "-m", "pip", "install", "--upgrade",
-                 "--find-links", wheelhouse, guard, "--report", gate.output / "guard-entry-install.json")
+                 *selected_archives(ledger, guard, compiler), "--report", gate.output / "guard-entry-install.json")
         gate.run("guard-entry-upgrade-check", upgrade, "-m", "pip", "check")
         expected = gate.archive_expectations("guard-entry", compiler, compiler_build,
             {"governance-ledger": ledger, "waveframe-guard": guard})
@@ -208,9 +261,11 @@ def main():
         assert digest(old_guard) == selected["guard_manifest"]["wheel_sha256"]
         unchanged = runtime_bytes(guard, ("guard/", "waveframe_guard/"))
         assert unchanged == runtime_bytes(old_guard, ("guard/", "waveframe_guard/"))
-        git("mount-input-equivalence", ROOT, "diff", "--exit-code", BASE, "HEAD", "--",
-            "guard", "waveframe_guard", "tests", "contracts", "pyproject.toml")
+        mount_inputs = verify_mount_inputs(
+            git("mount-inputs-base", ROOT, "ls-tree", "-r", "-z", BASE),
+            git("mount-inputs-current", ROOT, "ls-tree", "-r", "-z", head))
         report["mount_equivalence"] = {"historical_guard_head": BASE,
+            "source_inputs": mount_inputs,
             "historical_cell_wheel_sha256": digest(old_guard), "current_wheel_sha256": digest(guard),
             "runtime_sha256": unchanged,
             "retained_mount_evidence_commit": "e6008345c9891ec6ffb5088f38177022e3cef4aa",

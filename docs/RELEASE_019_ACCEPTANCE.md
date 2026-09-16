@@ -97,7 +97,19 @@ Guard evidence commit `e6008345c9891ec6ffb5088f38177022e3cef4aa`, including
 `artifacts/final-head-mount.zip`. Its exact tested wheel SHA-256 is
 `2b78374416635ca551ee5470fcd1e9e390d3f08141a53c91bcba7d42516b046e`.
 The wrapper compares all current Guard runtime bytes against #51 and requires
-unchanged runtime, tests, contracts and dependency metadata. Ledger #26 repairs
+unchanged runtime, contracts, dependency metadata and mount-relevant source inputs.
+The explicit inventory in `tools/acceptance/ledger_guard_extra.py` retains the
+entire existing tests tree (including fixtures and shared hooks), both runtime
+trees, contracts, `pyproject.toml`, root checkout attributes and possible root
+pytest/build configuration. It compares Git path, mode and object identity, so
+additions, removals, renames and byte changes invalidate equivalence. Only the
+new standalone `test_codex_connection.py` and `test_ledger_guard_extra.py` modules
+are excluded: they test the adapter and coordinator, are not imported by the
+mount test and provide no shared hooks. Exemptions must be absent at the historical
+base; their identities and reasons are recorded alongside every unchanged input.
+Unknown additions under the inventory still fail. This source inventory does not
+exempt either runtime tree from the separate wheel-byte equality check.
+Ledger #26 repairs
 CLI/legacy mediation and validation; Guard's filesystem enforcement is unchanged.
 This is scoped reuse of that proof, not a claim that the new wheel was mount-tested.
 Historical #49 evidence remains separately identified. Platform and namespace
