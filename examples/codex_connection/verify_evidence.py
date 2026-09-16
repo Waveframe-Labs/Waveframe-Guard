@@ -2,6 +2,8 @@
 import argparse
 import json
 from pathlib import Path
+import shutil
+import tempfile
 
 from waveframe_guard import Guard
 
@@ -13,19 +15,24 @@ def main():
     root = args.evidence.resolve()
     result = {"attestations": [], "inspections": {}, "replay_scope": "logical_decision_only"}
     # Artifact-store access requires no authority activation or mutation callback.
-    for action in ("create", "modify"):
-        guard = Guard.local(workspace=root / "guard" / action)
-        try:
-            for path in (guard.workspace / "execution-attestations").glob("*.json"):
-                attestation = guard.store.load_execution_attestation(path.stem)
-                guard.store.load_run(path.stem)
-                replay = guard.store.replay(path.stem)
-                assert replay["matches"]
-                result["attestations"].append({"run_id": path.stem,
-                    "execution_status": attestation["execution_status"],
-                    "mutation_status": attestation["mutation_status"], "replay_matches": True})
-        finally:
-            guard.close()
+    # The released replay API saves a replay artifact. Work on copies so
+    # verification never changes the archived evidence or its byte manifest.
+    with tempfile.TemporaryDirectory() as temp:
+        for action in ("create", "modify"):
+            workspace = Path(temp) / action
+            shutil.copytree(root / "guard" / action, workspace)
+            guard = Guard.local(workspace=workspace)
+            try:
+                for path in (guard.workspace / "execution-attestations").glob("*.json"):
+                    attestation = guard.store.load_execution_attestation(path.stem)
+                    guard.store.load_run(path.stem)
+                    replay = guard.store.replay(path.stem)
+                    assert replay["matches"]
+                    result["attestations"].append({"run_id": path.stem,
+                        "execution_status": attestation["execution_status"],
+                        "mutation_status": attestation["mutation_status"], "replay_matches": True})
+            finally:
+                guard.close()
     for path in (root / "native").glob("*/inspection.json"):
         inspection = json.loads(path.read_text())
         changes = sorted(k for k in inspection["before"].keys() | inspection["after"].keys()
