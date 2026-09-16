@@ -1,0 +1,21 @@
+Recorded terminal outcome from the initial relevant-gate run (not a raw full traceback).
+
+Command:
+C:/Users/swrig/AppData/Local/Waveframe/issue54/venv/Scripts/python.exe -m pytest tests/test_action_policy_creation.py -q -k release
+
+Result: 1 failed, 42 passed, 50 deselected in 1.62s.
+Failure: test_exact_dependencies_and_installed_public_api_acceptance[release]
+tools/acceptance/action_policy_creation.py:50
+    direct = json.loads(dist.read_text("direct_url.json"))
+TypeError: the JSON object must be str, bytes or bytearray, not NoneType
+
+This check expects a Git source-install direct_url.json with exact historical
+commit IDs. The proof intentionally installed public PyPI wheels, recorded in
+pip-report.json, which have no direct_url.json. No dependency, fixture or core
+SDK code was changed to make the check pass.
+
+Final relevant-gate command explicitly deselected both parameters of this
+source-install-only test. The command and 286 passed / 63 skipped / 2 deselected
+result are documented in RESULTS.md and relevant-tests.txt. The 10 adapter checks
+also ran separately with --noconftest --import-mode=importlib to retain installed
+wheel imports; ordinary repository conftest deliberately switches to source.

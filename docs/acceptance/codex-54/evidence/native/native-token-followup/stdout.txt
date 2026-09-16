@@ -1,0 +1,173 @@
+{
+  "token": {
+    "user_sid": "S-1-5-21-1414178670-2611979189-260258966-1004",
+    "restricted_sids": [
+      [
+        "S-1-5-21-1001917989-1495221339-3404521762-2986168395",
+        7
+      ],
+      [
+        "S-1-5-21-1414178670-2611979189-260258966-1004",
+        7
+      ],
+      [
+        "S-1-5-5-0-4020516",
+        7
+      ],
+      [
+        "S-1-1-0",
+        7
+      ]
+    ],
+    "elevation_type": 1
+  },
+  "python_direct_create": {
+    "allowed": false,
+    "error": "PermissionError",
+    "errno": 13,
+    "winerror": null
+  },
+  "python_direct_modify": {
+    "allowed": false,
+    "error": "PermissionError",
+    "errno": 13,
+    "winerror": null
+  },
+  "writer_code": {
+    "allowed": false,
+    "error": "PermissionError",
+    "errno": 13,
+    "winerror": null
+  },
+  "policy": {
+    "allowed": false,
+    "error": "PermissionError",
+    "errno": 13,
+    "winerror": null
+  },
+  "selection_config": {
+    "allowed": false,
+    "error": "PermissionError",
+    "errno": 13,
+    "winerror": null
+  },
+  "dependency_import": {
+    "allowed": false,
+    "error": "PermissionError",
+    "errno": 13,
+    "winerror": null
+  },
+  "dependency_injection": {
+    "allowed": false,
+    "error": "PermissionError",
+    "errno": 13,
+    "winerror": null
+  },
+  "scratch_write": {
+    "allowed": true,
+    "value": 13
+  },
+  "child_python": {
+    "argv": [
+      "C:\\Users\\swrig\\AppData\\Local\\Waveframe\\issue54\\venv\\Scripts\\python.exe",
+      "-I",
+      "-c",
+      "from pathlib import Path; Path('child-bypass.txt').write_text('bypass')"
+    ],
+    "exit_code": 1,
+    "stdout": "",
+    "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    from pathlib import Path; Path('child-bypass.txt').write_text('bypass')\n                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^\n  File \"C:\\Python314\\Lib\\pathlib\\__init__.py\", line 809, in write_text\n    with self.open(mode='w', encoding=encoding, errors=errors, newline=newline) as f:\n         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Python314\\Lib\\pathlib\\__init__.py\", line 771, in open\n    return io.open(self, mode, buffering, encoding, errors, newline)\n           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nPermissionError: [Errno 13] Permission denied: 'child-bypass.txt'\n"
+  },
+  "child_shell": {
+    "argv": [
+      "powershell.exe",
+      "-NoProfile",
+      "-Command",
+      "Set-Content -LiteralPath child-shell-bypass.txt -Value bypass"
+    ],
+    "exit_code": 1,
+    "stdout": "",
+    "stderr": "Set-Content : Access to the path \n'C:\\Users\\swrig\\AppData\\Local\\Waveframe\\issue54\\final\\workspace\\child-shell-bypass.txt' is denied.\nAt line:1 char:1\n+ Set-Content -LiteralPath child-shell-bypass.txt -Value bypass\n+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n    + CategoryInfo          : PermissionDenied: (C:\\Users\\swrig\\...hell-bypass.txt:String) [Set-Content], Unauthorized \n   AccessException\n    + FullyQualifiedErrorId : GetContentWriterUnauthorizedAccessError,Microsoft.PowerShell.Commands.SetContentCommand\n \n"
+  },
+  "identity": {
+    "argv": [
+      "whoami.exe",
+      "/all"
+    ],
+    "exit_code": 0,
+    "stdout": "\nUSER INFORMATION\n----------------\n\nUser Name                    SID                                          \n============================ =============================================\nwf-dev01\\codexsandboxoffline S-1-5-21-1414178670-2611979189-260258966-1004\n\n\nGROUP INFORMATION\n-----------------\n\nGroup Name                             Type             SID                                           Attributes                                        \n====================================== ================ ============================================= ==================================================\nEveryone                               Well-known group S-1-1-0                                       Mandatory group, Enabled by default, Enabled group\nWF-DEV01\\CodexSandboxUsers             Alias            S-1-5-21-1414178670-2611979189-260258966-1003 Mandatory group, Enabled by default, Enabled group\nBUILTIN\\Users                          Alias            S-1-5-32-545                                  Mandatory group, Enabled by default, Enabled group\nNT AUTHORITY\\INTERACTIVE               Well-known group S-1-5-4                                       Mandatory group, Enabled by default, Enabled group\nCONSOLE LOGON                          Well-known group S-1-2-1                                       Mandatory group, Enabled by default, Enabled group\nNT AUTHORITY\\Authenticated Users       Well-known group S-1-5-11                                      Mandatory group, Enabled by default, Enabled group\nNT AUTHORITY\\This Organization         Well-known group S-1-5-15                                      Mandatory group, Enabled by default, Enabled group\nNT AUTHORITY\\Local account             Well-known group S-1-5-113                                     Mandatory group, Enabled by default, Enabled group\nLOCAL                                  Well-known group S-1-2-0                                       Mandatory group, Enabled by default, Enabled group\nNT AUTHORITY\\NTLM Authentication       Well-known group S-1-5-64-10                                   Mandatory group, Enabled by default, Enabled group\nMandatory Label\\Medium Mandatory Level Label            S-1-16-8192                                                                                     \n\n\nPRIVILEGES INFORMATION\n----------------------\n\nPrivilege Name          Description              State  \n======================= ======================== =======\nSeChangeNotifyPrivilege Bypass traverse checking Enabled\n\n",
+    "stderr": ""
+  },
+  "acl": {
+    "argv": [
+      "icacls.exe",
+      "C:\\Users\\swrig\\AppData\\Local\\Waveframe\\issue54\\final\\workspace"
+    ],
+    "exit_code": 0,
+    "stdout": "C:\\Users\\swrig\\AppData\\Local\\Waveframe\\issue54\\final\\workspace WF-DEV01\\CodexSandboxUsers:(I)(OI)(CI)(RX)\n                                                               NT AUTHORITY\\SYSTEM:(I)(OI)(CI)(F)\n                                                               BUILTIN\\Administrators:(I)(OI)(CI)(F)\n                                                               WF-DEV01\\swrig:(I)(OI)(CI)(F)\n\nSuccessfully processed 1 files; Failed processing 0 files\n",
+    "stderr": ""
+  },
+  "acl_grant": {
+    "argv": [
+      "icacls.exe",
+      "C:\\Users\\swrig\\AppData\\Local\\Waveframe\\issue54\\final\\workspace\\README.md",
+      "/grant",
+      "CodexSandboxUsers:(F)"
+    ],
+    "exit_code": 5,
+    "stdout": "Successfully processed 0 files; Failed processing 1 files\n",
+    "stderr": "C:\\Users\\swrig\\AppData\\Local\\Waveframe\\issue54\\final\\workspace\\README.md: Access is denied.\n"
+  },
+  "ownership": {
+    "argv": [
+      "takeown.exe",
+      "/f",
+      "C:\\Users\\swrig\\AppData\\Local\\Waveframe\\issue54\\final\\workspace\\README.md"
+    ],
+    "exit_code": 1,
+    "stdout": "",
+    "stderr": "ERROR: The current logged on user does not have ownership privileges on\n       the file (or folder) \"C:\\Users\\swrig\\AppData\\Local\\Waveframe\\issue54\\final\\workspace\\README.md\".\n "
+  },
+  "writer_duplicate_handles": {
+    "allowed": false,
+    "winerror": 5
+  },
+  "writer_inject": {
+    "allowed": false,
+    "winerror": 5
+  },
+  "writer_read_memory": {
+    "allowed": true,
+    "winerror": 0
+  },
+  "nonsecret_memory_read": {
+    "allowed": true,
+    "matches_synthetic_marker": true,
+    "bytes_read": 31,
+    "winerror": 0
+  },
+  "writer_query_token": {
+    "allowed": true,
+    "winerror": 0
+  },
+  "writer_token_duplicate": {
+    "allowed": true
+  },
+  "writer_token_impersonate": {
+    "allowed": true
+  },
+  "writer_token_assign_primary": {
+    "allowed": true
+  },
+  "impersonated_write": {
+    "allowed": false,
+    "error": "OSError",
+    "errno": 22,
+    "winerror": null
+  },
+  "impersonation_level": 1,
+  "impersonated_win32_write": {
+    "allowed": false,
+    "winerror": 1346
+  }
+}
