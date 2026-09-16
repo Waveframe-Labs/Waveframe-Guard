@@ -80,7 +80,8 @@ def test_inventory_records_only_explicit_unrelated_additions():
 @pytest.mark.parametrize("path", list(BASE_INPUTS) + [
     "tests/new_mount_test.py", "tests/subdir/conftest.py", "tests/.gitattributes",
     "guard/new_runtime.py", "waveframe_guard/new_runtime.py", "contracts/new.json",
-    "conftest.py", "pytest.ini", ".pytest.ini", "setup.cfg", "setup.py", "tox.ini", ".gitattributes",
+    "conftest.py", "pytest.toml", ".pytest.toml", "pytest.ini", ".pytest.ini",
+    "setup.cfg", "setup.py", "tox.ini", ".gitattributes",
 ])
 def test_changed_or_added_relevant_input_invalidates_reuse(path):
     current = {**BASE_INPUTS, path: "100644 blob changed"}

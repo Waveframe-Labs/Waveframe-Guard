@@ -32,6 +32,8 @@ MOUNT_INPUTS = {
     "tests": "all existing tests, fixtures and conftest hooks, including the real mount test",
     "pyproject.toml": "build, dependencies and possible pytest settings",
     "conftest.py": "possible root pytest hooks",
+    "pytest.toml": "possible pytest settings",
+    ".pytest.toml": "possible pytest settings",
     "pytest.ini": "possible pytest settings",
     ".pytest.ini": "possible pytest settings",
     "setup.cfg": "possible build and pytest settings",
