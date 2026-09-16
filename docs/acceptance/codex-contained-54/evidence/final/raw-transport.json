@@ -1,0 +1,59 @@
+{
+  "before": {
+    "README.md": {
+      "sha256": "1a43538d565c2ab0fa798a1fafded4f70fceb07a654d1526b418eca9d0afba77",
+      "bytes": "23204164646974696f6e206578616d706c650a0a3e3e3e2032202b20330a360a"
+    }
+  },
+  "after": {
+    "README.md": {
+      "sha256": "1a43538d565c2ab0fa798a1fafded4f70fceb07a654d1526b418eca9d0afba77",
+      "bytes": "23204164646974696f6e206578616d706c650a0a3e3e3e2032202b20330a360a"
+    }
+  },
+  "results": {
+    "malformed": {
+      "scope": "supplemental deterministic MCP frame capture, not model chat",
+      "mode": "malformed",
+      "outcome": "malformed-frame",
+      "elapsed_seconds": 0.001,
+      "frames": [
+        {
+          "sent": "{\"jsonrpc\": \"2.0\", \"id\": 1, \"method\": \"initialize\", \"params\": {\"protocolVersion\": \"2025-03-26\", \"capabilities\": {}, \"clientInfo\": {\"name\": \"supplemental-raw-transport\", \"version\": \"1\"}}}\n"
+        },
+        {
+          "received": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"capabilities\":{\"experimental\":{},\"prompts\":{\"listChanged\":false},\"resources\":{\"listChanged\":false,\"subscribe\":false},\"tools\":{\"listChanged\":false}},\"instructions\":\"Call connection_status for loaded fixture policy and fixed identities. Use repository_write for create/modify only. Never retry a mutation after a timeout, disconnect or lost response. Read source bytes and ask the operator to inspect saved SDK evidence; report unknown until reconciled. This is fixture approval and local SDK evidence, not Cloud.\",\"protocolVersion\":\"2025-03-26\",\"serverInfo\":{\"name\":\"waveframe-contained-proof\",\"version\":\"\"}}}\n"
+        },
+        {
+          "sent": "{\"jsonrpc\": \"2.0\", \"method\": \"notifications/initialized\"}\n"
+        },
+        {
+          "sent": "{\"jsonrpc\": \"2.0\", \"id\": 2, \"method\": \"tools/call\", \"params\": {\"name\": \"connection_status\", \"arguments\": {}}}\n"
+        },
+        {
+          "received": "not-json\n"
+        }
+      ]
+    },
+    "timeout": {
+      "scope": "supplemental deterministic MCP frame capture, not model chat",
+      "mode": "timeout",
+      "outcome": "timeout",
+      "elapsed_seconds": 3.003,
+      "frames": [
+        {
+          "sent": "{\"jsonrpc\": \"2.0\", \"id\": 1, \"method\": \"initialize\", \"params\": {\"protocolVersion\": \"2025-03-26\", \"capabilities\": {}, \"clientInfo\": {\"name\": \"supplemental-raw-transport\", \"version\": \"1\"}}}\n"
+        },
+        {
+          "received": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"capabilities\":{\"experimental\":{},\"prompts\":{\"listChanged\":false},\"resources\":{\"listChanged\":false,\"subscribe\":false},\"tools\":{\"listChanged\":false}},\"instructions\":\"Call connection_status for loaded fixture policy and fixed identities. Use repository_write for create/modify only. Never retry a mutation after a timeout, disconnect or lost response. Read source bytes and ask the operator to inspect saved SDK evidence; report unknown until reconciled. This is fixture approval and local SDK evidence, not Cloud.\",\"protocolVersion\":\"2025-03-26\",\"serverInfo\":{\"name\":\"waveframe-contained-proof\",\"version\":\"\"}}}\n"
+        },
+        {
+          "sent": "{\"jsonrpc\": \"2.0\", \"method\": \"notifications/initialized\"}\n"
+        },
+        {
+          "sent": "{\"jsonrpc\": \"2.0\", \"id\": 2, \"method\": \"tools/call\", \"params\": {\"name\": \"connection_status\", \"arguments\": {}}}\n"
+        }
+      ]
+    }
+  }
+}
