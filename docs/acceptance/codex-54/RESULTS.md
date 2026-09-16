@@ -149,7 +149,7 @@ It is not counted as a passed OS test. The exact level/error follow-up therefore
 used the installed **`codex sandbox` command**, not a model conversation:
 [arguments](evidence/native/native-token-followup/argv.json),
 [full results](evidence/native/native-token-followup/stdout.txt),
-[operator script as run](evidence/native-token-followup.py),
+[operator script as run](evidence/native-token-followup.py.txt),
 [unchanged bytes](evidence/native/native-token-followup/inspection.json).
 
 Children inherit the restricted execution environment. The recorded writer
@@ -282,6 +282,10 @@ the unrestricted operator would not supply that separation.
 - Seven SDK attestations, associated saved runs and logical replays verify;
   all 11 principal phase inspections match their declared byte changes.
   Native memory-level follow-up is separate from the chat tests.
+- Repository integrity and its 34 dependency/CI-contract tests pass after
+  registering the exact 65 captured JSON paths. The original PowerShell-written
+  diagnostic script retains its BOM and bytes as a `.py.txt` archive, rather
+  than being treated as application source by repository AST checks.
 
 Commands for the final existing checks:
 
