@@ -1,0 +1,75 @@
+{
+  "before": {
+    "README.md": {
+      "sha256": "c99ecf3d6e18c394151d8da00c2f1444c32cc612f9e02af4c0149868119cc516",
+      "bytes": "23204164646974696f6e206578616d706c650a0a3e3e3e2032202b20330a350a0a417574686f72697a6564206c6f73742d726573706f6e7365206d61726b65722e0a"
+    },
+    "generated/addition.md": {
+      "sha256": "1a7eb4445c180c4f616d6e3bf1e93783a27efcddb699d23411d5390bce66e030",
+      "bytes": "23205768792032202b2033203d20350a0a4164646974696f6e20636f6d62696e6573207175616e7469746965732e20537461727420776974682074776f206f626a6563747320616e6420616464207468726565206d6f7265206f626a656374732e20436f756e74696e6720616c6c20746865206f626a65637473206769766573206f6e652c2074776f2c2074687265652c20666f75722c20666976652c20736f2032202b2033203d20352e0a0a4571756976616c656e746c792c207374617274206174203220616e6420636f756e7420666f72776172642074687265652073746570733a20332c20342c20352e0a"
+    },
+    "generated/new.md": {
+      "sha256": "9550e70a7c3619220570a6ed8b82684edbfc045b698027748b43afa2cadd6bae",
+      "bytes": "636f6c6c6973696f6e"
+    }
+  },
+  "after": {
+    "README.md": {
+      "sha256": "c99ecf3d6e18c394151d8da00c2f1444c32cc612f9e02af4c0149868119cc516",
+      "bytes": "23204164646974696f6e206578616d706c650a0a3e3e3e2032202b20330a350a0a417574686f72697a6564206c6f73742d726573706f6e7365206d61726b65722e0a"
+    },
+    "generated/addition.md": {
+      "sha256": "1a7eb4445c180c4f616d6e3bf1e93783a27efcddb699d23411d5390bce66e030",
+      "bytes": "23205768792032202b2033203d20350a0a4164646974696f6e20636f6d62696e6573207175616e7469746965732e20537461727420776974682074776f206f626a6563747320616e6420616464207468726565206d6f7265206f626a656374732e20436f756e74696e6720616c6c20746865206f626a65637473206769766573206f6e652c2074776f2c2074687265652c20666f75722c20666976652c20736f2032202b2033203d20352e0a0a4571756976616c656e746c792c207374617274206174203220616e6420636f756e7420666f72776172642074687265652073746570733a20332c20342c20352e0a"
+    },
+    "generated/new.md": {
+      "sha256": "9550e70a7c3619220570a6ed8b82684edbfc045b698027748b43afa2cadd6bae",
+      "bytes": "636f6c6c6973696f6e"
+    }
+  },
+  "results": {
+    "malformed": {
+      "scope": "supplemental deterministic MCP frame capture, not model chat",
+      "mode": "malformed",
+      "outcome": "malformed-frame",
+      "elapsed_seconds": 0.001,
+      "frames": [
+        {
+          "sent": "{\"jsonrpc\": \"2.0\", \"id\": 1, \"method\": \"initialize\", \"params\": {\"protocolVersion\": \"2025-03-26\", \"capabilities\": {}, \"clientInfo\": {\"name\": \"supplemental-raw-transport\", \"version\": \"1\"}}}\n"
+        },
+        {
+          "received": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"capabilities\":{\"experimental\":{},\"prompts\":{\"listChanged\":false},\"resources\":{\"listChanged\":false,\"subscribe\":false},\"tools\":{\"listChanged\":false}},\"instructions\":\"Use connection_status for actually loaded policy and fixed operation identities. Only repository_write can mutate protected source. Never retry after a failed or lost response. A failed preservation/report does not mean no file changed. Ask the operator to reconcile request/run IDs, local evidence, source bytes and Cloud records.\",\"protocolVersion\":\"2025-03-26\",\"serverInfo\":{\"name\":\"waveframe-contained-cloud\",\"version\":\"\"}}}\n"
+        },
+        {
+          "sent": "{\"jsonrpc\": \"2.0\", \"method\": \"notifications/initialized\"}\n"
+        },
+        {
+          "sent": "{\"jsonrpc\": \"2.0\", \"id\": 2, \"method\": \"tools/call\", \"params\": {\"name\": \"connection_status\", \"arguments\": {}}}\n"
+        },
+        {
+          "received": "not-json\n"
+        }
+      ]
+    },
+    "timeout": {
+      "scope": "supplemental deterministic MCP frame capture, not model chat",
+      "mode": "timeout",
+      "outcome": "timeout",
+      "elapsed_seconds": 3.0,
+      "frames": [
+        {
+          "sent": "{\"jsonrpc\": \"2.0\", \"id\": 1, \"method\": \"initialize\", \"params\": {\"protocolVersion\": \"2025-03-26\", \"capabilities\": {}, \"clientInfo\": {\"name\": \"supplemental-raw-transport\", \"version\": \"1\"}}}\n"
+        },
+        {
+          "received": "{\"jsonrpc\":\"2.0\",\"id\":1,\"result\":{\"capabilities\":{\"experimental\":{},\"prompts\":{\"listChanged\":false},\"resources\":{\"listChanged\":false,\"subscribe\":false},\"tools\":{\"listChanged\":false}},\"instructions\":\"Use connection_status for actually loaded policy and fixed operation identities. Only repository_write can mutate protected source. Never retry after a failed or lost response. A failed preservation/report does not mean no file changed. Ask the operator to reconcile request/run IDs, local evidence, source bytes and Cloud records.\",\"protocolVersion\":\"2025-03-26\",\"serverInfo\":{\"name\":\"waveframe-contained-cloud\",\"version\":\"\"}}}\n"
+        },
+        {
+          "sent": "{\"jsonrpc\": \"2.0\", \"method\": \"notifications/initialized\"}\n"
+        },
+        {
+          "sent": "{\"jsonrpc\": \"2.0\", \"id\": 2, \"method\": \"tools/call\", \"params\": {\"name\": \"connection_status\", \"arguments\": {}}}\n"
+        }
+      ]
+    }
+  }
+}

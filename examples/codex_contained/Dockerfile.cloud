@@ -1,0 +1,9 @@
+FROM python:3.14.7-slim@sha256:cad9a2c871761c413caa6fdd6441c783451e740a48aaeba60ae62a8b53525ef6
+RUN apt-get update && apt-get install -y --no-install-recommends socat && rm -rf /var/lib/apt/lists/*
+COPY --from=cloud requirements.txt requirements-api-common.txt /opt/requirements/
+RUN pip install --no-cache-dir --report /opt/pip-report.json -r /opt/requirements/requirements.txt
+COPY examples/codex_contained/disposable_cloud.py /opt/disposable_cloud.py
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+USER 10001:10001
+WORKDIR /cloud
+ENTRYPOINT ["python", "-I", "/opt/disposable_cloud.py"]

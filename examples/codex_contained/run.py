@@ -94,11 +94,12 @@ def inspect(name):
     return json.loads(docker('inspect', name + '-agent', name + '-writer', name + '-proxy').stdout)
 
 
-def setup(name, output, auth):
+def setup(name, output, auth, writer_factory=None):
     started = time.time()
     output.mkdir(parents=True, exist_ok=False)
     docker('info')
-    assert not docker('ps', '-aq', '--filter', 'label=waveframe.proof=' + name).stdout.strip()
+    for role in ('agent', 'writer', 'proxy'):
+        assert docker('inspect', name + '-' + role, check=False).returncode, 'client resource already exists'
     # Refuse resource reuse, including orphan volumes.
     for volume in ('source', 'evidence', 'scratch', 'ipc', 'egress', 'secret'):
         if docker('volume', 'inspect', name + '-' + volume, check=False).returncode == 0:
@@ -122,7 +123,7 @@ for n in ('source','evidence','scratch','ipc','egress','secret'):
            '--user', '0', *volumes, '--entrypoint', 'python', IMAGE, '-I', '-c', initializer)
     docker('run', '-d', '--name', name + '-proxy', '--label', 'waveframe.proof=' + name,
            *security('bridge'), '--memory', '384m', *mount(name, 'egress', '/egress'), IMAGE, 'proxy')
-    writer(name)
+    (writer_factory or writer)(name)
     docker('run', '-d', '--name', name + '-agent', '--label', 'waveframe.proof=' + name,
            *security(), '--memory', '2g', *mount(name, 'source', '/source', True),
            *mount(name, 'scratch', '/scratch'), *mount(name, 'ipc', '/ipc', True),

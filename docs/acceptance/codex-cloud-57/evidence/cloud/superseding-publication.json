@@ -1,0 +1,312 @@
+{
+  "approved": {
+    "authority": {
+      "name": "Contained Codex 57",
+      "version": "2.0.0"
+    },
+    "policy": {
+      "name": "Superseding disposable policy"
+    },
+    "private_evidence": {
+      "deletable": true,
+      "retained": true
+    },
+    "publication": null,
+    "review": {
+      "bindings": [],
+      "clauses": [
+        {
+          "clause_id": "policy-clause-d074fb9da7920e0a047c63ea9bbc06ce16d7df5ab23e8bf423d3227fbcd67f06",
+          "controls": [
+            {
+              "confirmed": true,
+              "control_id": "candidate-control-acfa80e799e3db5661214bd4b2c2a48275a0621af0a5963356d7436174ffa254",
+              "enforcement_location": "Compatible Guard runtime \u00b7 connection and operation evidence verified separately",
+              "explanation": "The create action requires repository role 'repository-maintainer'. This role grants no operation. This policy is prepared to enforce these controls through a compatible Guard runtime. Create and modify have independent paths and action-wide roles. An absent action or missing matching allow grants no permission. A matching deny wins within the same action; rules never cross actions. Roles restrict an action and grant no paths. Creation requires exclusive creation of one new regular file under an existing parent in the selected workspace, without overwrite or parent creation. Guard must check filesystem state, not caller facts. This review does not establish deployment, a connected runtime, successful execution, or control over mutations outside Guard.",
+              "questions": []
+            }
+          ],
+          "coverage": "Prepared for a compatible Guard runtime",
+          "residual_acknowledged": false,
+          "residual_explanation": null,
+          "source_span": {
+            "end_byte": 71,
+            "start_byte": 0
+          },
+          "source_text": "Agents must use role repository-maintainer to create repository files.\n"
+        },
+        {
+          "clause_id": "policy-clause-f17636d8b701eb427ab4fb83c3f11d464ebe49903af4d83e62063fe617f8a911",
+          "controls": [
+            {
+              "confirmed": true,
+              "control_id": "candidate-control-86d477148f61eeb5547411efbfce9ce60edb311d854eacb6515cd24640901a89",
+              "enforcement_location": "Compatible Guard runtime \u00b7 connection and operation evidence verified separately",
+              "explanation": "Automated agents may create files under 'generated/'. This policy is prepared to enforce these controls through a compatible Guard runtime. Create and modify have independent paths and action-wide roles. An absent action or missing matching allow grants no permission. A matching deny wins within the same action; rules never cross actions. Roles restrict an action and grant no paths. Creation requires exclusive creation of one new regular file under an existing parent in the selected workspace, without overwrite or parent creation. Guard must check filesystem state, not caller facts. This review does not establish deployment, a connected runtime, successful execution, or control over mutations outside Guard.",
+              "questions": []
+            }
+          ],
+          "coverage": "Prepared for a compatible Guard runtime",
+          "residual_acknowledged": false,
+          "residual_explanation": null,
+          "source_span": {
+            "end_byte": 113,
+            "start_byte": 71
+          },
+          "source_text": "Agents may create files under generated/.\n"
+        },
+        {
+          "clause_id": "policy-clause-80c4abfe9b7a0c7f8f44a899c30a413c259d534c52f4696a80e83e8b076915f7",
+          "controls": [
+            {
+              "confirmed": true,
+              "control_id": "candidate-control-b07470f68f684c3b72de6d9b8771418fd9794e4b7e41ccfae4155b604c08fe76",
+              "enforcement_location": "Compatible Guard runtime \u00b7 connection and operation evidence verified separately",
+              "explanation": "Automated agents must not create files under 'generated/private/'. This restriction grants no operation. This policy is prepared to enforce these controls through a compatible Guard runtime. Create and modify have independent paths and action-wide roles. An absent action or missing matching allow grants no permission. A matching deny wins within the same action; rules never cross actions. Roles restrict an action and grant no paths. Creation requires exclusive creation of one new regular file under an existing parent in the selected workspace, without overwrite or parent creation. Guard must check filesystem state, not caller facts. This review does not establish deployment, a connected runtime, successful execution, or control over mutations outside Guard.",
+              "questions": []
+            }
+          ],
+          "coverage": "Prepared for a compatible Guard runtime",
+          "residual_acknowledged": false,
+          "residual_explanation": null,
+          "source_span": {
+            "end_byte": 168,
+            "start_byte": 113
+          },
+          "source_text": "Agents must not create files under generated/private/.\n"
+        },
+        {
+          "clause_id": "policy-clause-eebcd12626e17dc56d284b30098fcd880c868e972dfdb2e62ead74ac86a24d59",
+          "controls": [
+            {
+              "confirmed": true,
+              "control_id": "candidate-control-ca7efa90fcc02cd42c967eddac7a3286c920993669bd55e35671ca5e7aa067cf",
+              "enforcement_location": "Compatible Guard runtime \u00b7 connection and operation evidence verified separately",
+              "explanation": "The modify action requires repository role 'security-reviewer'. This role grants no operation. This policy is prepared to enforce these controls through a compatible Guard runtime. Create and modify have independent paths and action-wide roles. An absent action or missing matching allow grants no permission. A matching deny wins within the same action; rules never cross actions. Roles restrict an action and grant no paths. Creation requires exclusive creation of one new regular file under an existing parent in the selected workspace, without overwrite or parent creation. Guard must check filesystem state, not caller facts. This review does not establish deployment, a connected runtime, successful execution, or control over mutations outside Guard.",
+              "questions": []
+            }
+          ],
+          "coverage": "Prepared for a compatible Guard runtime",
+          "residual_acknowledged": false,
+          "residual_explanation": null,
+          "source_span": {
+            "end_byte": 235,
+            "start_byte": 168
+          },
+          "source_text": "Agents must use role security-reviewer to modify repository files.\n"
+        },
+        {
+          "clause_id": "policy-clause-507a5880a00cc79234b7a791a1a4fc4fad30bd7a3994c421e588c3e4b5b88dc0",
+          "controls": [
+            {
+              "confirmed": true,
+              "control_id": "candidate-control-521baec8d349e118016ebf6addc23f00a2b2dcbd56531235a1d6129ac39bfe49",
+              "enforcement_location": "Compatible Guard runtime \u00b7 connection and operation evidence verified separately",
+              "explanation": "Automated agents may modify the exact path 'README.md'. This policy is prepared to enforce these controls through a compatible Guard runtime. Create and modify have independent paths and action-wide roles. An absent action or missing matching allow grants no permission. A matching deny wins within the same action; rules never cross actions. Roles restrict an action and grant no paths. Creation requires exclusive creation of one new regular file under an existing parent in the selected workspace, without overwrite or parent creation. Guard must check filesystem state, not caller facts. This review does not establish deployment, a connected runtime, successful execution, or control over mutations outside Guard.",
+              "questions": []
+            }
+          ],
+          "coverage": "Prepared for a compatible Guard runtime",
+          "residual_acknowledged": false,
+          "residual_explanation": null,
+          "source_span": {
+            "end_byte": 263,
+            "start_byte": 235
+          },
+          "source_text": "Agents may modify README.md."
+        }
+      ],
+      "coverage": {
+        "acknowledged_residual_count": 0,
+        "confirmed_control_count": 5,
+        "enforceable_control_clause_count": 5,
+        "full_clause_count": 5,
+        "informational_clause_count": 0,
+        "needs_answer_clause_count": 0,
+        "needs_confirmation_clause_count": 0,
+        "needs_connection_clause_count": 0,
+        "partial_clause_count": 0,
+        "proposed_control_count": 5,
+        "total_clause_count": 5,
+        "unenforced_clause_count": 0,
+        "waiting_clause_count": 0
+      }
+    },
+    "review_hash": "sha256:6e48098ebe9a241899811fa7571d26245f5d5487c64f56f72587f4e772a6b686",
+    "runtime_availability": {
+      "available": false,
+      "detail": "Approved policy preparation, sandbox simulation, SDK setup and verified operation evidence are separate. Release preparation does not activate a hosted deployment or customer runtime.",
+      "production_available": false,
+      "reason": "catalog_3_prepared_release",
+      "schema_version": "cloud_native_runtime_availability.v1",
+      "sdk_connection": {
+        "available": true,
+        "detail": "Compatible SDK setup is prepared for Cloud 0.6.0; public package acceptance is pending publication. Connection requires runtime evidence."
+      },
+      "simulation": {
+        "available": false,
+        "detail": "The isolated sandbox is unavailable or does not support catalog 3."
+      }
+    },
+    "schema_version": "cloud_policy_translation.v3",
+    "state": "approved",
+    "translation_id": "translation-cb285c018b93b51e4cfe89758118dc80a551c8c01e57e64ae7aa1c133da87dc8"
+  },
+  "published": {
+    "authority": {
+      "name": "Contained Codex 57",
+      "version": "2.0.0"
+    },
+    "policy": {
+      "name": "Superseding disposable policy"
+    },
+    "private_evidence": {
+      "deletable": true,
+      "retained": true
+    },
+    "publication": {
+      "authority_ref": "contained-codex-57@2.0.0",
+      "publication_id": "cloud-translation-15e0b4654721350f1a51588555c1220e",
+      "published_at": "2026-09-17T02:10:34Z"
+    },
+    "review": {
+      "bindings": [],
+      "clauses": [
+        {
+          "clause_id": "policy-clause-d074fb9da7920e0a047c63ea9bbc06ce16d7df5ab23e8bf423d3227fbcd67f06",
+          "controls": [
+            {
+              "confirmed": true,
+              "control_id": "candidate-control-acfa80e799e3db5661214bd4b2c2a48275a0621af0a5963356d7436174ffa254",
+              "enforcement_location": "Compatible Guard runtime \u00b7 connection and operation evidence verified separately",
+              "explanation": "The create action requires repository role 'repository-maintainer'. This role grants no operation. This policy is prepared to enforce these controls through a compatible Guard runtime. Create and modify have independent paths and action-wide roles. An absent action or missing matching allow grants no permission. A matching deny wins within the same action; rules never cross actions. Roles restrict an action and grant no paths. Creation requires exclusive creation of one new regular file under an existing parent in the selected workspace, without overwrite or parent creation. Guard must check filesystem state, not caller facts. This review does not establish deployment, a connected runtime, successful execution, or control over mutations outside Guard.",
+              "questions": []
+            }
+          ],
+          "coverage": "Prepared for a compatible Guard runtime",
+          "residual_acknowledged": false,
+          "residual_explanation": null,
+          "source_span": {
+            "end_byte": 71,
+            "start_byte": 0
+          },
+          "source_text": "Agents must use role repository-maintainer to create repository files.\n"
+        },
+        {
+          "clause_id": "policy-clause-f17636d8b701eb427ab4fb83c3f11d464ebe49903af4d83e62063fe617f8a911",
+          "controls": [
+            {
+              "confirmed": true,
+              "control_id": "candidate-control-86d477148f61eeb5547411efbfce9ce60edb311d854eacb6515cd24640901a89",
+              "enforcement_location": "Compatible Guard runtime \u00b7 connection and operation evidence verified separately",
+              "explanation": "Automated agents may create files under 'generated/'. This policy is prepared to enforce these controls through a compatible Guard runtime. Create and modify have independent paths and action-wide roles. An absent action or missing matching allow grants no permission. A matching deny wins within the same action; rules never cross actions. Roles restrict an action and grant no paths. Creation requires exclusive creation of one new regular file under an existing parent in the selected workspace, without overwrite or parent creation. Guard must check filesystem state, not caller facts. This review does not establish deployment, a connected runtime, successful execution, or control over mutations outside Guard.",
+              "questions": []
+            }
+          ],
+          "coverage": "Prepared for a compatible Guard runtime",
+          "residual_acknowledged": false,
+          "residual_explanation": null,
+          "source_span": {
+            "end_byte": 113,
+            "start_byte": 71
+          },
+          "source_text": "Agents may create files under generated/.\n"
+        },
+        {
+          "clause_id": "policy-clause-80c4abfe9b7a0c7f8f44a899c30a413c259d534c52f4696a80e83e8b076915f7",
+          "controls": [
+            {
+              "confirmed": true,
+              "control_id": "candidate-control-b07470f68f684c3b72de6d9b8771418fd9794e4b7e41ccfae4155b604c08fe76",
+              "enforcement_location": "Compatible Guard runtime \u00b7 connection and operation evidence verified separately",
+              "explanation": "Automated agents must not create files under 'generated/private/'. This restriction grants no operation. This policy is prepared to enforce these controls through a compatible Guard runtime. Create and modify have independent paths and action-wide roles. An absent action or missing matching allow grants no permission. A matching deny wins within the same action; rules never cross actions. Roles restrict an action and grant no paths. Creation requires exclusive creation of one new regular file under an existing parent in the selected workspace, without overwrite or parent creation. Guard must check filesystem state, not caller facts. This review does not establish deployment, a connected runtime, successful execution, or control over mutations outside Guard.",
+              "questions": []
+            }
+          ],
+          "coverage": "Prepared for a compatible Guard runtime",
+          "residual_acknowledged": false,
+          "residual_explanation": null,
+          "source_span": {
+            "end_byte": 168,
+            "start_byte": 113
+          },
+          "source_text": "Agents must not create files under generated/private/.\n"
+        },
+        {
+          "clause_id": "policy-clause-eebcd12626e17dc56d284b30098fcd880c868e972dfdb2e62ead74ac86a24d59",
+          "controls": [
+            {
+              "confirmed": true,
+              "control_id": "candidate-control-ca7efa90fcc02cd42c967eddac7a3286c920993669bd55e35671ca5e7aa067cf",
+              "enforcement_location": "Compatible Guard runtime \u00b7 connection and operation evidence verified separately",
+              "explanation": "The modify action requires repository role 'security-reviewer'. This role grants no operation. This policy is prepared to enforce these controls through a compatible Guard runtime. Create and modify have independent paths and action-wide roles. An absent action or missing matching allow grants no permission. A matching deny wins within the same action; rules never cross actions. Roles restrict an action and grant no paths. Creation requires exclusive creation of one new regular file under an existing parent in the selected workspace, without overwrite or parent creation. Guard must check filesystem state, not caller facts. This review does not establish deployment, a connected runtime, successful execution, or control over mutations outside Guard.",
+              "questions": []
+            }
+          ],
+          "coverage": "Prepared for a compatible Guard runtime",
+          "residual_acknowledged": false,
+          "residual_explanation": null,
+          "source_span": {
+            "end_byte": 235,
+            "start_byte": 168
+          },
+          "source_text": "Agents must use role security-reviewer to modify repository files.\n"
+        },
+        {
+          "clause_id": "policy-clause-507a5880a00cc79234b7a791a1a4fc4fad30bd7a3994c421e588c3e4b5b88dc0",
+          "controls": [
+            {
+              "confirmed": true,
+              "control_id": "candidate-control-521baec8d349e118016ebf6addc23f00a2b2dcbd56531235a1d6129ac39bfe49",
+              "enforcement_location": "Compatible Guard runtime \u00b7 connection and operation evidence verified separately",
+              "explanation": "Automated agents may modify the exact path 'README.md'. This policy is prepared to enforce these controls through a compatible Guard runtime. Create and modify have independent paths and action-wide roles. An absent action or missing matching allow grants no permission. A matching deny wins within the same action; rules never cross actions. Roles restrict an action and grant no paths. Creation requires exclusive creation of one new regular file under an existing parent in the selected workspace, without overwrite or parent creation. Guard must check filesystem state, not caller facts. This review does not establish deployment, a connected runtime, successful execution, or control over mutations outside Guard.",
+              "questions": []
+            }
+          ],
+          "coverage": "Prepared for a compatible Guard runtime",
+          "residual_acknowledged": false,
+          "residual_explanation": null,
+          "source_span": {
+            "end_byte": 263,
+            "start_byte": 235
+          },
+          "source_text": "Agents may modify README.md."
+        }
+      ],
+      "coverage": {
+        "acknowledged_residual_count": 0,
+        "confirmed_control_count": 5,
+        "enforceable_control_clause_count": 5,
+        "full_clause_count": 5,
+        "informational_clause_count": 0,
+        "needs_answer_clause_count": 0,
+        "needs_confirmation_clause_count": 0,
+        "needs_connection_clause_count": 0,
+        "partial_clause_count": 0,
+        "proposed_control_count": 5,
+        "total_clause_count": 5,
+        "unenforced_clause_count": 0,
+        "waiting_clause_count": 0
+      }
+    },
+    "review_hash": "sha256:6e48098ebe9a241899811fa7571d26245f5d5487c64f56f72587f4e772a6b686",
+    "runtime_availability": {
+      "available": false,
+      "detail": "Approved policy preparation, sandbox simulation, SDK setup and verified operation evidence are separate. Release preparation does not activate a hosted deployment or customer runtime.",
+      "production_available": false,
+      "reason": "catalog_3_prepared_release",
+      "schema_version": "cloud_native_runtime_availability.v1",
+      "sdk_connection": {
+        "available": true,
+        "detail": "Compatible SDK setup is prepared for Cloud 0.6.0; public package acceptance is pending publication. Connection requires runtime evidence."
+      },
+      "simulation": {
+        "available": false,
+        "detail": "The isolated sandbox is unavailable or does not support catalog 3."
+      }
+    },
+    "schema_version": "cloud_policy_translation.v3",
+    "state": "published",
+    "translation_id": "translation-cb285c018b93b51e4cfe89758118dc80a551c8c01e57e64ae7aa1c133da87dc8"
+  }
+}
