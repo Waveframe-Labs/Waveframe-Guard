@@ -1,0 +1,1372 @@
+{
+  "translation": {
+    "authority": {
+      "name": "Compiler documentation",
+      "version": "1.0.0"
+    },
+    "policy": {
+      "name": "Contained repository proof"
+    },
+    "private_evidence": {
+      "deletable": true,
+      "retained": true
+    },
+    "publication": null,
+    "review": {
+      "bindings": [],
+      "clauses": [
+        {
+          "clause_id": "policy-clause-fbfc4ff5f5d873759eae3e72be831c4cfb0bdf9b88f72031026679f25b6bbca6",
+          "controls": [
+            {
+              "confirmed": false,
+              "control_id": "candidate-control-acfa80e799e3db5661214bd4b2c2a48275a0621af0a5963356d7436174ffa254",
+              "enforcement_location": "Compatible Guard runtime \u00b7 connection and operation evidence verified separately",
+              "explanation": "The create action requires repository role 'repository-maintainer'. This role grants no operation. This policy is prepared to enforce these controls through a compatible Guard runtime. Create and modify have independent paths and action-wide roles. An absent action or missing matching allow grants no permission. A matching deny wins within the same action; rules never cross actions. Roles restrict an action and grant no paths. Creation requires exclusive creation of one new regular file under an existing parent in the selected workspace, without overwrite or parent creation. Guard must check filesystem state, not caller facts. This review does not establish deployment, a connected runtime, successful execution, or control over mutations outside Guard.",
+              "questions": []
+            }
+          ],
+          "coverage": "Needs confirmation",
+          "residual_acknowledged": false,
+          "residual_explanation": null,
+          "source_span": {
+            "end_byte": 71,
+            "start_byte": 0
+          },
+          "source_text": "Agents must use role repository-maintainer to create repository files.\n"
+        },
+        {
+          "clause_id": "policy-clause-d4f30bd28fd52f0729934bbd24d1c7b482393fb0f529ce1c26bba760db11e5df",
+          "controls": [
+            {
+              "confirmed": false,
+              "control_id": "candidate-control-42c579e90a29ba1c870a5b95ef46ea550f89b232ff75ca11d39b44157aac9dea",
+              "enforcement_location": "Compatible Guard runtime \u00b7 connection and operation evidence verified separately",
+              "explanation": "Automated agents may create the exact path 'examples/compile_repository_policy.py'. This policy is prepared to enforce these controls through a compatible Guard runtime. Create and modify have independent paths and action-wide roles. An absent action or missing matching allow grants no permission. A matching deny wins within the same action; rules never cross actions. Roles restrict an action and grant no paths. Creation requires exclusive creation of one new regular file under an existing parent in the selected workspace, without overwrite or parent creation. Guard must check filesystem state, not caller facts. This review does not establish deployment, a connected runtime, successful execution, or control over mutations outside Guard.",
+              "questions": []
+            }
+          ],
+          "coverage": "Needs confirmation",
+          "residual_acknowledged": false,
+          "residual_explanation": null,
+          "source_span": {
+            "end_byte": 128,
+            "start_byte": 71
+          },
+          "source_text": "Agents may create examples/compile_repository_policy.py.\n"
+        },
+        {
+          "clause_id": "policy-clause-d2208b089691276b7bd23dd020d116ab3e604a1f14c3e2a3cfbb00d6c24e3ea1",
+          "controls": [
+            {
+              "confirmed": false,
+              "control_id": "candidate-control-d4fa77b1922baa7861b71a18b5519b868ea9b120560f1b419d56ee75a9a66b49",
+              "enforcement_location": "Compatible Guard runtime \u00b7 connection and operation evidence verified separately",
+              "explanation": "The modify action requires repository role 'security-reviewer'. This role grants no operation. This policy is prepared to enforce these controls through a compatible Guard runtime. Create and modify have independent paths and action-wide roles. An absent action or missing matching allow grants no permission. A matching deny wins within the same action; rules never cross actions. Roles restrict an action and grant no paths. Creation requires exclusive creation of one new regular file under an existing parent in the selected workspace, without overwrite or parent creation. Guard must check filesystem state, not caller facts. This review does not establish deployment, a connected runtime, successful execution, or control over mutations outside Guard.",
+              "questions": []
+            }
+          ],
+          "coverage": "Needs confirmation",
+          "residual_acknowledged": false,
+          "residual_explanation": null,
+          "source_span": {
+            "end_byte": 195,
+            "start_byte": 128
+          },
+          "source_text": "Agents must use role security-reviewer to modify repository files.\n"
+        },
+        {
+          "clause_id": "policy-clause-f3314c9bb771c96de1c97207dfd627390e926a6d73700e6d9ae1813107484ee3",
+          "controls": [
+            {
+              "confirmed": false,
+              "control_id": "candidate-control-0367e2e1dc9aa072222b20e11b013a5021f0297b78ef38374f769220f5e3fbb1",
+              "enforcement_location": "Compatible Guard runtime \u00b7 connection and operation evidence verified separately",
+              "explanation": "Automated agents may modify the exact path 'README.md'. This policy is prepared to enforce these controls through a compatible Guard runtime. Create and modify have independent paths and action-wide roles. An absent action or missing matching allow grants no permission. A matching deny wins within the same action; rules never cross actions. Roles restrict an action and grant no paths. Creation requires exclusive creation of one new regular file under an existing parent in the selected workspace, without overwrite or parent creation. Guard must check filesystem state, not caller facts. This review does not establish deployment, a connected runtime, successful execution, or control over mutations outside Guard.",
+              "questions": []
+            }
+          ],
+          "coverage": "Needs confirmation",
+          "residual_acknowledged": false,
+          "residual_explanation": null,
+          "source_span": {
+            "end_byte": 223,
+            "start_byte": 195
+          },
+          "source_text": "Agents may modify README.md."
+        }
+      ],
+      "coverage": {
+        "acknowledged_residual_count": 0,
+        "confirmed_control_count": 0,
+        "enforceable_control_clause_count": 4,
+        "full_clause_count": 0,
+        "informational_clause_count": 0,
+        "needs_answer_clause_count": 0,
+        "needs_confirmation_clause_count": 4,
+        "needs_connection_clause_count": 0,
+        "partial_clause_count": 0,
+        "proposed_control_count": 4,
+        "total_clause_count": 4,
+        "unenforced_clause_count": 0,
+        "waiting_clause_count": 4
+      }
+    },
+    "review_hash": "sha256:a930ffacd4419845a21d9f074b25ed94e06690d0d45d7a4c525202ee5f0b9758",
+    "runtime_availability": {
+      "available": false,
+      "detail": "Approved policy preparation, sandbox simulation, SDK setup and verified operation evidence are separate. Release preparation does not activate a hosted deployment or customer runtime.",
+      "production_available": false,
+      "reason": "catalog_3_prepared_release",
+      "schema_version": "cloud_native_runtime_availability.v1",
+      "sdk_connection": {
+        "available": true,
+        "detail": "Compatible SDK setup is prepared for Cloud 0.6.0; public package acceptance is pending publication. Connection requires runtime evidence."
+      },
+      "simulation": {
+        "available": false,
+        "detail": "The isolated sandbox is unavailable or does not support catalog 3."
+      }
+    },
+    "schema_version": "cloud_policy_translation.v3",
+    "state": "review",
+    "translation_id": "translation-17200aac693ff7a797bda197f7c9a2152a9b9ebb2dde0295bcb95103e361c4b9"
+  },
+  "approval": {
+    "authority": {
+      "name": "Compiler documentation",
+      "version": "1.0.0"
+    },
+    "policy": {
+      "name": "Contained repository proof"
+    },
+    "private_evidence": {
+      "deletable": true,
+      "retained": true
+    },
+    "publication": null,
+    "review": {
+      "bindings": [],
+      "clauses": [
+        {
+          "clause_id": "policy-clause-fbfc4ff5f5d873759eae3e72be831c4cfb0bdf9b88f72031026679f25b6bbca6",
+          "controls": [
+            {
+              "confirmed": true,
+              "control_id": "candidate-control-acfa80e799e3db5661214bd4b2c2a48275a0621af0a5963356d7436174ffa254",
+              "enforcement_location": "Compatible Guard runtime \u00b7 connection and operation evidence verified separately",
+              "explanation": "The create action requires repository role 'repository-maintainer'. This role grants no operation. This policy is prepared to enforce these controls through a compatible Guard runtime. Create and modify have independent paths and action-wide roles. An absent action or missing matching allow grants no permission. A matching deny wins within the same action; rules never cross actions. Roles restrict an action and grant no paths. Creation requires exclusive creation of one new regular file under an existing parent in the selected workspace, without overwrite or parent creation. Guard must check filesystem state, not caller facts. This review does not establish deployment, a connected runtime, successful execution, or control over mutations outside Guard.",
+              "questions": []
+            }
+          ],
+          "coverage": "Prepared for a compatible Guard runtime",
+          "residual_acknowledged": false,
+          "residual_explanation": null,
+          "source_span": {
+            "end_byte": 71,
+            "start_byte": 0
+          },
+          "source_text": "Agents must use role repository-maintainer to create repository files.\n"
+        },
+        {
+          "clause_id": "policy-clause-d4f30bd28fd52f0729934bbd24d1c7b482393fb0f529ce1c26bba760db11e5df",
+          "controls": [
+            {
+              "confirmed": true,
+              "control_id": "candidate-control-42c579e90a29ba1c870a5b95ef46ea550f89b232ff75ca11d39b44157aac9dea",
+              "enforcement_location": "Compatible Guard runtime \u00b7 connection and operation evidence verified separately",
+              "explanation": "Automated agents may create the exact path 'examples/compile_repository_policy.py'. This policy is prepared to enforce these controls through a compatible Guard runtime. Create and modify have independent paths and action-wide roles. An absent action or missing matching allow grants no permission. A matching deny wins within the same action; rules never cross actions. Roles restrict an action and grant no paths. Creation requires exclusive creation of one new regular file under an existing parent in the selected workspace, without overwrite or parent creation. Guard must check filesystem state, not caller facts. This review does not establish deployment, a connected runtime, successful execution, or control over mutations outside Guard.",
+              "questions": []
+            }
+          ],
+          "coverage": "Prepared for a compatible Guard runtime",
+          "residual_acknowledged": false,
+          "residual_explanation": null,
+          "source_span": {
+            "end_byte": 128,
+            "start_byte": 71
+          },
+          "source_text": "Agents may create examples/compile_repository_policy.py.\n"
+        },
+        {
+          "clause_id": "policy-clause-d2208b089691276b7bd23dd020d116ab3e604a1f14c3e2a3cfbb00d6c24e3ea1",
+          "controls": [
+            {
+              "confirmed": true,
+              "control_id": "candidate-control-d4fa77b1922baa7861b71a18b5519b868ea9b120560f1b419d56ee75a9a66b49",
+              "enforcement_location": "Compatible Guard runtime \u00b7 connection and operation evidence verified separately",
+              "explanation": "The modify action requires repository role 'security-reviewer'. This role grants no operation. This policy is prepared to enforce these controls through a compatible Guard runtime. Create and modify have independent paths and action-wide roles. An absent action or missing matching allow grants no permission. A matching deny wins within the same action; rules never cross actions. Roles restrict an action and grant no paths. Creation requires exclusive creation of one new regular file under an existing parent in the selected workspace, without overwrite or parent creation. Guard must check filesystem state, not caller facts. This review does not establish deployment, a connected runtime, successful execution, or control over mutations outside Guard.",
+              "questions": []
+            }
+          ],
+          "coverage": "Prepared for a compatible Guard runtime",
+          "residual_acknowledged": false,
+          "residual_explanation": null,
+          "source_span": {
+            "end_byte": 195,
+            "start_byte": 128
+          },
+          "source_text": "Agents must use role security-reviewer to modify repository files.\n"
+        },
+        {
+          "clause_id": "policy-clause-f3314c9bb771c96de1c97207dfd627390e926a6d73700e6d9ae1813107484ee3",
+          "controls": [
+            {
+              "confirmed": true,
+              "control_id": "candidate-control-0367e2e1dc9aa072222b20e11b013a5021f0297b78ef38374f769220f5e3fbb1",
+              "enforcement_location": "Compatible Guard runtime \u00b7 connection and operation evidence verified separately",
+              "explanation": "Automated agents may modify the exact path 'README.md'. This policy is prepared to enforce these controls through a compatible Guard runtime. Create and modify have independent paths and action-wide roles. An absent action or missing matching allow grants no permission. A matching deny wins within the same action; rules never cross actions. Roles restrict an action and grant no paths. Creation requires exclusive creation of one new regular file under an existing parent in the selected workspace, without overwrite or parent creation. Guard must check filesystem state, not caller facts. This review does not establish deployment, a connected runtime, successful execution, or control over mutations outside Guard.",
+              "questions": []
+            }
+          ],
+          "coverage": "Prepared for a compatible Guard runtime",
+          "residual_acknowledged": false,
+          "residual_explanation": null,
+          "source_span": {
+            "end_byte": 223,
+            "start_byte": 195
+          },
+          "source_text": "Agents may modify README.md."
+        }
+      ],
+      "coverage": {
+        "acknowledged_residual_count": 0,
+        "confirmed_control_count": 4,
+        "enforceable_control_clause_count": 4,
+        "full_clause_count": 4,
+        "informational_clause_count": 0,
+        "needs_answer_clause_count": 0,
+        "needs_confirmation_clause_count": 0,
+        "needs_connection_clause_count": 0,
+        "partial_clause_count": 0,
+        "proposed_control_count": 4,
+        "total_clause_count": 4,
+        "unenforced_clause_count": 0,
+        "waiting_clause_count": 0
+      }
+    },
+    "review_hash": "sha256:736af2b659ed5d0cde8137e40b38633434f5b9905bc7bf2e0738e2277f4daaa6",
+    "runtime_availability": {
+      "available": false,
+      "detail": "Approved policy preparation, sandbox simulation, SDK setup and verified operation evidence are separate. Release preparation does not activate a hosted deployment or customer runtime.",
+      "production_available": false,
+      "reason": "catalog_3_prepared_release",
+      "schema_version": "cloud_native_runtime_availability.v1",
+      "sdk_connection": {
+        "available": true,
+        "detail": "Compatible SDK setup is prepared for Cloud 0.6.0; public package acceptance is pending publication. Connection requires runtime evidence."
+      },
+      "simulation": {
+        "available": false,
+        "detail": "The isolated sandbox is unavailable or does not support catalog 3."
+      }
+    },
+    "schema_version": "cloud_policy_translation.v3",
+    "state": "approved",
+    "translation_id": "translation-17200aac693ff7a797bda197f7c9a2152a9b9ebb2dde0295bcb95103e361c4b9"
+  },
+  "publication_response": {
+    "authority": {
+      "name": "Compiler documentation",
+      "version": "1.0.0"
+    },
+    "policy": {
+      "name": "Contained repository proof"
+    },
+    "private_evidence": {
+      "deletable": true,
+      "retained": true
+    },
+    "publication": {
+      "authority_ref": "compiler-documentation@1.0.0",
+      "publication_id": "cloud-translation-c5b8a9528b447502460458e5c3fedefd",
+      "published_at": "2026-09-17T19:06:03Z"
+    },
+    "review": {
+      "bindings": [],
+      "clauses": [
+        {
+          "clause_id": "policy-clause-fbfc4ff5f5d873759eae3e72be831c4cfb0bdf9b88f72031026679f25b6bbca6",
+          "controls": [
+            {
+              "confirmed": true,
+              "control_id": "candidate-control-acfa80e799e3db5661214bd4b2c2a48275a0621af0a5963356d7436174ffa254",
+              "enforcement_location": "Compatible Guard runtime \u00b7 connection and operation evidence verified separately",
+              "explanation": "The create action requires repository role 'repository-maintainer'. This role grants no operation. This policy is prepared to enforce these controls through a compatible Guard runtime. Create and modify have independent paths and action-wide roles. An absent action or missing matching allow grants no permission. A matching deny wins within the same action; rules never cross actions. Roles restrict an action and grant no paths. Creation requires exclusive creation of one new regular file under an existing parent in the selected workspace, without overwrite or parent creation. Guard must check filesystem state, not caller facts. This review does not establish deployment, a connected runtime, successful execution, or control over mutations outside Guard.",
+              "questions": []
+            }
+          ],
+          "coverage": "Prepared for a compatible Guard runtime",
+          "residual_acknowledged": false,
+          "residual_explanation": null,
+          "source_span": {
+            "end_byte": 71,
+            "start_byte": 0
+          },
+          "source_text": "Agents must use role repository-maintainer to create repository files.\n"
+        },
+        {
+          "clause_id": "policy-clause-d4f30bd28fd52f0729934bbd24d1c7b482393fb0f529ce1c26bba760db11e5df",
+          "controls": [
+            {
+              "confirmed": true,
+              "control_id": "candidate-control-42c579e90a29ba1c870a5b95ef46ea550f89b232ff75ca11d39b44157aac9dea",
+              "enforcement_location": "Compatible Guard runtime \u00b7 connection and operation evidence verified separately",
+              "explanation": "Automated agents may create the exact path 'examples/compile_repository_policy.py'. This policy is prepared to enforce these controls through a compatible Guard runtime. Create and modify have independent paths and action-wide roles. An absent action or missing matching allow grants no permission. A matching deny wins within the same action; rules never cross actions. Roles restrict an action and grant no paths. Creation requires exclusive creation of one new regular file under an existing parent in the selected workspace, without overwrite or parent creation. Guard must check filesystem state, not caller facts. This review does not establish deployment, a connected runtime, successful execution, or control over mutations outside Guard.",
+              "questions": []
+            }
+          ],
+          "coverage": "Prepared for a compatible Guard runtime",
+          "residual_acknowledged": false,
+          "residual_explanation": null,
+          "source_span": {
+            "end_byte": 128,
+            "start_byte": 71
+          },
+          "source_text": "Agents may create examples/compile_repository_policy.py.\n"
+        },
+        {
+          "clause_id": "policy-clause-d2208b089691276b7bd23dd020d116ab3e604a1f14c3e2a3cfbb00d6c24e3ea1",
+          "controls": [
+            {
+              "confirmed": true,
+              "control_id": "candidate-control-d4fa77b1922baa7861b71a18b5519b868ea9b120560f1b419d56ee75a9a66b49",
+              "enforcement_location": "Compatible Guard runtime \u00b7 connection and operation evidence verified separately",
+              "explanation": "The modify action requires repository role 'security-reviewer'. This role grants no operation. This policy is prepared to enforce these controls through a compatible Guard runtime. Create and modify have independent paths and action-wide roles. An absent action or missing matching allow grants no permission. A matching deny wins within the same action; rules never cross actions. Roles restrict an action and grant no paths. Creation requires exclusive creation of one new regular file under an existing parent in the selected workspace, without overwrite or parent creation. Guard must check filesystem state, not caller facts. This review does not establish deployment, a connected runtime, successful execution, or control over mutations outside Guard.",
+              "questions": []
+            }
+          ],
+          "coverage": "Prepared for a compatible Guard runtime",
+          "residual_acknowledged": false,
+          "residual_explanation": null,
+          "source_span": {
+            "end_byte": 195,
+            "start_byte": 128
+          },
+          "source_text": "Agents must use role security-reviewer to modify repository files.\n"
+        },
+        {
+          "clause_id": "policy-clause-f3314c9bb771c96de1c97207dfd627390e926a6d73700e6d9ae1813107484ee3",
+          "controls": [
+            {
+              "confirmed": true,
+              "control_id": "candidate-control-0367e2e1dc9aa072222b20e11b013a5021f0297b78ef38374f769220f5e3fbb1",
+              "enforcement_location": "Compatible Guard runtime \u00b7 connection and operation evidence verified separately",
+              "explanation": "Automated agents may modify the exact path 'README.md'. This policy is prepared to enforce these controls through a compatible Guard runtime. Create and modify have independent paths and action-wide roles. An absent action or missing matching allow grants no permission. A matching deny wins within the same action; rules never cross actions. Roles restrict an action and grant no paths. Creation requires exclusive creation of one new regular file under an existing parent in the selected workspace, without overwrite or parent creation. Guard must check filesystem state, not caller facts. This review does not establish deployment, a connected runtime, successful execution, or control over mutations outside Guard.",
+              "questions": []
+            }
+          ],
+          "coverage": "Prepared for a compatible Guard runtime",
+          "residual_acknowledged": false,
+          "residual_explanation": null,
+          "source_span": {
+            "end_byte": 223,
+            "start_byte": 195
+          },
+          "source_text": "Agents may modify README.md."
+        }
+      ],
+      "coverage": {
+        "acknowledged_residual_count": 0,
+        "confirmed_control_count": 4,
+        "enforceable_control_clause_count": 4,
+        "full_clause_count": 4,
+        "informational_clause_count": 0,
+        "needs_answer_clause_count": 0,
+        "needs_confirmation_clause_count": 0,
+        "needs_connection_clause_count": 0,
+        "partial_clause_count": 0,
+        "proposed_control_count": 4,
+        "total_clause_count": 4,
+        "unenforced_clause_count": 0,
+        "waiting_clause_count": 0
+      }
+    },
+    "review_hash": "sha256:736af2b659ed5d0cde8137e40b38633434f5b9905bc7bf2e0738e2277f4daaa6",
+    "runtime_availability": {
+      "available": false,
+      "detail": "Approved policy preparation, sandbox simulation, SDK setup and verified operation evidence are separate. Release preparation does not activate a hosted deployment or customer runtime.",
+      "production_available": false,
+      "reason": "catalog_3_prepared_release",
+      "schema_version": "cloud_native_runtime_availability.v1",
+      "sdk_connection": {
+        "available": true,
+        "detail": "Compatible SDK setup is prepared for Cloud 0.6.0; public package acceptance is pending publication. Connection requires runtime evidence."
+      },
+      "simulation": {
+        "available": false,
+        "detail": "The isolated sandbox is unavailable or does not support catalog 3."
+      }
+    },
+    "schema_version": "cloud_policy_translation.v3",
+    "state": "published",
+    "translation_id": "translation-17200aac693ff7a797bda197f7c9a2152a9b9ebb2dde0295bcb95103e361c4b9"
+  },
+  "publication": {
+    "authority_bundle": {
+      "approval_record": {
+        "approval_id": "publication-approval-v4-50e35491bd93cd8c5ab006ef1172a788404267841975a42daa12fe16a2a12403",
+        "approval_record_hash": "sha256:50e35491bd93cd8c5ab006ef1172a788404267841975a42daa12fe16a2a12403",
+        "approved_at": "2026-09-17T19:06:02Z",
+        "approved_by": "user-af747f9ea872",
+        "approved_constraint_ir_hash": "sha256:3b2ca24981dbb4cc91fdf21d438b05c3848f0e7dfc2ce0e32fc4ab284ce31b65",
+        "approved_policy_translation_commitment_hash": "sha256:75bd3f19cb2deb88f7799c93080549e56a8ea025db60da80baf47fc34e7eb3f6",
+        "approved_semantic_commit_hash": "sha256:7c096399d444abb993712c27224caa8c43607d550c879300c1364d8249016de0"
+      },
+      "authority": {
+        "authority_id": "compiler-documentation",
+        "authority_identity_hash": "sha256:f35a738f186073c263af2813e88aee14d11bf1a5f3050457398d374ac30bf563",
+        "authority_ref": "compiler-documentation@1.0.0",
+        "authority_version": "1.0.0"
+      },
+      "bundle_hash": "sha256:0d24d38834b04f505510ba10b07c7abdfd73f851190046f97add5d3ea6a572a3",
+      "compiled_authority_contract": {
+        "action_requirements": {
+          "create": {
+            "allow": [
+              {
+                "match": "exact",
+                "value": "examples/compile_repository_policy.py"
+              }
+            ],
+            "deny": [],
+            "required_role": "repository-maintainer"
+          },
+          "modify": {
+            "allow": [
+              {
+                "match": "exact",
+                "value": "README.md"
+              }
+            ],
+            "deny": [],
+            "required_role": "security-reviewer"
+          }
+        },
+        "authority_ref": "compiler-documentation@1.0.0",
+        "compiler_output": {
+          "action_requirements": {
+            "create": {
+              "allow": [
+                {
+                  "match": "exact",
+                  "value": "examples/compile_repository_policy.py"
+                }
+              ],
+              "deny": [],
+              "required_role": "repository-maintainer"
+            },
+            "modify": {
+              "allow": [
+                {
+                  "match": "exact",
+                  "value": "README.md"
+                }
+              ],
+              "deny": [],
+              "required_role": "security-reviewer"
+            }
+          },
+          "contract_hash": "6e2ea195af4acb954610ff487270cfec72649de1cd457ec276be97a8e4e94339",
+          "contract_id": "compiler-documentation",
+          "contract_version": "1.0.0",
+          "schema_version": "compiled_action_contract.v1"
+        },
+        "contract_hash": "sha256:b9204a43af8833f051c2ee167892c5ac05ab93496aa18cc411739b860c401c3e",
+        "contract_id": "compiler-documentation",
+        "contract_version": "1.0.0",
+        "provenance": {
+          "compiler_binding_hash": "sha256:bd5fbbb96ea0bb5ed855a0586229f5d25f313c7fc4df9721cb8c897c5c3dbcd8",
+          "constraint_ir_hash": "sha256:3b2ca24981dbb4cc91fdf21d438b05c3848f0e7dfc2ce0e32fc4ab284ce31b65",
+          "domain_pack_hash": "sha256:78783654a8131cb7a6547ee2ed9507e1dced640aebe32d35057c385bb1dc4459",
+          "policy_translation_commitment_hash": "sha256:75bd3f19cb2deb88f7799c93080549e56a8ea025db60da80baf47fc34e7eb3f6",
+          "runtime_fact_schema_hash": "sha256:3fcf3af0a61f91a78b171ccd6247db9f0f908e1baf44aa50ece12349c44bb582",
+          "semantic_commit_hash": "sha256:7c096399d444abb993712c27224caa8c43607d550c879300c1364d8249016de0",
+          "source_snapshot_hash": "sha256:3a7e6c8b749cad4914cc10fb6ffae359005a4624e6b3bc685f5a024a587d9a7e"
+        },
+        "schema_version": "compiled_authority_contract.v3"
+      },
+      "compiler_binding": {
+        "compiled_contract_schema_version": "compiled_authority_contract.v3",
+        "compiler_binding_hash": "sha256:bd5fbbb96ea0bb5ed855a0586229f5d25f313c7fc4df9721cb8c897c5c3dbcd8",
+        "compiler_lowering": {
+          "lowering_id": "waveframe.repository-changes.lowering.v2",
+          "lowering_version": "2.0.0"
+        },
+        "constraint_ir_schema_version": "constraint_ir.v1",
+        "control_emitters": [
+          {
+            "emitter_id": "waveframe.repository-changes.emitter.create-acting-role.v2",
+            "mapping_control_id": "create-acting-role"
+          },
+          {
+            "emitter_id": "waveframe.repository-changes.emitter.create-exact-path-access.v2",
+            "mapping_control_id": "create-exact-path-access"
+          },
+          {
+            "emitter_id": "waveframe.repository-changes.emitter.modify-acting-role.v2",
+            "mapping_control_id": "modify-acting-role"
+          },
+          {
+            "emitter_id": "waveframe.repository-changes.emitter.modify-exact-path-access.v2",
+            "mapping_control_id": "modify-exact-path-access"
+          }
+        ],
+        "domain_pack": {
+          "domain_pack_hash": "sha256:78783654a8131cb7a6547ee2ed9507e1dced640aebe32d35057c385bb1dc4459",
+          "domain_pack_id": "repository-changes",
+          "domain_pack_version": "3.0.0"
+        },
+        "grammar_compiler": {
+          "compiler_id": "waveframe.repository-changes.grammar.v2",
+          "compiler_version": "2.0.0"
+        }
+      },
+      "constraint_ir": {
+        "constraints": [
+          {
+            "acting_role": {
+              "kind": "role",
+              "value": "repository-maintainer"
+            },
+            "action": "create",
+            "condition": null,
+            "constraint_id": "constraint-7eec15c45ae4771aa4db3666fd9671744211f725a1f945fa4ca62b5c86f470e3",
+            "effect": "require",
+            "exceptions": [],
+            "obligations": {
+              "approvals": [],
+              "evidence": [],
+              "separation_of_duties": []
+            },
+            "required_runtime_facts": [
+              "actor.role",
+              "actor.subject_kind",
+              "proposal.action",
+              "proposal.resource.kind"
+            ],
+            "resource": {
+              "kind": "repository_change",
+              "match": "any",
+              "value": null
+            },
+            "subject": {
+              "kind": "subject_kind",
+              "value": "agent"
+            }
+          },
+          {
+            "acting_role": null,
+            "action": "create",
+            "condition": null,
+            "constraint_id": "constraint-86d85b4e01ad9b0c9f1d02d7d30aeaab23b749a76a7d38e2f63d503641b3cdba",
+            "effect": "allow",
+            "exceptions": [],
+            "obligations": {
+              "approvals": [],
+              "evidence": [],
+              "separation_of_duties": []
+            },
+            "required_runtime_facts": [
+              "actor.subject_kind",
+              "proposal.action",
+              "proposal.resource.kind",
+              "proposal.resource.path"
+            ],
+            "resource": {
+              "kind": "repository_path",
+              "match": "exact",
+              "value": "examples/compile_repository_policy.py"
+            },
+            "subject": {
+              "kind": "subject_kind",
+              "value": "agent"
+            }
+          },
+          {
+            "acting_role": {
+              "kind": "role",
+              "value": "security-reviewer"
+            },
+            "action": "modify",
+            "condition": null,
+            "constraint_id": "constraint-2bc4ffd17df7108653f60a3ed389157be992bbc97b06ec9f580a62a485b30aba",
+            "effect": "require",
+            "exceptions": [],
+            "obligations": {
+              "approvals": [],
+              "evidence": [],
+              "separation_of_duties": []
+            },
+            "required_runtime_facts": [
+              "actor.role",
+              "actor.subject_kind",
+              "proposal.action",
+              "proposal.resource.kind"
+            ],
+            "resource": {
+              "kind": "repository_change",
+              "match": "any",
+              "value": null
+            },
+            "subject": {
+              "kind": "subject_kind",
+              "value": "agent"
+            }
+          },
+          {
+            "acting_role": null,
+            "action": "modify",
+            "condition": null,
+            "constraint_id": "constraint-5a6048b7d86d30b83332b7b213e3e0751ff9fd079cbc2e308ef168203a1ea965",
+            "effect": "allow",
+            "exceptions": [],
+            "obligations": {
+              "approvals": [],
+              "evidence": [],
+              "separation_of_duties": []
+            },
+            "required_runtime_facts": [
+              "actor.subject_kind",
+              "proposal.action",
+              "proposal.resource.kind",
+              "proposal.resource.path"
+            ],
+            "resource": {
+              "kind": "repository_path",
+              "match": "exact",
+              "value": "README.md"
+            },
+            "subject": {
+              "kind": "subject_kind",
+              "value": "agent"
+            }
+          }
+        ],
+        "domain_pack": {
+          "domain_pack_hash": "sha256:78783654a8131cb7a6547ee2ed9507e1dced640aebe32d35057c385bb1dc4459",
+          "domain_pack_id": "repository-changes",
+          "domain_pack_version": "3.0.0"
+        },
+        "ir_hash": "sha256:3b2ca24981dbb4cc91fdf21d438b05c3848f0e7dfc2ce0e32fc4ab284ce31b65",
+        "runtime_fact_schema_hash": "sha256:3fcf3af0a61f91a78b171ccd6247db9f0f908e1baf44aa50ece12349c44bb582",
+        "schema_version": "constraint_ir.v1"
+      },
+      "domain_pack": {
+        "domain_pack_hash": "sha256:78783654a8131cb7a6547ee2ed9507e1dced640aebe32d35057c385bb1dc4459",
+        "domain_pack_id": "repository-changes",
+        "domain_pack_version": "3.0.0"
+      },
+      "policy_translation_commitment": {
+        "authority_ref": "compiler-documentation@1.0.0",
+        "capability_catalog": {
+          "catalog_hash": "sha256:bd7fd23eb59b5521ef6780edec0667ce9b7ba9b5738dfa2701a575fb3efce930",
+          "catalog_id": "waveframe.coding-agent.repository-change",
+          "catalog_version": "3.0.0"
+        },
+        "clauses": [
+          {
+            "clause_bytes_base64": "QWdlbnRzIG11c3QgdXNlIHJvbGUgcmVwb3NpdG9yeS1tYWludGFpbmVyIHRvIGNyZWF0ZSByZXBvc2l0b3J5IGZpbGVzLgo=",
+            "clause_hash": "sha256:061b27ecadd28facae2e6768910fb8c76e5c09852dee17721dcbcd1eaa80b17f",
+            "clause_id": "policy-clause-fbfc4ff5f5d873759eae3e72be831c4cfb0bdf9b88f72031026679f25b6bbca6",
+            "controls": [
+              {
+                "candidate_control": {
+                  "action": "create",
+                  "actor_kind": "autonomous_agent",
+                  "candidate_control_id": "candidate-control-acfa80e799e3db5661214bd4b2c2a48275a0621af0a5963356d7436174ffa254",
+                  "control_type": "acting_role",
+                  "effect": "require",
+                  "enforcement_point": "waveframe.guard.repository-change.v2",
+                  "fact_id": "actor.role",
+                  "operator": "==",
+                  "required_runtime_facts": [
+                    "actor.role",
+                    "actor.subject_kind",
+                    "proposal.action",
+                    "proposal.resource.kind"
+                  ],
+                  "resource_kind": "repository_change",
+                  "value": {
+                    "canonical_value": "repository-maintainer",
+                    "end_byte": 42,
+                    "kind": "source_literal",
+                    "literal_hash": "sha256:9d083daf15d2c3fceffeed7515861c9203bb5eef06dd0bbda744c1d5de1c02f1",
+                    "start_byte": 21,
+                    "value": "repository-maintainer"
+                  }
+                },
+                "constraint_id": "constraint-7eec15c45ae4771aa4db3666fd9671744211f725a1f945fa4ca62b5c86f470e3",
+                "customer_explanation": "The create action requires repository role 'repository-maintainer'. This role grants no operation. This policy is prepared to enforce these controls through a compatible Guard runtime. Create and modify have independent paths and action-wide roles. An absent action or missing matching allow grants no permission. A matching deny wins within the same action; rules never cross actions. Roles restrict an action and grant no paths. Creation requires exclusive creation of one new regular file under an existing parent in the selected workspace, without overwrite or parent creation. Guard must check filesystem state, not caller facts. This review does not establish deployment, a connected runtime, successful execution, or control over mutations outside Guard.",
+                "human_confirmation": {
+                  "candidate_control_id": "candidate-control-acfa80e799e3db5661214bd4b2c2a48275a0621af0a5963356d7436174ffa254",
+                  "clause_id": "policy-clause-fbfc4ff5f5d873759eae3e72be831c4cfb0bdf9b88f72031026679f25b6bbca6",
+                  "confirmation_hash": "sha256:44b2e3a9948144305bfe7e81edcfdfe5560cc26a5ff6dee24377af152407ce09",
+                  "confirmed_at": "2026-09-17T19:06:01Z",
+                  "confirmed_by": "user-af747f9ea872"
+                },
+                "resolved_value": "repository-maintainer"
+              }
+            ],
+            "customer_coverage_state": "Prepared for a compatible Guard runtime",
+            "customer_explanation": null,
+            "end_byte": 71,
+            "human_coverage_decision": {
+              "acknowledged_unrepresented": false,
+              "clause_id": "policy-clause-fbfc4ff5f5d873759eae3e72be831c4cfb0bdf9b88f72031026679f25b6bbca6",
+              "confirmed_at": "2026-09-17T19:06:01Z",
+              "confirmed_by": "user-af747f9ea872",
+              "coverage_status": "fully_represented",
+              "decision_hash": "sha256:1a0c8256eca338b22d4e66ae8df53b8a289f39eb5247dcab21c7cd446d9949c7",
+              "human_reason": null,
+              "reason_code": "human-confirmed-complete"
+            },
+            "index": 0,
+            "limitation_code": null,
+            "residuals": [],
+            "start_byte": 0
+          },
+          {
+            "clause_bytes_base64": "QWdlbnRzIG1heSBjcmVhdGUgZXhhbXBsZXMvY29tcGlsZV9yZXBvc2l0b3J5X3BvbGljeS5weS4K",
+            "clause_hash": "sha256:4e4951519b955e7a7d4929845d6d88ae1e209b891781f498bb8b9da0b11257fe",
+            "clause_id": "policy-clause-d4f30bd28fd52f0729934bbd24d1c7b482393fb0f529ce1c26bba760db11e5df",
+            "controls": [
+              {
+                "candidate_control": {
+                  "action": "create",
+                  "actor_kind": "autonomous_agent",
+                  "candidate_control_id": "candidate-control-42c579e90a29ba1c870a5b95ef46ea550f89b232ff75ca11d39b44157aac9dea",
+                  "control_type": "exact_path_access",
+                  "effect": "allow",
+                  "enforcement_point": "waveframe.guard.repository-change.v2",
+                  "fact_id": "proposal.resource.path",
+                  "operator": "==",
+                  "required_runtime_facts": [
+                    "actor.subject_kind",
+                    "proposal.action",
+                    "proposal.resource.kind",
+                    "proposal.resource.path"
+                  ],
+                  "resource_kind": "repository_path",
+                  "value": {
+                    "canonical_value": "examples/compile_repository_policy.py",
+                    "end_byte": 126,
+                    "kind": "source_literal",
+                    "literal_hash": "sha256:938402ebdd254625ccc5439fa4619b6c023b675409b719d7d9810e78c053cbb7",
+                    "start_byte": 89,
+                    "value": "examples/compile_repository_policy.py"
+                  }
+                },
+                "constraint_id": "constraint-86d85b4e01ad9b0c9f1d02d7d30aeaab23b749a76a7d38e2f63d503641b3cdba",
+                "customer_explanation": "Automated agents may create the exact path 'examples/compile_repository_policy.py'. This policy is prepared to enforce these controls through a compatible Guard runtime. Create and modify have independent paths and action-wide roles. An absent action or missing matching allow grants no permission. A matching deny wins within the same action; rules never cross actions. Roles restrict an action and grant no paths. Creation requires exclusive creation of one new regular file under an existing parent in the selected workspace, without overwrite or parent creation. Guard must check filesystem state, not caller facts. This review does not establish deployment, a connected runtime, successful execution, or control over mutations outside Guard.",
+                "human_confirmation": {
+                  "candidate_control_id": "candidate-control-42c579e90a29ba1c870a5b95ef46ea550f89b232ff75ca11d39b44157aac9dea",
+                  "clause_id": "policy-clause-d4f30bd28fd52f0729934bbd24d1c7b482393fb0f529ce1c26bba760db11e5df",
+                  "confirmation_hash": "sha256:4cf27fcb5d4917de8cf3e679c3c9b89563a8fa67f33c4dec062c66e97ec157b5",
+                  "confirmed_at": "2026-09-17T19:06:01Z",
+                  "confirmed_by": "user-af747f9ea872"
+                },
+                "resolved_value": "examples/compile_repository_policy.py"
+              }
+            ],
+            "customer_coverage_state": "Prepared for a compatible Guard runtime",
+            "customer_explanation": null,
+            "end_byte": 128,
+            "human_coverage_decision": {
+              "acknowledged_unrepresented": false,
+              "clause_id": "policy-clause-d4f30bd28fd52f0729934bbd24d1c7b482393fb0f529ce1c26bba760db11e5df",
+              "confirmed_at": "2026-09-17T19:06:01Z",
+              "confirmed_by": "user-af747f9ea872",
+              "coverage_status": "fully_represented",
+              "decision_hash": "sha256:f5e4ec351e2a378b29d8791215d93321e374b26ac3d9e9e6aff055bec0ed37e5",
+              "human_reason": null,
+              "reason_code": "human-confirmed-complete"
+            },
+            "index": 1,
+            "limitation_code": null,
+            "residuals": [],
+            "start_byte": 71
+          },
+          {
+            "clause_bytes_base64": "QWdlbnRzIG11c3QgdXNlIHJvbGUgc2VjdXJpdHktcmV2aWV3ZXIgdG8gbW9kaWZ5IHJlcG9zaXRvcnkgZmlsZXMuCg==",
+            "clause_hash": "sha256:ae5c2cb7a7cfa48e8ae009fe4d689321a2cac23a556ff0c8b2971f60b756813c",
+            "clause_id": "policy-clause-d2208b089691276b7bd23dd020d116ab3e604a1f14c3e2a3cfbb00d6c24e3ea1",
+            "controls": [
+              {
+                "candidate_control": {
+                  "action": "modify",
+                  "actor_kind": "autonomous_agent",
+                  "candidate_control_id": "candidate-control-d4fa77b1922baa7861b71a18b5519b868ea9b120560f1b419d56ee75a9a66b49",
+                  "control_type": "acting_role",
+                  "effect": "require",
+                  "enforcement_point": "waveframe.guard.repository-change.v2",
+                  "fact_id": "actor.role",
+                  "operator": "==",
+                  "required_runtime_facts": [
+                    "actor.role",
+                    "actor.subject_kind",
+                    "proposal.action",
+                    "proposal.resource.kind"
+                  ],
+                  "resource_kind": "repository_change",
+                  "value": {
+                    "canonical_value": "security-reviewer",
+                    "end_byte": 166,
+                    "kind": "source_literal",
+                    "literal_hash": "sha256:8a78bab66f6a0d499d511dd0b0f7671129ca34fa81fe69e9e4196d616fd28c17",
+                    "start_byte": 149,
+                    "value": "security-reviewer"
+                  }
+                },
+                "constraint_id": "constraint-2bc4ffd17df7108653f60a3ed389157be992bbc97b06ec9f580a62a485b30aba",
+                "customer_explanation": "The modify action requires repository role 'security-reviewer'. This role grants no operation. This policy is prepared to enforce these controls through a compatible Guard runtime. Create and modify have independent paths and action-wide roles. An absent action or missing matching allow grants no permission. A matching deny wins within the same action; rules never cross actions. Roles restrict an action and grant no paths. Creation requires exclusive creation of one new regular file under an existing parent in the selected workspace, without overwrite or parent creation. Guard must check filesystem state, not caller facts. This review does not establish deployment, a connected runtime, successful execution, or control over mutations outside Guard.",
+                "human_confirmation": {
+                  "candidate_control_id": "candidate-control-d4fa77b1922baa7861b71a18b5519b868ea9b120560f1b419d56ee75a9a66b49",
+                  "clause_id": "policy-clause-d2208b089691276b7bd23dd020d116ab3e604a1f14c3e2a3cfbb00d6c24e3ea1",
+                  "confirmation_hash": "sha256:629af21e00e9d684ce3e09fc16f8778a64a5e283257defd255cd346e73f54291",
+                  "confirmed_at": "2026-09-17T19:06:02Z",
+                  "confirmed_by": "user-af747f9ea872"
+                },
+                "resolved_value": "security-reviewer"
+              }
+            ],
+            "customer_coverage_state": "Prepared for a compatible Guard runtime",
+            "customer_explanation": null,
+            "end_byte": 195,
+            "human_coverage_decision": {
+              "acknowledged_unrepresented": false,
+              "clause_id": "policy-clause-d2208b089691276b7bd23dd020d116ab3e604a1f14c3e2a3cfbb00d6c24e3ea1",
+              "confirmed_at": "2026-09-17T19:06:02Z",
+              "confirmed_by": "user-af747f9ea872",
+              "coverage_status": "fully_represented",
+              "decision_hash": "sha256:7e93e29a562280b560c571b1ba879f71d74307584f798ec74f71384bfb832336",
+              "human_reason": null,
+              "reason_code": "human-confirmed-complete"
+            },
+            "index": 2,
+            "limitation_code": null,
+            "residuals": [],
+            "start_byte": 128
+          },
+          {
+            "clause_bytes_base64": "QWdlbnRzIG1heSBtb2RpZnkgUkVBRE1FLm1kLg==",
+            "clause_hash": "sha256:efebd7898a0b49ee75ca48436471fe45d566161bd3398c5630f14759deef3895",
+            "clause_id": "policy-clause-f3314c9bb771c96de1c97207dfd627390e926a6d73700e6d9ae1813107484ee3",
+            "controls": [
+              {
+                "candidate_control": {
+                  "action": "modify",
+                  "actor_kind": "autonomous_agent",
+                  "candidate_control_id": "candidate-control-0367e2e1dc9aa072222b20e11b013a5021f0297b78ef38374f769220f5e3fbb1",
+                  "control_type": "exact_path_access",
+                  "effect": "allow",
+                  "enforcement_point": "waveframe.guard.repository-change.v2",
+                  "fact_id": "proposal.resource.path",
+                  "operator": "==",
+                  "required_runtime_facts": [
+                    "actor.subject_kind",
+                    "proposal.action",
+                    "proposal.resource.kind",
+                    "proposal.resource.path"
+                  ],
+                  "resource_kind": "repository_path",
+                  "value": {
+                    "canonical_value": "README.md",
+                    "end_byte": 222,
+                    "kind": "source_literal",
+                    "literal_hash": "sha256:b335630551682c19a781afebcf4d07bf978fb1f8ac04c6bf87428ed5106870f5",
+                    "start_byte": 213,
+                    "value": "README.md"
+                  }
+                },
+                "constraint_id": "constraint-5a6048b7d86d30b83332b7b213e3e0751ff9fd079cbc2e308ef168203a1ea965",
+                "customer_explanation": "Automated agents may modify the exact path 'README.md'. This policy is prepared to enforce these controls through a compatible Guard runtime. Create and modify have independent paths and action-wide roles. An absent action or missing matching allow grants no permission. A matching deny wins within the same action; rules never cross actions. Roles restrict an action and grant no paths. Creation requires exclusive creation of one new regular file under an existing parent in the selected workspace, without overwrite or parent creation. Guard must check filesystem state, not caller facts. This review does not establish deployment, a connected runtime, successful execution, or control over mutations outside Guard.",
+                "human_confirmation": {
+                  "candidate_control_id": "candidate-control-0367e2e1dc9aa072222b20e11b013a5021f0297b78ef38374f769220f5e3fbb1",
+                  "clause_id": "policy-clause-f3314c9bb771c96de1c97207dfd627390e926a6d73700e6d9ae1813107484ee3",
+                  "confirmation_hash": "sha256:06faf0725afc3d3498ffd35b7870ef84f8f4ce3ef05c4065f496cd480100da35",
+                  "confirmed_at": "2026-09-17T19:06:02Z",
+                  "confirmed_by": "user-af747f9ea872"
+                },
+                "resolved_value": "README.md"
+              }
+            ],
+            "customer_coverage_state": "Prepared for a compatible Guard runtime",
+            "customer_explanation": null,
+            "end_byte": 223,
+            "human_coverage_decision": {
+              "acknowledged_unrepresented": false,
+              "clause_id": "policy-clause-f3314c9bb771c96de1c97207dfd627390e926a6d73700e6d9ae1813107484ee3",
+              "confirmed_at": "2026-09-17T19:06:02Z",
+              "confirmed_by": "user-af747f9ea872",
+              "coverage_status": "fully_represented",
+              "decision_hash": "sha256:c0e165bc44b59d734d5c576f320ff908d60830390e5ac187b984c854c3498ae4",
+              "human_reason": null,
+              "reason_code": "human-confirmed-complete"
+            },
+            "index": 3,
+            "limitation_code": null,
+            "residuals": [],
+            "start_byte": 195
+          }
+        ],
+        "commitment_hash": "sha256:75bd3f19cb2deb88f7799c93080549e56a8ea025db60da80baf47fc34e7eb3f6",
+        "commitment_id": "policy-translation-commitment-75bd3f19cb2deb88f7799c93080549e56a8ea025db60da80baf47fc34e7eb3f6",
+        "coverage": {
+          "acknowledged_residual_count": 0,
+          "confirmed_control_count": 4,
+          "full_clause_count": 4,
+          "informational_clause_count": 0,
+          "needs_answer_clause_count": 0,
+          "needs_connection_clause_count": 0,
+          "partial_clause_count": 0,
+          "total_clause_count": 4,
+          "unenforced_clause_count": 0,
+          "waiting_clause_count": 0
+        },
+        "customer_bindings": [],
+        "schema_version": "policy_translation_commitment.v1",
+        "source_policy_ref": "contained-repository-proof@2026-09",
+        "source_snapshot_hash": "sha256:3a7e6c8b749cad4914cc10fb6ffae359005a4624e6b3bc685f5a024a587d9a7e"
+      },
+      "provenance_bindings": {
+        "acknowledged_residuals_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "approval_record_hash": "sha256:50e35491bd93cd8c5ab006ef1172a788404267841975a42daa12fe16a2a12403",
+        "authority_identity_hash": "sha256:f35a738f186073c263af2813e88aee14d11bf1a5f3050457398d374ac30bf563",
+        "capability_catalog_hash": "sha256:bd7fd23eb59b5521ef6780edec0667ce9b7ba9b5738dfa2701a575fb3efce930",
+        "compiled_contract_hash": "sha256:b9204a43af8833f051c2ee167892c5ac05ab93496aa18cc411739b860c401c3e",
+        "compiler_binding_hash": "sha256:bd5fbbb96ea0bb5ed855a0586229f5d25f313c7fc4df9721cb8c897c5c3dbcd8",
+        "confirmed_controls_hash": "sha256:58650f45cad450840c98e2ae1f8ee99610180900a63dfb6b528a927bc7326ba5",
+        "constraint_ir_hash": "sha256:3b2ca24981dbb4cc91fdf21d438b05c3848f0e7dfc2ce0e32fc4ab284ce31b65",
+        "coverage_hash": "sha256:82e1e589a23b2b10a6044cad7a8c5da3800f55ecb0fa58012fd5343ebb0ea73e",
+        "customer_bindings_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "domain_pack_hash": "sha256:78783654a8131cb7a6547ee2ed9507e1dced640aebe32d35057c385bb1dc4459",
+        "policy_translation_commitment_hash": "sha256:75bd3f19cb2deb88f7799c93080549e56a8ea025db60da80baf47fc34e7eb3f6",
+        "publication_manifest_hash": "sha256:0370d21fb3b047e468320ed48a5a6bae434f2d61496822a6e901a83b3cffd2d8",
+        "runtime_fact_schema_hash": "sha256:3fcf3af0a61f91a78b171ccd6247db9f0f908e1baf44aa50ece12349c44bb582",
+        "semantic_commit_bundle_hash": "sha256:2306c5562a877ecf8d338b6ba0a9b2eef1646c5140a39b0559d67db89039fe31",
+        "semantic_commit_hash": "sha256:7c096399d444abb993712c27224caa8c43607d550c879300c1364d8249016de0",
+        "semantic_commit_id": "semantic-commit-7c096399d444",
+        "source_clauses_hash": "sha256:5e89440796a9d79fa2070341bc0ea5a992f2d46f6563bbb398fef5ffe5ae53b6",
+        "source_snapshot_hash": "sha256:3a7e6c8b749cad4914cc10fb6ffae359005a4624e6b3bc685f5a024a587d9a7e"
+      },
+      "provenance_complete": true,
+      "publication_manifest": {
+        "contracts": [
+          {
+            "contract_hash": "sha256:b9204a43af8833f051c2ee167892c5ac05ab93496aa18cc411739b860c401c3e",
+            "contract_id": "compiler-documentation",
+            "contract_version": "1.0.0",
+            "path": "contracts/compiler-documentation-1.0.0.contract.json",
+            "source_hash": "sha256:3a7e6c8b749cad4914cc10fb6ffae359005a4624e6b3bc685f5a024a587d9a7e"
+          }
+        ],
+        "publication_id": "cloud-translation-c5b8a9528b447502460458e5c3fedefd",
+        "published_at": "2026-09-17T19:06:03Z",
+        "published_by": "user-af747f9ea872",
+        "reviews": [
+          {
+            "path": "reviews/contained-repository-proof.policy-translation.json"
+          }
+        ],
+        "schema_version": "publication_manifest.v1",
+        "snapshots": [
+          {
+            "path": "snapshots/contained-repository-proof.source.json"
+          }
+        ]
+      },
+      "runtime_fact_schema": {
+        "facts": [
+          {
+            "canonical_unit": null,
+            "comparison_operators": [
+              "==",
+              "!="
+            ],
+            "derivation": {
+              "field_path": "/actor/subject_kind",
+              "kind": "proposal_field"
+            },
+            "enum_values": [
+              "agent"
+            ],
+            "fact_id": "actor.subject_kind",
+            "required": true,
+            "type": "enum"
+          },
+          {
+            "canonical_unit": null,
+            "comparison_operators": [
+              "==",
+              "!="
+            ],
+            "derivation": {
+              "field_path": "/actor/principal_id",
+              "kind": "proposal_field"
+            },
+            "enum_values": null,
+            "fact_id": "actor.principal_id",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "canonical_unit": null,
+            "comparison_operators": [
+              "==",
+              "!="
+            ],
+            "derivation": {
+              "field_path": "/actor/role",
+              "kind": "proposal_field"
+            },
+            "enum_values": [
+              "repository-maintainer",
+              "repository-reviewer",
+              "security-reviewer"
+            ],
+            "fact_id": "actor.role",
+            "required": false,
+            "type": "enum"
+          },
+          {
+            "canonical_unit": null,
+            "comparison_operators": [
+              "==",
+              "!="
+            ],
+            "derivation": {
+              "field_path": "/action",
+              "kind": "proposal_field"
+            },
+            "enum_values": [
+              "create",
+              "modify"
+            ],
+            "fact_id": "proposal.action",
+            "required": true,
+            "type": "enum"
+          },
+          {
+            "canonical_unit": null,
+            "comparison_operators": [
+              "==",
+              "!="
+            ],
+            "derivation": {
+              "field_path": "/resource/kind",
+              "kind": "proposal_field"
+            },
+            "enum_values": [
+              "repository_change",
+              "repository_path"
+            ],
+            "fact_id": "proposal.resource.kind",
+            "required": true,
+            "type": "enum"
+          },
+          {
+            "canonical_unit": null,
+            "comparison_operators": [
+              "==",
+              "!=",
+              "starts_with"
+            ],
+            "derivation": {
+              "field_path": "/resource/path",
+              "kind": "proposal_field"
+            },
+            "enum_values": null,
+            "fact_id": "proposal.resource.path",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "name": "Repository change proposal facts",
+        "schema_hash": "sha256:3fcf3af0a61f91a78b171ccd6247db9f0f908e1baf44aa50ece12349c44bb582",
+        "schema_id": "repository-changes-runtime",
+        "schema_version": "runtime_fact_schema.v1",
+        "schema_version_number": "3.0.0"
+      },
+      "schema_version": "authority_bundle.v4",
+      "semantic_commit_bundle": {
+        "approved_constraints": {
+          "approval": {
+            "attestation_required": false,
+            "human_in_loop_required": false,
+            "independent": false,
+            "minimum_approvals": null,
+            "required_roles": [],
+            "self_approval_prohibited": false
+          },
+          "continuity": {
+            "drift_result": null,
+            "identity_continuity_required": false,
+            "resume_comparison": null,
+            "revalidation_required": false,
+            "revocation_invalidates_resume": false,
+            "snapshot_hash_algorithm": null,
+            "snapshot_subject": null,
+            "state_snapshot_required": false
+          },
+          "escalation": {
+            "escalation_semantics": "",
+            "review_role": "escalation_review",
+            "threshold": null
+          },
+          "execution": {
+            "execution_context": {},
+            "ledger_boundary": "models deterministic runtime representation only",
+            "runtime_enforced_by": "Guard/Cloud",
+            "temporal_validation": {}
+          }
+        },
+        "bundle_hash": "sha256:2306c5562a877ecf8d338b6ba0a9b2eef1646c5140a39b0559d67db89039fe31",
+        "committed_at": "2026-09-17T19:06:03Z",
+        "committed_by": "user-af747f9ea872",
+        "committed_capabilities": [],
+        "committed_semantic_meaning": {
+          "authority": {
+            "authority_id": "compiler-documentation",
+            "authority_ref": "compiler-documentation@1.0.0",
+            "authority_version": "1.0.0"
+          },
+          "canonical_compiler_input": {
+            "action_requirements": {
+              "create": {
+                "allow": [
+                  {
+                    "match": "exact",
+                    "value": "examples/compile_repository_policy.py"
+                  }
+                ],
+                "deny": [],
+                "required_role": "repository-maintainer"
+              },
+              "modify": {
+                "allow": [
+                  {
+                    "match": "exact",
+                    "value": "README.md"
+                  }
+                ],
+                "deny": [],
+                "required_role": "security-reviewer"
+              }
+            },
+            "contract_id": "compiler-documentation",
+            "contract_version": "1.0.0",
+            "schema_version": "action_policy.v1"
+          },
+          "policy_translation_commitment": {
+            "commitment_hash": "sha256:75bd3f19cb2deb88f7799c93080549e56a8ea025db60da80baf47fc34e7eb3f6",
+            "commitment_id": "policy-translation-commitment-75bd3f19cb2deb88f7799c93080549e56a8ea025db60da80baf47fc34e7eb3f6",
+            "compiler_binding_hash": "sha256:bd5fbbb96ea0bb5ed855a0586229f5d25f313c7fc4df9721cb8c897c5c3dbcd8"
+          }
+        },
+        "continuity_posture": {
+          "drift_result": null,
+          "identity_continuity_required": false,
+          "resume_comparison": null,
+          "revalidation_required": false,
+          "revocation_invalidates_resume": false,
+          "snapshot_hash_algorithm": null,
+          "snapshot_subject": null,
+          "state_snapshot_required": false
+        },
+        "execution_admissibility_semantics": {
+          "execution_context": {},
+          "ledger_boundary": "models deterministic runtime representation only",
+          "runtime_enforced_by": "Guard/Cloud",
+          "temporal_validation": {}
+        },
+        "extraction_id": "policy-translation-commitment-75bd3f19cb2deb88f7799c93080549e56a8ea025db60da80baf47fc34e7eb3f6",
+        "identity_bindings": {
+          "approval_chain_semantics": {},
+          "authority_role_binding": {},
+          "governance_actor": {},
+          "identity_continuity_semantics": {}
+        },
+        "lifecycle_posture": {
+          "revocation_invalidates_resume": false,
+          "supersession_requires_revalidation": false
+        },
+        "non_goals": [
+          "does_not_interpret_raw_policy_text",
+          "does_not_compile_provisional_extraction",
+          "does_not_resolve_ambiguities",
+          "does_not_call_guard",
+          "does_not_determine_runtime_admissibility"
+        ],
+        "replay_obligations": [],
+        "resolved_interpretations": [
+          {
+            "acknowledged_unrepresented": false,
+            "clause_id": "policy-clause-fbfc4ff5f5d873759eae3e72be831c4cfb0bdf9b88f72031026679f25b6bbca6",
+            "confirmed_at": "2026-09-17T19:06:01Z",
+            "confirmed_by": "user-af747f9ea872",
+            "coverage_status": "fully_represented",
+            "decision_hash": "sha256:1a0c8256eca338b22d4e66ae8df53b8a289f39eb5247dcab21c7cd446d9949c7",
+            "human_reason": null,
+            "reason_code": "human-confirmed-complete"
+          },
+          {
+            "acknowledged_unrepresented": false,
+            "clause_id": "policy-clause-d4f30bd28fd52f0729934bbd24d1c7b482393fb0f529ce1c26bba760db11e5df",
+            "confirmed_at": "2026-09-17T19:06:01Z",
+            "confirmed_by": "user-af747f9ea872",
+            "coverage_status": "fully_represented",
+            "decision_hash": "sha256:f5e4ec351e2a378b29d8791215d93321e374b26ac3d9e9e6aff055bec0ed37e5",
+            "human_reason": null,
+            "reason_code": "human-confirmed-complete"
+          },
+          {
+            "acknowledged_unrepresented": false,
+            "clause_id": "policy-clause-d2208b089691276b7bd23dd020d116ab3e604a1f14c3e2a3cfbb00d6c24e3ea1",
+            "confirmed_at": "2026-09-17T19:06:02Z",
+            "confirmed_by": "user-af747f9ea872",
+            "coverage_status": "fully_represented",
+            "decision_hash": "sha256:7e93e29a562280b560c571b1ba879f71d74307584f798ec74f71384bfb832336",
+            "human_reason": null,
+            "reason_code": "human-confirmed-complete"
+          },
+          {
+            "acknowledged_unrepresented": false,
+            "clause_id": "policy-clause-f3314c9bb771c96de1c97207dfd627390e926a6d73700e6d9ae1813107484ee3",
+            "confirmed_at": "2026-09-17T19:06:02Z",
+            "confirmed_by": "user-af747f9ea872",
+            "coverage_status": "fully_represented",
+            "decision_hash": "sha256:c0e165bc44b59d734d5c576f320ff908d60830390e5ac187b984c854c3498ae4",
+            "human_reason": null,
+            "reason_code": "human-confirmed-complete"
+          }
+        ],
+        "schema_version": "semantic_commit_bundle.v1",
+        "semantic_commit_hash": "sha256:7c096399d444abb993712c27224caa8c43607d550c879300c1364d8249016de0",
+        "semantic_commit_id": "semantic-commit-7c096399d444",
+        "source_hash": "sha256:3a7e6c8b749cad4914cc10fb6ffae359005a4624e6b3bc685f5a024a587d9a7e",
+        "source_id": "contained-repository-proof"
+      },
+      "source_policy": {
+        "content_encoding": "base64",
+        "snapshot_hash": "sha256:3a7e6c8b749cad4914cc10fb6ffae359005a4624e6b3bc685f5a024a587d9a7e",
+        "source_bytes_base64": "QWdlbnRzIG11c3QgdXNlIHJvbGUgcmVwb3NpdG9yeS1tYWludGFpbmVyIHRvIGNyZWF0ZSByZXBvc2l0b3J5IGZpbGVzLgpBZ2VudHMgbWF5IGNyZWF0ZSBleGFtcGxlcy9jb21waWxlX3JlcG9zaXRvcnlfcG9saWN5LnB5LgpBZ2VudHMgbXVzdCB1c2Ugcm9sZSBzZWN1cml0eS1yZXZpZXdlciB0byBtb2RpZnkgcmVwb3NpdG9yeSBmaWxlcy4KQWdlbnRzIG1heSBtb2RpZnkgUkVBRE1FLm1kLg==",
+        "source_policy_id": "contained-repository-proof",
+        "source_policy_ref": "contained-repository-proof@2026-09",
+        "source_revision": "2026-09"
+      }
+    },
+    "authority_ref": "compiler-documentation@1.0.0",
+    "envelope_hash": "sha256:9febbb0fe847b603e92e020570926d72094c18417dd7582e9cfd835d127af1f3",
+    "organization_id": "contained-codex-57-b7fc0477",
+    "publication_receipt": {
+      "acknowledged_residuals_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "approval_record_hash": "sha256:50e35491bd93cd8c5ab006ef1172a788404267841975a42daa12fe16a2a12403",
+      "authority_identity_hash": "sha256:f35a738f186073c263af2813e88aee14d11bf1a5f3050457398d374ac30bf563",
+      "authority_ref": "compiler-documentation@1.0.0",
+      "bundle_hash": "sha256:0d24d38834b04f505510ba10b07c7abdfd73f851190046f97add5d3ea6a572a3",
+      "capability_catalog_hash": "sha256:bd7fd23eb59b5521ef6780edec0667ce9b7ba9b5738dfa2701a575fb3efce930",
+      "compiled_contract_hash": "sha256:b9204a43af8833f051c2ee167892c5ac05ab93496aa18cc411739b860c401c3e",
+      "compiled_contract_ref": "compiler-documentation@1.0.0",
+      "compiler_binding_hash": "sha256:bd5fbbb96ea0bb5ed855a0586229f5d25f313c7fc4df9721cb8c897c5c3dbcd8",
+      "confirmed_controls_hash": "sha256:58650f45cad450840c98e2ae1f8ee99610180900a63dfb6b528a927bc7326ba5",
+      "constraint_ir_hash": "sha256:3b2ca24981dbb4cc91fdf21d438b05c3848f0e7dfc2ce0e32fc4ab284ce31b65",
+      "coverage_hash": "sha256:82e1e589a23b2b10a6044cad7a8c5da3800f55ecb0fa58012fd5343ebb0ea73e",
+      "customer_bindings_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "domain_pack": {
+        "domain_pack_hash": "sha256:78783654a8131cb7a6547ee2ed9507e1dced640aebe32d35057c385bb1dc4459",
+        "domain_pack_id": "repository-changes",
+        "domain_pack_version": "3.0.0"
+      },
+      "domain_pack_hash": "sha256:78783654a8131cb7a6547ee2ed9507e1dced640aebe32d35057c385bb1dc4459",
+      "policy_translation_commitment_hash": "sha256:75bd3f19cb2deb88f7799c93080549e56a8ea025db60da80baf47fc34e7eb3f6",
+      "provenance_complete": true,
+      "publication_id": "cloud-translation-c5b8a9528b447502460458e5c3fedefd",
+      "publication_manifest_hash": "sha256:0370d21fb3b047e468320ed48a5a6bae434f2d61496822a6e901a83b3cffd2d8",
+      "published_at": "2026-09-17T19:06:03Z",
+      "published_by": "user-af747f9ea872",
+      "receipt_hash": "sha256:b7313b8de1e9bf574e14a4e432270b08acfaf542c4ddd1b5a2cd5a5ffe83b939",
+      "receipt_id": "receipt-v4-0d24d38834b04f505510ba10b07c7abdfd73f851190046f97add5d3ea6a572a3",
+      "runtime_fact_schema_hash": "sha256:3fcf3af0a61f91a78b171ccd6247db9f0f908e1baf44aa50ece12349c44bb582",
+      "schema_version": "publication_receipt.v4",
+      "semantic_commit_bundle_hash": "sha256:2306c5562a877ecf8d338b6ba0a9b2eef1646c5140a39b0559d67db89039fe31",
+      "semantic_commit_hash": "sha256:7c096399d444abb993712c27224caa8c43607d550c879300c1364d8249016de0",
+      "semantic_commit_id": "semantic-commit-7c096399d444",
+      "source_clauses_hash": "sha256:5e89440796a9d79fa2070341bc0ea5a992f2d46f6563bbb398fef5ffe5ae53b6",
+      "source_snapshot_hash": "sha256:3a7e6c8b749cad4914cc10fb6ffae359005a4624e6b3bc685f5a024a587d9a7e"
+    },
+    "registry_entry": {
+      "authority_ref": "compiler-documentation@1.0.0",
+      "bundle_hash": "sha256:0d24d38834b04f505510ba10b07c7abdfd73f851190046f97add5d3ea6a572a3",
+      "bundle_ref": "publications/688a5f52be7785de9a630f99731339f3f3af4b9dc9a6952d1f809678def6ce9c/371594cc3b4a62c08bcc226cccf6c3523fdb7cde8a662b22c1133c4b788c575f/bundle.json",
+      "contract_hash": "sha256:b9204a43af8833f051c2ee167892c5ac05ab93496aa18cc411739b860c401c3e",
+      "contract_id": "compiler-documentation",
+      "contract_version": "1.0.0",
+      "lifecycle_state": "active",
+      "publication_id": "cloud-translation-c5b8a9528b447502460458e5c3fedefd",
+      "published_at": "2026-09-17T19:06:03Z",
+      "published_by": "user-af747f9ea872",
+      "receipt_hash": "sha256:b7313b8de1e9bf574e14a4e432270b08acfaf542c4ddd1b5a2cd5a5ffe83b939",
+      "receipt_ref": "publications/688a5f52be7785de9a630f99731339f3f3af4b9dc9a6952d1f809678def6ce9c/371594cc3b4a62c08bcc226cccf6c3523fdb7cde8a662b22c1133c4b788c575f/receipt.json"
+    },
+    "registry_entry_hash": "sha256:b1b1a8fef43a4b656fb8bca38f9398b995db0e79d4d71de3c208130ded28f2f4",
+    "schema_version": "cloud_authority_publication.v1"
+  },
+  "enrollments": {
+    "create": {
+      "api_key_owner": "runtime:contained57-create",
+      "created_at": "2026-09-17T19:06:04Z",
+      "created_by": "user-af747f9ea872",
+      "key_id": "key-9aab5e8a4ef1",
+      "organization_id": "contained-codex-57-b7fc0477",
+      "schema_version": "api_key.v1",
+      "scope_contract": {
+        "explicit": true,
+        "key_id": "key-9aab5e8a4ef1",
+        "organization_id": "contained-codex-57-b7fc0477",
+        "schema_version": "cloud_api_key_scope.v1",
+        "scopes": [
+          "audit:write",
+          "authorities:read",
+          "continuity:write"
+        ]
+      },
+      "scopes": [
+        "audit:write",
+        "authorities:read",
+        "continuity:write"
+      ],
+      "status": "active"
+    },
+    "modify": {
+      "api_key_owner": "runtime:contained57-modify",
+      "created_at": "2026-09-17T19:06:05Z",
+      "created_by": "user-af747f9ea872",
+      "key_id": "key-95d1e408c915",
+      "organization_id": "contained-codex-57-b7fc0477",
+      "schema_version": "api_key.v1",
+      "scope_contract": {
+        "explicit": true,
+        "key_id": "key-95d1e408c915",
+        "organization_id": "contained-codex-57-b7fc0477",
+        "schema_version": "cloud_api_key_scope.v1",
+        "scopes": [
+          "audit:write",
+          "authorities:read",
+          "continuity:write"
+        ]
+      },
+      "scopes": [
+        "audit:write",
+        "authorities:read",
+        "continuity:write"
+      ],
+      "status": "active"
+    }
+  },
+  "elapsed_seconds": 7.3220245000266,
+  "browser_version": "153.0.8010.12",
+  "provider": "Guard task-specific fixed provider",
+  "approval_method": "existing Console review, individual confirmations, approval and publication",
+  "enrollment_method": "same public /v1/api-keys contract as Console; explicit scoped create/modify bindings"
+}

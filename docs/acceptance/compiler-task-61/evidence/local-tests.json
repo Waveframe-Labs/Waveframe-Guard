@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "tests": 53,
+  "seconds": 8.19,
+  "image": "sha256:86bd888757923cdbc549887e6ec39559a93701bb6f53cc2641c62681bf1fb5fe",
+  "invocation": "docker run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges --user 10001:10001; read-only /review bind; python -I -m pytest -q -p no:cacheprovider",
+  "paths": [
+    "examples/codex_contained/test_configuration.py",
+    "examples/codex_contained/test_cloud_writer.py",
+    "examples/codex_contained/test_evidence.py",
+    "tests/test_codex_connection.py",
+    "tests/test_codex_cloud_revalidation.py",
+    "tests/test_codex_compiler_trial.py"
+  ],
+  "reported_stdout": "53 passed in 8.19s"
+}

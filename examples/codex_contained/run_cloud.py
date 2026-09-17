@@ -16,7 +16,7 @@ WRITER_IMAGE = 'waveframe-guard-57-writer:local'
 CLOUD_IMAGE = 'waveframe-guard-57-cloud:local'
 
 
-def start_cloud(name, checkout, output):
+def start_cloud(name, checkout, output, entry_script=None):
     assert subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=checkout).decode().strip() == CLOUD_HEAD
     assert not subprocess.check_output(['git', 'status', '--porcelain', '--untracked-files=no'], cwd=checkout).strip()
     output.mkdir(parents=True, exist_ok=False)
@@ -28,10 +28,13 @@ def start_cloud(name, checkout, output):
         '--entrypoint', 'python', CLOUD_IMAGE, '-I', '-c',
         "import os; os.chown('/state',10001,10001); os.chown('/transport',10001,10001)")
     contained.docker('network', 'create', '--label', 'waveframe.proof=' + name, name + '-cloud-net')
+    extra = (['--mount', f'type=bind,source={entry_script.resolve()},target=/opt/task_cloud.py,readonly',
+              '--entrypoint', 'python'] if entry_script else [])
     contained.docker('run', '-d', '--name', name + '-cloud', '--label', 'waveframe.proof=' + name,
         *contained.security(name + '-cloud-net'), '--memory', '1g', '-p', '127.0.0.1::8000',
         '--mount', f'type=bind,source={checkout.resolve()},target=/cloud,readonly',
-        *contained.mount(name, 'cloud-state', '/state'), *contained.mount(name, 'cloud-transport', '/transport'), CLOUD_IMAGE)
+        *contained.mount(name, 'cloud-state', '/state'), *contained.mount(name, 'cloud-transport', '/transport'),
+        *extra, CLOUD_IMAGE, *(['-I', '/opt/task_cloud.py'] if entry_script else []))
     info = json.loads(contained.docker('inspect', name + '-cloud').stdout)[0]
     port = info['NetworkSettings']['Ports']['8000/tcp'][0]['HostPort']
     url = 'http://127.0.0.1:' + port
@@ -47,7 +50,8 @@ def start_cloud(name, checkout, output):
     contained.save(output / 'cloud-setup.json', {'url': 'http://127.0.0.1:' + port, 'cloud_commit': CLOUD_HEAD,
         'tracked_source_unchanged': True, 'container': info,
         'image': json.loads(contained.docker('image', 'inspect', CLOUD_IMAGE).stdout),
-        'provider': 'pinned Cloud ExampleProvider: deterministic exact five-clause policy only'})
+        'provider': 'Guard task-specific fixed provider' if entry_script else 'pinned Cloud ExampleProvider: deterministic exact five-clause policy only',
+        'operator_entry_sha256': hashlib.sha256(entry_script.read_bytes()).hexdigest() if entry_script else None})
     print('Disposable Console: http://127.0.0.1:' + port)
 
 

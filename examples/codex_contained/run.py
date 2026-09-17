@@ -94,7 +94,7 @@ def inspect(name):
     return json.loads(docker('inspect', name + '-agent', name + '-writer', name + '-proxy').stdout)
 
 
-def setup(name, output, auth, writer_factory=None):
+def setup(name, output, auth, writer_factory=None, source_archive=None):
     started = time.time()
     output.mkdir(parents=True, exist_ok=False)
     docker('info')
@@ -107,20 +107,30 @@ def setup(name, output, auth, writer_factory=None):
     for volume in ('source', 'evidence', 'scratch', 'ipc', 'egress', 'secret'):
         docker('volume', 'create', '--label', 'waveframe.proof=' + name, name + '-' + volume)
     volumes = sum((mount(name, v, '/' + v) for v in ('source', 'evidence', 'scratch', 'ipc', 'egress', 'secret')), [])
-    initializer = """import os,pathlib,secrets
+    initializer = """import os,pathlib,secrets,sys,tarfile,io
 for n in ('source','evidence','scratch','ipc','egress','secret'):
  p=pathlib.Path('/'+n); os.chown(p,0,0); p.chmod(0o700 if n=='secret' else 0o755)
-pathlib.Path('/source/generated').mkdir()
-pathlib.Path('/source/README.md').write_text('# Addition example\\n\\n>>> 2 + 3\\n6\\n')
+if REPOSITORY_IMPORT:
+ with tarfile.open(fileobj=io.BytesIO(sys.stdin.buffer.read())) as archive:
+  for member in archive.getmembers():
+   p=pathlib.PurePosixPath(member.name)
+   if p.is_absolute() or '..' in p.parts or '.git' in p.parts or not (member.isfile() or member.isdir()):
+    raise ValueError('only tracked regular repository files and directories are supported')
+  archive.extractall('/source',filter='data')
+ pathlib.Path('/source/examples').mkdir(exist_ok=True)
+else:
+ pathlib.Path('/source/generated').mkdir()
+ pathlib.Path('/source/README.md').write_text('# Addition example\\n\\n>>> 2 + 3\\n6\\n')
 p=pathlib.Path('/secret/writer-credential'); p.write_text('SYNTHETIC-WRITER-ONLY-'+secrets.token_hex(32)); p.chmod(0o400)
 for n in ('source','evidence','scratch','ipc','egress','secret'):
  p=pathlib.Path('/'+n)
  for child in p.rglob('*'): os.chown(child,10001,10001)
  os.chown(p,10001,10001)
 """
+    initializer = initializer.replace('REPOSITORY_IMPORT', repr(source_archive is not None))
     # Short operator initialization, before either unprivileged service starts.
-    docker('run', '--rm', '--network', 'none', '--read-only', '--cap-drop', 'ALL', '--cap-add', 'CHOWN',
-           '--user', '0', *volumes, '--entrypoint', 'python', IMAGE, '-I', '-c', initializer)
+    docker('run', '--rm', '-i', '--network', 'none', '--read-only', '--cap-drop', 'ALL', '--cap-add', 'CHOWN',
+           '--user', '0', *volumes, '--entrypoint', 'python', IMAGE, '-I', '-c', initializer, data=source_archive)
     docker('run', '-d', '--name', name + '-proxy', '--label', 'waveframe.proof=' + name,
            *security('bridge'), '--memory', '384m', *mount(name, 'egress', '/egress'), IMAGE, 'proxy')
     (writer_factory or writer)(name)

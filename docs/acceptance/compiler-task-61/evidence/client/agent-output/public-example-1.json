@@ -1,0 +1,33 @@
+{
+  "action_requirements": {
+    "create": {
+      "allow": [
+        {
+          "match": "prefix",
+          "value": "generated/"
+        }
+      ],
+      "deny": [
+        {
+          "match": "prefix",
+          "value": "generated/private/"
+        }
+      ],
+      "required_role": null
+    },
+    "modify": {
+      "allow": [
+        {
+          "match": "exact",
+          "value": "README.md"
+        }
+      ],
+      "deny": [],
+      "required_role": "repository-maintainer"
+    }
+  },
+  "contract_hash": "e8edbb3c29cf75fc651d5768ca4365adb6c9d16d911a52434d5ebaaa3612037b",
+  "contract_id": "repository-file-policy",
+  "contract_version": "2.0.0",
+  "schema_version": "compiled_action_contract.v1"
+}

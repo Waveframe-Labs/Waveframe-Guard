@@ -1,0 +1,18 @@
+{
+  "command": [
+    "docker",
+    "exec",
+    "-w",
+    "/source",
+    "-e",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "-e",
+    "PYTHONPATH=/source/src",
+    "wf54-57-61-trial2-agent",
+    "python",
+    "-c",
+    "import compiler,pytest,json; print(json.dumps({'compiler_origin':compiler.__file__})); assert compiler.__file__.startswith('/source/src/'); raise SystemExit(pytest.main(['-q','-p','no:cacheprovider','--basetemp=/scratch/operator-pytest','--junitxml=/scratch/output/operator-tests.xml','/source/tests']))"
+  ],
+  "exit_code": 0,
+  "seconds": 1.3332533999928273
+}
