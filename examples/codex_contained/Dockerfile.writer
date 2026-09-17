@@ -1,0 +1,5 @@
+FROM waveframe-guard-54-contained:local
+USER root
+COPY examples/codex_contained/cloud_writer.py examples/codex_contained/cloud_server.py examples/codex_contained/cloud_entry.py examples/codex_contained/launch.py /opt/connected/
+USER 10001:10001
+ENTRYPOINT ["python", "-I", "/opt/connected/cloud_entry.py"]

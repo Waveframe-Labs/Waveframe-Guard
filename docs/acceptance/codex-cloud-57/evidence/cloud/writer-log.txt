@@ -1,0 +1,44 @@
+2026/09/17 02:09:59 socat[38] E read(6, 0x637fc9feb000, 8192): Connection reset by peer
+2026/09/17 02:10:26 socat[56] E read(6, 0x637fc9feb000, 8192): Connection reset by peer
+Traceback (most recent call last):
+  File "/opt/connected/launch.py", line 5, in <module>
+    runpy.run_path('/opt/connected/cloud_server.py', run_name='__main__')
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 294, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/opt/connected/cloud_server.py", line 15, in <module>
+    writer = Writer('/source', '/evidence', json.loads(credential.value))
+  File "/opt/connected/cloud_writer.py", line 33, in __init__
+    guard = Guard.cloud(
+        authority=config['authority'], cloud_url=config['cloud_url'],
+    ...<5 lines>...
+        preservation_timeout_seconds=3,
+    )
+  File "/usr/local/lib/python3.14/site-packages/guard/sdk/guard.py", line 218, in cloud
+    guard = cls(
+        workspace=workspace,
+    ...<14 lines>...
+        cloud_api_key=resolved_api_key,
+    )
+  File "/usr/local/lib/python3.14/site-packages/guard/sdk/guard.py", line 66, in __init__
+    authority_source = AuthoritySource.from_inputs(
+        authority=authority,
+    ...<4 lines>...
+        authority_loader=authority_loader,
+    )
+  File "/usr/local/lib/python3.14/site-packages/guard/sdk/authority_source.py", line 53, in from_inputs
+    loaded_authority = load_authority(
+        authority,
+        resolver=authority_resolver,
+        cache=authority_cache,
+    )
+  File "/usr/local/lib/python3.14/site-packages/waveframe_guard/authority/loader.py", line 27, in load_authority
+    registry_entry = active_resolver.resolve(authority_ref)
+  File "/usr/local/lib/python3.14/site-packages/waveframe_guard/cloud/publication.py", line 167, in resolve
+    publication = self.client.fetch_publication(authority_ref)
+  File "/usr/local/lib/python3.14/site-packages/waveframe_guard/cloud/client.py", line 158, in fetch_publication
+    raise CloudAuthorityFetchError(_publication_http_error(response.status_code))
+waveframe_guard.cloud.client.CloudAuthorityFetchError: Cloud publication Cloud service failed (HTTP 503)
+2026/09/17 02:11:39 socat[143] E read(5, 0x6076c5b0c000, 8192): Connection reset by peer
+2026/09/17 02:11:39 socat[143] W waitpid(): child 144 exited with status 1

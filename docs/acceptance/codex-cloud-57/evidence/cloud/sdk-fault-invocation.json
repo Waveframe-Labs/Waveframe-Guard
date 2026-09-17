@@ -1,0 +1,39 @@
+{
+  "command": [
+    "docker",
+    "exec",
+    "-i",
+    "wf54-57-proof-writer",
+    "python",
+    "-I",
+    "/tmp/sdk_fault_probe.py"
+  ],
+  "cwd": "C:\\GitHub\\Waveframe-Guard-57",
+  "exit_code": 0,
+  "barriers": [
+    "unavailable",
+    "redirect",
+    "normal",
+    "normal",
+    "normal",
+    "normal",
+    "normal",
+    "normal",
+    "normal",
+    "normal",
+    "preservation",
+    "normal",
+    "report",
+    "normal",
+    "unavailable",
+    "normal",
+    "unavailable",
+    "normal",
+    "redirect",
+    "normal",
+    "supersede",
+    "load-new-version",
+    "revoke"
+  ],
+  "scope": "deterministic SDK supplement inside writer; separate scratch repositories"
+}

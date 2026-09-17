@@ -1,0 +1,272 @@
+[
+    {
+        "Id": "85f84f356789ce180802bb53efd28c2632411aa75aea8701aea451b8bc7e5d5f",
+        "Created": "2026-09-17T01:52:14.036436594Z",
+        "Path": "python",
+        "Args": [
+            "-I",
+            "/opt/disposable_cloud.py"
+        ],
+        "State": {
+            "Status": "running",
+            "Running": true,
+            "Paused": false,
+            "Restarting": false,
+            "OOMKilled": false,
+            "Dead": false,
+            "Pid": 764,
+            "ExitCode": 0,
+            "Error": "",
+            "StartedAt": "2026-09-17T01:52:14.101064673Z",
+            "FinishedAt": "0001-01-01T00:00:00Z"
+        },
+        "Image": "sha256:bc5f71b586ea19056a327fd4077b23ee28eb2af5d5fb42ffa2956f58bed3d9f6",
+        "ResolvConfPath": "/var/lib/docker/containers/85f84f356789ce180802bb53efd28c2632411aa75aea8701aea451b8bc7e5d5f/resolv.conf",
+        "HostnamePath": "/var/lib/docker/containers/85f84f356789ce180802bb53efd28c2632411aa75aea8701aea451b8bc7e5d5f/hostname",
+        "HostsPath": "/var/lib/docker/containers/85f84f356789ce180802bb53efd28c2632411aa75aea8701aea451b8bc7e5d5f/hosts",
+        "LogPath": "/var/lib/docker/containers/85f84f356789ce180802bb53efd28c2632411aa75aea8701aea451b8bc7e5d5f/85f84f356789ce180802bb53efd28c2632411aa75aea8701aea451b8bc7e5d5f-json.log",
+        "Name": "/wf54-57-live-cloud",
+        "RestartCount": 0,
+        "Driver": "overlayfs",
+        "Platform": "linux",
+        "MountLabel": "",
+        "ProcessLabel": "",
+        "AppArmorProfile": "",
+        "ExecIDs": null,
+        "HostConfig": {
+            "Binds": null,
+            "ContainerIDFile": "",
+            "LogConfig": {
+                "Type": "json-file",
+                "Config": {}
+            },
+            "NetworkMode": "wf54-57-live-cloud-net",
+            "PortBindings": {
+                "8000/tcp": [
+                    {
+                        "HostIp": "127.0.0.1",
+                        "HostPort": ""
+                    }
+                ]
+            },
+            "RestartPolicy": {
+                "Name": "no",
+                "MaximumRetryCount": 0
+            },
+            "AutoRemove": false,
+            "VolumeDriver": "",
+            "VolumesFrom": null,
+            "ConsoleSize": [
+                0,
+                0
+            ],
+            "CapAdd": null,
+            "CapDrop": [
+                "ALL"
+            ],
+            "CgroupnsMode": "private",
+            "Dns": null,
+            "DnsOptions": [],
+            "DnsSearch": [],
+            "ExtraHosts": null,
+            "GroupAdd": null,
+            "IpcMode": "private",
+            "Cgroup": "",
+            "Links": null,
+            "OomScoreAdj": 0,
+            "PidMode": "",
+            "Privileged": false,
+            "PublishAllPorts": false,
+            "ReadonlyRootfs": true,
+            "SecurityOpt": [
+                "no-new-privileges"
+            ],
+            "Tmpfs": {
+                "/tmp": "rw,noexec,nosuid,size=128m,uid=10001,gid=10001,mode=1777"
+            },
+            "UTSMode": "",
+            "UsernsMode": "",
+            "ShmSize": 67108864,
+            "Runtime": "runc",
+            "Isolation": "",
+            "CpuShares": 0,
+            "Memory": 1073741824,
+            "NanoCpus": 0,
+            "CgroupParent": "",
+            "BlkioWeight": 0,
+            "BlkioWeightDevice": [],
+            "BlkioDeviceReadBps": [],
+            "BlkioDeviceWriteBps": [],
+            "BlkioDeviceReadIOps": [],
+            "BlkioDeviceWriteIOps": [],
+            "CpuPeriod": 0,
+            "CpuQuota": 0,
+            "CpuRealtimePeriod": 0,
+            "CpuRealtimeRuntime": 0,
+            "CpusetCpus": "",
+            "CpusetMems": "",
+            "Devices": [],
+            "DeviceCgroupRules": null,
+            "DeviceRequests": null,
+            "MemoryReservation": 0,
+            "MemorySwap": 2147483648,
+            "MemorySwappiness": null,
+            "OomKillDisable": null,
+            "PidsLimit": 256,
+            "Ulimits": [],
+            "CpuCount": 0,
+            "CpuPercent": 0,
+            "IOMaximumIOps": 0,
+            "IOMaximumBandwidth": 0,
+            "Mounts": [
+                {
+                    "Type": "bind",
+                    "Source": "C:\\GitHub\\Waveframe-Guard-57-cloud",
+                    "Target": "/cloud",
+                    "ReadOnly": true
+                },
+                {
+                    "Type": "volume",
+                    "Source": "wf54-57-live-cloud-state",
+                    "Target": "/state"
+                },
+                {
+                    "Type": "volume",
+                    "Source": "wf54-57-live-cloud-transport",
+                    "Target": "/transport"
+                }
+            ],
+            "MaskedPaths": [
+                "/proc/acpi",
+                "/proc/asound",
+                "/proc/interrupts",
+                "/proc/kcore",
+                "/proc/keys",
+                "/proc/latency_stats",
+                "/proc/sched_debug",
+                "/proc/scsi",
+                "/proc/timer_list",
+                "/proc/timer_stats",
+                "/sys/devices/virtual/powercap",
+                "/sys/firmware"
+            ],
+            "ReadonlyPaths": [
+                "/proc/bus",
+                "/proc/fs",
+                "/proc/irq",
+                "/proc/sys",
+                "/proc/sysrq-trigger"
+            ],
+            "Init": true
+        },
+        "Storage": {
+            "RootFS": {
+                "Snapshot": {
+                    "Name": "overlayfs"
+                }
+            }
+        },
+        "Mounts": [
+            {
+                "Type": "bind",
+                "Source": "C:\\GitHub\\Waveframe-Guard-57-cloud",
+                "Destination": "/cloud",
+                "Mode": "",
+                "RW": false,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "volume",
+                "Name": "wf54-57-live-cloud-state",
+                "Source": "/var/lib/docker/volumes/wf54-57-live-cloud-state/_data",
+                "Destination": "/state",
+                "Driver": "local",
+                "Mode": "z",
+                "RW": true,
+                "Propagation": ""
+            },
+            {
+                "Type": "volume",
+                "Name": "wf54-57-live-cloud-transport",
+                "Source": "/var/lib/docker/volumes/wf54-57-live-cloud-transport/_data",
+                "Destination": "/transport",
+                "Driver": "local",
+                "Mode": "z",
+                "RW": true,
+                "Propagation": ""
+            }
+        ],
+        "Config": {
+            "Hostname": "85f84f356789",
+            "Domainname": "",
+            "User": "10001:10001",
+            "AttachStdin": false,
+            "AttachStdout": false,
+            "AttachStderr": false,
+            "ExposedPorts": {
+                "8000/tcp": {}
+            },
+            "Tty": false,
+            "OpenStdin": false,
+            "StdinOnce": false,
+            "Env": [
+                "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "PYTHON_VERSION=3.14.7",
+                "PYTHON_SHA256=3b48dac8fb59f62eaa67ac83c1eb12bda1b7a08406dd286e252c11a66be27f81",
+                "PYTHONDONTWRITEBYTECODE=1",
+                "PYTHONUNBUFFERED=1"
+            ],
+            "Cmd": null,
+            "Image": "waveframe-guard-57-cloud:local",
+            "Volumes": null,
+            "WorkingDir": "/cloud",
+            "Entrypoint": [
+                "python",
+                "-I",
+                "/opt/disposable_cloud.py"
+            ],
+            "Labels": {
+                "waveframe.proof": "wf54-57-live"
+            },
+            "StopTimeout": 1
+        },
+        "NetworkSettings": {
+            "SandboxID": "406d3f8330ce2219ef454cb60bb408eef391bcf1029c62021dad7e34d15fa1cc",
+            "SandboxKey": "/var/run/docker/netns/406d3f8330ce",
+            "Ports": {
+                "8000/tcp": []
+            },
+            "Networks": {
+                "wf54-57-live-cloud-net": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": null,
+                    "DriverOpts": null,
+                    "GwPriority": 0,
+                    "NetworkID": "d87f20d1a99c0655ad5eb6be4b472676ac18eba9bd3fc463279530caa4a434b0",
+                    "EndpointID": "1e0d80d4377c4bdf3e913ec50933262a92b8604313a4abbf880fa3ab17f4738e",
+                    "Gateway": "",
+                    "IPAddress": "172.19.0.2",
+                    "MacAddress": "16:c0:d7:5c:d8:06",
+                    "IPPrefixLen": 16,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": [
+                        "wf54-57-live-cloud",
+                        "85f84f356789"
+                    ]
+                }
+            }
+        },
+        "ImageManifestDescriptor": {
+            "mediaType": "application/vnd.oci.image.manifest.v1+json",
+            "digest": "sha256:90dadd3f7ab128d9c6d2f31de5e80dd9e220a8e7d070e4a56f281506c2adb916",
+            "size": 2004,
+            "platform": {
+                "architecture": "amd64",
+                "os": "linux"
+            }
+        }
+    }
+]

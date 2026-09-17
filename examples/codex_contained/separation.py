@@ -8,6 +8,7 @@ import subprocess
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--name', required=True)
 parser.add_argument('--output', type=Path, required=True)
+parser.add_argument('--cloud', action='store_true')
 args = parser.parse_args()
 
 agent = r'''
@@ -26,7 +27,7 @@ loaded=json.loads(status['result']['content'][0]['text'])
 print(json.dumps({'writer_local_pid':loaded['writer_pid'],'loaded_status':loaded,'agent_pid_namespace':os.readlink('/proc/self/ns/pid')}),flush=True)
 challenge=json.loads(sys.stdin.readline()); pid=challenge['global_pid']; address=challenge['address']; size=challenge['size']
 result={'challenge':challenge,'proc_reads':{}}
-for name in ('mem','environ','root/secrets/writer-credential'):
+for name in ('mem','environ','root/secrets/writer-credential','root/secrets/cloud.json'):
  try:
   with open(f'/proc/{pid}/{name}','rb') as stream: count=len(stream.read(1))
   result['proc_reads'][name]={'unexpected_read_bytes':count}
@@ -50,21 +51,22 @@ records = command_output('exec',args.name+'-writer','cat','/evidence/processes.j
 marker = next(r for r in reversed([json.loads(line) for line in records.splitlines()]) if r['pid']==ready['writer_local_pid'])
 top = command_output('top',args.name+'-writer','-eo','pid,args').decode()
 servers = [line for line in top.splitlines() if len(line.split()) > 1 and line.split()[1] == 'python'
-           and 'python -I /opt/proof/contained/server.py' in line]
+           and ('python -I /opt/proof/contained/server.py' in line or 'python -I /opt/connected/launch.py' in line)]
 assert len(servers)==1, 'run this supplemental test between chats'
 challenge = {'global_pid':int(servers[0].split()[0]),'address':marker['marker_address'],'size':marker['marker_size']}
 process.stdin.write((json.dumps(challenge)+'\n').encode());process.stdin.flush()
 result = json.loads(process.stdout.readline()); process.stdin.close(); process.wait(timeout=15)
 assert process.returncode==0,process.stderr.read().decode()
 writer_ns=command_output('exec',args.name+'-writer','readlink','/proc/self/ns/pid').decode().strip()
-credential=command_output('exec',args.name+'-writer','cat','/secrets/writer-credential')
+credential=command_output('exec',args.name+'-writer','cat','/secrets/cloud.json' if args.cloud else '/secrets/writer-credential')
 assert ready['agent_pid_namespace']!=writer_ns
 assert result['process_vm_readv']=={'read_bytes':-1,'errno':3}, result
 assert all(r.get('errno')==2 for r in result['proc_reads'].values())
 capture={'scope':'deterministic supplemental live MCP/process test, not model chat',
          'ready':ready,'writer_pid_namespace':writer_ns,'writer_processes':top,'result':result,
-         'synthetic_credential_sha256':hashlib.sha256(credential).hexdigest(),
-         'synthetic_credential_bytes':len(credential),'argv':command}
+         'credential_kind':'real disposable Cloud config' if args.cloud else 'synthetic marker',
+         'credential_sha256':hashlib.sha256(credential).hexdigest(),
+         'credential_bytes':len(credential),'argv':command}
 assert credential not in json.dumps(capture).encode()
 args.output.write_text(json.dumps(capture,indent=2)+'\n',encoding='utf-8')
 print('Live writer PID/memory/environment/credential separation passed')

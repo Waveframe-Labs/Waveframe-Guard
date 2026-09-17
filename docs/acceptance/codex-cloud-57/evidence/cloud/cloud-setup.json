@@ -1,0 +1,343 @@
+{
+  "url": "http://127.0.0.1:60998",
+  "cloud_commit": "dd4d483fcec7c4f5d62312b3e802370d9ba7f264",
+  "tracked_source_unchanged": true,
+  "container": {
+    "Id": "3326e430d6304d3f271b41d0e43cc0aa651ebb412f03f407b4d29e59ecfedf4d",
+    "Created": "2026-09-17T01:52:49.006211188Z",
+    "Path": "python",
+    "Args": [
+      "-I",
+      "/opt/disposable_cloud.py"
+    ],
+    "State": {
+      "Status": "running",
+      "Running": true,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 905,
+      "ExitCode": 0,
+      "Error": "",
+      "StartedAt": "2026-09-17T01:52:49.067001205Z",
+      "FinishedAt": "0001-01-01T00:00:00Z"
+    },
+    "Image": "sha256:bc5f71b586ea19056a327fd4077b23ee28eb2af5d5fb42ffa2956f58bed3d9f6",
+    "ResolvConfPath": "/var/lib/docker/containers/3326e430d6304d3f271b41d0e43cc0aa651ebb412f03f407b4d29e59ecfedf4d/resolv.conf",
+    "HostnamePath": "/var/lib/docker/containers/3326e430d6304d3f271b41d0e43cc0aa651ebb412f03f407b4d29e59ecfedf4d/hostname",
+    "HostsPath": "/var/lib/docker/containers/3326e430d6304d3f271b41d0e43cc0aa651ebb412f03f407b4d29e59ecfedf4d/hosts",
+    "LogPath": "/var/lib/docker/containers/3326e430d6304d3f271b41d0e43cc0aa651ebb412f03f407b4d29e59ecfedf4d/3326e430d6304d3f271b41d0e43cc0aa651ebb412f03f407b4d29e59ecfedf4d-json.log",
+    "Name": "/wf54-57-proof-cloud",
+    "RestartCount": 0,
+    "Driver": "overlayfs",
+    "Platform": "linux",
+    "MountLabel": "",
+    "ProcessLabel": "",
+    "AppArmorProfile": "",
+    "ExecIDs": null,
+    "HostConfig": {
+      "Binds": null,
+      "ContainerIDFile": "",
+      "LogConfig": {
+        "Type": "json-file",
+        "Config": {}
+      },
+      "NetworkMode": "wf54-57-proof-cloud-net",
+      "PortBindings": {
+        "8000/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": ""
+          }
+        ]
+      },
+      "RestartPolicy": {
+        "Name": "no",
+        "MaximumRetryCount": 0
+      },
+      "AutoRemove": false,
+      "VolumeDriver": "",
+      "VolumesFrom": null,
+      "ConsoleSize": [
+        0,
+        0
+      ],
+      "CapAdd": null,
+      "CapDrop": [
+        "ALL"
+      ],
+      "CgroupnsMode": "private",
+      "Dns": null,
+      "DnsOptions": [],
+      "DnsSearch": [],
+      "ExtraHosts": null,
+      "GroupAdd": null,
+      "IpcMode": "private",
+      "Cgroup": "",
+      "Links": null,
+      "OomScoreAdj": 0,
+      "PidMode": "",
+      "Privileged": false,
+      "PublishAllPorts": false,
+      "ReadonlyRootfs": true,
+      "SecurityOpt": [
+        "no-new-privileges"
+      ],
+      "Tmpfs": {
+        "/tmp": "rw,noexec,nosuid,size=128m,uid=10001,gid=10001,mode=1777"
+      },
+      "UTSMode": "",
+      "UsernsMode": "",
+      "ShmSize": 67108864,
+      "Runtime": "runc",
+      "Isolation": "",
+      "CpuShares": 0,
+      "Memory": 1073741824,
+      "NanoCpus": 0,
+      "CgroupParent": "",
+      "BlkioWeight": 0,
+      "BlkioWeightDevice": [],
+      "BlkioDeviceReadBps": [],
+      "BlkioDeviceWriteBps": [],
+      "BlkioDeviceReadIOps": [],
+      "BlkioDeviceWriteIOps": [],
+      "CpuPeriod": 0,
+      "CpuQuota": 0,
+      "CpuRealtimePeriod": 0,
+      "CpuRealtimeRuntime": 0,
+      "CpusetCpus": "",
+      "CpusetMems": "",
+      "Devices": [],
+      "DeviceCgroupRules": null,
+      "DeviceRequests": null,
+      "MemoryReservation": 0,
+      "MemorySwap": 2147483648,
+      "MemorySwappiness": null,
+      "OomKillDisable": null,
+      "PidsLimit": 256,
+      "Ulimits": [],
+      "CpuCount": 0,
+      "CpuPercent": 0,
+      "IOMaximumIOps": 0,
+      "IOMaximumBandwidth": 0,
+      "Mounts": [
+        {
+          "Type": "bind",
+          "Source": "C:\\GitHub\\Waveframe-Guard-57-cloud",
+          "Target": "/cloud",
+          "ReadOnly": true
+        },
+        {
+          "Type": "volume",
+          "Source": "wf54-57-proof-cloud-state",
+          "Target": "/state"
+        },
+        {
+          "Type": "volume",
+          "Source": "wf54-57-proof-cloud-transport",
+          "Target": "/transport"
+        }
+      ],
+      "MaskedPaths": [
+        "/proc/acpi",
+        "/proc/asound",
+        "/proc/interrupts",
+        "/proc/kcore",
+        "/proc/keys",
+        "/proc/latency_stats",
+        "/proc/sched_debug",
+        "/proc/scsi",
+        "/proc/timer_list",
+        "/proc/timer_stats",
+        "/sys/devices/virtual/powercap",
+        "/sys/firmware"
+      ],
+      "ReadonlyPaths": [
+        "/proc/bus",
+        "/proc/fs",
+        "/proc/irq",
+        "/proc/sys",
+        "/proc/sysrq-trigger"
+      ],
+      "Init": true
+    },
+    "Storage": {
+      "RootFS": {
+        "Snapshot": {
+          "Name": "overlayfs"
+        }
+      }
+    },
+    "Mounts": [
+      {
+        "Type": "bind",
+        "Source": "C:\\GitHub\\Waveframe-Guard-57-cloud",
+        "Destination": "/cloud",
+        "Mode": "",
+        "RW": false,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "volume",
+        "Name": "wf54-57-proof-cloud-state",
+        "Source": "/var/lib/docker/volumes/wf54-57-proof-cloud-state/_data",
+        "Destination": "/state",
+        "Driver": "local",
+        "Mode": "z",
+        "RW": true,
+        "Propagation": ""
+      },
+      {
+        "Type": "volume",
+        "Name": "wf54-57-proof-cloud-transport",
+        "Source": "/var/lib/docker/volumes/wf54-57-proof-cloud-transport/_data",
+        "Destination": "/transport",
+        "Driver": "local",
+        "Mode": "z",
+        "RW": true,
+        "Propagation": ""
+      }
+    ],
+    "Config": {
+      "Hostname": "3326e430d630",
+      "Domainname": "",
+      "User": "10001:10001",
+      "AttachStdin": false,
+      "AttachStdout": false,
+      "AttachStderr": false,
+      "ExposedPorts": {
+        "8000/tcp": {}
+      },
+      "Tty": false,
+      "OpenStdin": false,
+      "StdinOnce": false,
+      "Env": [
+        "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+        "PYTHON_VERSION=3.14.7",
+        "PYTHON_SHA256=3b48dac8fb59f62eaa67ac83c1eb12bda1b7a08406dd286e252c11a66be27f81",
+        "PYTHONDONTWRITEBYTECODE=1",
+        "PYTHONUNBUFFERED=1"
+      ],
+      "Cmd": null,
+      "Image": "waveframe-guard-57-cloud:local",
+      "Volumes": null,
+      "WorkingDir": "/cloud",
+      "Entrypoint": [
+        "python",
+        "-I",
+        "/opt/disposable_cloud.py"
+      ],
+      "Labels": {
+        "waveframe.proof": "wf54-57-proof"
+      },
+      "StopTimeout": 1
+    },
+    "NetworkSettings": {
+      "SandboxID": "50a81e6d5dfe0e218e759af70dd4747995af2f40ebad6e7ab391289e3db8d6f3",
+      "SandboxKey": "/var/run/docker/netns/50a81e6d5dfe",
+      "Ports": {
+        "8000/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "60998"
+          }
+        ]
+      },
+      "Networks": {
+        "wf54-57-proof-cloud-net": {
+          "IPAMConfig": null,
+          "Links": null,
+          "Aliases": null,
+          "DriverOpts": null,
+          "GwPriority": 0,
+          "NetworkID": "0ca88941447b3cf180d63b4ba1bc4f8045dc5afb29d0b0b5f88cbce2423bd857",
+          "EndpointID": "d27411467afb2798f0cc5662dbab2289820f693f43f09ab8ac010e03fad5e40a",
+          "Gateway": "172.21.0.1",
+          "IPAddress": "172.21.0.2",
+          "MacAddress": "c6:51:00:ea:44:60",
+          "IPPrefixLen": 16,
+          "IPv6Gateway": "",
+          "GlobalIPv6Address": "",
+          "GlobalIPv6PrefixLen": 0,
+          "DNSNames": [
+            "wf54-57-proof-cloud",
+            "3326e430d630"
+          ]
+        }
+      }
+    },
+    "ImageManifestDescriptor": {
+      "mediaType": "application/vnd.oci.image.manifest.v1+json",
+      "digest": "sha256:90dadd3f7ab128d9c6d2f31de5e80dd9e220a8e7d070e4a56f281506c2adb916",
+      "size": 2004,
+      "platform": {
+        "architecture": "amd64",
+        "os": "linux"
+      }
+    }
+  },
+  "image": [
+    {
+      "Id": "sha256:bc5f71b586ea19056a327fd4077b23ee28eb2af5d5fb42ffa2956f58bed3d9f6",
+      "RepoTags": [
+        "waveframe-guard-57-cloud:local"
+      ],
+      "RepoDigests": [
+        "waveframe-guard-57-cloud@sha256:bc5f71b586ea19056a327fd4077b23ee28eb2af5d5fb42ffa2956f58bed3d9f6"
+      ],
+      "Comment": "buildkit.dockerfile.v0",
+      "Created": "2026-09-17T01:50:25.081356252Z",
+      "Config": {
+        "User": "10001:10001",
+        "Env": [
+          "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+          "PYTHON_VERSION=3.14.7",
+          "PYTHON_SHA256=3b48dac8fb59f62eaa67ac83c1eb12bda1b7a08406dd286e252c11a66be27f81",
+          "PYTHONDONTWRITEBYTECODE=1",
+          "PYTHONUNBUFFERED=1"
+        ],
+        "Entrypoint": [
+          "python",
+          "-I",
+          "/opt/disposable_cloud.py"
+        ],
+        "WorkingDir": "/cloud"
+      },
+      "Architecture": "amd64",
+      "Os": "linux",
+      "Size": 70089643,
+      "RootFS": {
+        "Type": "layers",
+        "Layers": [
+          "sha256:411a86676185cb54d695a805b238194a64e9b77e0c723f3802fbb87d333ea0b3",
+          "sha256:7e6a39b645ae2a5f2d1b60d5bdc539ba90db0e7c9f60e5c57827d8927d1bc1a9",
+          "sha256:72a7471afe641797484f21d643652177a22c3d632065d7c9867f21cff59b3fd9",
+          "sha256:d1fea40c1545e9eeb29a353d1131a521ae4bb0e794804ebe5f95984c329d7696",
+          "sha256:9785cf643c522838e42fbc8dd0a2349e12d8b19054d5c9c913aed6143f494af9",
+          "sha256:5f23f9c1dbadc5c2ecea169ebbe045bb140d95714a3ca9c1d7a44e13626fec81",
+          "sha256:446ce136bee7b30575b7534163c9fcd338a8ec97d676c37c0a035010f9b87574",
+          "sha256:9c53e91402e22771b623e07a628285d472c2e4abae8d7fe2776386c5da6e4356",
+          "sha256:7f378dcc878da088de8e63094e5f2826c3335652b53eb1292d13c6e0cf1a7866"
+        ]
+      },
+      "Metadata": {
+        "LastTagTime": "2026-09-17T01:50:26.894832164Z"
+      },
+      "Descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:bc5f71b586ea19056a327fd4077b23ee28eb2af5d5fb42ffa2956f58bed3d9f6",
+        "size": 856
+      },
+      "Identity": {
+        "Build": [
+          {
+            "Ref": "2qmyj2muv42c4yljkkv4fq11i",
+            "CreatedAt": "2026-09-17T01:50:28.026148079Z"
+          }
+        ]
+      }
+    }
+  ],
+  "provider": "pinned Cloud ExampleProvider: deterministic exact five-clause policy only"
+}

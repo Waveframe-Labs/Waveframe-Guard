@@ -9,7 +9,12 @@ from run import writer, snapshot, save, docker
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--name', required=True)
 parser.add_argument('--output', type=Path, required=True)
+parser.add_argument('--cloud', action='store_true')
 args = parser.parse_args()
+if args.cloud:
+    from run_cloud import writer as cloud_writer
+    def writer(name, mode='normal'):
+        return cloud_writer(name, mode=mode)
 before = snapshot(args.name)
 probe = r'''
 import json,socket,sys,time

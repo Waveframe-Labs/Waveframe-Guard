@@ -1,0 +1,965 @@
+{
+  "name": "wf54-57-repro2",
+  "elapsed_seconds": 2.45,
+  "auth_method": "supported copy of existing auth.json only",
+  "image": [
+    {
+      "Id": "sha256:2af4a2af92444e349c6755ddaf1d4e92fdbd53da8cc2fe51b6a71acbc83bcefb",
+      "RepoTags": [
+        "waveframe-guard-54-contained:local"
+      ],
+      "RepoDigests": [
+        "waveframe-guard-54-contained@sha256:2af4a2af92444e349c6755ddaf1d4e92fdbd53da8cc2fe51b6a71acbc83bcefb"
+      ],
+      "Comment": "buildkit.dockerfile.v0",
+      "Created": "2026-09-16T16:48:58.467142487Z",
+      "Config": {
+        "User": "10001:10001",
+        "Env": [
+          "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+          "PYTHON_VERSION=3.14.7",
+          "PYTHON_SHA256=3b48dac8fb59f62eaa67ac83c1eb12bda1b7a08406dd286e252c11a66be27f81",
+          "PYTHONDONTWRITEBYTECODE=1",
+          "PYTHONUNBUFFERED=1"
+        ],
+        "Entrypoint": [
+          "python",
+          "-I",
+          "/opt/proof/contained/entry.py"
+        ],
+        "WorkingDir": "/source"
+      },
+      "Architecture": "amd64",
+      "Os": "linux",
+      "Size": 249674665,
+      "RootFS": {
+        "Type": "layers",
+        "Layers": [
+          "sha256:411a86676185cb54d695a805b238194a64e9b77e0c723f3802fbb87d333ea0b3",
+          "sha256:7e6a39b645ae2a5f2d1b60d5bdc539ba90db0e7c9f60e5c57827d8927d1bc1a9",
+          "sha256:72a7471afe641797484f21d643652177a22c3d632065d7c9867f21cff59b3fd9",
+          "sha256:d1fea40c1545e9eeb29a353d1131a521ae4bb0e794804ebe5f95984c329d7696",
+          "sha256:2f7094ecdc36c1c3cceaae5b503aa8006c6f149d3242740b80d9419b32e4699e",
+          "sha256:25937fa215ded796161f79a50cfd5785d15fcb28cb4fe05b7b12ade4040d7617",
+          "sha256:0ede556857161ad17e519872336c9152564a02366e2a75a85b9b48152ea5bb62",
+          "sha256:9669fdd453cb1c2aa7352c6a813cec8f1b534a7a8ae105b6bbdea1be706acdca",
+          "sha256:b0fea260cffb16e4b6d8248b08fc898e996ceec15b42cb50e52f4d538bddf0aa",
+          "sha256:416861dd98d76ab63b683ba749203ef6a0c21b7074e08b18e2c6f64eb58c0f63",
+          "sha256:98a2d5ca828f97313b61bdc7c2a07b24a779f456db5f73e286c861efca6c4dd1",
+          "sha256:cc93af1dde6c171047835e85f45d534e19a4d2b3dd81586483d4e26a696451a3",
+          "sha256:02213998abb5bc23f3f61b36c36cc938b1adc7f0cf6f5783bbf48ad2926a5e86"
+        ]
+      },
+      "Metadata": {
+        "LastTagTime": "2026-09-16T16:48:58.693295164Z"
+      },
+      "Descriptor": {
+        "mediaType": "application/vnd.oci.image.index.v1+json",
+        "digest": "sha256:2af4a2af92444e349c6755ddaf1d4e92fdbd53da8cc2fe51b6a71acbc83bcefb",
+        "size": 856
+      },
+      "Identity": {
+        "Pull": [
+          {
+            "Repository": "docker.io/library/waveframe-guard-54-contained"
+          }
+        ],
+        "Build": [
+          {
+            "Ref": "mqxi6rtnxttqwk8p25709kp8j",
+            "CreatedAt": "2026-09-16T16:48:58.771027197Z"
+          }
+        ]
+      }
+    }
+  ],
+  "containers": [
+    {
+      "Id": "ae5d05ed8dc3495ee5309bfcc6361c956d414dfcfaae0ef9181c6f829353db92",
+      "Created": "2026-09-17T02:17:51.48764163Z",
+      "Path": "python",
+      "Args": [
+        "-I",
+        "/opt/proof/contained/entry.py",
+        "agent"
+      ],
+      "State": {
+        "Status": "running",
+        "Running": true,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 8965,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-09-17T02:17:51.556177941Z",
+        "FinishedAt": "0001-01-01T00:00:00Z"
+      },
+      "Image": "sha256:2af4a2af92444e349c6755ddaf1d4e92fdbd53da8cc2fe51b6a71acbc83bcefb",
+      "ResolvConfPath": "/var/lib/docker/containers/ae5d05ed8dc3495ee5309bfcc6361c956d414dfcfaae0ef9181c6f829353db92/resolv.conf",
+      "HostnamePath": "/var/lib/docker/containers/ae5d05ed8dc3495ee5309bfcc6361c956d414dfcfaae0ef9181c6f829353db92/hostname",
+      "HostsPath": "/var/lib/docker/containers/ae5d05ed8dc3495ee5309bfcc6361c956d414dfcfaae0ef9181c6f829353db92/hosts",
+      "LogPath": "/var/lib/docker/containers/ae5d05ed8dc3495ee5309bfcc6361c956d414dfcfaae0ef9181c6f829353db92/ae5d05ed8dc3495ee5309bfcc6361c956d414dfcfaae0ef9181c6f829353db92-json.log",
+      "Name": "/wf54-57-repro2-agent",
+      "RestartCount": 0,
+      "Driver": "overlayfs",
+      "Platform": "linux",
+      "MountLabel": "",
+      "ProcessLabel": "",
+      "AppArmorProfile": "",
+      "ExecIDs": null,
+      "HostConfig": {
+        "Binds": null,
+        "ContainerIDFile": "",
+        "LogConfig": {
+          "Type": "json-file",
+          "Config": {}
+        },
+        "NetworkMode": "none",
+        "PortBindings": {},
+        "RestartPolicy": {
+          "Name": "no",
+          "MaximumRetryCount": 0
+        },
+        "AutoRemove": false,
+        "VolumeDriver": "",
+        "VolumesFrom": null,
+        "ConsoleSize": [
+          0,
+          0
+        ],
+        "CapAdd": null,
+        "CapDrop": [
+          "ALL"
+        ],
+        "CgroupnsMode": "private",
+        "Dns": null,
+        "DnsOptions": [],
+        "DnsSearch": [],
+        "ExtraHosts": null,
+        "GroupAdd": null,
+        "IpcMode": "private",
+        "Cgroup": "",
+        "Links": null,
+        "OomScoreAdj": 0,
+        "PidMode": "",
+        "Privileged": false,
+        "PublishAllPorts": false,
+        "ReadonlyRootfs": true,
+        "SecurityOpt": [
+          "no-new-privileges"
+        ],
+        "Tmpfs": {
+          "/tmp": "rw,noexec,nosuid,size=128m,uid=10001,gid=10001,mode=1777"
+        },
+        "UTSMode": "",
+        "UsernsMode": "",
+        "ShmSize": 67108864,
+        "Runtime": "runc",
+        "Isolation": "",
+        "CpuShares": 0,
+        "Memory": 2147483648,
+        "NanoCpus": 0,
+        "CgroupParent": "",
+        "BlkioWeight": 0,
+        "BlkioWeightDevice": [],
+        "BlkioDeviceReadBps": [],
+        "BlkioDeviceWriteBps": [],
+        "BlkioDeviceReadIOps": [],
+        "BlkioDeviceWriteIOps": [],
+        "CpuPeriod": 0,
+        "CpuQuota": 0,
+        "CpuRealtimePeriod": 0,
+        "CpuRealtimeRuntime": 0,
+        "CpusetCpus": "",
+        "CpusetMems": "",
+        "Devices": [],
+        "DeviceCgroupRules": null,
+        "DeviceRequests": null,
+        "MemoryReservation": 0,
+        "MemorySwap": 4294967296,
+        "MemorySwappiness": null,
+        "OomKillDisable": null,
+        "PidsLimit": 256,
+        "Ulimits": [],
+        "CpuCount": 0,
+        "CpuPercent": 0,
+        "IOMaximumIOps": 0,
+        "IOMaximumBandwidth": 0,
+        "Mounts": [
+          {
+            "Type": "volume",
+            "Source": "wf54-57-repro2-source",
+            "Target": "/source",
+            "ReadOnly": true
+          },
+          {
+            "Type": "volume",
+            "Source": "wf54-57-repro2-scratch",
+            "Target": "/scratch"
+          },
+          {
+            "Type": "volume",
+            "Source": "wf54-57-repro2-ipc",
+            "Target": "/ipc",
+            "ReadOnly": true
+          },
+          {
+            "Type": "volume",
+            "Source": "wf54-57-repro2-egress",
+            "Target": "/egress",
+            "ReadOnly": true
+          }
+        ],
+        "MaskedPaths": [
+          "/proc/acpi",
+          "/proc/asound",
+          "/proc/interrupts",
+          "/proc/kcore",
+          "/proc/keys",
+          "/proc/latency_stats",
+          "/proc/sched_debug",
+          "/proc/scsi",
+          "/proc/timer_list",
+          "/proc/timer_stats",
+          "/sys/devices/virtual/powercap",
+          "/sys/firmware"
+        ],
+        "ReadonlyPaths": [
+          "/proc/bus",
+          "/proc/fs",
+          "/proc/irq",
+          "/proc/sys",
+          "/proc/sysrq-trigger"
+        ],
+        "Init": true
+      },
+      "Storage": {
+        "RootFS": {
+          "Snapshot": {
+            "Name": "overlayfs"
+          }
+        }
+      },
+      "Mounts": [
+        {
+          "Type": "volume",
+          "Name": "wf54-57-repro2-source",
+          "Source": "/var/lib/docker/volumes/wf54-57-repro2-source/_data",
+          "Destination": "/source",
+          "Driver": "local",
+          "Mode": "z",
+          "RW": false,
+          "Propagation": ""
+        },
+        {
+          "Type": "volume",
+          "Name": "wf54-57-repro2-scratch",
+          "Source": "/var/lib/docker/volumes/wf54-57-repro2-scratch/_data",
+          "Destination": "/scratch",
+          "Driver": "local",
+          "Mode": "z",
+          "RW": true,
+          "Propagation": ""
+        },
+        {
+          "Type": "volume",
+          "Name": "wf54-57-repro2-ipc",
+          "Source": "/var/lib/docker/volumes/wf54-57-repro2-ipc/_data",
+          "Destination": "/ipc",
+          "Driver": "local",
+          "Mode": "z",
+          "RW": false,
+          "Propagation": ""
+        },
+        {
+          "Type": "volume",
+          "Name": "wf54-57-repro2-egress",
+          "Source": "/var/lib/docker/volumes/wf54-57-repro2-egress/_data",
+          "Destination": "/egress",
+          "Driver": "local",
+          "Mode": "z",
+          "RW": false,
+          "Propagation": ""
+        }
+      ],
+      "Config": {
+        "Hostname": "ae5d05ed8dc3",
+        "Domainname": "",
+        "User": "10001:10001",
+        "AttachStdin": false,
+        "AttachStdout": false,
+        "AttachStderr": false,
+        "Tty": false,
+        "OpenStdin": false,
+        "StdinOnce": false,
+        "Env": [
+          "CODEX_HOME=/scratch/codex",
+          "XDG_CACHE_HOME=/scratch/cache",
+          "HTTPS_PROXY=http://127.0.0.1:18080",
+          "HTTP_PROXY=http://127.0.0.1:18080",
+          "NO_PROXY=localhost,127.0.0.1",
+          "HOME=/scratch",
+          "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+          "PYTHON_VERSION=3.14.7",
+          "PYTHON_SHA256=3b48dac8fb59f62eaa67ac83c1eb12bda1b7a08406dd286e252c11a66be27f81",
+          "PYTHONDONTWRITEBYTECODE=1",
+          "PYTHONUNBUFFERED=1"
+        ],
+        "Cmd": [
+          "agent"
+        ],
+        "Image": "waveframe-guard-54-contained:local",
+        "Volumes": null,
+        "WorkingDir": "/source",
+        "Entrypoint": [
+          "python",
+          "-I",
+          "/opt/proof/contained/entry.py"
+        ],
+        "Labels": {
+          "waveframe.proof": "wf54-57-repro2"
+        },
+        "StopTimeout": 1
+      },
+      "NetworkSettings": {
+        "SandboxID": "1295376c667599a8f42eb12104a020d157ef2fbf6d89fa686081c40c576f1b91",
+        "SandboxKey": "/var/run/docker/netns/1295376c6675",
+        "Ports": {},
+        "Networks": {
+          "none": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "DriverOpts": null,
+            "GwPriority": 0,
+            "NetworkID": "c6f228dae2da504e48ceb3a9e73a0c7d16d7696273b69377cd42181ce26e204c",
+            "EndpointID": "12192340c6b432dc4cf75f09504ef4ed4362613c56833299eb7b0a2ae520db4c",
+            "Gateway": "",
+            "IPAddress": "",
+            "MacAddress": "",
+            "IPPrefixLen": 0,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "DNSNames": null
+          }
+        }
+      },
+      "ImageManifestDescriptor": {
+        "mediaType": "application/vnd.oci.image.manifest.v1+json",
+        "digest": "sha256:f32a6962478e77de1a624735dd4eb40f420b36df88143067fc530a574b5fa50e",
+        "size": 2769,
+        "platform": {
+          "architecture": "amd64",
+          "os": "linux"
+        }
+      }
+    },
+    {
+      "Id": "02a5340530b29d02beb40d38094ddc97bf8a016a14d6d1c637642269bb0724c2",
+      "Created": "2026-09-17T02:17:51.257852185Z",
+      "Path": "python",
+      "Args": [
+        "-I",
+        "/opt/connected/cloud_entry.py",
+        "normal"
+      ],
+      "State": {
+        "Status": "running",
+        "Running": true,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 8919,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-09-17T02:17:51.323793816Z",
+        "FinishedAt": "0001-01-01T00:00:00Z"
+      },
+      "Image": "sha256:86bd888757923cdbc549887e6ec39559a93701bb6f53cc2641c62681bf1fb5fe",
+      "ResolvConfPath": "/var/lib/docker/containers/02a5340530b29d02beb40d38094ddc97bf8a016a14d6d1c637642269bb0724c2/resolv.conf",
+      "HostnamePath": "/var/lib/docker/containers/02a5340530b29d02beb40d38094ddc97bf8a016a14d6d1c637642269bb0724c2/hostname",
+      "HostsPath": "/var/lib/docker/containers/02a5340530b29d02beb40d38094ddc97bf8a016a14d6d1c637642269bb0724c2/hosts",
+      "LogPath": "/var/lib/docker/containers/02a5340530b29d02beb40d38094ddc97bf8a016a14d6d1c637642269bb0724c2/02a5340530b29d02beb40d38094ddc97bf8a016a14d6d1c637642269bb0724c2-json.log",
+      "Name": "/wf54-57-repro2-writer",
+      "RestartCount": 0,
+      "Driver": "overlayfs",
+      "Platform": "linux",
+      "MountLabel": "",
+      "ProcessLabel": "",
+      "AppArmorProfile": "",
+      "ExecIDs": null,
+      "HostConfig": {
+        "Binds": null,
+        "ContainerIDFile": "",
+        "LogConfig": {
+          "Type": "json-file",
+          "Config": {}
+        },
+        "NetworkMode": "none",
+        "PortBindings": {},
+        "RestartPolicy": {
+          "Name": "no",
+          "MaximumRetryCount": 0
+        },
+        "AutoRemove": false,
+        "VolumeDriver": "",
+        "VolumesFrom": null,
+        "ConsoleSize": [
+          0,
+          0
+        ],
+        "CapAdd": null,
+        "CapDrop": [
+          "ALL"
+        ],
+        "CgroupnsMode": "private",
+        "Dns": null,
+        "DnsOptions": [],
+        "DnsSearch": [],
+        "ExtraHosts": null,
+        "GroupAdd": null,
+        "IpcMode": "private",
+        "Cgroup": "",
+        "Links": null,
+        "OomScoreAdj": 0,
+        "PidMode": "",
+        "Privileged": false,
+        "PublishAllPorts": false,
+        "ReadonlyRootfs": true,
+        "SecurityOpt": [
+          "no-new-privileges"
+        ],
+        "Tmpfs": {
+          "/tmp": "rw,noexec,nosuid,size=128m,uid=10001,gid=10001,mode=1777"
+        },
+        "UTSMode": "",
+        "UsernsMode": "",
+        "ShmSize": 67108864,
+        "Runtime": "runc",
+        "Isolation": "",
+        "CpuShares": 0,
+        "Memory": 805306368,
+        "NanoCpus": 0,
+        "CgroupParent": "",
+        "BlkioWeight": 0,
+        "BlkioWeightDevice": [],
+        "BlkioDeviceReadBps": [],
+        "BlkioDeviceWriteBps": [],
+        "BlkioDeviceReadIOps": [],
+        "BlkioDeviceWriteIOps": [],
+        "CpuPeriod": 0,
+        "CpuQuota": 0,
+        "CpuRealtimePeriod": 0,
+        "CpuRealtimeRuntime": 0,
+        "CpusetCpus": "",
+        "CpusetMems": "",
+        "Devices": [],
+        "DeviceCgroupRules": null,
+        "DeviceRequests": null,
+        "MemoryReservation": 0,
+        "MemorySwap": 1610612736,
+        "MemorySwappiness": null,
+        "OomKillDisable": null,
+        "PidsLimit": 256,
+        "Ulimits": [],
+        "CpuCount": 0,
+        "CpuPercent": 0,
+        "IOMaximumIOps": 0,
+        "IOMaximumBandwidth": 0,
+        "Mounts": [
+          {
+            "Type": "volume",
+            "Source": "wf54-57-repro2-source",
+            "Target": "/source"
+          },
+          {
+            "Type": "volume",
+            "Source": "wf54-57-repro2-evidence",
+            "Target": "/evidence"
+          },
+          {
+            "Type": "volume",
+            "Source": "wf54-57-repro2-ipc",
+            "Target": "/ipc"
+          },
+          {
+            "Type": "volume",
+            "Source": "wf54-57-repro2-secret",
+            "Target": "/secrets",
+            "ReadOnly": true
+          },
+          {
+            "Type": "volume",
+            "Source": "wf54-57-repro2-cloud-transport",
+            "Target": "/cloud-transport",
+            "ReadOnly": true
+          }
+        ],
+        "MaskedPaths": [
+          "/proc/acpi",
+          "/proc/asound",
+          "/proc/interrupts",
+          "/proc/kcore",
+          "/proc/keys",
+          "/proc/latency_stats",
+          "/proc/sched_debug",
+          "/proc/scsi",
+          "/proc/timer_list",
+          "/proc/timer_stats",
+          "/sys/devices/virtual/powercap",
+          "/sys/firmware"
+        ],
+        "ReadonlyPaths": [
+          "/proc/bus",
+          "/proc/fs",
+          "/proc/irq",
+          "/proc/sys",
+          "/proc/sysrq-trigger"
+        ],
+        "Init": true
+      },
+      "Storage": {
+        "RootFS": {
+          "Snapshot": {
+            "Name": "overlayfs"
+          }
+        }
+      },
+      "Mounts": [
+        {
+          "Type": "volume",
+          "Name": "wf54-57-repro2-source",
+          "Source": "/var/lib/docker/volumes/wf54-57-repro2-source/_data",
+          "Destination": "/source",
+          "Driver": "local",
+          "Mode": "z",
+          "RW": true,
+          "Propagation": ""
+        },
+        {
+          "Type": "volume",
+          "Name": "wf54-57-repro2-evidence",
+          "Source": "/var/lib/docker/volumes/wf54-57-repro2-evidence/_data",
+          "Destination": "/evidence",
+          "Driver": "local",
+          "Mode": "z",
+          "RW": true,
+          "Propagation": ""
+        },
+        {
+          "Type": "volume",
+          "Name": "wf54-57-repro2-ipc",
+          "Source": "/var/lib/docker/volumes/wf54-57-repro2-ipc/_data",
+          "Destination": "/ipc",
+          "Driver": "local",
+          "Mode": "z",
+          "RW": true,
+          "Propagation": ""
+        },
+        {
+          "Type": "volume",
+          "Name": "wf54-57-repro2-secret",
+          "Source": "/var/lib/docker/volumes/wf54-57-repro2-secret/_data",
+          "Destination": "/secrets",
+          "Driver": "local",
+          "Mode": "z",
+          "RW": false,
+          "Propagation": ""
+        },
+        {
+          "Type": "volume",
+          "Name": "wf54-57-repro2-cloud-transport",
+          "Source": "/var/lib/docker/volumes/wf54-57-repro2-cloud-transport/_data",
+          "Destination": "/cloud-transport",
+          "Driver": "local",
+          "Mode": "z",
+          "RW": false,
+          "Propagation": ""
+        }
+      ],
+      "Config": {
+        "Hostname": "02a5340530b2",
+        "Domainname": "",
+        "User": "10001:10001",
+        "AttachStdin": false,
+        "AttachStdout": false,
+        "AttachStderr": false,
+        "Tty": false,
+        "OpenStdin": false,
+        "StdinOnce": false,
+        "Env": [
+          "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+          "PYTHON_VERSION=3.14.7",
+          "PYTHON_SHA256=3b48dac8fb59f62eaa67ac83c1eb12bda1b7a08406dd286e252c11a66be27f81",
+          "PYTHONDONTWRITEBYTECODE=1",
+          "PYTHONUNBUFFERED=1"
+        ],
+        "Cmd": [
+          "normal"
+        ],
+        "Image": "waveframe-guard-57-writer:local",
+        "Volumes": null,
+        "WorkingDir": "/source",
+        "Entrypoint": [
+          "python",
+          "-I",
+          "/opt/connected/cloud_entry.py"
+        ],
+        "Labels": {
+          "waveframe.proof": "wf54-57-repro2"
+        },
+        "StopTimeout": 1
+      },
+      "NetworkSettings": {
+        "SandboxID": "38761b861d6fc23ba515d241e7b3788a7c6001f0a40f01a7a9391882af18e88c",
+        "SandboxKey": "/var/run/docker/netns/38761b861d6f",
+        "Ports": {},
+        "Networks": {
+          "none": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "DriverOpts": null,
+            "GwPriority": 0,
+            "NetworkID": "c6f228dae2da504e48ceb3a9e73a0c7d16d7696273b69377cd42181ce26e204c",
+            "EndpointID": "5971c7b9719337613f72385f5a51c2316db10f3ab02abfab0430c74dc73dc764",
+            "Gateway": "",
+            "IPAddress": "",
+            "MacAddress": "",
+            "IPPrefixLen": 0,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "DNSNames": null
+          }
+        }
+      },
+      "ImageManifestDescriptor": {
+        "mediaType": "application/vnd.oci.image.manifest.v1+json",
+        "digest": "sha256:afdd1c8d5ea7332eee534c69cf6e99536f69ea3b76a14aa5e40d89e50f03cf39",
+        "size": 2958,
+        "platform": {
+          "architecture": "amd64",
+          "os": "linux"
+        }
+      }
+    },
+    {
+      "Id": "ac73702b3a6a72499a415e687863ecece399c28a207357902579f0a5745d4c9b",
+      "Created": "2026-09-17T02:17:50.570277647Z",
+      "Path": "python",
+      "Args": [
+        "-I",
+        "/opt/proof/contained/entry.py",
+        "proxy"
+      ],
+      "State": {
+        "Status": "running",
+        "Running": true,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 8806,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-09-17T02:17:50.630902013Z",
+        "FinishedAt": "0001-01-01T00:00:00Z"
+      },
+      "Image": "sha256:2af4a2af92444e349c6755ddaf1d4e92fdbd53da8cc2fe51b6a71acbc83bcefb",
+      "ResolvConfPath": "/var/lib/docker/containers/ac73702b3a6a72499a415e687863ecece399c28a207357902579f0a5745d4c9b/resolv.conf",
+      "HostnamePath": "/var/lib/docker/containers/ac73702b3a6a72499a415e687863ecece399c28a207357902579f0a5745d4c9b/hostname",
+      "HostsPath": "/var/lib/docker/containers/ac73702b3a6a72499a415e687863ecece399c28a207357902579f0a5745d4c9b/hosts",
+      "LogPath": "/var/lib/docker/containers/ac73702b3a6a72499a415e687863ecece399c28a207357902579f0a5745d4c9b/ac73702b3a6a72499a415e687863ecece399c28a207357902579f0a5745d4c9b-json.log",
+      "Name": "/wf54-57-repro2-proxy",
+      "RestartCount": 0,
+      "Driver": "overlayfs",
+      "Platform": "linux",
+      "MountLabel": "",
+      "ProcessLabel": "",
+      "AppArmorProfile": "",
+      "ExecIDs": null,
+      "HostConfig": {
+        "Binds": null,
+        "ContainerIDFile": "",
+        "LogConfig": {
+          "Type": "json-file",
+          "Config": {}
+        },
+        "NetworkMode": "bridge",
+        "PortBindings": {},
+        "RestartPolicy": {
+          "Name": "no",
+          "MaximumRetryCount": 0
+        },
+        "AutoRemove": false,
+        "VolumeDriver": "",
+        "VolumesFrom": null,
+        "ConsoleSize": [
+          0,
+          0
+        ],
+        "CapAdd": null,
+        "CapDrop": [
+          "ALL"
+        ],
+        "CgroupnsMode": "private",
+        "Dns": null,
+        "DnsOptions": [],
+        "DnsSearch": [],
+        "ExtraHosts": null,
+        "GroupAdd": null,
+        "IpcMode": "private",
+        "Cgroup": "",
+        "Links": null,
+        "OomScoreAdj": 0,
+        "PidMode": "",
+        "Privileged": false,
+        "PublishAllPorts": false,
+        "ReadonlyRootfs": true,
+        "SecurityOpt": [
+          "no-new-privileges"
+        ],
+        "Tmpfs": {
+          "/tmp": "rw,noexec,nosuid,size=128m,uid=10001,gid=10001,mode=1777"
+        },
+        "UTSMode": "",
+        "UsernsMode": "",
+        "ShmSize": 67108864,
+        "Runtime": "runc",
+        "Isolation": "",
+        "CpuShares": 0,
+        "Memory": 402653184,
+        "NanoCpus": 0,
+        "CgroupParent": "",
+        "BlkioWeight": 0,
+        "BlkioWeightDevice": [],
+        "BlkioDeviceReadBps": [],
+        "BlkioDeviceWriteBps": [],
+        "BlkioDeviceReadIOps": [],
+        "BlkioDeviceWriteIOps": [],
+        "CpuPeriod": 0,
+        "CpuQuota": 0,
+        "CpuRealtimePeriod": 0,
+        "CpuRealtimeRuntime": 0,
+        "CpusetCpus": "",
+        "CpusetMems": "",
+        "Devices": [],
+        "DeviceCgroupRules": null,
+        "DeviceRequests": null,
+        "MemoryReservation": 0,
+        "MemorySwap": 805306368,
+        "MemorySwappiness": null,
+        "OomKillDisable": null,
+        "PidsLimit": 256,
+        "Ulimits": [],
+        "CpuCount": 0,
+        "CpuPercent": 0,
+        "IOMaximumIOps": 0,
+        "IOMaximumBandwidth": 0,
+        "Mounts": [
+          {
+            "Type": "volume",
+            "Source": "wf54-57-repro2-egress",
+            "Target": "/egress"
+          }
+        ],
+        "MaskedPaths": [
+          "/proc/acpi",
+          "/proc/asound",
+          "/proc/interrupts",
+          "/proc/kcore",
+          "/proc/keys",
+          "/proc/latency_stats",
+          "/proc/sched_debug",
+          "/proc/scsi",
+          "/proc/timer_list",
+          "/proc/timer_stats",
+          "/sys/devices/virtual/powercap",
+          "/sys/firmware"
+        ],
+        "ReadonlyPaths": [
+          "/proc/bus",
+          "/proc/fs",
+          "/proc/irq",
+          "/proc/sys",
+          "/proc/sysrq-trigger"
+        ],
+        "Init": true
+      },
+      "Storage": {
+        "RootFS": {
+          "Snapshot": {
+            "Name": "overlayfs"
+          }
+        }
+      },
+      "Mounts": [
+        {
+          "Type": "volume",
+          "Name": "wf54-57-repro2-egress",
+          "Source": "/var/lib/docker/volumes/wf54-57-repro2-egress/_data",
+          "Destination": "/egress",
+          "Driver": "local",
+          "Mode": "z",
+          "RW": true,
+          "Propagation": ""
+        }
+      ],
+      "Config": {
+        "Hostname": "ac73702b3a6a",
+        "Domainname": "",
+        "User": "10001:10001",
+        "AttachStdin": false,
+        "AttachStdout": false,
+        "AttachStderr": false,
+        "Tty": false,
+        "OpenStdin": false,
+        "StdinOnce": false,
+        "Env": [
+          "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+          "PYTHON_VERSION=3.14.7",
+          "PYTHON_SHA256=3b48dac8fb59f62eaa67ac83c1eb12bda1b7a08406dd286e252c11a66be27f81",
+          "PYTHONDONTWRITEBYTECODE=1",
+          "PYTHONUNBUFFERED=1"
+        ],
+        "Cmd": [
+          "proxy"
+        ],
+        "Image": "waveframe-guard-54-contained:local",
+        "Volumes": null,
+        "WorkingDir": "/source",
+        "Entrypoint": [
+          "python",
+          "-I",
+          "/opt/proof/contained/entry.py"
+        ],
+        "Labels": {
+          "waveframe.proof": "wf54-57-repro2"
+        },
+        "StopTimeout": 1
+      },
+      "NetworkSettings": {
+        "SandboxID": "db9591f9f6b471201c12615c3aa6071fa05e17f2a00ace38be10963b93f59294",
+        "SandboxKey": "/var/run/docker/netns/db9591f9f6b4",
+        "Ports": {},
+        "Networks": {
+          "bridge": {
+            "IPAMConfig": null,
+            "Links": null,
+            "Aliases": null,
+            "DriverOpts": null,
+            "GwPriority": 0,
+            "NetworkID": "485752da639b11338cd2f22de27e37b4b5183492ff4b622afd4fd06678d1530b",
+            "EndpointID": "a97eb082ce8ef891c4c48793722c35caa1c2e72b7060ba9ef55aa518eaf76dae",
+            "Gateway": "172.17.0.1",
+            "IPAddress": "172.17.0.3",
+            "MacAddress": "52:a0:f1:b6:b2:be",
+            "IPPrefixLen": 16,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "DNSNames": null
+          }
+        }
+      },
+      "ImageManifestDescriptor": {
+        "mediaType": "application/vnd.oci.image.manifest.v1+json",
+        "digest": "sha256:f32a6962478e77de1a624735dd4eb40f420b36df88143067fc530a574b5fa50e",
+        "size": 2769,
+        "platform": {
+          "architecture": "amd64",
+          "os": "linux"
+        }
+      }
+    }
+  ],
+  "client_options": {
+    "model": "gpt-6-astra",
+    "web_search": "disabled",
+    "project_doc_max_bytes": 0,
+    "cli_auth_credentials_store": "file",
+    "features.hooks": false,
+    "features.plugins": false,
+    "features.apps": false,
+    "features.multi_agent": false,
+    "features.multi_agent_v2": false,
+    "features.browser_use": false,
+    "features.browser_use_external": false,
+    "features.computer_use": false,
+    "features.in_app_browser": false,
+    "features.code_mode": false,
+    "features.skip_host_skill_discovery": true,
+    "mcp_servers.waveframe": {
+      "command": "socat",
+      "args": [
+        "STDIO",
+        "UNIX-CONNECT:/ipc/mcp.sock"
+      ],
+      "startup_timeout_sec": 8,
+      "tool_timeout_sec": 3,
+      "enabled_tools": [
+        "connection_status",
+        "repository_write"
+      ],
+      "tools": {
+        "connection_status": {
+          "approval_mode": "approve"
+        },
+        "repository_write": {
+          "approval_mode": "approve"
+        }
+      }
+    }
+  },
+  "stack_base": "2352ab222fded209287dc1074dd63f024e1cf429",
+  "source_head": "f5dba74c724d7cf50c9223ae192e3e5b5ee53ba9",
+  "source_status": " M examples/codex_contained/raw_transport.py\n M examples/codex_contained/run.py\n M examples/codex_contained/separation.py\n M examples/codex_contained/verify_installed.py\n?? examples/codex_contained/CLOUD.md\n?? examples/codex_contained/Dockerfile.cloud\n?? examples/codex_contained/Dockerfile.writer\n?? examples/codex_contained/Start-CloudProof.ps1\n?? examples/codex_contained/cloud_entry.py\n?? examples/codex_contained/cloud_fault_acceptance.py\n?? examples/codex_contained/cloud_server.py\n?? examples/codex_contained/cloud_writer.py\n?? examples/codex_contained/console_acceptance.py\n?? examples/codex_contained/disposable_cloud.py\n?? examples/codex_contained/launch.py\n?? examples/codex_contained/prompts/cloud-allowed.txt\n?? examples/codex_contained/prompts/cloud-denied.txt\n?? examples/codex_contained/prompts/cloud-useful.txt\n?? examples/codex_contained/reconcile_cloud.py\n?? examples/codex_contained/run_cloud.py\n?? examples/codex_contained/sdk_fault_probe.py\n?? examples/codex_contained/test_cloud_writer.py\n?? examples/codex_contained/transport_probe.py\n?? examples/codex_contained/verify_cloud_evidence.py\n",
+  "operator_source_sha256": {
+    "examples/codex_contained/CLOUD.md": "b439beb8bf4e1fc682fff8b8e598b97c5a0c5ecc1ecf4920dec9d8b1f5afd723",
+    "examples/codex_contained/cloud_entry.py": "611a8fdb29d33295107c34f8cb5c9e950b403ab12c09f9007bd14cfeaf0338d1",
+    "examples/codex_contained/cloud_fault_acceptance.py": "bc31f1c200059c3fbfce5fb50d0da8d408d0f0dfeca9a4d5332b69843d6d35f1",
+    "examples/codex_contained/cloud_server.py": "fc03dcb01eeb9188d10e68a79c21c739efa491fdc49ad400b7cc2cc36f2fbc93",
+    "examples/codex_contained/cloud_writer.py": "ddc0b3d422930af1959cd851bac4a4937427376dd2eb497c3e2810d8bb12a81d",
+    "examples/codex_contained/console_acceptance.py": "5ca7966fd8eb258eeb55d058aec6d800e7e90c7f7ab5222efffa243137919607",
+    "examples/codex_contained/disposable_cloud.py": "1f6278dd311c6cd2fd08d0146fcffa970894ad8a7de9b0812827ae3a8770774f",
+    "examples/codex_contained/Dockerfile": "4cf3fd8ab63899e276154eddadead00c5bbbcfaee94fd23c67d045c28a0c8f1f",
+    "examples/codex_contained/Dockerfile.cloud": "424b6c6599682bac635d31c43985a4890163fa1602f3ec48ae22f37b11d2d859",
+    "examples/codex_contained/Dockerfile.writer": "f90a49624b9373e91e66aff9e0f846ca6f1262123ca22cb16173c2ee7ac5516a",
+    "examples/codex_contained/entry.py": "21283880a565d9859d25434c3090e9437d4085d7abd2f01e18c0ec483d323f2f",
+    "examples/codex_contained/install_client.py": "064fb514ed94cc6d9a67f07563ae3c077fa53aff4b1d355ee6f8c8253b36e01f",
+    "examples/codex_contained/launch.py": "21c2dcceb1b68140e575f1a8adc1200edeec09ea99b0634831077225d59acdb9",
+    "examples/codex_contained/probe.py": "077112f38455d116e0b973f0f2a8bcad95c870178fdfcca60173222fa1d318b0",
+    "examples/codex_contained/prompts/allowed.txt": "80a3cfec9a623ca6aab54e2d02eb1219aa0aa83dac479573ce0542086e8af7ee",
+    "examples/codex_contained/prompts/bypass.txt": "badf26cdf17c42b01e4aaebcbecb3d944d3ea787d9add38d68d8ae45a6aec03f",
+    "examples/codex_contained/prompts/cloud-allowed.txt": "9c8108253aca30cb1da3bf536bce71c87fdf1d5167c3828f3143bb98399be5d8",
+    "examples/codex_contained/prompts/cloud-denied.txt": "cf49488726eae69e819d15e424cad8360a262533aa829139703be4ece9eea4e1",
+    "examples/codex_contained/prompts/cloud-useful.txt": "02308a7a6cec71ed04cf7913320d88a6c18a9b51a3876f4999346851be8d3bf1",
+    "examples/codex_contained/prompts/denied.txt": "ff482cfa582a8a1573ea29d7c1d20fe8c5833bc572264e413de08a0c34604390",
+    "examples/codex_contained/prompts/live-stop.txt": "b0c648f16f9e0a5bc9cff7954b32d2c6e043eb4279683842f5546a65945fd649",
+    "examples/codex_contained/prompts/lost.txt": "b9dade4049bcf19708f0e65f9c133226707974090629026d27b3753255485974",
+    "examples/codex_contained/prompts/outage.txt": "27fc8531839af745095032e6a22210426fae7a0db345054f47a764ece60b7012",
+    "examples/codex_contained/raw_transport.py": "35a1df77f847cab2d360dcbb210dcefb69a486e9b64b988123474103a5cd492d",
+    "examples/codex_contained/README.md": "7c460a6bb1bca8c6387a431653979e60a0b5ee4e8eb9b53700ca7b5c73179b2f",
+    "examples/codex_contained/reconcile_cloud.py": "70f3ec8dcdd08126b8cd7e2e12e1083b5b25833ee1ee50b2395d6f71c0132076",
+    "examples/codex_contained/run.py": "ea3bb52b14e369f091033796f8c63b5b65aa09b427499ac6d36d16bc7ef63064",
+    "examples/codex_contained/run_cloud.py": "b4063ca1c17ca70adbe1a183165fe7f7499c42af7ae973010fa3586682e0d448",
+    "examples/codex_contained/sdk_fault_probe.py": "ad23174ae6ce97235235ef20a7baf9dc3a6004cf2e63039da04d4e5263df8f8e",
+    "examples/codex_contained/separation.py": "19d53c5c388629876b56433a1dd099fcb33c42aacd62b0f9c1fa76b6e251edfa",
+    "examples/codex_contained/server.py": "4bb11597cc81832f4f7ac723aaea3e109cafe5c2c28528a0636a730d47fa5a13",
+    "examples/codex_contained/squid.conf": "56a38364b6d9458eb6a508df108a4227b3c9617ed78657a85f2e7e98834ec57d",
+    "examples/codex_contained/Start-CloudProof.ps1": "17fa8954691853dda26254c35775a6a177c4634e8c20e48dc10121a071563824",
+    "examples/codex_contained/Start-Proof.ps1": "7d752e7ff4e84def46e883ebbcd60a61b46487e65c46178b54b8640a40ba66d0",
+    "examples/codex_contained/test_cloud_writer.py": "3504b21109b82412c5c2e94f024de09598550f2eed0fbb100bc5417411f03c1a",
+    "examples/codex_contained/test_configuration.py": "3bfa1f5f68e32d765bee273ba8ec2e7034d600723d0c4bd011281796f2d1c8de",
+    "examples/codex_contained/test_evidence.py": "8d8ffe96895eadcb27fcd81f054809b7fd4ea7d63b1f83e013c935530509551d",
+    "examples/codex_contained/transport_probe.py": "712afa92c9e242c4dd4a444d6caa59220f4c2cbed3c9e7f1494554f9d6ba74ac",
+    "examples/codex_contained/verify.py": "3708462615057811555f7f24b98a1981ddf8a816becbf11702df47a48dedd2bb",
+    "examples/codex_contained/verify_cloud_evidence.py": "53f8426346e2e1095cf4f30335e9350c9dea1d8855d8b09dacda39cba1844e3d",
+    "examples/codex_contained/verify_installed.py": "8676ee7e4c361ddc51ab15fbdfd5044d7accfc4a45d4c9b60bbf7f87ba134912"
+  }
+}

@@ -1,5 +1,8 @@
 # Contained real Codex proof — issue #54, phase two
 
+For the subsequent fresh Cloud integration, use [issue #57 setup and boundary](CLOUD.md).
+The archived #54 proof below remains a separate fixture-only result.
+
 Run the entire Codex CLI in Docker Desktop's Linux/WSL2 environment, with a
 read-only source volume and a separate Guard writer. This is a disposable proof
 for two fixture-approved paths, not a native Windows filesystem guarantee or a
