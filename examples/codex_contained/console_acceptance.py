@@ -21,6 +21,8 @@ def main():
     parser.add_argument('action', choices=['approve', 'activity'])
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--client-output', type=Path)
+    parser.add_argument('--policy-file', type=Path)
+    parser.add_argument('--authority-name', default='Contained Codex 57')
     args = parser.parse_args()
     output = args.output
     origin = json.loads((output / 'cloud-setup.json').read_text())['url']
@@ -43,8 +45,8 @@ def main():
             (output / 'operator-private.json').write_text(json.dumps({'email': email, 'password': password, 'auth': auth}))
             page.locator('#policy-import-form').wait_for()
             page.locator('[name="policy_name"]').fill('Contained repository proof')
-            page.locator('[name="authority_name"]').fill('Contained Codex 57')
-            page.locator('[name="source_text"]').fill(POLICY)
+            page.locator('[name="authority_name"]').fill(args.authority_name)
+            page.locator('[name="source_text"]').fill(args.policy_file.read_text(encoding='utf-8') if args.policy_file else POLICY)
             with page.expect_response(lambda r: r.url.endswith('/v1/policy-translations') and r.request.method == 'POST') as created:
                 page.get_by_role('button', name='Analyze policy', exact=True).click()
             translation = created.value.json()
@@ -89,7 +91,7 @@ def main():
             record = {'translation': translation, 'approval': approval, 'publication_response': publication_response,
                       'publication': pair, 'enrollments': enrollments,
                       'elapsed_seconds': time.monotonic() - started, 'browser_version': browser.version,
-                      'provider': 'deterministic pinned ExampleProvider; exact fixed policy only',
+                      'provider': 'Guard task-specific fixed provider' if args.policy_file else 'deterministic pinned ExampleProvider; exact fixed policy only',
                       'approval_method': 'existing Console review, individual confirmations, approval and publication',
                       'enrollment_method': 'same public /v1/api-keys contract as Console; explicit scoped create/modify bindings'}
             (output / 'fresh-publication.json').write_text(json.dumps(record, indent=2), encoding='utf-8')

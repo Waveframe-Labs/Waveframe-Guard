@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/source/scripts/check_release.py", line 37, in <module>
+    check_release(Path(__file__).resolve().parents[1])
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/source/scripts/check_release.py", line 25, in check_release
+    assert "Compiler 0.5.0 is an unreleased candidate" in readme
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

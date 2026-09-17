@@ -1,0 +1,17 @@
+{
+  "command": [
+    "docker",
+    "exec",
+    "-w",
+    "/source",
+    "-e",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "wf54-57-61-trial2-agent",
+    "python",
+    "-I",
+    "-c",
+    "import compiler,json; print(json.dumps({'compiler_origin':compiler.__file__,'version':compiler.__version__})); assert '/site-packages/' in compiler.__file__; \nimport json\n\nfrom compiler import compile_action_policy\n\npolicy = {\n    \"schema_version\": \"action_policy.v1\",\n    \"contract_id\": \"repository-file-policy\",\n    \"contract_version\": \"2.0.0\",\n    \"action_requirements\": {\n        \"create\": {\n            \"required_role\": None,\n            \"allow\": [{\"match\": \"prefix\", \"value\": \"generated/\"}],\n            \"deny\": [{\"match\": \"prefix\", \"value\": \"generated/private/\"}],\n        },\n        \"modify\": {\n            \"required_role\": \"repository-maintainer\",\n            \"allow\": [{\"match\": \"exact\", \"value\": \"README.md\"}],\n            \"deny\": [],\n        },\n    },\n}\ncompiled = compile_action_policy(policy)\nprint(json.dumps(compiled, sort_keys=True, indent=2))\n\nimport json\nfrom importlib.resources import files\n\nschema = json.loads(files(\"compiler\").joinpath(\n    \"schemas/action_policy.schema.json\"\n).read_text(encoding=\"utf-8\"))\n\nfrom compiler.compile_policy import compile_policy\n\npolicy = {\n    \"contract_id\": \"finance-policy\",\n    \"contract_version\": \"1.0.0\",\n    \"authority\": {\n        \"required_roles\": [\"proposer\", \"reviewer\"]\n    },\n    \"approvals\": {\n        \"thresholds\": [\n            {\n                \"field\": \"amount\",\n                \"operator\": \">\",\n                \"value\": 1000,\n                \"requires_role\": \"approver\"\n            }\n        ]\n    },\n    \"artifacts\": {\n        \"required\": [\"proposal\", \"approval\"]\n    },\n    \"stages\": {\n        \"allowed_transitions\": [\n            {\"from\": \"proposed\", \"to\": \"approved\"}\n        ]\n    },\n    \"constraints\": [\n        {\n            \"type\": \"separation_of_duties\",\n            \"roles\": [\"proposer\", \"reviewer\"]\n        }\n    ]\n}\n\ncompiled_contract = compile_policy(policy)\n"
+  ],
+  "exit_code": 0,
+  "seconds": 0.25487299999804236
+}

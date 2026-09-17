@@ -1,0 +1,28 @@
+{
+  "base": "06b14f6b3c513940a6c67958207acb7fa8f388d5",
+  "agent_writer_runtime_maps_identical": true,
+  "unchanged_source_blobs": {
+    "examples/codex_contained/cloud_writer.py": "ddc0b3d422930af1959cd851bac4a4937427376dd2eb497c3e2810d8bb12a81d",
+    "examples/codex_contained/cloud_server.py": "fc03dcb01eeb9188d10e68a79c21c739efa491fdc49ad400b7cc2cc36f2fbc93",
+    "examples/codex_contained/cloud_entry.py": "611a8fdb29d33295107c34f8cb5c9e950b403ab12c09f9007bd14cfeaf0338d1",
+    "examples/codex_contained/launch.py": "21c2dcceb1b68140e575f1a8adc1200edeec09ea99b0634831077225d59acdb9",
+    "examples/codex_contained/entry.py": "080b799e4f826617fef7f8c394f3a9679340f1bd2e129e4f304631aa7a4d4229",
+    "examples/codex_contained/server.py": "9149acb0727d897c341d93e5fac64980c50565ce847000033f1ff4c00742b4b3",
+    "examples/codex_contained/squid.conf": "ce63e81c04361c2941b4cf533fe095a07dda71a70e852985b73cfccf8403894c",
+    "examples/codex_contained/Dockerfile": "145fd952e4ad74974765d2ee125142ad467aaf5ceab086d2734ff52e818c2f4c",
+    "examples/codex_contained/Dockerfile.writer": "f90a49624b9373e91e66aff9e0f846ca6f1262123ca22cb16173c2ee7ac5516a",
+    "examples/codex_contained/Dockerfile.cloud": "424b6c6599682bac635d31c43985a4890163fa1602f3ec48ae22f37b11d2d859"
+  },
+  "unchanged_launch_functions": [
+    "security",
+    "mount",
+    "config",
+    "cli"
+  ],
+  "unchanged_container_controls_and_mount_shapes": true,
+  "cloud_added_readonly_provider": {
+    "/opt/task_cloud.py": "93565b3c7cccfa09a1015f23fdf5c0b24a39df8f269c540b47432da9215be886"
+  },
+  "affected_live_checks": "exact 65-file import before service exposure, direct agent source write errno30, absence of private mounts, writer installed import, exact fresh scope and denied source mutation, source tests and all non-deliverable hashes unchanged",
+  "reuse_scope": "prior process isolation, restricted egress, credential separation, connector/Cloud failures and cached session semantics; no new full matrix claim"
+}

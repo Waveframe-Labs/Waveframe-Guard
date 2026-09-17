@@ -1,0 +1,20 @@
+{
+  "images": {
+    "waveframe-guard-54-contained:local": "sha256:2af4a2af92444e349c6755ddaf1d4e92fdbd53da8cc2fe51b6a71acbc83bcefb",
+    "waveframe-guard-57-writer:local": "sha256:86bd888757923cdbc549887e6ec39559a93701bb6f53cc2641c62681bf1fb5fe",
+    "waveframe-guard-57-cloud:local": "sha256:bc5f71b586ea19056a327fd4077b23ee28eb2af5d5fb42ffa2956f58bed3d9f6"
+  },
+  "test_dependencies": {
+    "compiler_origin": "/usr/local/lib/python3.14/site-packages/compiler/__init__.py",
+    "versions": {
+      "waveframe-guard": "0.19.0",
+      "governance-ledger": "0.9.0",
+      "cricore-contract-compiler": "0.5.0",
+      "pytest": "9.0.2",
+      "jsonschema": "4.26.0"
+    }
+  },
+  "dependency_setup": "existing immutable accepted image already satisfies project dev requirements pytest>=7 and jsonschema>=4; no install/build/network added to agent",
+  "host_prerequisites": "running Docker Desktop Linux engine; Git; Python operator with requests and Playwright Chromium; existing supported Codex auth cache",
+  "excluded_preparation": "prior image/tool/browser download and installation, Docker startup, user login; all named prerequisites existed before this measured command"
+}

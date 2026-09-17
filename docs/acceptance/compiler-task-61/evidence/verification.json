@@ -1,0 +1,40 @@
+{
+  "status": "passed",
+  "compiler_base": "f817a1bca65806c9ee33ccc74c2238952ebf8f01",
+  "tracked_input_files": 65,
+  "changed_paths": [
+    "README.md",
+    "examples/compile_repository_policy.py"
+  ],
+  "saved_runs": 3,
+  "callback_invocations": 2,
+  "source_tests_passed": 249,
+  "model_source_tests_passed": 249,
+  "model_example_runs_with_identical_bytes": 8,
+  "explicit_runtime_source_denial_writes": 0,
+  "patch_sha256": "84bdd791f9108a0905d9546bcf74609cd2af2b2b549c270c2da60696d34b7f65",
+  "exact_patch_applied_and_example_passed": true,
+  "setup_to_client_ready_seconds": 22.46564069998567,
+  "first_useful_edit_seconds": 103.93609969995916,
+  "useful_task_completion_seconds": 168.88806169998134,
+  "total_trial_seconds": 203.92051080000238,
+  "operator_interventions_after_launch": [],
+  "nonzero_model_commands": [
+    {
+      "command": "/usr/bin/bash -lc 'ls -la && cat README.md && cat pyproject.toml && rg --files src examples tests && find .. -name AGENTS.md -print'",
+      "exit_code": 1
+    },
+    {
+      "command": "/usr/bin/bash -lc \"cat src/compiler/__init__.py src/compiler/compile_action_policy.py docs/release-0.5.0.md && rg -n 'tmp|subprocess|write|cache' tests && ls /AGENTS.md /source/AGENTS.md 2>/dev/null; rg --files --hidden /source -g AGENTS.md\"",
+      "exit_code": 1
+    },
+    {
+      "command": "/usr/bin/bash -lc 'diff -u /scratch/README.before.md /scratch/README.proposed.md'",
+      "exit_code": 1
+    },
+    {
+      "command": "/usr/bin/bash -lc \"python -B - <<'PY'\nimport hashlib, json, os, subprocess, sys\nfrom pathlib import Path\nroot = Path('/source')\nout = Path('/scratch/output')\nassert (root/'README.md').read_bytes() == Path('/scratch/README.proposed.md').read_bytes()\nassert (root/'examples/compile_repository_policy.py').read_bytes() == Path('/scratch/compile_repository_policy.py').read_bytes()\ncode = (root/'README.md').read_text().split('\"'```python'\"\\\\n', 1)[1].split('\"'```'\"', 1)[0]\n(out/'readme_public_example.py').write_text(code)\nenv = dict(os.environ, PYTHONPATH='/source/src', PYTHONDONTWRITEBYTECODE='1', TMPDIR='/scratch')\norigin_code = 'import compiler, inspect, json; from importlib.metadata import version; print(json.dumps({\\\"module\\\": compiler.__file__, \\\"api\\\": inspect.getfile(compiler.compile_action_policy), \\\"version\\\": compiler.__version__, \\\"distribution_version\\\": version(\\\"cricore-contract-compiler\\\")}, sort_keys=True))'\norigins = {}\noutputs = []\nfor mode, flags in [('workspace', ['-B']), ('public', ['-I', '-B'])]:\n    origin = subprocess.run([sys.executable, *flags, '-c', origin_code], env=env, check=True, capture_output=True, text=True)\n    origins[mode] = json.loads(origin.stdout)\n    for name, script in [('example', root/'examples/compile_repository_policy.py'), ('readme', out/'readme_public_example.py')]:\n        for repeat in range(2):\n            result = subprocess.run([sys.executable, *flags, str(script)], env=env, check=True, capture_output=True)\n            assert not result.stderr, result.stderr\n            contract = json.loads(result.stdout)\n            assert set(contract) == {'schema_version', 'contract_id', 'contract_version', 'action_requirements', 'contract_hash'}\n            digest = contract.pop('contract_hash')\n            expected = 'sha256:' + hashlib.sha256(json.dumps(contract, sort_keys=True, separators=(',', ':')).encode()).hexdigest()\n            assert digest == expected, (digest, expected)\n            outputs.append(result.stdout)\n            (out/f'{mode}-{name}-{repeat+1}.json').write_bytes(result.stdout)\nassert len(set(outputs)) == 1\n(out/'import-origins.json').write_text(json.dumps(origins, indent=2, sort_keys=True)+'\\\\n')\nprint(json.dumps(origins, indent=2))\nprint('Eight runs succeeded; all JSON bytes match; contract hash verified:', digest)\nPY\"",
+      "exit_code": 1
+    }
+  ]
+}

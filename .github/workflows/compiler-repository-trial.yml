@@ -1,0 +1,41 @@
+name: Compiler repository trial
+
+on:
+  pull_request:
+    branches: [spike/59-contained-cloud-revalidation]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  focused:
+    name: Repository import, patch and captured task
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: '3.14'
+      - name: Install existing public wheels without rebuilding packages
+        run: >-
+          python -m pip install --only-binary=:all:
+          waveframe-guard==0.19.0 governance-ledger==0.9.0
+          cricore-contract-compiler==0.5.0 pytest==9.0.3
+      - name: Validate repository and the actual task evidence
+        run: |
+          python tools/validate_repository.py --diff-base 06b14f6b3c513940a6c67958207acb7fa8f388d5
+          python examples/codex_contained/verify_compiler_trial.py --output docs/acceptance/compiler-task-61/evidence
+      - name: Run focused checks and existing captured regressions
+        run: >-
+          python -m pytest -q -p no:cacheprovider
+          examples/codex_contained/test_configuration.py
+          examples/codex_contained/test_cloud_writer.py
+          examples/codex_contained/test_evidence.py
+          tests/test_codex_connection.py tests/test_codex_cloud_revalidation.py
+          tests/test_codex_compiler_trial.py
