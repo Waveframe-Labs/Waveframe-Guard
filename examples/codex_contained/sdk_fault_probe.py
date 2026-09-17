@@ -80,10 +80,10 @@ for case, fault, key in [('before-load-outage', 'unavailable', None),
 barrier('normal')
 g = connect('wrong-runtime', key=config['bindings']['modify']['credential'])
 print(json.dumps({'result': {'case': 'wrong-runtime-registration', 'connection': asdict(g.runtime_connection),
-                             'observation': 'registration is not verification of credential runtime binding'}}), flush=True)
-result = perform(g, 'wrong-runtime', 'ordinary')
-assert result['exists'] and not result['evaluation']['cloud_preservation']['ok']
-assert not result['evaluation']['cloud_runtime_attestation']['ok']
+                             'callback_count': 0, 'mutations': 0,
+                             'observation': 'failed connection must be checked before exposing mutations'}}), flush=True)
+assert not g.runtime_connection.ok
+assert not (root / 'wrong-runtime/generated/probe.md').exists()
 g.close()
 
 for case in ('empty', 'partial', 'unknown', 'no-report', 'collision', 'preservation', 'report', 'after-mutation-outage', 'loaded-outage', 'redirect-loaded'):

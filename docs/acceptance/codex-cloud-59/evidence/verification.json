@@ -1,0 +1,181 @@
+{
+  "status": "passed",
+  "real_cli_phases": 9,
+  "accepted_cli_phases": 8,
+  "saved_runs": 7,
+  "callback_invocations": 5,
+  "actual_mutations": 5,
+  "denied_zero_callback_runs": 2,
+  "failed_startups_zero_callbacks_and_writes": 3,
+  "historical_exact_packages": 7,
+  "lost_response_reconciled_without_replay": true,
+  "boundary_inputs": {
+    "base": "0d2376c971c1d9c8e7c15ee208bfeee1a6f8659e",
+    "unchanged_runtime_file_maps": true,
+    "unchanged_source_blobs": {
+      "examples/codex_contained/run.py": "8dc2421f3edfebcdd99c03bb69f1b6ac6698949d31f40259813d1831db54f37e",
+      "examples/codex_contained/cloud_writer.py": "ddc0b3d422930af1959cd851bac4a4937427376dd2eb497c3e2810d8bb12a81d",
+      "examples/codex_contained/cloud_server.py": "fc03dcb01eeb9188d10e68a79c21c739efa491fdc49ad400b7cc2cc36f2fbc93",
+      "examples/codex_contained/cloud_entry.py": "611a8fdb29d33295107c34f8cb5c9e950b403ab12c09f9007bd14cfeaf0338d1",
+      "examples/codex_contained/launch.py": "21c2dcceb1b68140e575f1a8adc1200edeec09ea99b0634831077225d59acdb9",
+      "examples/codex_contained/Dockerfile": "145fd952e4ad74974765d2ee125142ad467aaf5ceab086d2734ff52e818c2f4c",
+      "examples/codex_contained/Dockerfile.writer": "f90a49624b9373e91e66aff9e0f846ca6f1262123ca22cb16173c2ee7ac5516a",
+      "examples/codex_contained/Dockerfile.cloud": "424b6c6599682bac635d31c43985a4890163fa1602f3ec48ae22f37b11d2d859",
+      "examples/codex_contained/disposable_cloud.py": "1f6278dd311c6cd2fd08d0146fcffa970894ad8a7de9b0812827ae3a8770774f",
+      "examples/codex_contained/entry.py": "080b799e4f826617fef7f8c394f3a9679340f1bd2e129e4f304631aa7a4d4229",
+      "examples/codex_contained/server.py": "9149acb0727d897c341d93e5fac64980c50565ce847000033f1ff4c00742b4b3",
+      "examples/codex_contained/probe.py": "c52582b3320650d9936ad2ca484ae17b7e0716fded7314b46201751bdc450bfc",
+      "examples/codex_contained/squid.conf": "ce63e81c04361c2941b4cf533fe095a07dda71a70e852985b73cfccf8403894c",
+      "examples/codex_contained/install_client.py": "c5ad54e6e6690e01df2b4917587419d79e69b614e5827239f79b1bd68cf57ae3"
+    },
+    "container_controls": [
+      {
+        "role": "agent",
+        "image": "sha256:2af4a2af92444e349c6755ddaf1d4e92fdbd53da8cc2fe51b6a71acbc83bcefb",
+        "mounts": [
+          [
+            "/egress",
+            "volume",
+            false
+          ],
+          [
+            "/ipc",
+            "volume",
+            false
+          ],
+          [
+            "/scratch",
+            "volume",
+            true
+          ],
+          [
+            "/source",
+            "volume",
+            false
+          ]
+        ],
+        "controls": {
+          "ReadonlyRootfs": true,
+          "CapDrop": [
+            "ALL"
+          ],
+          "CapAdd": null,
+          "SecurityOpt": [
+            "no-new-privileges"
+          ],
+          "NetworkMode": "none",
+          "PidMode": "",
+          "IpcMode": "private",
+          "Privileged": false,
+          "PidsLimit": 256,
+          "Memory": 2147483648,
+          "Tmpfs": {
+            "/tmp": "rw,noexec,nosuid,size=128m,uid=10001,gid=10001,mode=1777"
+          }
+        }
+      },
+      {
+        "role": "writer",
+        "image": "sha256:86bd888757923cdbc549887e6ec39559a93701bb6f53cc2641c62681bf1fb5fe",
+        "mounts": [
+          [
+            "/cloud-transport",
+            "volume",
+            false
+          ],
+          [
+            "/evidence",
+            "volume",
+            true
+          ],
+          [
+            "/ipc",
+            "volume",
+            true
+          ],
+          [
+            "/secrets",
+            "volume",
+            false
+          ],
+          [
+            "/source",
+            "volume",
+            true
+          ]
+        ],
+        "controls": {
+          "ReadonlyRootfs": true,
+          "CapDrop": [
+            "ALL"
+          ],
+          "CapAdd": null,
+          "SecurityOpt": [
+            "no-new-privileges"
+          ],
+          "NetworkMode": "none",
+          "PidMode": "",
+          "IpcMode": "private",
+          "Privileged": false,
+          "PidsLimit": 256,
+          "Memory": 805306368,
+          "Tmpfs": {
+            "/tmp": "rw,noexec,nosuid,size=128m,uid=10001,gid=10001,mode=1777"
+          }
+        }
+      },
+      {
+        "role": "proxy",
+        "image": "sha256:2af4a2af92444e349c6755ddaf1d4e92fdbd53da8cc2fe51b6a71acbc83bcefb",
+        "mounts": [
+          [
+            "/egress",
+            "volume",
+            true
+          ]
+        ],
+        "controls": {
+          "ReadonlyRootfs": true,
+          "CapDrop": [
+            "ALL"
+          ],
+          "CapAdd": null,
+          "SecurityOpt": [
+            "no-new-privileges"
+          ],
+          "NetworkMode": "bridge",
+          "PidMode": "",
+          "IpcMode": "private",
+          "Privileged": false,
+          "PidsLimit": 256,
+          "Memory": 402653184,
+          "Tmpfs": {
+            "/tmp": "rw,noexec,nosuid,size=128m,uid=10001,gid=10001,mode=1777"
+          }
+        }
+      }
+    ],
+    "cloud_wrapper_image": "sha256:bc5f71b586ea19056a327fd4077b23ee28eb2af5d5fb42ffa2956f58bed3d9f6",
+    "selected_packages": {
+      "waveframe-guard": [
+        "0.19.0",
+        "e734836af5780fff7f834e2904c67f88a1d3a5ef1b47a2e8fc2f4e07f3dbb42f"
+      ],
+      "governance-ledger": [
+        "0.9.0",
+        "6b7913e4ba4e2b11d1007bb3006dea81cde08ebc06980a7bab89113938779bd4"
+      ],
+      "cricore-contract-compiler": [
+        "0.5.0",
+        "1bc689d2885e32641ac3ade7e710a4d0fe079c089f1a2160e2d86f328bbb7c44"
+      ]
+    },
+    "reused_evidence": [
+      "docs/acceptance/codex-contained-54/evidence/SHA256SUMS.json",
+      "docs/acceptance/codex-cloud-57/evidence/SHA256SUMS.json"
+    ],
+    "reuse_scope": "OS read-only source, private processes/credentials, restricted model egress, connector and Cloud failure containment; exact image/source/config controls unchanged",
+    "changed_inputs": "Cloud source pin; operator stop/replacement of 0400 credential file; focused acceptance expectations and scripts",
+    "rerun_scope": "wrong-binding startup and direct-write refusal; replacement then correct binding; active/inactive sessions; historical package/report/Activity retrieval; lost response"
+  }
+}

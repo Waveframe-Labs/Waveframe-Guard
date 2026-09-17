@@ -1,9 +1,14 @@
-# Contained Codex with disposable Cloud — issue #57
+# Contained Codex with disposable Cloud — issues #57 / #59
 
 This is a Guard-owned integration proof using released Guard 0.19.0, Ledger
 0.9.0 and Compiler 0.5.0. Cloud is an unchanged, isolated integration dependency
-at `dd4d483fcec7c4f5d62312b3e802370d9ba7f264`. The prior #55/#56 source and
+at `93bf80f30d170a6be32622a34dbbdf0d85b8ccc6`. The prior #55/#56/#58 source and
 archived evidence remain part of this stack. No package or image is published.
+
+For the focused #59 handoff use [CLOUD-REVALIDATION.md](CLOUD-REVALIDATION.md)
+and `Start-CloudRevalidation.ps1`. It reuses the accepted images and runs the
+changed enrollment/history interactions. The broader #57 fault procedure below
+is historical setup documentation, not a requirement to repeat that investigation.
 
 ## PowerShell setup
 
@@ -13,7 +18,7 @@ Run from the new Guard checkout. Authentication, initial Docker installation,
 image/package/browser downloads and policy approval are separate from edit time.
 
 ```powershell
-git -C C:\GitHub\Waveframe-Cloud worktree add --detach C:\GitHub\Cloud-57-isolated dd4d483fcec7c4f5d62312b3e802370d9ba7f264
+git -C C:\GitHub\Waveframe-Cloud worktree add --detach C:\GitHub\Cloud-57-isolated 93bf80f30d170a6be32622a34dbbdf0d85b8ccc6
 .\examples\codex_contained\Start-CloudProof.ps1 -CloudCheckout C:\GitHub\Cloud-57-isolated -Name wf54-57-mine
 ```
 

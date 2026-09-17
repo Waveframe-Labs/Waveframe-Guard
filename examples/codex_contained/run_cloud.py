@@ -11,7 +11,7 @@ from urllib.request import urlopen
 
 import run as contained
 
-CLOUD_HEAD = 'dd4d483fcec7c4f5d62312b3e802370d9ba7f264'
+CLOUD_HEAD = '93bf80f30d170a6be32622a34dbbdf0d85b8ccc6'
 WRITER_IMAGE = 'waveframe-guard-57-writer:local'
 CLOUD_IMAGE = 'waveframe-guard-57-cloud:local'
 
@@ -52,13 +52,16 @@ def start_cloud(name, checkout, output):
 
 
 def writer(name, config=None, mode='normal'):
+    # Stop the old session before an operator changes its immutable secret file.
+    contained.docker('rm', '-f', name + '-writer', check=False)
     # Credential bytes travel on stdin, never argv/environment/logs or agent mounts.
     if config:
         value = config.read_bytes()
         contained.docker('run', '--rm', '-i', *contained.security(), *contained.mount(name, 'secret', '/secrets'),
             '--entrypoint', 'python', WRITER_IMAGE, '-I', '-c',
-            "import sys,os; p='/secrets/cloud.json'; f=open(p,'wb'); os.chmod(p,0o400); f.write(sys.stdin.buffer.read()); f.close()", data=value)
-    contained.docker('rm', '-f', name + '-writer', check=False)
+            "import sys,os,pathlib; p=pathlib.Path('/secrets/cloud.json'); p.unlink(missing_ok=True); "
+            "fd=os.open(p,os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o400); "
+            "f=os.fdopen(fd,'wb'); f.write(sys.stdin.buffer.read()); f.close()", data=value)
     contained.docker('run', '-d', '--name', name + '-writer', '--label', 'waveframe.proof=' + name,
         *contained.security(), '--memory', '768m', *contained.mount(name, 'source', '/source'),
         *contained.mount(name, 'evidence', '/evidence'), *contained.mount(name, 'ipc', '/ipc'),
