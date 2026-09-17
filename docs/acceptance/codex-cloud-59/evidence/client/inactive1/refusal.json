@@ -1,0 +1,25 @@
+{
+  "callback_count": 0,
+  "protected_writes": 0,
+  "count_basis": "Constructor 422 before MCP exposure; unchanged independently captured source; four original completed journal runs",
+  "registration_before": null,
+  "registration_after": null,
+  "registration_comparison": "Before-hash not retained on this failed harness assertion; authority loading precedes runtime enrollment",
+  "native_http": [
+    {
+      "method": "GET",
+      "path": "/v1/authorities/contained-codex-57@1.0.0/publication",
+      "query": "",
+      "request": {
+        "bytes": 0
+      },
+      "status": "422 Unprocessable Entity",
+      "response": {
+        "detail": "The stored authority publication failed integrity validation.",
+        "error": "invalid_authority_publication"
+      }
+    }
+  ],
+  "expected_error": "CloudAuthorityFetchError HTTP 422",
+  "direct_write_errno": 30
+}

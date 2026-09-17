@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "/opt/connected/launch.py", line 5, in <module>
+    runpy.run_path('/opt/connected/cloud_server.py', run_name='__main__')
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen runpy>", line 294, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "/opt/connected/cloud_server.py", line 15, in <module>
+    writer = Writer('/source', '/evidence', json.loads(credential.value))
+  File "/opt/connected/cloud_writer.py", line 47, in __init__
+    raise ValueError('runtime connection rejected; writer not activated')
+ValueError: runtime connection rejected; writer not activated
+2026/09/17 18:10:11 socat[9] W waitpid(): child 10 exited with status 1
+2026/09/17 18:10:11 socat[9] E read(5, 0x641f8bd80000, 8192): Connection reset by peer
