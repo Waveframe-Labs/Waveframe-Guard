@@ -4,6 +4,9 @@
 
 # Waveframe Guard
 
+[Contained Compiler operator preview: prepare and launch](examples/codex_contained/COMPILER-TRIAL.md)
+builds its own local images and tools. Private Cloud access and manual prerequisites still apply.
+
 Repository integrations in Guard 0.18.0: see the
 [repository adapter boundary and migration guide](docs/architecture/REPOSITORY_WORKSPACE.md)
 for issue #33, supported platforms, and the `repository_tool` API.

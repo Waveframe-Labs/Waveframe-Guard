@@ -253,13 +253,21 @@ def export_patch(repository, output, before, after):
 
 
 def main():
+    global IMAGES
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--name', required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--compiler-repository', type=Path, required=True)
     parser.add_argument('--cloud-checkout', type=Path, required=True)
     parser.add_argument('--auth', type=Path, default=Path.home() / '.codex/auth.json')
+    parser.add_argument('--prepared', type=Path, help='Verified preparation manifest from Start-CompilerTrial.ps1')
     args = parser.parse_args()
+    if args.prepared:
+        from prepare_compiler import configure, inputs, read
+        prepared = read(args.prepared)
+        assert prepared['inputs'] == inputs(args.cloud_checkout), 'Prepared source inputs changed'
+        configure(prepared)
+        IMAGES = {v: v for v in prepared['images'].values()}
     assert re.fullmatch(r'wf54-57-61-[a-z0-9-]+', args.name)
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
@@ -278,6 +286,12 @@ def main():
         print('Completed:', name, flush=True)
         return result
     stage('check_existing_prerequisites', lambda: preflight(output))
+    if args.prepared:
+        prerequisites = load(output / 'prerequisites.json')
+        prerequisites.update(dependency_setup='new images built and public bytes verified by preparation; actual IDs rechecked before client/writer startup',
+            excluded_preparation='see separate preparation timing; no pre-existing Waveframe images or operator environment used',
+            preparation=str(args.prepared), cloud_head=run_cloud.CLOUD_HEAD)
+        run.save(output / 'prerequisites.json', prerequisites)
     archive, initial = stage('read_pinned_tracked_snapshot', lambda: archive_snapshot(args.compiler_repository))
     (output / 'compiler-base.tar').write_bytes(archive)
     run.save(output / 'import.json', {'compiler_base': COMPILER_HEAD, 'archive_sha256': sha(archive),
@@ -293,7 +307,22 @@ def main():
         writer_factory=lambda name: run_cloud.writer(name, cloud / 'writer-private.json'), source_archive=archive))
     assert run.snapshot(args.name) == initial
     stage('affected_boundary_and_writer_import', lambda: affected_boundary(args.name, output))
-    stage('useful_task', lambda: run.chat(args.name, client, 'task', TASK))
+    if args.prepared:
+        from prepared_boundary import verify_boundary
+        stage('new_image_containment_checks', lambda: verify_boundary(args.name, output / 'containment'))
+        boundary = load(output / 'boundary.json')
+        boundary['changed_inputs'] = ['newly built images/dependencies', 'read-only Cloud #159', 'prepared operator environment']
+        boundary['reuse'] = 'unchanged boundary design; existing deterministic checks freshly passed on these image IDs (containment/result.json)'
+        run.save(output / 'boundary.json', boundary)
+    task_prompt = TASK
+    if args.prepared:
+        task_prompt += '''\nFor reproducible evidence, save JUnit as /scratch/output/pytest.xml and import origins as
+/scratch/output/import-origins.json with {"workspace":{"module":...},"public":{"module":...}}.
+Run the new example and actual README Python snippet twice each with workspace source and twice
+each with the installed public package. Save their unmodified stdout to /scratch/output/
+{workspace|public}-{example|readme}-{1|2}.json. All eight should be identical deterministic JSON.
+These are scratch evidence files, not protected repository edits.'''
+    stage('useful_task', lambda: run.chat(args.name, client, 'task', task_prompt))
     task = load(client / 'task/inspection.json')
     assert task['exit_code'] == 0 and set(task['changed']) == ALLOWED
     stage('independent_source_tests_and_examples', lambda: validate_workspace(args.name, output / 'validation'))

@@ -1,19 +1,21 @@
-param(
+﻿param(
     [Parameter(Mandatory=$true)][string]$CompilerRepository,
     [Parameter(Mandatory=$true)][string]$CloudCheckout,
-    [Parameter(Mandatory=$true)][string]$OperatorPython,
+    [ValidateSet('Prepare','Launch','All')][string]$Stage = 'Prepare',
+    [string]$Python = 'python',
+    [string]$Preparation = 'acceptance-output/compiler-preparation',
+    [string]$Auth = "$env:USERPROFILE\.codex\auth.json",
     [string]$Name = ('wf54-57-61-' + (Get-Date -Format 'yyyyMMddHHmmss'))
 )
 $ErrorActionPreference = 'Stop'
 $GuardRoot = (Resolve-Path "$PSScriptRoot\..\..").Path
-Set-Location $GuardRoot
-# The Python driver retains failed steps and never replays a mutation automatically.
-# OperatorPython must have requests and Playwright/Chromium ready (documented prerequisite).
-$PreviousPreference = $ErrorActionPreference
+if (-not (Get-Command $Python -ErrorAction SilentlyContinue)) {
+    throw 'Install Python 3.14 and select it with -Python. No operator environment is required.'
+}
+Push-Location $GuardRoot
 try {
     $ErrorActionPreference = 'Continue'
-    & $OperatorPython examples/codex_contained/compiler_trial.py --name $Name --output "acceptance-output/$Name" --compiler-repository $CompilerRepository --cloud-checkout $CloudCheckout 2>&1 | ForEach-Object { Write-Output "$_" }
+    & $Python examples/codex_contained/prepare_compiler.py --stage $Stage --preparation $Preparation --compiler-repository $CompilerRepository --cloud-checkout $CloudCheckout --auth $Auth --name $Name 2>&1 | ForEach-Object { Write-Output "$_" }
     $NativeExit = $LASTEXITCODE
-} finally { $ErrorActionPreference = $PreviousPreference }
-if ($NativeExit -ne 0) { throw "Compiler trial failed with exit $NativeExit. Retain the attempt; do not replay writes." }
-Write-Host "Patch and results: acceptance-output/$Name. Retain evidence before documented cleanup."
+} finally { Pop-Location }
+if ($NativeExit -ne 0) { throw 'Preparation/trial stopped. See retained attempt diagnostics. Do not replay an uncertain write; use a fresh execution name.' }

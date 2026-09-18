@@ -10,7 +10,11 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--name', required=True)
 parser.add_argument('--output', type=Path, required=True)
 parser.add_argument('--cloud', action='store_true')
+parser.add_argument('--prepared', type=Path)
 args = parser.parse_args()
+if args.prepared:
+    from prepare_compiler import configure, read
+    configure(read(args.prepared))
 if args.cloud:
     from run_cloud import writer as cloud_writer
     def writer(name, mode='normal'):

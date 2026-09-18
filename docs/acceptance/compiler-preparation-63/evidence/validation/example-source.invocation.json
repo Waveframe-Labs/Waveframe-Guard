@@ -1,0 +1,17 @@
+{
+  "command": [
+    "docker",
+    "exec",
+    "-w",
+    "/source",
+    "-e",
+    "PYTHONDONTWRITEBYTECODE=1",
+    "-e",
+    "PYTHONPATH=/source/src",
+    "wf54-57-61-cold63b-agent",
+    "python",
+    "/source/examples/compile_repository_policy.py"
+  ],
+  "exit_code": 0,
+  "seconds": 0.21164180000778288
+}

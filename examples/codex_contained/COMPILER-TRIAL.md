@@ -5,46 +5,64 @@ This is one bounded repository trial. It imports tracked files at Compiler commi
 Codex choose its edits, runs the existing tests/examples and exports a reviewable
 patch. The original checkout is only read through Git; it is never mounted in
 the client or edited. Cloud is read-only at
-`93bf80f30d170a6be32622a34dbbdf0d85b8ccc6`.
+`16227bd414e5394160dbb1c7a33d543f84097631`.
 
-## Explicit prerequisites
+## Prepare and launch (Windows operator preview)
 
-- Git, Python and Docker Desktop's running Linux/WSL2 engine.
-- Existing supported Codex login at `$env:USERPROFILE/.codex/auth.json`.
-- The three accepted local images from #58/#60. The launcher checks their exact
-  digests, not just tags. No image was pushed; a first-time machine without those
-  images needs the earlier local setup and validation of any changed inputs.
-- An operator Python environment containing `requests==2.34.2`,
-  `playwright==1.63.0` and its Chromium browser. These are host-side Console tools,
-  never mounted into the client. A new environment can be prepared with:
+Manual prerequisites: Git >=2.40, Python 3.14, a running Docker Desktop Linux/WSL2
+x86_64 engine, existing `codex login`, and authorized read access to the private
+Cloud repository. Obtain a clean isolated Cloud checkout at
+`16227bd414e5394160dbb1c7a33d543f84097631` through your normal authorized Git setup:
 
 ```powershell
-python -m venv acceptance-output/operator61
-& acceptance-output/operator61/Scripts/python.exe -m pip install requests==2.34.2 playwright==1.63.0
-& acceptance-output/operator61/Scripts/python.exe -m playwright install chromium
+git -C C:\GitHub\Waveframe-Cloud worktree add --detach C:\GitHub\Waveframe-Guard-63-cloud 16227bd414e5394160dbb1c7a33d543f84097631
 ```
 
-Record this preparation separately when it is needed; the reported warm trial
-used an existing environment. The agent image already contains pytest 9.0.2 and
-jsonschema, satisfying the Compiler's ordinary test dependencies. No project
-dependency install, package rebuild or additional agent network access is needed.
-The pinned Compiler repository may be checked out at another commit: only its
-named Git objects are read. It must contain the exact pinned commit.
-
-## Launch and approval
-
-From this Guard branch, one PowerShell command runs the documented sequence:
+The Compiler checkout must contain `f817a1bca65806c9ee33ccc74c2238952ebf8f01`;
+its working-tree state is not imported. No existing Waveframe image or operator
+virtual environment is required. From this Guard checkout, run:
 
 ```powershell
 $TrialName = 'wf54-57-61-' + (Get-Date -Format 'yyyyMMddHHmmss')
+$Preparation = 'acceptance-output/prepare-' + (Get-Date -Format 'yyyyMMddHHmmss')
 .\examples\codex_contained\Start-CompilerTrial.ps1 `
+  -Stage All -Preparation $Preparation -Name $TrialName `
   -CompilerRepository C:\GitHub\cricore-contract-compiler `
-  -CloudCheckout C:\GitHub\Waveframe-Guard-59-cloud `
-  -OperatorPython C:\GitHub\Waveframe-Guard-57\acceptance-output\operator-env\Scripts\python.exe `
-  -Name $TrialName
+  -CloudCheckout C:\GitHub\Waveframe-Guard-63-cloud
 ```
 
-Adjust the operator environment path to the explicit prerequisite you prepared.
+Use `-Python C:\Python314\python.exe` or `-Auth <existing-auth.json>` when needed.
+The default stage is **Prepare**, which creates an isolated Python environment,
+downloads Chromium into that preparation directory, and builds all three images
+with unique tags and `--no-cache`. The writer derives from this newly built
+agent image. Historical Waveframe images are never selected. Docker's pinned
+Python base-image store may be retained; this is not an OS/Docker installation
+test. Dependencies come from ordinary public downloads, not a private wheelhouse.
+Build context excludes credentials, output, Git metadata and prior evidence.
+
+`-Stage Launch` reuses verified completed preparation and executes once with a
+fresh `-Name`; `-Stage All` performs both. Repeating **Prepare** only re-verifies
+and never executes a task. Each launch rechecks exact source inputs, image IDs,
+selected public wheel hashes and installed bytes. The agent uses Codex 0.154.0,
+Guard 0.19.0, Ledger 0.9.0, Compiler 0.5.0, MCP 2.2.0 and pytest 9.0.2.
+No dependencies are installed by the agent or writer at execution time.
+
+Attempt logs and timing live under `$Preparation/attempt-*`; `prepared.json`
+records measured image IDs and inputs. Failed preparation is retained; correct
+the diagnostic and choose a fresh preparation directory. A completed preparation
+can be reused only while its inputs still match. An existing execution directory
+is always refused. No automatic execution retry or uncertain-write replay occurs.
+Missing prerequisites are checked before disposable credentials or writer startup.
+Login presence is checked without logging values; expired login is still an
+execution-time failure requiring operator sign-in. Machine-wide auth is unchanged.
+
+This remains an **operator preview**, not a customer installer: private Cloud
+access, Docker/WSL installation and account sign-in remain manual. Approval below
+is driven by the existing acceptance browser automation against a fresh disposable
+local Cloud, not a customer authority. General projects and translation are unsupported.
+
+## Approval and bounded work
+
 Before the client starts, the script drives the existing Console review, confirms
 each control and explicitly approves a fresh **Compiler documentation** policy:
 
@@ -108,15 +126,20 @@ build packages and is deliberately outside this trial.
 ## Cleanup
 
 Retain and secret-scan the selected evidence before cleanup. The repository's
-`retain_compiler_trial.py` records the successful cohort and its initial failed
-import attempt; its CLI takes explicit input/output directories and does not
-overwrite prior evidence. After retention:
+`retain_compiler_trial.py` curates the task cohort; preparation and boundary records
+are retained separately in the #63 acceptance bundle. Never copy operator-private
+or writer-private files into durable evidence. After retention:
 
 ```powershell
 python examples/codex_contained/run.py cleanup --name $TrialName --output "acceptance-output/$TrialName/client"
 python examples/codex_contained/run_cloud.py cleanup --name $TrialName --output "acceptance-output/$TrialName/cloud"
 Remove-Item -LiteralPath "acceptance-output/$TrialName/cloud/operator-private.json","acceptance-output/$TrialName/cloud/writer-private.json"
 ```
+
+Cleanup checks exact attempt resource names and ownership labels. It removes only
+that trial's containers, volumes and network. It leaves prepared images, logs and
+the isolated environment for inspection; it never prunes Docker or changes sibling
+repositories. Remove your explicitly named preparation directory only after retention.
 
 No merge, package rebuild/publication, image push, deployment or activation.
 Cached-session revocation semantics are unchanged. Cloud #141/#121 remain rollout

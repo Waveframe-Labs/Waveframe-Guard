@@ -1,0 +1,10 @@
+  File "C:\GitHub\Waveframe-Guard-63\examples\codex_contained\prepare_compiler.py", line 146, in main
+    run.save(attempt / 'prerequisites.json', step('preflight', lambda: preflight(args.compiler_repository, args.cloud_checkout, args.auth, attempt)))
+                                             ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\GitHub\Waveframe-Guard-63\examples\codex_contained\prepare_compiler.py", line 141, in step
+    result = fn()
+  File "C:\GitHub\Waveframe-Guard-63\examples\codex_contained\prepare_compiler.py", line 146, in <lambda>
+    run.save(attempt / 'prerequisites.json', step('preflight', lambda: preflight(args.compiler_repository, args.cloud_checkout, args.auth, attempt)))
+                                                                       ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\GitHub\Waveframe-Guard-63\examples\codex_contained\prepare_compiler.py", line 51, in preflight
+    raise RuntimeError('Sign in using codex login, or select an existing login with -Auth; login values are never logged.') from None

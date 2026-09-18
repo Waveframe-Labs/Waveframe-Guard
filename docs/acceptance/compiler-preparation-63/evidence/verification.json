@@ -1,0 +1,28 @@
+{
+  "status": "passed",
+  "compiler_base": "f817a1bca65806c9ee33ccc74c2238952ebf8f01",
+  "tracked_input_files": 65,
+  "changed_paths": [
+    "README.md",
+    "examples/compile_repository_policy.py"
+  ],
+  "saved_runs": 3,
+  "callback_invocations": 2,
+  "source_tests_passed": 249,
+  "model_source_tests_passed": 249,
+  "model_example_runs_with_identical_bytes": 8,
+  "explicit_runtime_source_denial_writes": 0,
+  "patch_sha256": "2cd2da292eebf96a42049fc181e91158426c7264c295fe87efdc5e294ab92260",
+  "exact_patch_applied_and_example_passed": true,
+  "setup_to_client_ready_seconds": 16.705177700001514,
+  "first_useful_edit_seconds": 104.88956249999674,
+  "useful_task_completion_seconds": 151.56920599998557,
+  "total_trial_seconds": 181.28510300000198,
+  "operator_interventions_after_launch": [],
+  "nonzero_model_commands": [
+    {
+      "command": "/usr/bin/bash -lc \"cat src/compiler/__init__.py src/compiler/compile_action_policy.py && tail -20 pyproject.toml && rg -n 'candidate|unreleased|publish|0.5.0' README.md && rg --files -g 'AGENTS.md' /source /scratch && python -I -B -c 'import compiler; import importlib.metadata as m; print(compiler.__file__); print(m.version(\\\"cricore-contract-compiler\\\")); print(callable(compiler.compile_action_policy))'\"",
+      "exit_code": 1
+    }
+  ]
+}

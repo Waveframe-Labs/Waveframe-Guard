@@ -1,0 +1,919 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="9" failures="0" skipped="15" tests="64" time="2.933" timestamp="2026-09-17T19:58:12.574199-04:00" hostname="WF-DEV01"><testcase classname="examples.codex_contained.test_configuration" name="test_agent_and_writer_have_no_network_and_no_capabilities" time="0.000" /><testcase classname="examples.codex_contained.test_configuration" name="test_agent_readonly_mount_is_explicit[source-/source]" time="0.000" /><testcase classname="examples.codex_contained.test_configuration" name="test_agent_readonly_mount_is_explicit[ipc-/ipc]" time="0.000" /><testcase classname="examples.codex_contained.test_configuration" name="test_agent_readonly_mount_is_explicit[egress-/egress]" time="0.000" /><testcase classname="examples.codex_contained.test_configuration" name="test_no_connector_or_hook_required_for_container_security" time="0.000" /><testcase classname="examples.codex_contained.test_configuration" name="test_mcp_only_relays_stdio_to_fixed_private_socket" time="0.000" /><testcase classname="examples.codex_contained.test_configuration" name="test_client_policy_does_not_mask_the_os_write_probe" time="0.000" /><testcase classname="examples.codex_contained.test_cloud_writer" name="test_agent_cannot_override_operator_binding[role]" time="0.000"><skipped type="pytest.skip" message="contained writer uses Linux flock">C:\GitHub\Waveframe-Guard-63\examples\codex_contained\test_cloud_writer.py:49: contained writer uses Linux flock</skipped></testcase><testcase classname="examples.codex_contained.test_cloud_writer" name="test_agent_cannot_override_operator_binding[actor_identity]" time="0.000"><skipped type="pytest.skip" message="contained writer uses Linux flock">C:\GitHub\Waveframe-Guard-63\examples\codex_contained\test_cloud_writer.py:49: contained writer uses Linux flock</skipped></testcase><testcase classname="examples.codex_contained.test_cloud_writer" name="test_agent_cannot_override_operator_binding[runtime_id]" time="0.000"><skipped type="pytest.skip" message="contained writer uses Linux flock">C:\GitHub\Waveframe-Guard-63\examples\codex_contained\test_cloud_writer.py:49: contained writer uses Linux flock</skipped></testcase><testcase classname="examples.codex_contained.test_cloud_writer" name="test_agent_cannot_override_operator_binding[authority]" time="0.000"><skipped type="pytest.skip" message="contained writer uses Linux flock">C:\GitHub\Waveframe-Guard-63\examples\codex_contained\test_cloud_writer.py:49: contained writer uses Linux flock</skipped></testcase><testcase classname="examples.codex_contained.test_cloud_writer" name="test_agent_cannot_override_operator_binding[cloud_url]" time="0.000"><skipped type="pytest.skip" message="contained writer uses Linux flock">C:\GitHub\Waveframe-Guard-63\examples\codex_contained\test_cloud_writer.py:49: contained writer uses Linux flock</skipped></testcase><testcase classname="examples.codex_contained.test_cloud_writer" name="test_agent_cannot_override_operator_binding[command]" time="0.000"><skipped type="pytest.skip" message="contained writer uses Linux flock">C:\GitHub\Waveframe-Guard-63\examples\codex_contained\test_cloud_writer.py:49: contained writer uses Linux flock</skipped></testcase><testcase classname="examples.codex_contained.test_cloud_writer" name="test_agent_cannot_override_operator_binding[root]" time="0.000"><skipped type="pytest.skip" message="contained writer uses Linux flock">C:\GitHub\Waveframe-Guard-63\examples\codex_contained\test_cloud_writer.py:49: contained writer uses Linux flock</skipped></testcase><testcase classname="examples.codex_contained.test_cloud_writer" name="test_rejected_activation_closes_all_open_guards[substituted-True]" time="0.000"><skipped type="pytest.skip" message="contained writer uses Linux flock">C:\GitHub\Waveframe-Guard-63\examples\codex_contained\test_cloud_writer.py:60: contained writer uses Linux flock</skipped></testcase><testcase classname="examples.codex_contained.test_cloud_writer" name="test_rejected_activation_closes_all_open_guards[fresh-False]" time="0.000"><skipped type="pytest.skip" message="contained writer uses Linux flock">C:\GitHub\Waveframe-Guard-63\examples\codex_contained\test_cloud_writer.py:60: contained writer uses Linux flock</skipped></testcase><testcase classname="examples.codex_contained.test_cloud_writer" name="test_alternate_endpoint_never_reaches_sdk[https://example.com]" time="0.000"><skipped type="pytest.skip" message="contained writer uses Linux flock">C:\GitHub\Waveframe-Guard-63\examples\codex_contained\test_cloud_writer.py:67: contained writer uses Linux flock</skipped></testcase><testcase classname="examples.codex_contained.test_cloud_writer" name="test_alternate_endpoint_never_reaches_sdk[http://localhost:18081]" time="0.000"><skipped type="pytest.skip" message="contained writer uses Linux flock">C:\GitHub\Waveframe-Guard-63\examples\codex_contained\test_cloud_writer.py:67: contained writer uses Linux flock</skipped></testcase><testcase classname="examples.codex_contained.test_cloud_writer" name="test_alternate_endpoint_never_reaches_sdk[http://127.0.0.1:8000]" time="0.000"><skipped type="pytest.skip" message="contained writer uses Linux flock">C:\GitHub\Waveframe-Guard-63\examples\codex_contained\test_cloud_writer.py:67: contained writer uses Linux flock</skipped></testcase><testcase classname="examples.codex_contained.test_cloud_writer" name="test_alternate_endpoint_never_reaches_sdk[http://127.0.0.1:18081/redirect]" time="0.000"><skipped type="pytest.skip" message="contained writer uses Linux flock">C:\GitHub\Waveframe-Guard-63\examples\codex_contained\test_cloud_writer.py:67: contained writer uses Linux flock</skipped></testcase><testcase classname="examples.codex_contained.test_cloud_writer" name="test_successful_mutation_remains_success_when_cloud_evidence_fails" time="0.000"><skipped type="pytest.skip" message="contained writer uses Linux flock">C:\GitHub\Waveframe-Guard-63\examples\codex_contained\test_cloud_writer.py:75: contained writer uses Linux flock</skipped></testcase><testcase classname="examples.codex_contained.test_cloud_writer" name="test_unknown_exception_is_not_reported_as_zero_writes_or_retried" time="0.000"><skipped type="pytest.skip" message="contained writer uses Linux flock">C:\GitHub\Waveframe-Guard-63\examples\codex_contained\test_cloud_writer.py:90: contained writer uses Linux flock</skipped></testcase><testcase classname="examples.codex_contained.test_evidence" name="test_real_captured_transport_and_filesystem_boundary" time="1.125" /><testcase classname="examples.codex_contained.test_evidence" name="test_broadened_agent_controls_are_rejected[writable_source]" time="0.001" /><testcase classname="examples.codex_contained.test_evidence" name="test_broadened_agent_controls_are_rejected[host_network]" time="0.001" /><testcase classname="examples.codex_contained.test_evidence" name="test_broadened_agent_controls_are_rejected[capability]" time="0.001" /><testcase classname="examples.codex_contained.test_evidence" name="test_broadened_agent_controls_are_rejected[host_pid]" time="0.001" /><testcase classname="examples.codex_contained.test_evidence" name="test_broadened_agent_controls_are_rejected[docker_socket]" time="0.001" /><testcase classname="examples.codex_contained.test_evidence" name="test_broadened_agent_controls_are_rejected[writer_secret]" time="0.001" /><testcase classname="examples.codex_contained.test_evidence" name="test_wrong_captured_byte_hash_is_rejected" time="0.001" /><testcase classname="examples.codex_contained.test_evidence" name="test_hidden_actual_write_is_rejected_even_with_consistent_hash" time="0.001" /><testcase classname="tests.test_codex_connection" name="test_released_capabilities_and_saved_evidence" time="0.060"><error message="failed on setup with &quot;waveframe_guard.authority.exceptions.AuthorityVerificationError: action publication requires Ledger's exact catalog and complete public validators: No module named 'governance_ledger.action_policy_publication'&quot;">payload = {'schema_version': 'authority_bundle.v4', 'provenance_complete': True, 'source_policy': {'source_policy_id': 'reposito...09939a41b7e335165ecebffc714064c816c6465dc5afee8ee3702946d1d94bf', 'authority_ref': 'repository-mixed@3.0.0', ...}, ...}
+
+    def verify_publication_generation(payload):
+        """Bind catalog, pack, runtime and confirmed enforcement points exactly."""
+        try:
+            version = require_action_generation(payload["compiled_authority_contract"])
+            catalog_hash, pack_hash, runtime_hash, enforcement = _GENERATIONS[version]
+            commitment = payload["policy_translation_commitment"]
+            expected_catalog = dict(catalog_id="waveframe.coding-agent.repository-change",
+                                    catalog_version=version, catalog_hash=catalog_hash)
+            expected_pack = dict(domain_pack_id="repository-changes",
+                                 domain_pack_version=version, domain_pack_hash=pack_hash)
+            schema = payload["runtime_fact_schema"]
+            if (commitment["capability_catalog"] != expected_catalog
+                or payload["domain_pack"] != expected_pack
+                or payload["constraint_ir"]["domain_pack"] != expected_pack
+                or (schema["schema_id"], schema["schema_version_number"], schema["schema_hash"])
+                    != ("repository-changes-runtime", version, runtime_hash)):
+                raise ValueError("catalog/pack/runtime bindings disagree")
+            for clause in commitment["clauses"]:
+                for record in clause["controls"]:
+                    if record["candidate_control"]["enforcement_point"] != enforcement:
+                        raise ValueError("unsupported enforcement point")
+            # Confirm that the installed dependency supplies the exact catalog and
+            # public validators. Never fall back to a shared envelope version.
+            from governance_ledger.policy_translation import get_policy_translation_capability_catalog
+&gt;           from governance_ledger.action_policy_publication import validate_compiled_authority_contract_v3
+E           ModuleNotFoundError: No module named 'governance_ledger.action_policy_publication'
+
+waveframe_guard\authority\generations.py:62: ModuleNotFoundError
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = WindowsPath('C:/Users/swrig/AppData/Local/Temp/pytest-of-swrig/pytest-2256/test_released_capabilities_and0')
+
+    @pytest.fixture
+    def writer(tmp_path):
+        repo = tmp_path / "repo"
+        repo.mkdir()
+        (repo / "generated").mkdir()
+        (repo / "README.md").write_bytes(b"before\n")
+&gt;       value = MODULE.Writer(repo, tmp_path / "evidence", ROOT / "tests/fixtures/action_policy_release_v4/mixed")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_codex_connection.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+examples\codex_connection\writer.py:44: in __init__
+    self.guards[action] = Guard.local(
+guard\sdk\guard.py:133: in local
+    return cls(
+guard\sdk\guard.py:66: in __init__
+    authority_source = AuthoritySource.from_inputs(
+guard\sdk\authority_source.py:53: in from_inputs
+    loaded_authority = load_authority(
+waveframe_guard\authority\loader.py:44: in load_authority
+    authority = verifier.verify(loader.load(registry_entry))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+waveframe_guard\authority\verifier.py:34: in verify
+    verify_publication_generation(bundle.payload)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+payload = {'schema_version': 'authority_bundle.v4', 'provenance_complete': True, 'source_policy': {'source_policy_id': 'reposito...09939a41b7e335165ecebffc714064c816c6465dc5afee8ee3702946d1d94bf', 'authority_ref': 'repository-mixed@3.0.0', ...}, ...}
+
+    def verify_publication_generation(payload):
+        """Bind catalog, pack, runtime and confirmed enforcement points exactly."""
+        try:
+            version = require_action_generation(payload["compiled_authority_contract"])
+            catalog_hash, pack_hash, runtime_hash, enforcement = _GENERATIONS[version]
+            commitment = payload["policy_translation_commitment"]
+            expected_catalog = dict(catalog_id="waveframe.coding-agent.repository-change",
+                                    catalog_version=version, catalog_hash=catalog_hash)
+            expected_pack = dict(domain_pack_id="repository-changes",
+                                 domain_pack_version=version, domain_pack_hash=pack_hash)
+            schema = payload["runtime_fact_schema"]
+            if (commitment["capability_catalog"] != expected_catalog
+                or payload["domain_pack"] != expected_pack
+                or payload["constraint_ir"]["domain_pack"] != expected_pack
+                or (schema["schema_id"], schema["schema_version_number"], schema["schema_hash"])
+                    != ("repository-changes-runtime", version, runtime_hash)):
+                raise ValueError("catalog/pack/runtime bindings disagree")
+            for clause in commitment["clauses"]:
+                for record in clause["controls"]:
+                    if record["candidate_control"]["enforcement_point"] != enforcement:
+                        raise ValueError("unsupported enforcement point")
+            # Confirm that the installed dependency supplies the exact catalog and
+            # public validators. Never fall back to a shared envelope version.
+            from governance_ledger.policy_translation import get_policy_translation_capability_catalog
+            from governance_ledger.action_policy_publication import validate_compiled_authority_contract_v3
+    
+            catalog = get_policy_translation_capability_catalog(catalog_version=version)
+            if any(catalog.get(key) != value for key, value in expected_catalog.items()):
+                raise ValueError("installed catalog identity differs")
+            validate_compiled_authority_contract_v3(dict(payload["compiled_authority_contract"]))
+            return version
+        except AuthorityVerificationError:
+            raise
+        except (ImportError, AttributeError, KeyError, TypeError, ValueError) as exc:
+&gt;           raise AuthorityVerificationError(
+                "action publication requires Ledger's exact catalog and complete public validators: " + str(exc)
+            ) from exc
+E           waveframe_guard.authority.exceptions.AuthorityVerificationError: action publication requires Ledger's exact catalog and complete public validators: No module named 'governance_ledger.action_policy_publication'
+
+waveframe_guard\authority\generations.py:72: AuthorityVerificationError</error></testcase><testcase classname="tests.test_codex_connection" name="test_denial_and_collision_are_different_and_zero_write" time="0.004"><error message="failed on setup with &quot;waveframe_guard.authority.exceptions.AuthorityVerificationError: action publication requires Ledger's exact catalog and complete public validators: No module named 'governance_ledger.action_policy_publication'&quot;">payload = {'schema_version': 'authority_bundle.v4', 'provenance_complete': True, 'source_policy': {'source_policy_id': 'reposito...09939a41b7e335165ecebffc714064c816c6465dc5afee8ee3702946d1d94bf', 'authority_ref': 'repository-mixed@3.0.0', ...}, ...}
+
+    def verify_publication_generation(payload):
+        """Bind catalog, pack, runtime and confirmed enforcement points exactly."""
+        try:
+            version = require_action_generation(payload["compiled_authority_contract"])
+            catalog_hash, pack_hash, runtime_hash, enforcement = _GENERATIONS[version]
+            commitment = payload["policy_translation_commitment"]
+            expected_catalog = dict(catalog_id="waveframe.coding-agent.repository-change",
+                                    catalog_version=version, catalog_hash=catalog_hash)
+            expected_pack = dict(domain_pack_id="repository-changes",
+                                 domain_pack_version=version, domain_pack_hash=pack_hash)
+            schema = payload["runtime_fact_schema"]
+            if (commitment["capability_catalog"] != expected_catalog
+                or payload["domain_pack"] != expected_pack
+                or payload["constraint_ir"]["domain_pack"] != expected_pack
+                or (schema["schema_id"], schema["schema_version_number"], schema["schema_hash"])
+                    != ("repository-changes-runtime", version, runtime_hash)):
+                raise ValueError("catalog/pack/runtime bindings disagree")
+            for clause in commitment["clauses"]:
+                for record in clause["controls"]:
+                    if record["candidate_control"]["enforcement_point"] != enforcement:
+                        raise ValueError("unsupported enforcement point")
+            # Confirm that the installed dependency supplies the exact catalog and
+            # public validators. Never fall back to a shared envelope version.
+            from governance_ledger.policy_translation import get_policy_translation_capability_catalog
+&gt;           from governance_ledger.action_policy_publication import validate_compiled_authority_contract_v3
+E           ModuleNotFoundError: No module named 'governance_ledger.action_policy_publication'
+
+waveframe_guard\authority\generations.py:62: ModuleNotFoundError
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = WindowsPath('C:/Users/swrig/AppData/Local/Temp/pytest-of-swrig/pytest-2256/test_denial_and_collision_are_0')
+
+    @pytest.fixture
+    def writer(tmp_path):
+        repo = tmp_path / "repo"
+        repo.mkdir()
+        (repo / "generated").mkdir()
+        (repo / "README.md").write_bytes(b"before\n")
+&gt;       value = MODULE.Writer(repo, tmp_path / "evidence", ROOT / "tests/fixtures/action_policy_release_v4/mixed")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_codex_connection.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+examples\codex_connection\writer.py:44: in __init__
+    self.guards[action] = Guard.local(
+guard\sdk\guard.py:133: in local
+    return cls(
+guard\sdk\guard.py:66: in __init__
+    authority_source = AuthoritySource.from_inputs(
+guard\sdk\authority_source.py:53: in from_inputs
+    loaded_authority = load_authority(
+waveframe_guard\authority\loader.py:44: in load_authority
+    authority = verifier.verify(loader.load(registry_entry))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+waveframe_guard\authority\verifier.py:34: in verify
+    verify_publication_generation(bundle.payload)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+payload = {'schema_version': 'authority_bundle.v4', 'provenance_complete': True, 'source_policy': {'source_policy_id': 'reposito...09939a41b7e335165ecebffc714064c816c6465dc5afee8ee3702946d1d94bf', 'authority_ref': 'repository-mixed@3.0.0', ...}, ...}
+
+    def verify_publication_generation(payload):
+        """Bind catalog, pack, runtime and confirmed enforcement points exactly."""
+        try:
+            version = require_action_generation(payload["compiled_authority_contract"])
+            catalog_hash, pack_hash, runtime_hash, enforcement = _GENERATIONS[version]
+            commitment = payload["policy_translation_commitment"]
+            expected_catalog = dict(catalog_id="waveframe.coding-agent.repository-change",
+                                    catalog_version=version, catalog_hash=catalog_hash)
+            expected_pack = dict(domain_pack_id="repository-changes",
+                                 domain_pack_version=version, domain_pack_hash=pack_hash)
+            schema = payload["runtime_fact_schema"]
+            if (commitment["capability_catalog"] != expected_catalog
+                or payload["domain_pack"] != expected_pack
+                or payload["constraint_ir"]["domain_pack"] != expected_pack
+                or (schema["schema_id"], schema["schema_version_number"], schema["schema_hash"])
+                    != ("repository-changes-runtime", version, runtime_hash)):
+                raise ValueError("catalog/pack/runtime bindings disagree")
+            for clause in commitment["clauses"]:
+                for record in clause["controls"]:
+                    if record["candidate_control"]["enforcement_point"] != enforcement:
+                        raise ValueError("unsupported enforcement point")
+            # Confirm that the installed dependency supplies the exact catalog and
+            # public validators. Never fall back to a shared envelope version.
+            from governance_ledger.policy_translation import get_policy_translation_capability_catalog
+            from governance_ledger.action_policy_publication import validate_compiled_authority_contract_v3
+    
+            catalog = get_policy_translation_capability_catalog(catalog_version=version)
+            if any(catalog.get(key) != value for key, value in expected_catalog.items()):
+                raise ValueError("installed catalog identity differs")
+            validate_compiled_authority_contract_v3(dict(payload["compiled_authority_contract"]))
+            return version
+        except AuthorityVerificationError:
+            raise
+        except (ImportError, AttributeError, KeyError, TypeError, ValueError) as exc:
+&gt;           raise AuthorityVerificationError(
+                "action publication requires Ledger's exact catalog and complete public validators: " + str(exc)
+            ) from exc
+E           waveframe_guard.authority.exceptions.AuthorityVerificationError: action publication requires Ledger's exact catalog and complete public validators: No module named 'governance_ledger.action_policy_publication'
+
+waveframe_guard\authority\generations.py:72: AuthorityVerificationError</error></testcase><testcase classname="tests.test_codex_connection" name="test_request_cannot_select_trust_or_unreleased_operations[change0]" time="0.004"><error message="failed on setup with &quot;waveframe_guard.authority.exceptions.AuthorityVerificationError: action publication requires Ledger's exact catalog and complete public validators: No module named 'governance_ledger.action_policy_publication'&quot;">payload = {'schema_version': 'authority_bundle.v4', 'provenance_complete': True, 'source_policy': {'source_policy_id': 'reposito...09939a41b7e335165ecebffc714064c816c6465dc5afee8ee3702946d1d94bf', 'authority_ref': 'repository-mixed@3.0.0', ...}, ...}
+
+    def verify_publication_generation(payload):
+        """Bind catalog, pack, runtime and confirmed enforcement points exactly."""
+        try:
+            version = require_action_generation(payload["compiled_authority_contract"])
+            catalog_hash, pack_hash, runtime_hash, enforcement = _GENERATIONS[version]
+            commitment = payload["policy_translation_commitment"]
+            expected_catalog = dict(catalog_id="waveframe.coding-agent.repository-change",
+                                    catalog_version=version, catalog_hash=catalog_hash)
+            expected_pack = dict(domain_pack_id="repository-changes",
+                                 domain_pack_version=version, domain_pack_hash=pack_hash)
+            schema = payload["runtime_fact_schema"]
+            if (commitment["capability_catalog"] != expected_catalog
+                or payload["domain_pack"] != expected_pack
+                or payload["constraint_ir"]["domain_pack"] != expected_pack
+                or (schema["schema_id"], schema["schema_version_number"], schema["schema_hash"])
+                    != ("repository-changes-runtime", version, runtime_hash)):
+                raise ValueError("catalog/pack/runtime bindings disagree")
+            for clause in commitment["clauses"]:
+                for record in clause["controls"]:
+                    if record["candidate_control"]["enforcement_point"] != enforcement:
+                        raise ValueError("unsupported enforcement point")
+            # Confirm that the installed dependency supplies the exact catalog and
+            # public validators. Never fall back to a shared envelope version.
+            from governance_ledger.policy_translation import get_policy_translation_capability_catalog
+&gt;           from governance_ledger.action_policy_publication import validate_compiled_authority_contract_v3
+E           ModuleNotFoundError: No module named 'governance_ledger.action_policy_publication'
+
+waveframe_guard\authority\generations.py:62: ModuleNotFoundError
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = WindowsPath('C:/Users/swrig/AppData/Local/Temp/pytest-of-swrig/pytest-2256/test_request_cannot_select_tru0')
+
+    @pytest.fixture
+    def writer(tmp_path):
+        repo = tmp_path / "repo"
+        repo.mkdir()
+        (repo / "generated").mkdir()
+        (repo / "README.md").write_bytes(b"before\n")
+&gt;       value = MODULE.Writer(repo, tmp_path / "evidence", ROOT / "tests/fixtures/action_policy_release_v4/mixed")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_codex_connection.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+examples\codex_connection\writer.py:44: in __init__
+    self.guards[action] = Guard.local(
+guard\sdk\guard.py:133: in local
+    return cls(
+guard\sdk\guard.py:66: in __init__
+    authority_source = AuthoritySource.from_inputs(
+guard\sdk\authority_source.py:53: in from_inputs
+    loaded_authority = load_authority(
+waveframe_guard\authority\loader.py:44: in load_authority
+    authority = verifier.verify(loader.load(registry_entry))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+waveframe_guard\authority\verifier.py:34: in verify
+    verify_publication_generation(bundle.payload)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+payload = {'schema_version': 'authority_bundle.v4', 'provenance_complete': True, 'source_policy': {'source_policy_id': 'reposito...09939a41b7e335165ecebffc714064c816c6465dc5afee8ee3702946d1d94bf', 'authority_ref': 'repository-mixed@3.0.0', ...}, ...}
+
+    def verify_publication_generation(payload):
+        """Bind catalog, pack, runtime and confirmed enforcement points exactly."""
+        try:
+            version = require_action_generation(payload["compiled_authority_contract"])
+            catalog_hash, pack_hash, runtime_hash, enforcement = _GENERATIONS[version]
+            commitment = payload["policy_translation_commitment"]
+            expected_catalog = dict(catalog_id="waveframe.coding-agent.repository-change",
+                                    catalog_version=version, catalog_hash=catalog_hash)
+            expected_pack = dict(domain_pack_id="repository-changes",
+                                 domain_pack_version=version, domain_pack_hash=pack_hash)
+            schema = payload["runtime_fact_schema"]
+            if (commitment["capability_catalog"] != expected_catalog
+                or payload["domain_pack"] != expected_pack
+                or payload["constraint_ir"]["domain_pack"] != expected_pack
+                or (schema["schema_id"], schema["schema_version_number"], schema["schema_hash"])
+                    != ("repository-changes-runtime", version, runtime_hash)):
+                raise ValueError("catalog/pack/runtime bindings disagree")
+            for clause in commitment["clauses"]:
+                for record in clause["controls"]:
+                    if record["candidate_control"]["enforcement_point"] != enforcement:
+                        raise ValueError("unsupported enforcement point")
+            # Confirm that the installed dependency supplies the exact catalog and
+            # public validators. Never fall back to a shared envelope version.
+            from governance_ledger.policy_translation import get_policy_translation_capability_catalog
+            from governance_ledger.action_policy_publication import validate_compiled_authority_contract_v3
+    
+            catalog = get_policy_translation_capability_catalog(catalog_version=version)
+            if any(catalog.get(key) != value for key, value in expected_catalog.items()):
+                raise ValueError("installed catalog identity differs")
+            validate_compiled_authority_contract_v3(dict(payload["compiled_authority_contract"]))
+            return version
+        except AuthorityVerificationError:
+            raise
+        except (ImportError, AttributeError, KeyError, TypeError, ValueError) as exc:
+&gt;           raise AuthorityVerificationError(
+                "action publication requires Ledger's exact catalog and complete public validators: " + str(exc)
+            ) from exc
+E           waveframe_guard.authority.exceptions.AuthorityVerificationError: action publication requires Ledger's exact catalog and complete public validators: No module named 'governance_ledger.action_policy_publication'
+
+waveframe_guard\authority\generations.py:72: AuthorityVerificationError</error></testcase><testcase classname="tests.test_codex_connection" name="test_request_cannot_select_trust_or_unreleased_operations[change1]" time="0.004"><error message="failed on setup with &quot;waveframe_guard.authority.exceptions.AuthorityVerificationError: action publication requires Ledger's exact catalog and complete public validators: No module named 'governance_ledger.action_policy_publication'&quot;">payload = {'schema_version': 'authority_bundle.v4', 'provenance_complete': True, 'source_policy': {'source_policy_id': 'reposito...09939a41b7e335165ecebffc714064c816c6465dc5afee8ee3702946d1d94bf', 'authority_ref': 'repository-mixed@3.0.0', ...}, ...}
+
+    def verify_publication_generation(payload):
+        """Bind catalog, pack, runtime and confirmed enforcement points exactly."""
+        try:
+            version = require_action_generation(payload["compiled_authority_contract"])
+            catalog_hash, pack_hash, runtime_hash, enforcement = _GENERATIONS[version]
+            commitment = payload["policy_translation_commitment"]
+            expected_catalog = dict(catalog_id="waveframe.coding-agent.repository-change",
+                                    catalog_version=version, catalog_hash=catalog_hash)
+            expected_pack = dict(domain_pack_id="repository-changes",
+                                 domain_pack_version=version, domain_pack_hash=pack_hash)
+            schema = payload["runtime_fact_schema"]
+            if (commitment["capability_catalog"] != expected_catalog
+                or payload["domain_pack"] != expected_pack
+                or payload["constraint_ir"]["domain_pack"] != expected_pack
+                or (schema["schema_id"], schema["schema_version_number"], schema["schema_hash"])
+                    != ("repository-changes-runtime", version, runtime_hash)):
+                raise ValueError("catalog/pack/runtime bindings disagree")
+            for clause in commitment["clauses"]:
+                for record in clause["controls"]:
+                    if record["candidate_control"]["enforcement_point"] != enforcement:
+                        raise ValueError("unsupported enforcement point")
+            # Confirm that the installed dependency supplies the exact catalog and
+            # public validators. Never fall back to a shared envelope version.
+            from governance_ledger.policy_translation import get_policy_translation_capability_catalog
+&gt;           from governance_ledger.action_policy_publication import validate_compiled_authority_contract_v3
+E           ModuleNotFoundError: No module named 'governance_ledger.action_policy_publication'
+
+waveframe_guard\authority\generations.py:62: ModuleNotFoundError
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = WindowsPath('C:/Users/swrig/AppData/Local/Temp/pytest-of-swrig/pytest-2256/test_request_cannot_select_tru1')
+
+    @pytest.fixture
+    def writer(tmp_path):
+        repo = tmp_path / "repo"
+        repo.mkdir()
+        (repo / "generated").mkdir()
+        (repo / "README.md").write_bytes(b"before\n")
+&gt;       value = MODULE.Writer(repo, tmp_path / "evidence", ROOT / "tests/fixtures/action_policy_release_v4/mixed")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_codex_connection.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+examples\codex_connection\writer.py:44: in __init__
+    self.guards[action] = Guard.local(
+guard\sdk\guard.py:133: in local
+    return cls(
+guard\sdk\guard.py:66: in __init__
+    authority_source = AuthoritySource.from_inputs(
+guard\sdk\authority_source.py:53: in from_inputs
+    loaded_authority = load_authority(
+waveframe_guard\authority\loader.py:44: in load_authority
+    authority = verifier.verify(loader.load(registry_entry))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+waveframe_guard\authority\verifier.py:34: in verify
+    verify_publication_generation(bundle.payload)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+payload = {'schema_version': 'authority_bundle.v4', 'provenance_complete': True, 'source_policy': {'source_policy_id': 'reposito...09939a41b7e335165ecebffc714064c816c6465dc5afee8ee3702946d1d94bf', 'authority_ref': 'repository-mixed@3.0.0', ...}, ...}
+
+    def verify_publication_generation(payload):
+        """Bind catalog, pack, runtime and confirmed enforcement points exactly."""
+        try:
+            version = require_action_generation(payload["compiled_authority_contract"])
+            catalog_hash, pack_hash, runtime_hash, enforcement = _GENERATIONS[version]
+            commitment = payload["policy_translation_commitment"]
+            expected_catalog = dict(catalog_id="waveframe.coding-agent.repository-change",
+                                    catalog_version=version, catalog_hash=catalog_hash)
+            expected_pack = dict(domain_pack_id="repository-changes",
+                                 domain_pack_version=version, domain_pack_hash=pack_hash)
+            schema = payload["runtime_fact_schema"]
+            if (commitment["capability_catalog"] != expected_catalog
+                or payload["domain_pack"] != expected_pack
+                or payload["constraint_ir"]["domain_pack"] != expected_pack
+                or (schema["schema_id"], schema["schema_version_number"], schema["schema_hash"])
+                    != ("repository-changes-runtime", version, runtime_hash)):
+                raise ValueError("catalog/pack/runtime bindings disagree")
+            for clause in commitment["clauses"]:
+                for record in clause["controls"]:
+                    if record["candidate_control"]["enforcement_point"] != enforcement:
+                        raise ValueError("unsupported enforcement point")
+            # Confirm that the installed dependency supplies the exact catalog and
+            # public validators. Never fall back to a shared envelope version.
+            from governance_ledger.policy_translation import get_policy_translation_capability_catalog
+            from governance_ledger.action_policy_publication import validate_compiled_authority_contract_v3
+    
+            catalog = get_policy_translation_capability_catalog(catalog_version=version)
+            if any(catalog.get(key) != value for key, value in expected_catalog.items()):
+                raise ValueError("installed catalog identity differs")
+            validate_compiled_authority_contract_v3(dict(payload["compiled_authority_contract"]))
+            return version
+        except AuthorityVerificationError:
+            raise
+        except (ImportError, AttributeError, KeyError, TypeError, ValueError) as exc:
+&gt;           raise AuthorityVerificationError(
+                "action publication requires Ledger's exact catalog and complete public validators: " + str(exc)
+            ) from exc
+E           waveframe_guard.authority.exceptions.AuthorityVerificationError: action publication requires Ledger's exact catalog and complete public validators: No module named 'governance_ledger.action_policy_publication'
+
+waveframe_guard\authority\generations.py:72: AuthorityVerificationError</error></testcase><testcase classname="tests.test_codex_connection" name="test_request_cannot_select_trust_or_unreleased_operations[change2]" time="0.004"><error message="failed on setup with &quot;waveframe_guard.authority.exceptions.AuthorityVerificationError: action publication requires Ledger's exact catalog and complete public validators: No module named 'governance_ledger.action_policy_publication'&quot;">payload = {'schema_version': 'authority_bundle.v4', 'provenance_complete': True, 'source_policy': {'source_policy_id': 'reposito...09939a41b7e335165ecebffc714064c816c6465dc5afee8ee3702946d1d94bf', 'authority_ref': 'repository-mixed@3.0.0', ...}, ...}
+
+    def verify_publication_generation(payload):
+        """Bind catalog, pack, runtime and confirmed enforcement points exactly."""
+        try:
+            version = require_action_generation(payload["compiled_authority_contract"])
+            catalog_hash, pack_hash, runtime_hash, enforcement = _GENERATIONS[version]
+            commitment = payload["policy_translation_commitment"]
+            expected_catalog = dict(catalog_id="waveframe.coding-agent.repository-change",
+                                    catalog_version=version, catalog_hash=catalog_hash)
+            expected_pack = dict(domain_pack_id="repository-changes",
+                                 domain_pack_version=version, domain_pack_hash=pack_hash)
+            schema = payload["runtime_fact_schema"]
+            if (commitment["capability_catalog"] != expected_catalog
+                or payload["domain_pack"] != expected_pack
+                or payload["constraint_ir"]["domain_pack"] != expected_pack
+                or (schema["schema_id"], schema["schema_version_number"], schema["schema_hash"])
+                    != ("repository-changes-runtime", version, runtime_hash)):
+                raise ValueError("catalog/pack/runtime bindings disagree")
+            for clause in commitment["clauses"]:
+                for record in clause["controls"]:
+                    if record["candidate_control"]["enforcement_point"] != enforcement:
+                        raise ValueError("unsupported enforcement point")
+            # Confirm that the installed dependency supplies the exact catalog and
+            # public validators. Never fall back to a shared envelope version.
+            from governance_ledger.policy_translation import get_policy_translation_capability_catalog
+&gt;           from governance_ledger.action_policy_publication import validate_compiled_authority_contract_v3
+E           ModuleNotFoundError: No module named 'governance_ledger.action_policy_publication'
+
+waveframe_guard\authority\generations.py:62: ModuleNotFoundError
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = WindowsPath('C:/Users/swrig/AppData/Local/Temp/pytest-of-swrig/pytest-2256/test_request_cannot_select_tru2')
+
+    @pytest.fixture
+    def writer(tmp_path):
+        repo = tmp_path / "repo"
+        repo.mkdir()
+        (repo / "generated").mkdir()
+        (repo / "README.md").write_bytes(b"before\n")
+&gt;       value = MODULE.Writer(repo, tmp_path / "evidence", ROOT / "tests/fixtures/action_policy_release_v4/mixed")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_codex_connection.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+examples\codex_connection\writer.py:44: in __init__
+    self.guards[action] = Guard.local(
+guard\sdk\guard.py:133: in local
+    return cls(
+guard\sdk\guard.py:66: in __init__
+    authority_source = AuthoritySource.from_inputs(
+guard\sdk\authority_source.py:53: in from_inputs
+    loaded_authority = load_authority(
+waveframe_guard\authority\loader.py:44: in load_authority
+    authority = verifier.verify(loader.load(registry_entry))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+waveframe_guard\authority\verifier.py:34: in verify
+    verify_publication_generation(bundle.payload)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+payload = {'schema_version': 'authority_bundle.v4', 'provenance_complete': True, 'source_policy': {'source_policy_id': 'reposito...09939a41b7e335165ecebffc714064c816c6465dc5afee8ee3702946d1d94bf', 'authority_ref': 'repository-mixed@3.0.0', ...}, ...}
+
+    def verify_publication_generation(payload):
+        """Bind catalog, pack, runtime and confirmed enforcement points exactly."""
+        try:
+            version = require_action_generation(payload["compiled_authority_contract"])
+            catalog_hash, pack_hash, runtime_hash, enforcement = _GENERATIONS[version]
+            commitment = payload["policy_translation_commitment"]
+            expected_catalog = dict(catalog_id="waveframe.coding-agent.repository-change",
+                                    catalog_version=version, catalog_hash=catalog_hash)
+            expected_pack = dict(domain_pack_id="repository-changes",
+                                 domain_pack_version=version, domain_pack_hash=pack_hash)
+            schema = payload["runtime_fact_schema"]
+            if (commitment["capability_catalog"] != expected_catalog
+                or payload["domain_pack"] != expected_pack
+                or payload["constraint_ir"]["domain_pack"] != expected_pack
+                or (schema["schema_id"], schema["schema_version_number"], schema["schema_hash"])
+                    != ("repository-changes-runtime", version, runtime_hash)):
+                raise ValueError("catalog/pack/runtime bindings disagree")
+            for clause in commitment["clauses"]:
+                for record in clause["controls"]:
+                    if record["candidate_control"]["enforcement_point"] != enforcement:
+                        raise ValueError("unsupported enforcement point")
+            # Confirm that the installed dependency supplies the exact catalog and
+            # public validators. Never fall back to a shared envelope version.
+            from governance_ledger.policy_translation import get_policy_translation_capability_catalog
+            from governance_ledger.action_policy_publication import validate_compiled_authority_contract_v3
+    
+            catalog = get_policy_translation_capability_catalog(catalog_version=version)
+            if any(catalog.get(key) != value for key, value in expected_catalog.items()):
+                raise ValueError("installed catalog identity differs")
+            validate_compiled_authority_contract_v3(dict(payload["compiled_authority_contract"]))
+            return version
+        except AuthorityVerificationError:
+            raise
+        except (ImportError, AttributeError, KeyError, TypeError, ValueError) as exc:
+&gt;           raise AuthorityVerificationError(
+                "action publication requires Ledger's exact catalog and complete public validators: " + str(exc)
+            ) from exc
+E           waveframe_guard.authority.exceptions.AuthorityVerificationError: action publication requires Ledger's exact catalog and complete public validators: No module named 'governance_ledger.action_policy_publication'
+
+waveframe_guard\authority\generations.py:72: AuthorityVerificationError</error></testcase><testcase classname="tests.test_codex_connection" name="test_request_cannot_select_trust_or_unreleased_operations[change3]" time="0.004"><error message="failed on setup with &quot;waveframe_guard.authority.exceptions.AuthorityVerificationError: action publication requires Ledger's exact catalog and complete public validators: No module named 'governance_ledger.action_policy_publication'&quot;">payload = {'schema_version': 'authority_bundle.v4', 'provenance_complete': True, 'source_policy': {'source_policy_id': 'reposito...09939a41b7e335165ecebffc714064c816c6465dc5afee8ee3702946d1d94bf', 'authority_ref': 'repository-mixed@3.0.0', ...}, ...}
+
+    def verify_publication_generation(payload):
+        """Bind catalog, pack, runtime and confirmed enforcement points exactly."""
+        try:
+            version = require_action_generation(payload["compiled_authority_contract"])
+            catalog_hash, pack_hash, runtime_hash, enforcement = _GENERATIONS[version]
+            commitment = payload["policy_translation_commitment"]
+            expected_catalog = dict(catalog_id="waveframe.coding-agent.repository-change",
+                                    catalog_version=version, catalog_hash=catalog_hash)
+            expected_pack = dict(domain_pack_id="repository-changes",
+                                 domain_pack_version=version, domain_pack_hash=pack_hash)
+            schema = payload["runtime_fact_schema"]
+            if (commitment["capability_catalog"] != expected_catalog
+                or payload["domain_pack"] != expected_pack
+                or payload["constraint_ir"]["domain_pack"] != expected_pack
+                or (schema["schema_id"], schema["schema_version_number"], schema["schema_hash"])
+                    != ("repository-changes-runtime", version, runtime_hash)):
+                raise ValueError("catalog/pack/runtime bindings disagree")
+            for clause in commitment["clauses"]:
+                for record in clause["controls"]:
+                    if record["candidate_control"]["enforcement_point"] != enforcement:
+                        raise ValueError("unsupported enforcement point")
+            # Confirm that the installed dependency supplies the exact catalog and
+            # public validators. Never fall back to a shared envelope version.
+            from governance_ledger.policy_translation import get_policy_translation_capability_catalog
+&gt;           from governance_ledger.action_policy_publication import validate_compiled_authority_contract_v3
+E           ModuleNotFoundError: No module named 'governance_ledger.action_policy_publication'
+
+waveframe_guard\authority\generations.py:62: ModuleNotFoundError
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = WindowsPath('C:/Users/swrig/AppData/Local/Temp/pytest-of-swrig/pytest-2256/test_request_cannot_select_tru3')
+
+    @pytest.fixture
+    def writer(tmp_path):
+        repo = tmp_path / "repo"
+        repo.mkdir()
+        (repo / "generated").mkdir()
+        (repo / "README.md").write_bytes(b"before\n")
+&gt;       value = MODULE.Writer(repo, tmp_path / "evidence", ROOT / "tests/fixtures/action_policy_release_v4/mixed")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_codex_connection.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+examples\codex_connection\writer.py:44: in __init__
+    self.guards[action] = Guard.local(
+guard\sdk\guard.py:133: in local
+    return cls(
+guard\sdk\guard.py:66: in __init__
+    authority_source = AuthoritySource.from_inputs(
+guard\sdk\authority_source.py:53: in from_inputs
+    loaded_authority = load_authority(
+waveframe_guard\authority\loader.py:44: in load_authority
+    authority = verifier.verify(loader.load(registry_entry))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+waveframe_guard\authority\verifier.py:34: in verify
+    verify_publication_generation(bundle.payload)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+payload = {'schema_version': 'authority_bundle.v4', 'provenance_complete': True, 'source_policy': {'source_policy_id': 'reposito...09939a41b7e335165ecebffc714064c816c6465dc5afee8ee3702946d1d94bf', 'authority_ref': 'repository-mixed@3.0.0', ...}, ...}
+
+    def verify_publication_generation(payload):
+        """Bind catalog, pack, runtime and confirmed enforcement points exactly."""
+        try:
+            version = require_action_generation(payload["compiled_authority_contract"])
+            catalog_hash, pack_hash, runtime_hash, enforcement = _GENERATIONS[version]
+            commitment = payload["policy_translation_commitment"]
+            expected_catalog = dict(catalog_id="waveframe.coding-agent.repository-change",
+                                    catalog_version=version, catalog_hash=catalog_hash)
+            expected_pack = dict(domain_pack_id="repository-changes",
+                                 domain_pack_version=version, domain_pack_hash=pack_hash)
+            schema = payload["runtime_fact_schema"]
+            if (commitment["capability_catalog"] != expected_catalog
+                or payload["domain_pack"] != expected_pack
+                or payload["constraint_ir"]["domain_pack"] != expected_pack
+                or (schema["schema_id"], schema["schema_version_number"], schema["schema_hash"])
+                    != ("repository-changes-runtime", version, runtime_hash)):
+                raise ValueError("catalog/pack/runtime bindings disagree")
+            for clause in commitment["clauses"]:
+                for record in clause["controls"]:
+                    if record["candidate_control"]["enforcement_point"] != enforcement:
+                        raise ValueError("unsupported enforcement point")
+            # Confirm that the installed dependency supplies the exact catalog and
+            # public validators. Never fall back to a shared envelope version.
+            from governance_ledger.policy_translation import get_policy_translation_capability_catalog
+            from governance_ledger.action_policy_publication import validate_compiled_authority_contract_v3
+    
+            catalog = get_policy_translation_capability_catalog(catalog_version=version)
+            if any(catalog.get(key) != value for key, value in expected_catalog.items()):
+                raise ValueError("installed catalog identity differs")
+            validate_compiled_authority_contract_v3(dict(payload["compiled_authority_contract"]))
+            return version
+        except AuthorityVerificationError:
+            raise
+        except (ImportError, AttributeError, KeyError, TypeError, ValueError) as exc:
+&gt;           raise AuthorityVerificationError(
+                "action publication requires Ledger's exact catalog and complete public validators: " + str(exc)
+            ) from exc
+E           waveframe_guard.authority.exceptions.AuthorityVerificationError: action publication requires Ledger's exact catalog and complete public validators: No module named 'governance_ledger.action_policy_publication'
+
+waveframe_guard\authority\generations.py:72: AuthorityVerificationError</error></testcase><testcase classname="tests.test_codex_connection" name="test_request_cannot_select_trust_or_unreleased_operations[change4]" time="0.004"><error message="failed on setup with &quot;waveframe_guard.authority.exceptions.AuthorityVerificationError: action publication requires Ledger's exact catalog and complete public validators: No module named 'governance_ledger.action_policy_publication'&quot;">payload = {'schema_version': 'authority_bundle.v4', 'provenance_complete': True, 'source_policy': {'source_policy_id': 'reposito...09939a41b7e335165ecebffc714064c816c6465dc5afee8ee3702946d1d94bf', 'authority_ref': 'repository-mixed@3.0.0', ...}, ...}
+
+    def verify_publication_generation(payload):
+        """Bind catalog, pack, runtime and confirmed enforcement points exactly."""
+        try:
+            version = require_action_generation(payload["compiled_authority_contract"])
+            catalog_hash, pack_hash, runtime_hash, enforcement = _GENERATIONS[version]
+            commitment = payload["policy_translation_commitment"]
+            expected_catalog = dict(catalog_id="waveframe.coding-agent.repository-change",
+                                    catalog_version=version, catalog_hash=catalog_hash)
+            expected_pack = dict(domain_pack_id="repository-changes",
+                                 domain_pack_version=version, domain_pack_hash=pack_hash)
+            schema = payload["runtime_fact_schema"]
+            if (commitment["capability_catalog"] != expected_catalog
+                or payload["domain_pack"] != expected_pack
+                or payload["constraint_ir"]["domain_pack"] != expected_pack
+                or (schema["schema_id"], schema["schema_version_number"], schema["schema_hash"])
+                    != ("repository-changes-runtime", version, runtime_hash)):
+                raise ValueError("catalog/pack/runtime bindings disagree")
+            for clause in commitment["clauses"]:
+                for record in clause["controls"]:
+                    if record["candidate_control"]["enforcement_point"] != enforcement:
+                        raise ValueError("unsupported enforcement point")
+            # Confirm that the installed dependency supplies the exact catalog and
+            # public validators. Never fall back to a shared envelope version.
+            from governance_ledger.policy_translation import get_policy_translation_capability_catalog
+&gt;           from governance_ledger.action_policy_publication import validate_compiled_authority_contract_v3
+E           ModuleNotFoundError: No module named 'governance_ledger.action_policy_publication'
+
+waveframe_guard\authority\generations.py:62: ModuleNotFoundError
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = WindowsPath('C:/Users/swrig/AppData/Local/Temp/pytest-of-swrig/pytest-2256/test_request_cannot_select_tru4')
+
+    @pytest.fixture
+    def writer(tmp_path):
+        repo = tmp_path / "repo"
+        repo.mkdir()
+        (repo / "generated").mkdir()
+        (repo / "README.md").write_bytes(b"before\n")
+&gt;       value = MODULE.Writer(repo, tmp_path / "evidence", ROOT / "tests/fixtures/action_policy_release_v4/mixed")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_codex_connection.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+examples\codex_connection\writer.py:44: in __init__
+    self.guards[action] = Guard.local(
+guard\sdk\guard.py:133: in local
+    return cls(
+guard\sdk\guard.py:66: in __init__
+    authority_source = AuthoritySource.from_inputs(
+guard\sdk\authority_source.py:53: in from_inputs
+    loaded_authority = load_authority(
+waveframe_guard\authority\loader.py:44: in load_authority
+    authority = verifier.verify(loader.load(registry_entry))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+waveframe_guard\authority\verifier.py:34: in verify
+    verify_publication_generation(bundle.payload)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+payload = {'schema_version': 'authority_bundle.v4', 'provenance_complete': True, 'source_policy': {'source_policy_id': 'reposito...09939a41b7e335165ecebffc714064c816c6465dc5afee8ee3702946d1d94bf', 'authority_ref': 'repository-mixed@3.0.0', ...}, ...}
+
+    def verify_publication_generation(payload):
+        """Bind catalog, pack, runtime and confirmed enforcement points exactly."""
+        try:
+            version = require_action_generation(payload["compiled_authority_contract"])
+            catalog_hash, pack_hash, runtime_hash, enforcement = _GENERATIONS[version]
+            commitment = payload["policy_translation_commitment"]
+            expected_catalog = dict(catalog_id="waveframe.coding-agent.repository-change",
+                                    catalog_version=version, catalog_hash=catalog_hash)
+            expected_pack = dict(domain_pack_id="repository-changes",
+                                 domain_pack_version=version, domain_pack_hash=pack_hash)
+            schema = payload["runtime_fact_schema"]
+            if (commitment["capability_catalog"] != expected_catalog
+                or payload["domain_pack"] != expected_pack
+                or payload["constraint_ir"]["domain_pack"] != expected_pack
+                or (schema["schema_id"], schema["schema_version_number"], schema["schema_hash"])
+                    != ("repository-changes-runtime", version, runtime_hash)):
+                raise ValueError("catalog/pack/runtime bindings disagree")
+            for clause in commitment["clauses"]:
+                for record in clause["controls"]:
+                    if record["candidate_control"]["enforcement_point"] != enforcement:
+                        raise ValueError("unsupported enforcement point")
+            # Confirm that the installed dependency supplies the exact catalog and
+            # public validators. Never fall back to a shared envelope version.
+            from governance_ledger.policy_translation import get_policy_translation_capability_catalog
+            from governance_ledger.action_policy_publication import validate_compiled_authority_contract_v3
+    
+            catalog = get_policy_translation_capability_catalog(catalog_version=version)
+            if any(catalog.get(key) != value for key, value in expected_catalog.items()):
+                raise ValueError("installed catalog identity differs")
+            validate_compiled_authority_contract_v3(dict(payload["compiled_authority_contract"]))
+            return version
+        except AuthorityVerificationError:
+            raise
+        except (ImportError, AttributeError, KeyError, TypeError, ValueError) as exc:
+&gt;           raise AuthorityVerificationError(
+                "action publication requires Ledger's exact catalog and complete public validators: " + str(exc)
+            ) from exc
+E           waveframe_guard.authority.exceptions.AuthorityVerificationError: action publication requires Ledger's exact catalog and complete public validators: No module named 'governance_ledger.action_policy_publication'
+
+waveframe_guard\authority\generations.py:72: AuthorityVerificationError</error></testcase><testcase classname="tests.test_codex_connection" name="test_request_cannot_select_trust_or_unreleased_operations[change5]" time="0.004"><error message="failed on setup with &quot;waveframe_guard.authority.exceptions.AuthorityVerificationError: action publication requires Ledger's exact catalog and complete public validators: No module named 'governance_ledger.action_policy_publication'&quot;">payload = {'schema_version': 'authority_bundle.v4', 'provenance_complete': True, 'source_policy': {'source_policy_id': 'reposito...09939a41b7e335165ecebffc714064c816c6465dc5afee8ee3702946d1d94bf', 'authority_ref': 'repository-mixed@3.0.0', ...}, ...}
+
+    def verify_publication_generation(payload):
+        """Bind catalog, pack, runtime and confirmed enforcement points exactly."""
+        try:
+            version = require_action_generation(payload["compiled_authority_contract"])
+            catalog_hash, pack_hash, runtime_hash, enforcement = _GENERATIONS[version]
+            commitment = payload["policy_translation_commitment"]
+            expected_catalog = dict(catalog_id="waveframe.coding-agent.repository-change",
+                                    catalog_version=version, catalog_hash=catalog_hash)
+            expected_pack = dict(domain_pack_id="repository-changes",
+                                 domain_pack_version=version, domain_pack_hash=pack_hash)
+            schema = payload["runtime_fact_schema"]
+            if (commitment["capability_catalog"] != expected_catalog
+                or payload["domain_pack"] != expected_pack
+                or payload["constraint_ir"]["domain_pack"] != expected_pack
+                or (schema["schema_id"], schema["schema_version_number"], schema["schema_hash"])
+                    != ("repository-changes-runtime", version, runtime_hash)):
+                raise ValueError("catalog/pack/runtime bindings disagree")
+            for clause in commitment["clauses"]:
+                for record in clause["controls"]:
+                    if record["candidate_control"]["enforcement_point"] != enforcement:
+                        raise ValueError("unsupported enforcement point")
+            # Confirm that the installed dependency supplies the exact catalog and
+            # public validators. Never fall back to a shared envelope version.
+            from governance_ledger.policy_translation import get_policy_translation_capability_catalog
+&gt;           from governance_ledger.action_policy_publication import validate_compiled_authority_contract_v3
+E           ModuleNotFoundError: No module named 'governance_ledger.action_policy_publication'
+
+waveframe_guard\authority\generations.py:62: ModuleNotFoundError
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = WindowsPath('C:/Users/swrig/AppData/Local/Temp/pytest-of-swrig/pytest-2256/test_request_cannot_select_tru5')
+
+    @pytest.fixture
+    def writer(tmp_path):
+        repo = tmp_path / "repo"
+        repo.mkdir()
+        (repo / "generated").mkdir()
+        (repo / "README.md").write_bytes(b"before\n")
+&gt;       value = MODULE.Writer(repo, tmp_path / "evidence", ROOT / "tests/fixtures/action_policy_release_v4/mixed")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_codex_connection.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+examples\codex_connection\writer.py:44: in __init__
+    self.guards[action] = Guard.local(
+guard\sdk\guard.py:133: in local
+    return cls(
+guard\sdk\guard.py:66: in __init__
+    authority_source = AuthoritySource.from_inputs(
+guard\sdk\authority_source.py:53: in from_inputs
+    loaded_authority = load_authority(
+waveframe_guard\authority\loader.py:44: in load_authority
+    authority = verifier.verify(loader.load(registry_entry))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+waveframe_guard\authority\verifier.py:34: in verify
+    verify_publication_generation(bundle.payload)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+payload = {'schema_version': 'authority_bundle.v4', 'provenance_complete': True, 'source_policy': {'source_policy_id': 'reposito...09939a41b7e335165ecebffc714064c816c6465dc5afee8ee3702946d1d94bf', 'authority_ref': 'repository-mixed@3.0.0', ...}, ...}
+
+    def verify_publication_generation(payload):
+        """Bind catalog, pack, runtime and confirmed enforcement points exactly."""
+        try:
+            version = require_action_generation(payload["compiled_authority_contract"])
+            catalog_hash, pack_hash, runtime_hash, enforcement = _GENERATIONS[version]
+            commitment = payload["policy_translation_commitment"]
+            expected_catalog = dict(catalog_id="waveframe.coding-agent.repository-change",
+                                    catalog_version=version, catalog_hash=catalog_hash)
+            expected_pack = dict(domain_pack_id="repository-changes",
+                                 domain_pack_version=version, domain_pack_hash=pack_hash)
+            schema = payload["runtime_fact_schema"]
+            if (commitment["capability_catalog"] != expected_catalog
+                or payload["domain_pack"] != expected_pack
+                or payload["constraint_ir"]["domain_pack"] != expected_pack
+                or (schema["schema_id"], schema["schema_version_number"], schema["schema_hash"])
+                    != ("repository-changes-runtime", version, runtime_hash)):
+                raise ValueError("catalog/pack/runtime bindings disagree")
+            for clause in commitment["clauses"]:
+                for record in clause["controls"]:
+                    if record["candidate_control"]["enforcement_point"] != enforcement:
+                        raise ValueError("unsupported enforcement point")
+            # Confirm that the installed dependency supplies the exact catalog and
+            # public validators. Never fall back to a shared envelope version.
+            from governance_ledger.policy_translation import get_policy_translation_capability_catalog
+            from governance_ledger.action_policy_publication import validate_compiled_authority_contract_v3
+    
+            catalog = get_policy_translation_capability_catalog(catalog_version=version)
+            if any(catalog.get(key) != value for key, value in expected_catalog.items()):
+                raise ValueError("installed catalog identity differs")
+            validate_compiled_authority_contract_v3(dict(payload["compiled_authority_contract"]))
+            return version
+        except AuthorityVerificationError:
+            raise
+        except (ImportError, AttributeError, KeyError, TypeError, ValueError) as exc:
+&gt;           raise AuthorityVerificationError(
+                "action publication requires Ledger's exact catalog and complete public validators: " + str(exc)
+            ) from exc
+E           waveframe_guard.authority.exceptions.AuthorityVerificationError: action publication requires Ledger's exact catalog and complete public validators: No module named 'governance_ledger.action_policy_publication'
+
+waveframe_guard\authority\generations.py:72: AuthorityVerificationError</error></testcase><testcase classname="tests.test_codex_connection" name="test_unknown_failure_never_retries_or_claims_rollback" time="0.003"><error message="failed on setup with &quot;waveframe_guard.authority.exceptions.AuthorityVerificationError: action publication requires Ledger's exact catalog and complete public validators: No module named 'governance_ledger.action_policy_publication'&quot;">payload = {'schema_version': 'authority_bundle.v4', 'provenance_complete': True, 'source_policy': {'source_policy_id': 'reposito...09939a41b7e335165ecebffc714064c816c6465dc5afee8ee3702946d1d94bf', 'authority_ref': 'repository-mixed@3.0.0', ...}, ...}
+
+    def verify_publication_generation(payload):
+        """Bind catalog, pack, runtime and confirmed enforcement points exactly."""
+        try:
+            version = require_action_generation(payload["compiled_authority_contract"])
+            catalog_hash, pack_hash, runtime_hash, enforcement = _GENERATIONS[version]
+            commitment = payload["policy_translation_commitment"]
+            expected_catalog = dict(catalog_id="waveframe.coding-agent.repository-change",
+                                    catalog_version=version, catalog_hash=catalog_hash)
+            expected_pack = dict(domain_pack_id="repository-changes",
+                                 domain_pack_version=version, domain_pack_hash=pack_hash)
+            schema = payload["runtime_fact_schema"]
+            if (commitment["capability_catalog"] != expected_catalog
+                or payload["domain_pack"] != expected_pack
+                or payload["constraint_ir"]["domain_pack"] != expected_pack
+                or (schema["schema_id"], schema["schema_version_number"], schema["schema_hash"])
+                    != ("repository-changes-runtime", version, runtime_hash)):
+                raise ValueError("catalog/pack/runtime bindings disagree")
+            for clause in commitment["clauses"]:
+                for record in clause["controls"]:
+                    if record["candidate_control"]["enforcement_point"] != enforcement:
+                        raise ValueError("unsupported enforcement point")
+            # Confirm that the installed dependency supplies the exact catalog and
+            # public validators. Never fall back to a shared envelope version.
+            from governance_ledger.policy_translation import get_policy_translation_capability_catalog
+&gt;           from governance_ledger.action_policy_publication import validate_compiled_authority_contract_v3
+E           ModuleNotFoundError: No module named 'governance_ledger.action_policy_publication'
+
+waveframe_guard\authority\generations.py:62: ModuleNotFoundError
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = WindowsPath('C:/Users/swrig/AppData/Local/Temp/pytest-of-swrig/pytest-2256/test_unknown_failure_never_ret0')
+
+    @pytest.fixture
+    def writer(tmp_path):
+        repo = tmp_path / "repo"
+        repo.mkdir()
+        (repo / "generated").mkdir()
+        (repo / "README.md").write_bytes(b"before\n")
+&gt;       value = MODULE.Writer(repo, tmp_path / "evidence", ROOT / "tests/fixtures/action_policy_release_v4/mixed")
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_codex_connection.py:22: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+examples\codex_connection\writer.py:44: in __init__
+    self.guards[action] = Guard.local(
+guard\sdk\guard.py:133: in local
+    return cls(
+guard\sdk\guard.py:66: in __init__
+    authority_source = AuthoritySource.from_inputs(
+guard\sdk\authority_source.py:53: in from_inputs
+    loaded_authority = load_authority(
+waveframe_guard\authority\loader.py:44: in load_authority
+    authority = verifier.verify(loader.load(registry_entry))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+waveframe_guard\authority\verifier.py:34: in verify
+    verify_publication_generation(bundle.payload)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+payload = {'schema_version': 'authority_bundle.v4', 'provenance_complete': True, 'source_policy': {'source_policy_id': 'reposito...09939a41b7e335165ecebffc714064c816c6465dc5afee8ee3702946d1d94bf', 'authority_ref': 'repository-mixed@3.0.0', ...}, ...}
+
+    def verify_publication_generation(payload):
+        """Bind catalog, pack, runtime and confirmed enforcement points exactly."""
+        try:
+            version = require_action_generation(payload["compiled_authority_contract"])
+            catalog_hash, pack_hash, runtime_hash, enforcement = _GENERATIONS[version]
+            commitment = payload["policy_translation_commitment"]
+            expected_catalog = dict(catalog_id="waveframe.coding-agent.repository-change",
+                                    catalog_version=version, catalog_hash=catalog_hash)
+            expected_pack = dict(domain_pack_id="repository-changes",
+                                 domain_pack_version=version, domain_pack_hash=pack_hash)
+            schema = payload["runtime_fact_schema"]
+            if (commitment["capability_catalog"] != expected_catalog
+                or payload["domain_pack"] != expected_pack
+                or payload["constraint_ir"]["domain_pack"] != expected_pack
+                or (schema["schema_id"], schema["schema_version_number"], schema["schema_hash"])
+                    != ("repository-changes-runtime", version, runtime_hash)):
+                raise ValueError("catalog/pack/runtime bindings disagree")
+            for clause in commitment["clauses"]:
+                for record in clause["controls"]:
+                    if record["candidate_control"]["enforcement_point"] != enforcement:
+                        raise ValueError("unsupported enforcement point")
+            # Confirm that the installed dependency supplies the exact catalog and
+            # public validators. Never fall back to a shared envelope version.
+            from governance_ledger.policy_translation import get_policy_translation_capability_catalog
+            from governance_ledger.action_policy_publication import validate_compiled_authority_contract_v3
+    
+            catalog = get_policy_translation_capability_catalog(catalog_version=version)
+            if any(catalog.get(key) != value for key, value in expected_catalog.items()):
+                raise ValueError("installed catalog identity differs")
+            validate_compiled_authority_contract_v3(dict(payload["compiled_authority_contract"]))
+            return version
+        except AuthorityVerificationError:
+            raise
+        except (ImportError, AttributeError, KeyError, TypeError, ValueError) as exc:
+&gt;           raise AuthorityVerificationError(
+                "action publication requires Ledger's exact catalog and complete public validators: " + str(exc)
+            ) from exc
+E           waveframe_guard.authority.exceptions.AuthorityVerificationError: action publication requires Ledger's exact catalog and complete public validators: No module named 'governance_ledger.action_policy_publication'
+
+waveframe_guard\authority\generations.py:72: AuthorityVerificationError</error></testcase><testcase classname="tests.test_codex_connection" name="test_invalid_publication_cannot_report_connected" time="0.020" /><testcase classname="tests.test_codex_cloud_revalidation" name="test_actual_contained_history_and_enrollment_evidence" time="0.354" /><testcase classname="tests.test_codex_cloud_revalidation" name="test_evidence_verifier_rejects_contradictory_claims[lost-replay]" time="0.013" /><testcase classname="tests.test_codex_cloud_revalidation" name="test_evidence_verifier_rejects_contradictory_claims[startup-write]" time="0.001" /><testcase classname="tests.test_codex_cloud_revalidation" name="test_evidence_verifier_rejects_contradictory_claims[changed-history]" time="0.033" /><testcase classname="tests.test_codex_cloud_revalidation" name="test_evidence_verifier_rejects_contradictory_claims[failed-upload]" time="0.001" /><testcase classname="tests.test_codex_cloud_revalidation" name="test_evidence_verifier_rejects_contradictory_claims[missing-journal]" time="0.001" /><testcase classname="tests.test_codex_compiler_trial" name="test_tracked_import_ignores_local_files_and_autocrlf" time="0.319" /><testcase classname="tests.test_codex_compiler_trial" name="test_export_rejects_out_of_scope_changes[src/compiler/compile_policy.py]" time="0.000" /><testcase classname="tests.test_codex_compiler_trial" name="test_export_rejects_out_of_scope_changes[LICENSE]" time="0.000" /><testcase classname="tests.test_codex_compiler_trial" name="test_export_rejects_out_of_scope_changes[pyproject.toml]" time="0.000" /><testcase classname="tests.test_codex_compiler_trial" name="test_fixed_provider_clauses_bind_exact_source_literals" time="0.000" /><testcase classname="tests.test_codex_compiler_trial" name="test_actual_compiler_task_evidence" time="0.220" /><testcase classname="tests.test_compiler_preparation" name="test_missing_tool_refuses_before_activation[git]" time="0.002" /><testcase classname="tests.test_compiler_preparation" name="test_missing_tool_refuses_before_activation[docker]" time="0.001" /><testcase classname="tests.test_compiler_preparation" name="test_missing_or_bad_login_does_not_disclose_values[None]" time="0.002" /><testcase classname="tests.test_compiler_preparation" name="test_missing_or_bad_login_does_not_disclose_values[{bad SECRET-TEST-LOGIN]" time="0.004" /><testcase classname="tests.test_compiler_preparation" name="test_missing_or_bad_login_does_not_disclose_values[{}]" time="0.002" /><testcase classname="tests.test_compiler_preparation" name="test_missing_or_bad_login_does_not_disclose_values[{&quot;tokens&quot;:null}]" time="0.003" /><testcase classname="tests.test_compiler_preparation" name="test_missing_source_is_actionable" time="0.003" /><testcase classname="tests.test_compiler_preparation" name="test_wrong_engine_refuses" time="0.002" /><testcase classname="tests.test_compiler_preparation" name="test_repeated_prepare_never_executes" time="0.006" /><testcase classname="tests.test_compiler_preparation" name="test_image_identity_rejected_before_container" time="0.002" /><testcase classname="tests.test_compiler_preparation" name="test_cleanup_refuses_unowned_resources" time="0.002" /></testsuite></testsuites>

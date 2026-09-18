@@ -1,0 +1,34 @@
+{
+  "/cloud-transport/cloud.sock": {
+    "errno": 2
+  },
+  "/secrets/cloud.json": {
+    "errno": 2
+  },
+  "/opt/connected/cloud_writer.py": {
+    "errno": 2
+  },
+  "/evidence/requests.jsonl": {
+    "errno": 2
+  },
+  "127.0.0.1:18081": {
+    "error_class": "ConnectionRefusedError",
+    "errno": 111
+  },
+  "127.0.0.1:8000": {
+    "error_class": "ConnectionRefusedError",
+    "errno": 111
+  },
+  "host.docker.internal:8000": {
+    "error_class": "gaierror",
+    "errno": -3
+  },
+  "1.1.1.1:443": {
+    "error_class": "OSError",
+    "errno": 101
+  },
+  "proxy:host.docker.internal:8000": "HTTP/1.1 403 Forbidden",
+  "proxy:127.0.0.1:8000": "HTTP/1.1 403 Forbidden",
+  "proxy:example.com:443": "HTTP/1.1 403 Forbidden",
+  "proxy:api.openai.com:80": "HTTP/1.1 403 Forbidden"
+}

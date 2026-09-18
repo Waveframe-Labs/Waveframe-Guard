@@ -1,0 +1,27 @@
+{
+  "actions": {
+    "create": {
+      "allow": [
+        {
+          "match": "exact",
+          "value": "examples/compile_repository_policy.py"
+        }
+      ],
+      "deny": [],
+      "required_role": "repository-maintainer"
+    },
+    "modify": {
+      "allow": [
+        {
+          "match": "exact",
+          "value": "README.md"
+        }
+      ],
+      "deny": [],
+      "required_role": "security-reviewer"
+    }
+  },
+  "publication_id": "cloud-translation-69f50bc84d4b5e2e5ef9b05d1976167c",
+  "scope_verified_before_agent_start": true,
+  "provider_limit": "exact four-clause fixed fixture; not general natural-language onboarding"
+}

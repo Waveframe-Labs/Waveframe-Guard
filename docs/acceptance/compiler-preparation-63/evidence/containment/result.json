@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "source_unchanged": true,
+  "images": {
+    "agent": "sha256:5399caca0e8f08e4f3bf04af5300337f561ee12298f02bf81357c4ce82efa9dc",
+    "writer": "sha256:9d6dc5ec00161f275f0bf0524748f483292b1741f76aa869a73f3201b4cc4096",
+    "cloud": "sha256:3ded137f9fb24d60134b71a1e2edc95502e4f0f4fffba0d6a744e0b88bb962b6"
+  },
+  "checks": [
+    "OS writes/permissions/native patch/child/remount/namespaces",
+    "private PID/memory/env/credentials",
+    "no direct network or Cloud transport; proxy allowlist",
+    "malformed MCP and timeout with zero source writes"
+  ],
+  "reuse": "Existing probe.py, transport_probe.py, separation.py and raw_transport.py; new images measured here. Prior lifecycle/lost-response evidence remains historical, not rerun."
+}
