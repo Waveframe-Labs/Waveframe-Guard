@@ -1,0 +1,60 @@
+{
+  "Id": "sha256:3ded137f9fb24d60134b71a1e2edc95502e4f0f4fffba0d6a744e0b88bb962b6",
+  "RepoTags": [
+    "waveframe-trial-63-cold63b-cloud:local"
+  ],
+  "RepoDigests": [
+    "waveframe-trial-63-cold63b-cloud@sha256:3ded137f9fb24d60134b71a1e2edc95502e4f0f4fffba0d6a744e0b88bb962b6"
+  ],
+  "Comment": "buildkit.dockerfile.v0",
+  "Created": "2026-09-17T23:55:48.494561584Z",
+  "Config": {
+    "User": "10001:10001",
+    "Env": [
+      "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+      "PYTHON_VERSION=3.14.7",
+      "PYTHON_SHA256=3b48dac8fb59f62eaa67ac83c1eb12bda1b7a08406dd286e252c11a66be27f81",
+      "PYTHONDONTWRITEBYTECODE=1",
+      "PYTHONUNBUFFERED=1"
+    ],
+    "Entrypoint": [
+      "python",
+      "-I",
+      "/opt/disposable_cloud.py"
+    ],
+    "WorkingDir": "/cloud"
+  },
+  "Architecture": "amd64",
+  "Os": "linux",
+  "Size": 70088545,
+  "RootFS": {
+    "Type": "layers",
+    "Layers": [
+      "sha256:411a86676185cb54d695a805b238194a64e9b77e0c723f3802fbb87d333ea0b3",
+      "sha256:7e6a39b645ae2a5f2d1b60d5bdc539ba90db0e7c9f60e5c57827d8927d1bc1a9",
+      "sha256:72a7471afe641797484f21d643652177a22c3d632065d7c9867f21cff59b3fd9",
+      "sha256:d1fea40c1545e9eeb29a353d1131a521ae4bb0e794804ebe5f95984c329d7696",
+      "sha256:519182563788674566d6d90138cdd41d00027ecebced05a3356ca29d445b9b2b",
+      "sha256:7736df8b90f352946fa804ac05ac529b4d69de3bbc216561f969586cf0a60f0f",
+      "sha256:125b4b4681c14dfaea172748110a252a72580946742b87cb12bfeb8665f0bd60",
+      "sha256:ca70e640f9ce3980a00879f059552161e017f30fe4909cfbd5c92ac29a594d40",
+      "sha256:2e27b653806cc6489141c52d5d1fb27cd2c83f83d0a0f3adc051ebf17d707906"
+    ]
+  },
+  "Metadata": {
+    "LastTagTime": "2026-09-17T23:55:50.30593692Z"
+  },
+  "Descriptor": {
+    "mediaType": "application/vnd.oci.image.index.v1+json",
+    "digest": "sha256:3ded137f9fb24d60134b71a1e2edc95502e4f0f4fffba0d6a744e0b88bb962b6",
+    "size": 856
+  },
+  "Identity": {
+    "Build": [
+      {
+        "Ref": "e3us9ffeacnqsx042s8qtnjob",
+        "CreatedAt": "2026-09-17T23:55:51.441129354Z"
+      }
+    ]
+  }
+}

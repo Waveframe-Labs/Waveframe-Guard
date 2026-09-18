@@ -1,0 +1,161 @@
+Compiler documentation/example trial
+Base-commit: f817a1bca65806c9ee33ccc74c2238952ebf8f01
+
+diff --git a/README.md b/README.md
+index 264e9bcccbd55fb9b1a281268dd02a24bd9fc49d..3a6fefefe281c231f939797063ab73d6a76a1d8c 100644
+--- a/README.md
++++ b/README.md
+@@ -18,23 +18,27 @@ artifacts with a stable structure and deterministic hash.
+ 
+ ## Installation
+ 
+-**Compiler 0.5.0 is an unreleased candidate.** The ordinary published package
+-does not yet provide this candidate's action-policy API. For candidate review,
+-install the validated wheel retained by CI:
++**Compiler 0.5.0 is released on PyPI.** Install the public package:
+ 
+ ```bash
+-pip install /path/to/cricore_contract_compiler-0.5.0-py3-none-any.whl
++python -m pip install cricore-contract-compiler==0.5.0
+ ```
+ 
+-Requires Python 3.9 or later. See the [release handoff](docs/release-0.5.0.md)
+-for validation and the remaining coordinated publication gates.
++Requires Python 3.9 or later. The distribution is named
++`cricore-contract-compiler`; its Python import package is `compiler`.
++The [release handoff](docs/release-0.5.0.md) is preserved as historical
++candidate-stage validation evidence, not current installation or release status.
+ 
+-## Action policy API (0.5.0 unreleased candidate)
++## Action policy API (0.5.0)
+ 
+-Use the distinct public API for independent file creation and modification
+-requirements:
++After installing the public package, run this Python example using
++`python -I` (paste the code below into that interpreter). Isolated mode selects
++the installed package without adding the checkout or `PYTHONPATH` to imports.
++Use the public API for independent file creation and modification requirements:
+ 
+ ```python
++import json
++
+ from compiler import compile_action_policy
+ 
+ policy = {
+@@ -55,8 +59,30 @@ policy = {
+     },
+ }
+ compiled = compile_action_policy(policy)
++print(json.dumps(compiled, sort_keys=True, separators=(",", ":")))
++```
++
++The runnable [repository policy example](examples/compile_repository_policy.py)
++emits the same deterministic JSON, including the contract hash, to stdout.
++From the repository root, run it against the installed public package:
++
++```bash
++python -I examples/compile_repository_policy.py
+ ```
+ 
++To run against workspace source instead (with dependencies already installed):
++
++```bash
++PYTHONPATH=src python examples/compile_repository_policy.py
++```
++
++The policy describes creation under `generated/` except `generated/private/`,
++and modification of `README.md` requiring the `repository-maintainer` role.
++Compilation validates and serializes these requirements; it does not create or
++modify files, check an actor's role, or authorize an operation. Guard must enforce
++the compiled policy at runtime, including deny precedence and role requirements.
++A compiled contract or its hash alone is not evidence of runtime authorization.
++
+ The module import `from compiler.compile_action_policy import compile_action_policy`
+ is also supported. Invalid input raises
+ `compiler.compile_policy.PolicyCompilationError`.
+@@ -119,11 +145,11 @@ newly written wrappers identify the 0.5.0 producer. The CLI remains a legacy com
+ with `json.dumps` when needed. The legacy artifact writer adds `_compiler`
+ metadata and does not produce the exact action output envelope.
+ 
+-Published `0.4.0` cannot acquire this capability retroactively. Future consumers
+-must require the named new API and validate its exact output; a missing API must
+-fail without legacy fallback. This candidate prepares package version 0.5.0 and
+-updates newly emitted legacy producer metadata accordingly. Distribution version
+-alone is not a capability check.
++Published `0.4.0` does not provide the action-policy API. Consumers must require
++`compile_action_policy` and validate its exact output; a missing API must fail
++without legacy fallback. Version 0.5.0 provides this API and identifies newly
++emitted legacy producer metadata as 0.5.0. Distribution version alone is not a
++capability check.
+ 
+ ## Legacy CLI Usage
+ 
+@@ -341,8 +367,8 @@ Written artifacts also include `_compiler` metadata:
+ ## Validation
+ 
+ The `_compiler.version` field identifies the writer of a newly emitted legacy
+-artifact. It is wrapper metadata outside the hashed compiled contract. In this
+-candidate only that field changes from historical 0.4.0 artifacts; the contract
++artifact. It is wrapper metadata outside the hashed compiled contract. In 0.5.0
++only that field changes from historical 0.4.0 artifacts; the contract
+ and hash stay identical. Retained artifacts and historical fixtures remain
+ untouched. The action API returns its exact five fields without this wrapper.
+ 
+@@ -416,10 +442,16 @@ future versions of the execution pipeline.
+ 
+ ## Project Status
+ 
+-Version **0.5.0 is an unreleased candidate** for independent create/modify
+-compilation. The CLI remains legacy-only. Ledger must require
+-`from compiler import compile_action_policy` without a legacy fallback;
+-downstream dependency pin changes belong to subsequent tasks.
++Version **0.5.0 is released** with the public `compile_action_policy` API for
++independent create/modify compilation. The CLI remains legacy-only. Consumers
++such as Ledger must require `from compiler import compile_action_policy`
++without a legacy fallback. Runtime enforcement and downstream integration
++remain the responsibility of their respective systems.
++
++The [historical release handoff](docs/release-0.5.0.md), retained validation
++artifacts, and legacy fixtures preserve the evidence from release preparation.
++The validation workflow below is for maintainers reproducing release checks;
++it is not required to install or use the public package.
+ 
+ Install `requirements/ci.txt` in a virtual environment with
+ `python -m pip install --require-hashes -r requirements/ci.txt`, then run
+diff --git a/examples/compile_repository_policy.py b/examples/compile_repository_policy.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..d33412f44adcd533fddc9b9cae5ce2d166afa534
+--- /dev/null
++++ b/examples/compile_repository_policy.py
+@@ -0,0 +1,31 @@
++"""Compile repository create/modify requirements; perform no file operations."""
++
++import json
++
++from compiler import compile_action_policy
++
++
++def main():
++    policy = {
++        "schema_version": "action_policy.v1",
++        "contract_id": "repository-file-policy",
++        "contract_version": "2.0.0",
++        "action_requirements": {
++            "create": {
++                "required_role": None,
++                "allow": [{"match": "prefix", "value": "generated/"}],
++                "deny": [{"match": "prefix", "value": "generated/private/"}],
++            },
++            "modify": {
++                "required_role": "repository-maintainer",
++                "allow": [{"match": "exact", "value": "README.md"}],
++                "deny": [],
++            },
++        },
++    }
++    compiled = compile_action_policy(policy)
++    print(json.dumps(compiled, sort_keys=True, separators=(",", ":")))
++
++
++if __name__ == "__main__":
++    main()

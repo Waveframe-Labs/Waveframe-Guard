@@ -1,0 +1,33 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile.writer
+#1 transferring dockerfile: 387B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/waveframe-trial-63-cold63b-agent:local
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 419B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 10.17kB done
+#4 DONE 0.0s
+
+#5 [1/2] FROM docker.io/library/waveframe-trial-63-cold63b-agent:local@sha256:5399caca0e8f08e4f3bf04af5300337f561ee12298f02bf81357c4ce82efa9dc
+#5 resolve docker.io/library/waveframe-trial-63-cold63b-agent:local@sha256:5399caca0e8f08e4f3bf04af5300337f561ee12298f02bf81357c4ce82efa9dc 0.0s done
+#5 DONE 0.1s
+
+#6 [2/2] COPY examples/codex_contained/cloud_writer.py examples/codex_contained/cloud_server.py examples/codex_contained/cloud_entry.py examples/codex_contained/launch.py /opt/connected/
+#6 DONE 0.2s
+
+#7 exporting to image
+#7 exporting layers 0.1s done
+#7 exporting manifest sha256:283ff93fed2f67bee7572129022522429f2d6a3d46d2075963bab1b189ff63f2 0.0s done
+#7 exporting config sha256:8fecb612d9aed17ea2e411bac8f59c2f85becbc4e459d1ef64f96336b4eb3b73 0.0s done
+#7 exporting attestation manifest sha256:2002299fe7eac2f63566e35d12d21cc9c42289791ca383bdac95632d81c827a7 0.0s done
+#7 exporting manifest list sha256:9d6dc5ec00161f275f0bf0524748f483292b1741f76aa869a73f3201b4cc4096 0.0s done
+#7 naming to docker.io/library/waveframe-trial-63-cold63b-writer:local done
+#7 unpacking to docker.io/library/waveframe-trial-63-cold63b-writer:local 0.0s done
+#7 DONE 0.2s

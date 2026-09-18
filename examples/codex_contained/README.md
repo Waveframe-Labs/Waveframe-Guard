@@ -1,5 +1,7 @@
 # Contained real Codex proof — issue #54, phase two
 
+For the reproducible Compiler operator preview, use [prepare and launch](COMPILER-TRIAL.md). It builds fresh local components without prior Waveframe images or an operator environment.
+
 For the subsequent fresh Cloud integration, use [issue #57 setup and boundary](CLOUD.md).
 The archived #54 proof below remains a separate fixture-only result.
 

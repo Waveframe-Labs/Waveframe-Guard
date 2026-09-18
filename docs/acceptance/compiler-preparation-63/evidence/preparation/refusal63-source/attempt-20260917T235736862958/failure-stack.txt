@@ -1,0 +1,10 @@
+  File "C:\GitHub\Waveframe-Guard-63\examples\codex_contained\prepare_compiler.py", line 146, in main
+    run.save(attempt / 'prerequisites.json', step('preflight', lambda: preflight(args.compiler_repository, args.cloud_checkout, args.auth, attempt)))
+                                             ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\GitHub\Waveframe-Guard-63\examples\codex_contained\prepare_compiler.py", line 141, in step
+    result = fn()
+  File "C:\GitHub\Waveframe-Guard-63\examples\codex_contained\prepare_compiler.py", line 146, in <lambda>
+    run.save(attempt / 'prerequisites.json', step('preflight', lambda: preflight(args.compiler_repository, args.cloud_checkout, args.auth, attempt)))
+                                                                       ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\GitHub\Waveframe-Guard-63\examples\codex_contained\prepare_compiler.py", line 55, in preflight
+    raise RuntimeError(f'Obtain the authorized {label} checkout containing {commit}; select it with -{option}.') from None
