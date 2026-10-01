@@ -207,6 +207,15 @@ Production activation remains a separate blocked handoff. A published Cloud
 release does not establish that the hosted endpoint is ready for this quickstart.
 The Cloud quickstart requires an available, compatible Cloud deployment.
 
+Historical context for Guard 0.18.0:
+
+Guard 0.18.0 can verify matching Ledger v2 and v3 publication envelopes.
+Waveframe Cloud source support for atomic v2/v3 publication serving merged
+in Cloud PR #135. Hosted translation backend and Console workflow source
+merged in PRs #136 and #140. At the Guard 0.18.0 release date, those Cloud
+changes had not yet been released or deployed to the hosted service.
+Guard does not claim hosted translation availability at that date.
+
 The `GET /v1/authorities/{authority_ref}/publication` response uses
 `cloud_authority_publication.v1` to bind the bundle, receipt, logical
 references, registry, and envelope as one tenant-scoped publication. Existing
