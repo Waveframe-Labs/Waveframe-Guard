@@ -4,7 +4,7 @@
 
 # Waveframe Guard
 
-Repository integrations in Guard 0.18.0: see the
+Repository integrations introduced in Guard 0.18.0: see the
 [repository adapter boundary and migration guide](docs/architecture/REPOSITORY_WORKSPACE.md)
 for issue #33, supported platforms, and the `repository_tool` API.
 
@@ -16,10 +16,11 @@ Guard enforces actions that pass through its wrapped tool boundary. Actions
 that reach the same capability through another function, tool, process,
 credential, or API path are outside that enforcement guarantee.
 
-Candidate: 0.19.0 (unreleased; proposed tag v0.19.0). Published release: 0.18.0.
+Published release: [0.19.0](https://pypi.org/project/waveframe-guard/0.19.0/).
 
-The 0.19.0 install and versioned download commands below apply after coordinated
-publication. See [candidate acceptance and remaining gates](docs/RELEASE_019_ACCEPTANCE.md).
+The install and versioned download commands below use the published release.
+See the [release acceptance record](docs/RELEASE_019_ACCEPTANCE.md) for historical
+candidate evidence; its prepublication gates describe that earlier checkpoint.
 
 ```text
 Guard does not generate actions.
@@ -199,12 +200,12 @@ The three choices are intentionally independent:
 
 ### Cloud availability
 
-Guard 0.18.0 can verify matching Ledger v2 and v3 publication envelopes.
-Waveframe Cloud source support for atomic v2/v3 publication serving merged
-in Cloud PR #135. Hosted translation backend and Console workflow source
-merged in PRs #136 and #140. At the Guard 0.18.0 release date, those Cloud
-changes had not yet been released or deployed to the hosted service.
-Guard does not claim hosted translation availability at that date.
+[Waveframe Cloud 0.6.0](https://github.com/Waveframe-Labs/Waveframe-Cloud/releases/tag/v0.6.0)
+is published with native Ledger v4 create/modify publication, guided runtime
+connection, and preserved execution evidence using public Guard 0.19.0.
+Production activation remains a separate blocked handoff. A published Cloud
+release does not establish that the hosted endpoint is ready for this quickstart.
+The Cloud quickstart requires an available, compatible Cloud deployment.
 
 The `GET /v1/authorities/{authority_ref}/publication` response uses
 `cloud_authority_publication.v1` to bind the bundle, receipt, logical
@@ -369,9 +370,10 @@ merged Cloud source and hosted availability at this release date, see
 [Cloud availability](#cloud-availability).
 
 Guard 0.19.0 requires `governance-ledger>=0.9.0,<0.10.0`, which requires
-Compiler >=0.5.0,<0.6.0. Install Guard directly after coordinated publication.
-Do not advertise Ledger's new optional Guard extra until Guard is uploaded and
-ordinary index installation has been verified.
+Compiler >=0.5.0,<0.6.0. Both Guard 0.19.0 and Ledger 0.9.0 are published on
+PyPI. Install Guard directly as shown above, or use
+`pip install "governance-ledger[guard]==0.9.0"` for Ledger with its compatible
+Guard extra.
 
 ## Local development path
 
