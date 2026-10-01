@@ -1,7 +1,7 @@
-# Waveframe Guard v0.19.0 candidate release notes
+# Waveframe Guard v0.19.0 release notes
 
-**Unreleased candidate. Proposed tag: v0.19.0.** Publication and activation require
-coordinated authorization; the commands below apply after package availability.
+**Published on PyPI: 2026-09-16. Tag: v0.19.0.** The installation commands use
+the published package. Cloud production activation remains separately gated.
 
 Install `waveframe-guard==0.19.0`, supply an approved authority, protect create and
 modify callbacks with `repository_tool(action="create" or "modify", target="path")`,
