@@ -103,6 +103,24 @@ This is scoped reuse of that proof, not a claim that the new wheel was mount-tes
 Historical #49 evidence remains separately identified. Platform and namespace
 skips retain their actual meanings and are never counted as mount passes.
 
+### Issue #67: subsequent publication-status acceptance
+
+The original #52 comparison above required the entire tests directory to match
+the historical base. Issue #67 records the subsequent publication-assertion
+update separately: only `tests/test_public_guard_export.py` at reviewed commit
+`1909ea18b981f6fbf9254b7f6f3289547f0a9009` differs. Current acceptance retains
+that full historical diff, requires all remaining protected inputs to match
+the same base, and pins the changed test to that exact reviewed revision.
+Fresh source suites execute the updated documentation test. The immutable #51
+mount evidence and its exact tested-wheel identity remain unchanged; current
+wheels are not newly mount-tested.
+
+Both combined-extra and Guard-entry upgrade now select the authenticated
+Compiler, Ledger and current Guard archives explicitly. `--find-links` alone
+does not establish origin when same-version public wheels exist. Dependency
+resolution, install reports, archive-origin/hash checks and runtime comparisons
+remain mandatory; public release artifacts are not relabeled as retained inputs.
+
 ## Cloud and release handoff
 
 The installed client regression must execute all 23 cases per cell against

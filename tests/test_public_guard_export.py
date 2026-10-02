@@ -33,15 +33,15 @@ def test_public_version_matches_release():
     assert __version__ == "0.19.0"
 
 
-def test_release_metadata_matches_v0190_candidate():
+def test_release_metadata_matches_v0190_publication():
     pyproject = (REPO_ROOT / "pyproject.toml").read_text(encoding="utf-8")
     citation = (REPO_ROOT / "CITATION.cff").read_text(encoding="utf-8")
     changelog = (REPO_ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
 
     assert 'version = "0.19.0"' in pyproject
     assert 'version: "0.19.0"' in citation
-    assert 'date-released:' not in citation
-    assert '## [0.19.0] - Unreleased candidate' in changelog
+    assert 'date-released: "2026-09-16"' in citation
+    assert '## [0.19.0] - 2026-09-16' in changelog
     assert "## [0.18.0] - 2026-09-08" in changelog
     assert "## [0.17.0] - 2026-09-04" in changelog
     assert "## [0.16.1] - 2026-09-01" in changelog
@@ -106,15 +106,18 @@ def test_v0180_cloud_source_support_is_distinct_from_hosted_availability():
         ) is None, path
 
 
-def test_candidate_docs_keep_publication_and_extra_gated():
+def test_published_docs_identify_release_and_compatible_extra():
     for path in ("README.md", "RELEASE_NOTES.md", "docs/getting-started/README.md"):
         text = _current_release_text(path).lower()
-        assert "0.19.0" in text and "unreleased" in text
-        assert "publication" in text
+        assert "0.19.0" in text and "published" in text
+        assert "0.19.0 is an unreleased candidate" not in text
+        assert "candidate: 0.19.0 (unreleased" not in text
+        assert "**unreleased candidate." not in text
     for path in ("README.md", "docs/getting-started/README.md"):
         text = _current_release_text(path)
         assert "pip install waveframe-guard==0.19.0" in text
-        assert "Do not advertise Ledger's" in text
+        assert 'governance-ledger[guard]==0.9.0' in text
+        assert "Do not advertise Ledger's" not in text
 
 
 def test_release_quickstart_urls_match_package_and_example_versions():

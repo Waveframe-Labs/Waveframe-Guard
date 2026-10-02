@@ -1,6 +1,6 @@
-> Guard 0.19.0 is an unreleased candidate (proposed tag v0.19.0). The install
-> and download commands apply after coordinated publication. See
-> [release acceptance](../RELEASE_019_ACCEPTANCE.md).
+> Guard 0.19.0 is published on [PyPI](https://pypi.org/project/waveframe-guard/0.19.0/).
+> The install and download commands use the published release. See
+> [release acceptance](../RELEASE_019_ACCEPTANCE.md) for historical candidate evidence.
 
 # Getting Started with Waveframe Guard
 
@@ -171,8 +171,8 @@ Candidate acceptance covers Windows/Linux with Python 3.10 and 3.14.
 Ledger 0.9 requires Compiler >=0.5.0,<0.6.0. Ordinary installation upgrades
 older Ledger; the new SDK cannot run with Ledger 0.8. Compatible runtimes still
 verify supported historical authorities without granting new permissions.
-Do not advertise Ledger's optional Guard extra until Guard is uploaded and
-ordinary index installation has been verified. See the release acceptance
+Ledger 0.9.0 and its compatible Guard extra are published on PyPI:
+`pip install "governance-ledger[guard]==0.9.0"`. See the release acceptance
 record for exact candidate sources and independent historical environments.
 
 Requests 2.32.0 was considered but is

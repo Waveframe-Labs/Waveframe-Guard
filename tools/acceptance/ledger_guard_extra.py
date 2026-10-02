@@ -163,7 +163,10 @@ def main():
                            archive_origin=report["archive_origin"])
         gate.report["gates"] = {"combined_extra": "incomplete"}
         gate.env["WAVEFRAME_LEDGER_TEST_WHEEL"] = str(ledger)
-        python = gate.environment("combined-extra", "--find-links", wheelhouse, f"{ledger}[dev,guard]")
+        # find-links alone also permits same-version public wheels. Select the
+        # authenticated archives explicitly while retaining normal resolution.
+        python = gate.environment("combined-extra", "--find-links", wheelhouse,
+                                  f"{ledger}[dev,guard]", compiler, guard)
         expected = gate.archive_expectations("combined-extra", compiler, compiler_build,
             {"governance-ledger": ledger, "waveframe-guard": guard})
         gate.probe(python, support, "combined-provenance", "check_installed_wheel_set.py", expected)
@@ -185,7 +188,8 @@ def main():
         upgrade = gate.environment("guard-entry", "governance-ledger==0.8.0",
                                    "waveframe-guard==0.18.0", "cricore-contract-compiler==0.4.0")
         gate.run("guard-entry-upgrade", upgrade, "-m", "pip", "install", "--upgrade",
-                 "--find-links", wheelhouse, guard, "--report", gate.output / "guard-entry-install.json")
+                 "--find-links", wheelhouse, guard, ledger, compiler,
+                 "--report", gate.output / "guard-entry-install.json")
         gate.run("guard-entry-upgrade-check", upgrade, "-m", "pip", "check")
         expected = gate.archive_expectations("guard-entry", compiler, compiler_build,
             {"governance-ledger": ledger, "waveframe-guard": guard})
@@ -208,14 +212,31 @@ def main():
         assert digest(old_guard) == selected["guard_manifest"]["wheel_sha256"]
         unchanged = runtime_bytes(guard, ("guard/", "waveframe_guard/"))
         assert unchanged == runtime_bytes(old_guard, ("guard/", "waveframe_guard/"))
-        git("mount-input-equivalence", ROOT, "diff", "--exit-code", BASE, "HEAD", "--",
-            "guard", "waveframe_guard", "tests", "contracts", "pyproject.toml")
+        mount_inputs = ("guard", "waveframe_guard", "tests", "contracts", "pyproject.toml")
+        documentation_test = "tests/test_public_guard_export.py"
+        reviewed_docs_head = "1909ea18b981f6fbf9254b7f6f3289547f0a9009"
+        # Record the original broad scope honestly; only the reviewed publication
+        # assertions may differ. Every other test, fixture and runtime stays fixed.
+        historical_changes = git("historical-mount-input-changes", ROOT, "diff", "--name-only",
+            BASE, head, "--", *mount_inputs).decode().splitlines()
+        report["historical_mount_input_comparison"] = {
+            "base": BASE, "head": head, "paths": list(mount_inputs),
+            "changed_paths": historical_changes, "all_inputs_equal": not historical_changes}
+        save()
+        git("historical-mount-input-diff", ROOT, "diff", BASE, head, "--", *mount_inputs)
+        assert historical_changes == [documentation_test], historical_changes
+        git("reviewed-documentation-test", ROOT, "diff", "--exit-code",
+            reviewed_docs_head, head, "--", documentation_test)
+        git("mount-input-equivalence", ROOT, "diff", "--exit-code", BASE, head, "--",
+            *mount_inputs, f":(exclude){documentation_test}")
         report["mount_equivalence"] = {"historical_guard_head": BASE,
             "historical_cell_wheel_sha256": digest(old_guard), "current_wheel_sha256": digest(guard),
             "runtime_sha256": unchanged,
             "retained_mount_evidence_commit": "e6008345c9891ec6ffb5088f38177022e3cef4aa",
             "actually_mount_tested_wheel_sha256": "2b78374416635ca551ee5470fcd1e9e390d3f08141a53c91bcba7d42516b046e",
-            "scope": "#51 Linux/Python 3.14 real same-device bind-mount proof; identical Guard runtime and mount-test inputs. Ledger #26 changes CLI/legacy mediation, not Guard filesystem enforcement. This current wheel was not newly mount-tested."}
+            "documentation_test_revision": reviewed_docs_head,
+            "excluded_documentation_test": documentation_test,
+            "scope": "#51 Linux/Python 3.14 real same-device bind-mount proof; identical Guard runtime, contracts, dependency metadata and all test inputs except the pinned publication-assertion update. The original full comparison is recorded separately. Current source suites execute the updated documentation test. This current wheel was not newly mount-tested."}
         assert git("final-guard-head", ROOT, "rev-parse", "HEAD").decode().strip() == head
         assert not git("final-guard-clean", ROOT, "status", "--porcelain", "--untracked-files=no").strip()
         assert not git("final-ledger-clean", source, "status", "--porcelain", "--untracked-files=no").strip()
