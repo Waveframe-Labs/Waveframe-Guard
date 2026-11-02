@@ -1,0 +1,1008 @@
+{
+  "artifact_manifest": {
+    "deterministic_identity_hash": "sha256:3e07c9b47077ae1ae04d9bd7a32d6f0daca512f78afa17cdc407fd14d06b989e",
+    "hashed_inputs": {
+      "actor_identity_hash": "sha256:eec58ac1645ca23427a9ed9ca02fdd25a37f89154e36954228c2c46d26038842",
+      "approval_evidence_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "authority_evidence_hash": "sha256:f0a8638bcb30d858c3a1122ed11d58ff9472dd37d35481753a43b09479972c18",
+      "compiled_authority_hash": "sha256:f0bd37909b9bd4dfaff5651774d7b2768540c4eeab1f2d9d1d6a76a714952242",
+      "continuity_posture_hash": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "evaluated_execution_request_hash": "sha256:3b7eda5dbeb4b885daf954f8e83dcd5f88a59a7022ec9c2f881cd5c81bdbd37f",
+      "execution_context_hash": "sha256:be3164e3ad6b7e432357519dcfb421f68f85d19afef594d0a188b6c4d73b5b1b",
+      "execution_request_hash": "sha256:3b7eda5dbeb4b885daf954f8e83dcd5f88a59a7022ec9c2f881cd5c81bdbd37f",
+      "replay_posture_hash": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "runtime_dependencies_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "runtime_evidence_hash": "sha256:8ffa4a74d1d664dd4597678e8568ada0a6543b0484a31fd4294f352131e3a736",
+      "runtime_facts_hash": "sha256:6b3f318f3e1a444c4808218f2ff7e474af9450771adf276bab776665be704656",
+      "target_binding_hash": "sha256:e27fa668253083bd6bb2c809a1bc7a6990e5aba30c25f3796748382e672c6908",
+      "timestamp_source_hash": "sha256:c1cc5379bbb8e8464502ea699fa32c058143478acc6cd1e0ee18291c09baf5e4"
+    },
+    "lineage_continuity_fields": [
+      "authority_ref",
+      "contract_hash",
+      "execution_request_hash",
+      "runtime_evidence_hash",
+      "continuity_posture_hash",
+      "replay_posture_hash",
+      "outcome_hash",
+      "evaluation_trace_hash",
+      "chronology_hash",
+      "runtime_dependencies_hash",
+      "authority_evidence_hash",
+      "runtime_facts_hash",
+      "target_binding_hash"
+    ],
+    "lineage_continuity_hash": "sha256:75249213b892d2754c22b13c02ef3d935e0987169c201e941b7cff99378f9c0a",
+    "manifest_hash": "sha256:2fa1bbca966dafeaf6264ab7c8e2cc9a6afd4f4cfe51b75478ca183dd58bafd5",
+    "persisted_artifacts": {
+      "evaluation": "sha256:5e5ec2dc5c6da40ba01d11559655a52f94298ce3e2a0802ecf53baf15949fcf1",
+      "guard_enforcement_outcome": "sha256:7f56e9b3d46b48b1f7ccb80b9a1036f5992fb45e184a3e5ea0050779db08beaf",
+      "inputs": "sha256:02145787aab9eaafa14bdc1b73e47bfa26c725b6afa8a2795c9ee9c77ab65b81",
+      "receipt": "sha256:93a9a0e9e3514c2ceed46ac374a331d727c8a71aaa959ce73bf8fcb1437b44a6"
+    },
+    "replay_basis_fields": [
+      "actor_identity",
+      "authority_evidence",
+      "compiled_authority",
+      "continuity_state",
+      "evaluated_execution_request",
+      "evaluation_time",
+      "evidence_posture",
+      "execution_request",
+      "replay_posture",
+      "runtime_facts",
+      "start_sequence",
+      "target_binding"
+    ],
+    "replay_basis_hash": "sha256:068246138dc6f7a4b97188ca7e16e8eff0ac22094affb55295671aa6b7f97bad",
+    "replayable": true,
+    "run_id": "guard_run_3e07c9b47077ae1ae04d9bd7",
+    "schema_version": "guard_artifact_manifest.v1"
+  },
+  "evaluation": {
+    "accepted_execution_request": {
+      "action": "modify",
+      "arguments": {},
+      "artifacts": [],
+      "request_id": "deny-only-secrets_prod.key",
+      "schema_version": "normalized_execution_request.v1",
+      "target": "secrets/prod.key"
+    },
+    "admissibility_projection": {
+      "actor_identity": {
+        "id": "synthetic-agent",
+        "role": "repository-maintainer",
+        "type": "agent"
+      },
+      "authority_ref": "synthetic-deny-only@1.0.0",
+      "continuation_status": {
+        "admissible": true,
+        "continuity_valid": true,
+        "dependency_failures": [],
+        "dependency_valid": true,
+        "escalation_required": false,
+        "evidence_valid": true,
+        "expired": false,
+        "invalidated": false,
+        "lifecycle_state": "admissible",
+        "replay_valid": true,
+        "revalidation_required": false,
+        "schema_version": "guard_continuation_status.v1",
+        "status": "admissible"
+      },
+      "continuity_requirements": [],
+      "contract_hash": "sha256:c04cc28628b98b682a07f2ccab91421885538c7b8a330afa7a780723306c9773",
+      "enforcement_consequences": [
+        {
+          "consequence": "allow_execution"
+        }
+      ],
+      "execution_request": {
+        "action": "modify",
+        "arguments": {},
+        "artifacts": [],
+        "request_id": "deny-only-secrets_prod.key",
+        "schema_version": "normalized_execution_request.v1",
+        "target": "secrets/prod.key"
+      },
+      "projection_hash": "sha256:2996554abe55b2cd27bb9121f133b381983d562a79e260827040a51c43a78b03",
+      "projection_id": "admissibility_projection_07578b75429b100bc551e12b",
+      "rationale": "execution is admissible against compiled authority",
+      "replay_obligations": [],
+      "required_evidence": [],
+      "schema_version": "execution_admissibility_projection.v1",
+      "status": "admissible",
+      "violated_constraints": []
+    },
+    "admissible": true,
+    "authority_evidence": {
+      "authority": {
+        "authority_id": "synthetic-deny-only",
+        "authority_identity_hash": "sha256:f346eeb0cba1d524be20692a7cc5a8982142f5dd4b4813af339765618afed3dc",
+        "authority_ref": "synthetic-deny-only@1.0.0",
+        "authority_version": "1.0.0"
+      },
+      "authority_bundle": {
+        "bundle_hash": "sha256:503a3efc89b444b8da29e68cd6788a3ba284bbb3fbb7c5dd26dd55dc3b41a235",
+        "logical_ref": "bundle.json",
+        "publication_id": "synthetic-publication-deny-only",
+        "schema_version": "authority_bundle.v2"
+      },
+      "compiled_contract": {
+        "contract_hash": "sha256:c04cc28628b98b682a07f2ccab91421885538c7b8a330afa7a780723306c9773",
+        "contract_id": "synthetic-deny-only",
+        "contract_version": "1.0.0",
+        "schema_version": "compiled_authority_contract.v2"
+      },
+      "constraint_ir": {
+        "constraint_ir_id": "sha256:c9d032b51143efcabd3b65f3ebe3477ba03b0f3d75943eaf3f821cda783450fd",
+        "ir_hash": "sha256:c9d032b51143efcabd3b65f3ebe3477ba03b0f3d75943eaf3f821cda783450fd",
+        "schema_version": "constraint_ir.v1"
+      },
+      "domain_pack": {
+        "domain_pack_hash": "sha256:4b6ff9a3ebf3b419151fbaa3f899012dca39ff354de8e768da05146ad0c64b80",
+        "domain_pack_id": "repository-changes",
+        "domain_pack_version": "1.0.0",
+        "schema_version": "domain_pack.v1"
+      },
+      "publication_receipt": {
+        "logical_ref": "receipt.json",
+        "receipt_hash": "sha256:5f04e5fafae06a895b82cdcc06a9b94b3abb43366281b31b996ef0d6ffdf6731",
+        "receipt_id": "receipt-v2-503a3efc89b444b8da29e68cd6788a3ba284bbb3fbb7c5dd26dd55dc3b41a235",
+        "schema_version": "publication_receipt.v2"
+      },
+      "runtime_fact_schema": {
+        "schema_hash": "sha256:c1595ef8d77165a7a486151673f01eda5a93000786f47e1f048875f17eb396a1",
+        "schema_id": "repository-changes-runtime",
+        "schema_version": "runtime_fact_schema.v1",
+        "schema_version_number": "1.0.0"
+      },
+      "runtime_facts": {
+        "canonical_hash": "sha256:6b3f318f3e1a444c4808218f2ff7e474af9450771adf276bab776665be704656",
+        "facts": {
+          "actor.principal_id": "synthetic-agent",
+          "actor.role": "repository-maintainer",
+          "actor.subject_kind": "agent",
+          "proposal.action": "modify",
+          "proposal.resource.kind": "repository_path",
+          "proposal.resource.path": "secrets/prod.key"
+        },
+        "provider_key": {
+          "domain_pack_hash": "sha256:4b6ff9a3ebf3b419151fbaa3f899012dca39ff354de8e768da05146ad0c64b80",
+          "domain_pack_id": "repository-changes",
+          "domain_pack_version": "1.0.0",
+          "schema_hash": "sha256:c1595ef8d77165a7a486151673f01eda5a93000786f47e1f048875f17eb396a1",
+          "schema_id": "repository-changes-runtime",
+          "schema_version": "1.0.0"
+        }
+      },
+      "schema_version": "guard_verified_authority_evidence.v1",
+      "verification": {
+        "ledger_authority_bundle_validated": true,
+        "ledger_publication_receipt_validated": true,
+        "ledger_runtime_fact_compatible": true
+      }
+    },
+    "blocked": false,
+    "cloud_preservation_scope": "decision_only_not_final_execution",
+    "continuation_requirements": [],
+    "continuation_status": {
+      "admissible": true,
+      "continuity_valid": true,
+      "dependency_failures": [],
+      "dependency_valid": true,
+      "escalation_required": false,
+      "evidence_valid": true,
+      "expired": false,
+      "invalidated": false,
+      "lifecycle_state": "admissible",
+      "replay_valid": true,
+      "revalidation_required": false,
+      "schema_version": "guard_continuation_status.v1",
+      "status": "admissible"
+    },
+    "continuity_posture": {
+      "authority_ref": "synthetic-deny-only@1.0.0",
+      "continuity_requirements": [],
+      "continuity_state": {},
+      "posture_hash": "sha256:003469ba37c33ea4cee283b77f2fa366407a8c16b57c5367af39767c1d78a5c5",
+      "posture_id": "continuity_posture_ff5ac1c44249ff1c1c8716f6",
+      "replay_obligations": [],
+      "replay_posture": {},
+      "requires_replay": false,
+      "requires_revalidation": false,
+      "schema_version": "guard_continuity_posture.v1",
+      "signals": []
+    },
+    "continuity_requirements": [],
+    "enforcement_consequences": [
+      {
+        "consequence": "allow_execution"
+      }
+    ],
+    "enforcement_outcome": {
+      "authority_ref": "synthetic-deny-only@1.0.0",
+      "consequences": [
+        {
+          "consequence": "allow_execution"
+        }
+      ],
+      "continuation_requirements": [],
+      "continuation_status": {
+        "admissible": true,
+        "continuity_valid": true,
+        "dependency_failures": [],
+        "dependency_valid": true,
+        "escalation_required": false,
+        "evidence_valid": true,
+        "expired": false,
+        "invalidated": false,
+        "lifecycle_state": "admissible",
+        "replay_valid": true,
+        "revalidation_required": false,
+        "schema_version": "guard_continuation_status.v1",
+        "status": "admissible"
+      },
+      "execution_state": "allowed",
+      "invalidation_reasons": [],
+      "outcome_hash": "sha256:84704cc4420d2fba1f166c280f9f4c89c93945fa81925cbf0045c84f9d40be6e",
+      "outcome_id": "enforcement_outcome_7220354251255b85e68d072e",
+      "rationale": "execution is admissible against compiled authority",
+      "runtime_condition_checks": [
+        {
+          "condition": "evidence_valid",
+          "rationale": "runtime evidence validity checked",
+          "valid": true
+        },
+        {
+          "condition": "replay_valid",
+          "rationale": "replay posture validity checked",
+          "valid": true
+        },
+        {
+          "condition": "dependency_valid",
+          "rationale": "runtime dependency validity checked",
+          "valid": true
+        },
+        {
+          "condition": "continuity_valid",
+          "rationale": "lineage continuity validity checked",
+          "valid": true
+        },
+        {
+          "condition": "not_expired",
+          "rationale": "continuation did not expire before execution",
+          "valid": true
+        }
+      ],
+      "runtime_dependency_posture": {
+        "dependencies": [],
+        "expired": false,
+        "failures": [],
+        "schema_version": "guard_runtime_dependency_posture.v1",
+        "valid": true
+      },
+      "runtime_lifecycle_state": "admissible",
+      "schema_version": "guard_enforcement_outcome.v1",
+      "status": "admissible"
+    },
+    "escalated": false,
+    "evaluation_trace": {
+      "authority_ref": "synthetic-deny-only@1.0.0",
+      "rationale": "execution is admissible against compiled authority",
+      "schema_version": "guard_evaluation_trace.v1",
+      "status": "admissible",
+      "steps": [
+        {
+          "authority_ref": "synthetic-deny-only@1.0.0",
+          "status": "completed",
+          "step": "compiled_authority_loaded"
+        },
+        {
+          "status": "completed",
+          "step": "execution_request_projected",
+          "target": "secrets/prod.key"
+        },
+        {
+          "rationale": "execution is admissible against compiled authority",
+          "status": "admissible",
+          "step": "admissibility_assessed"
+        },
+        {
+          "status": "completed",
+          "step": "runtime_posture_materialized"
+        }
+      ],
+      "trace_hash": "sha256:95520cd5aedc7accebdd9e8f0f636443513584c5391744c755b4478ebc066b5a",
+      "trace_id": "guard_trace_19c5261fc7ce09ad9249da90"
+    },
+    "execution_posture_surface": {
+      "chronology_event_ids": [
+        "guard_event_ba2c3721ece67c3faa99c8c3",
+        "guard_event_c683bb090012753aa349d0ed",
+        "guard_event_a5f4b8ae643fcc45e823c65d",
+        "guard_event_ff8c93f252d48606eb2ab1a8",
+        "guard_event_4217ff863eac23848762b6d4",
+        "guard_event_2f717c5e78191cf075cf669d",
+        "guard_event_4c49dc56a4f75ee6b5cad64a"
+      ],
+      "continuity_state": {
+        "authority_ref": "synthetic-deny-only@1.0.0",
+        "continuity_requirements": [],
+        "continuity_state": {},
+        "posture_hash": "sha256:003469ba37c33ea4cee283b77f2fa366407a8c16b57c5367af39767c1d78a5c5",
+        "posture_id": "continuity_posture_ff5ac1c44249ff1c1c8716f6",
+        "replay_obligations": [],
+        "replay_posture": {},
+        "requires_replay": false,
+        "requires_revalidation": false,
+        "schema_version": "guard_continuity_posture.v1",
+        "signals": []
+      },
+      "posture": "admissible",
+      "rationale": "execution is admissible against compiled authority",
+      "replay_requirements": [],
+      "runtime_blockers": [],
+      "schema_version": "execution_posture_surface.v1"
+    },
+    "execution_state": "allowed",
+    "invalidation_reasons": [],
+    "rationale": "execution is admissible against compiled authority",
+    "replay_obligations": [],
+    "required_evidence": [],
+    "runtime_condition_checks": [
+      {
+        "condition": "evidence_valid",
+        "rationale": "runtime evidence validity checked",
+        "valid": true
+      },
+      {
+        "condition": "replay_valid",
+        "rationale": "replay posture validity checked",
+        "valid": true
+      },
+      {
+        "condition": "dependency_valid",
+        "rationale": "runtime dependency validity checked",
+        "valid": true
+      },
+      {
+        "condition": "continuity_valid",
+        "rationale": "lineage continuity validity checked",
+        "valid": true
+      },
+      {
+        "condition": "not_expired",
+        "rationale": "continuation did not expire before execution",
+        "valid": true
+      }
+    ],
+    "runtime_dependency_posture": {
+      "dependencies": [],
+      "expired": false,
+      "failures": [],
+      "schema_version": "guard_runtime_dependency_posture.v1",
+      "valid": true
+    },
+    "runtime_evidence": {
+      "actor_identity": {
+        "id": "synthetic-agent",
+        "role": "repository-maintainer",
+        "type": "agent"
+      },
+      "approvals": [],
+      "continuity_snapshot": {},
+      "execution_context": {
+        "surface": "guard_sdk",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:f0bd37909b9bd4dfaff5651774d7b2768540c4eeab1f2d9d1d6a76a714952242",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_d69f649c09134ded8c53eb5dd53090d0"
+        }
+      },
+      "replay_evidence": {},
+      "runtime_dependencies": [],
+      "schema_version": "guard_runtime_evidence_model.v1",
+      "timestamp_source": {
+        "source": "caller_supplied",
+        "timestamp": "2026-11-01T12:03:00Z"
+      }
+    },
+    "runtime_facts": {
+      "actor.principal_id": "synthetic-agent",
+      "actor.role": "repository-maintainer",
+      "actor.subject_kind": "agent",
+      "proposal.action": "modify",
+      "proposal.resource.kind": "repository_path",
+      "proposal.resource.path": "secrets/prod.key"
+    },
+    "runtime_facts_hash": "sha256:6b3f318f3e1a444c4808218f2ff7e474af9450771adf276bab776665be704656",
+    "runtime_lifecycle_state": "admissible",
+    "runtime_posture": {
+      "actor_identity": {
+        "id": "synthetic-agent",
+        "role": "repository-maintainer",
+        "type": "agent"
+      },
+      "authority_ref": "synthetic-deny-only@1.0.0",
+      "chronology_event_ids": [
+        "guard_event_ba2c3721ece67c3faa99c8c3",
+        "guard_event_c683bb090012753aa349d0ed",
+        "guard_event_a5f4b8ae643fcc45e823c65d",
+        "guard_event_ff8c93f252d48606eb2ab1a8",
+        "guard_event_4217ff863eac23848762b6d4",
+        "guard_event_2f717c5e78191cf075cf669d",
+        "guard_event_4c49dc56a4f75ee6b5cad64a"
+      ],
+      "continuation_status": {
+        "admissible": true,
+        "continuity_valid": true,
+        "dependency_failures": [],
+        "dependency_valid": true,
+        "escalation_required": false,
+        "evidence_valid": true,
+        "expired": false,
+        "invalidated": false,
+        "lifecycle_state": "admissible",
+        "replay_valid": true,
+        "revalidation_required": false,
+        "schema_version": "guard_continuation_status.v1",
+        "status": "admissible"
+      },
+      "continuity_state": {
+        "authority_ref": "synthetic-deny-only@1.0.0",
+        "continuity_requirements": [],
+        "continuity_state": {},
+        "posture_hash": "sha256:003469ba37c33ea4cee283b77f2fa366407a8c16b57c5367af39767c1d78a5c5",
+        "posture_id": "continuity_posture_ff5ac1c44249ff1c1c8716f6",
+        "replay_obligations": [],
+        "replay_posture": {},
+        "requires_replay": false,
+        "requires_revalidation": false,
+        "schema_version": "guard_continuity_posture.v1",
+        "signals": []
+      },
+      "contract_hash": "sha256:c04cc28628b98b682a07f2ccab91421885538c7b8a330afa7a780723306c9773",
+      "enforcement_outcome": {
+        "authority_ref": "synthetic-deny-only@1.0.0",
+        "consequences": [
+          {
+            "consequence": "allow_execution"
+          }
+        ],
+        "continuation_requirements": [],
+        "continuation_status": {
+          "admissible": true,
+          "continuity_valid": true,
+          "dependency_failures": [],
+          "dependency_valid": true,
+          "escalation_required": false,
+          "evidence_valid": true,
+          "expired": false,
+          "invalidated": false,
+          "lifecycle_state": "admissible",
+          "replay_valid": true,
+          "revalidation_required": false,
+          "schema_version": "guard_continuation_status.v1",
+          "status": "admissible"
+        },
+        "execution_state": "allowed",
+        "invalidation_reasons": [],
+        "outcome_hash": "sha256:84704cc4420d2fba1f166c280f9f4c89c93945fa81925cbf0045c84f9d40be6e",
+        "outcome_id": "enforcement_outcome_7220354251255b85e68d072e",
+        "rationale": "execution is admissible against compiled authority",
+        "runtime_condition_checks": [
+          {
+            "condition": "evidence_valid",
+            "rationale": "runtime evidence validity checked",
+            "valid": true
+          },
+          {
+            "condition": "replay_valid",
+            "rationale": "replay posture validity checked",
+            "valid": true
+          },
+          {
+            "condition": "dependency_valid",
+            "rationale": "runtime dependency validity checked",
+            "valid": true
+          },
+          {
+            "condition": "continuity_valid",
+            "rationale": "lineage continuity validity checked",
+            "valid": true
+          },
+          {
+            "condition": "not_expired",
+            "rationale": "continuation did not expire before execution",
+            "valid": true
+          }
+        ],
+        "runtime_dependency_posture": {
+          "dependencies": [],
+          "expired": false,
+          "failures": [],
+          "schema_version": "guard_runtime_dependency_posture.v1",
+          "valid": true
+        },
+        "runtime_lifecycle_state": "admissible",
+        "schema_version": "guard_enforcement_outcome.v1",
+        "status": "admissible"
+      },
+      "execution_request": {
+        "action": "modify",
+        "arguments": {},
+        "artifacts": [],
+        "request_id": "deny-only-secrets_prod.key",
+        "schema_version": "normalized_execution_request.v1",
+        "target": "secrets/prod.key"
+      },
+      "posture": "admissible",
+      "posture_hash": "sha256:ba0a1f064287f52adcdee6e34ad2dec819930bda1a4e619cb0fbe151f892e13f",
+      "posture_id": "runtime_posture_634531e0c1cd6bdec34e188f",
+      "rationale": "execution is admissible against compiled authority",
+      "replay_requirements": [],
+      "runtime_blockers": [],
+      "schema_version": "execution_runtime_posture.v1",
+      "telemetry_event_types": [
+        "authority_context_resolved",
+        "evaluation_pipeline_started",
+        "runtime_evidence_loaded",
+        "continuity_checked",
+        "replay_validated",
+        "admissibility_evaluated",
+        "enforcement_outcome_recorded"
+      ]
+    },
+    "status": "admissible",
+    "target_binding": {
+      "adapter_version": "guard.repository-file.v2",
+      "assurance_class": "ntfs-sharing-locks.v1",
+      "authority_contract_hash": "sha256:f0bd37909b9bd4dfaff5651774d7b2768540c4eeab1f2d9d1d6a76a714952242",
+      "domain_resolver": "guard.target-domain-resolver.v1",
+      "schema_version": "guard_target_binding.v1",
+      "target_domain": "repository_path",
+      "workspace_binding_id": "workspace_d69f649c09134ded8c53eb5dd53090d0"
+    },
+    "target_binding_hash": "sha256:e27fa668253083bd6bb2c809a1bc7a6990e5aba30c25f3796748382e672c6908",
+    "telemetry_events": [
+      {
+        "authority_ref": "synthetic-deny-only@1.0.0",
+        "details": {
+          "contract_boundary": "compiled_authority"
+        },
+        "event_hash": "sha256:46845144f94d88742bcb8fcf03356f8c1fb615ced4150feb6bc2bc75f3b6351b",
+        "event_id": "guard_event_ba2c3721ece67c3faa99c8c3",
+        "event_type": "authority_context_resolved",
+        "schema_version": "guard_runtime_event.v1",
+        "sequence": 1,
+        "timestamp": "2026-11-01T12:03:00Z"
+      },
+      {
+        "authority_ref": "synthetic-deny-only@1.0.0",
+        "details": {
+          "status": "started"
+        },
+        "event_hash": "sha256:89decea1687304dfd96e83ff8811160901b5c82d6997914534ba326c35e7c079",
+        "event_id": "guard_event_c683bb090012753aa349d0ed",
+        "event_type": "evaluation_pipeline_started",
+        "schema_version": "guard_runtime_event.v1",
+        "sequence": 2,
+        "timestamp": "2026-11-01T12:03:00Z"
+      },
+      {
+        "authority_ref": "synthetic-deny-only@1.0.0",
+        "details": {
+          "evidence_boundary": "guard_runtime_evidence_model.v1",
+          "required_evidence": []
+        },
+        "event_hash": "sha256:a39ff73d1bd241fc80575adb52162101e21156c5537562b6becfe0d106003695",
+        "event_id": "guard_event_a5f4b8ae643fcc45e823c65d",
+        "event_type": "runtime_evidence_loaded",
+        "schema_version": "guard_runtime_event.v1",
+        "sequence": 3,
+        "timestamp": "2026-11-01T12:03:00Z"
+      },
+      {
+        "authority_ref": "synthetic-deny-only@1.0.0",
+        "details": {
+          "continuity_requirements": []
+        },
+        "event_hash": "sha256:cd74d0ee480111947609d899303df369c8fa13d3a49164f370e2c5f33dc3fed0",
+        "event_id": "guard_event_ff8c93f252d48606eb2ab1a8",
+        "event_type": "continuity_checked",
+        "schema_version": "guard_runtime_event.v1",
+        "sequence": 4,
+        "timestamp": "2026-11-01T12:03:00Z"
+      },
+      {
+        "authority_ref": "synthetic-deny-only@1.0.0",
+        "details": {
+          "replay_obligations": []
+        },
+        "event_hash": "sha256:d6b2db950fa5e6bec15b6127679883550d885a20921236d5782bd2bd9ddc1daf",
+        "event_id": "guard_event_4217ff863eac23848762b6d4",
+        "event_type": "replay_validated",
+        "schema_version": "guard_runtime_event.v1",
+        "sequence": 5,
+        "timestamp": "2026-11-01T12:03:00Z"
+      },
+      {
+        "authority_ref": "synthetic-deny-only@1.0.0",
+        "details": {
+          "required_evidence": [],
+          "runtime_lifecycle_state": "admissible",
+          "status": "admissible",
+          "violated_constraints": []
+        },
+        "event_hash": "sha256:65934785530b0fc212b26d742d1bf132c7830475881f12d7e892d27f0bf83781",
+        "event_id": "guard_event_2f717c5e78191cf075cf669d",
+        "event_type": "admissibility_evaluated",
+        "schema_version": "guard_runtime_event.v1",
+        "sequence": 6,
+        "timestamp": "2026-11-01T12:03:00Z"
+      },
+      {
+        "authority_ref": "synthetic-deny-only@1.0.0",
+        "details": {
+          "consequences": [
+            {
+              "consequence": "allow_execution"
+            }
+          ],
+          "runtime_lifecycle_state": "admissible",
+          "status": "admissible"
+        },
+        "event_hash": "sha256:4079de24b4458980a990859f7ddac8373314f2d4cb30bc9f809902c24b8c469c",
+        "event_id": "guard_event_4c49dc56a4f75ee6b5cad64a",
+        "event_type": "enforcement_outcome_recorded",
+        "schema_version": "guard_runtime_event.v1",
+        "sequence": 7,
+        "timestamp": "2026-11-01T12:03:00Z"
+      }
+    ],
+    "telemetry_stream": [
+      {
+        "authority_ref": "synthetic-deny-only@1.0.0",
+        "event_hash": "sha256:46845144f94d88742bcb8fcf03356f8c1fb615ced4150feb6bc2bc75f3b6351b",
+        "event_id": "guard_event_ba2c3721ece67c3faa99c8c3",
+        "event_type": "authority_context_resolved",
+        "sequence": 1,
+        "timestamp": "2026-11-01T12:03:00Z"
+      },
+      {
+        "authority_ref": "synthetic-deny-only@1.0.0",
+        "event_hash": "sha256:89decea1687304dfd96e83ff8811160901b5c82d6997914534ba326c35e7c079",
+        "event_id": "guard_event_c683bb090012753aa349d0ed",
+        "event_type": "evaluation_pipeline_started",
+        "sequence": 2,
+        "timestamp": "2026-11-01T12:03:00Z"
+      },
+      {
+        "authority_ref": "synthetic-deny-only@1.0.0",
+        "event_hash": "sha256:a39ff73d1bd241fc80575adb52162101e21156c5537562b6becfe0d106003695",
+        "event_id": "guard_event_a5f4b8ae643fcc45e823c65d",
+        "event_type": "runtime_evidence_loaded",
+        "sequence": 3,
+        "timestamp": "2026-11-01T12:03:00Z"
+      },
+      {
+        "authority_ref": "synthetic-deny-only@1.0.0",
+        "event_hash": "sha256:cd74d0ee480111947609d899303df369c8fa13d3a49164f370e2c5f33dc3fed0",
+        "event_id": "guard_event_ff8c93f252d48606eb2ab1a8",
+        "event_type": "continuity_checked",
+        "sequence": 4,
+        "timestamp": "2026-11-01T12:03:00Z"
+      },
+      {
+        "authority_ref": "synthetic-deny-only@1.0.0",
+        "event_hash": "sha256:d6b2db950fa5e6bec15b6127679883550d885a20921236d5782bd2bd9ddc1daf",
+        "event_id": "guard_event_4217ff863eac23848762b6d4",
+        "event_type": "replay_validated",
+        "sequence": 5,
+        "timestamp": "2026-11-01T12:03:00Z"
+      },
+      {
+        "authority_ref": "synthetic-deny-only@1.0.0",
+        "event_hash": "sha256:65934785530b0fc212b26d742d1bf132c7830475881f12d7e892d27f0bf83781",
+        "event_id": "guard_event_2f717c5e78191cf075cf669d",
+        "event_type": "admissibility_evaluated",
+        "sequence": 6,
+        "timestamp": "2026-11-01T12:03:00Z"
+      },
+      {
+        "authority_ref": "synthetic-deny-only@1.0.0",
+        "event_hash": "sha256:4079de24b4458980a990859f7ddac8373314f2d4cb30bc9f809902c24b8c469c",
+        "event_id": "guard_event_4c49dc56a4f75ee6b5cad64a",
+        "event_type": "enforcement_outcome_recorded",
+        "sequence": 7,
+        "timestamp": "2026-11-01T12:03:00Z"
+      }
+    ],
+    "violated_constraints": []
+  },
+  "guard_enforcement_outcome": {
+    "authority_ref": "synthetic-deny-only@1.0.0",
+    "consequences": [
+      {
+        "consequence": "allow_execution"
+      }
+    ],
+    "continuation_requirements": [],
+    "continuation_status": {
+      "admissible": true,
+      "continuity_valid": true,
+      "dependency_failures": [],
+      "dependency_valid": true,
+      "escalation_required": false,
+      "evidence_valid": true,
+      "expired": false,
+      "invalidated": false,
+      "lifecycle_state": "admissible",
+      "replay_valid": true,
+      "revalidation_required": false,
+      "schema_version": "guard_continuation_status.v1",
+      "status": "admissible"
+    },
+    "execution_state": "allowed",
+    "invalidation_reasons": [],
+    "outcome_hash": "sha256:84704cc4420d2fba1f166c280f9f4c89c93945fa81925cbf0045c84f9d40be6e",
+    "outcome_id": "enforcement_outcome_7220354251255b85e68d072e",
+    "rationale": "execution is admissible against compiled authority",
+    "runtime_condition_checks": [
+      {
+        "condition": "evidence_valid",
+        "rationale": "runtime evidence validity checked",
+        "valid": true
+      },
+      {
+        "condition": "replay_valid",
+        "rationale": "replay posture validity checked",
+        "valid": true
+      },
+      {
+        "condition": "dependency_valid",
+        "rationale": "runtime dependency validity checked",
+        "valid": true
+      },
+      {
+        "condition": "continuity_valid",
+        "rationale": "lineage continuity validity checked",
+        "valid": true
+      },
+      {
+        "condition": "not_expired",
+        "rationale": "continuation did not expire before execution",
+        "valid": true
+      }
+    ],
+    "runtime_dependency_posture": {
+      "dependencies": [],
+      "expired": false,
+      "failures": [],
+      "schema_version": "guard_runtime_dependency_posture.v1",
+      "valid": true
+    },
+    "runtime_lifecycle_state": "admissible",
+    "schema_version": "guard_enforcement_outcome.v1",
+    "status": "admissible"
+  },
+  "inputs": {
+    "authority_evidence": {
+      "authority": {
+        "authority_id": "synthetic-deny-only",
+        "authority_identity_hash": "sha256:f346eeb0cba1d524be20692a7cc5a8982142f5dd4b4813af339765618afed3dc",
+        "authority_ref": "synthetic-deny-only@1.0.0",
+        "authority_version": "1.0.0"
+      },
+      "authority_bundle": {
+        "bundle_hash": "sha256:503a3efc89b444b8da29e68cd6788a3ba284bbb3fbb7c5dd26dd55dc3b41a235",
+        "logical_ref": "bundle.json",
+        "publication_id": "synthetic-publication-deny-only",
+        "schema_version": "authority_bundle.v2"
+      },
+      "compiled_contract": {
+        "contract_hash": "sha256:c04cc28628b98b682a07f2ccab91421885538c7b8a330afa7a780723306c9773",
+        "contract_id": "synthetic-deny-only",
+        "contract_version": "1.0.0",
+        "schema_version": "compiled_authority_contract.v2"
+      },
+      "constraint_ir": {
+        "constraint_ir_id": "sha256:c9d032b51143efcabd3b65f3ebe3477ba03b0f3d75943eaf3f821cda783450fd",
+        "ir_hash": "sha256:c9d032b51143efcabd3b65f3ebe3477ba03b0f3d75943eaf3f821cda783450fd",
+        "schema_version": "constraint_ir.v1"
+      },
+      "domain_pack": {
+        "domain_pack_hash": "sha256:4b6ff9a3ebf3b419151fbaa3f899012dca39ff354de8e768da05146ad0c64b80",
+        "domain_pack_id": "repository-changes",
+        "domain_pack_version": "1.0.0",
+        "schema_version": "domain_pack.v1"
+      },
+      "publication_receipt": {
+        "logical_ref": "receipt.json",
+        "receipt_hash": "sha256:5f04e5fafae06a895b82cdcc06a9b94b3abb43366281b31b996ef0d6ffdf6731",
+        "receipt_id": "receipt-v2-503a3efc89b444b8da29e68cd6788a3ba284bbb3fbb7c5dd26dd55dc3b41a235",
+        "schema_version": "publication_receipt.v2"
+      },
+      "runtime_fact_schema": {
+        "schema_hash": "sha256:c1595ef8d77165a7a486151673f01eda5a93000786f47e1f048875f17eb396a1",
+        "schema_id": "repository-changes-runtime",
+        "schema_version": "runtime_fact_schema.v1",
+        "schema_version_number": "1.0.0"
+      },
+      "runtime_facts": {
+        "canonical_hash": "sha256:6b3f318f3e1a444c4808218f2ff7e474af9450771adf276bab776665be704656",
+        "facts": {
+          "actor.principal_id": "synthetic-agent",
+          "actor.role": "repository-maintainer",
+          "actor.subject_kind": "agent",
+          "proposal.action": "modify",
+          "proposal.resource.kind": "repository_path",
+          "proposal.resource.path": "secrets/prod.key"
+        },
+        "provider_key": {
+          "domain_pack_hash": "sha256:4b6ff9a3ebf3b419151fbaa3f899012dca39ff354de8e768da05146ad0c64b80",
+          "domain_pack_id": "repository-changes",
+          "domain_pack_version": "1.0.0",
+          "schema_hash": "sha256:c1595ef8d77165a7a486151673f01eda5a93000786f47e1f048875f17eb396a1",
+          "schema_id": "repository-changes-runtime",
+          "schema_version": "1.0.0"
+        }
+      },
+      "schema_version": "guard_verified_authority_evidence.v1",
+      "verification": {
+        "ledger_authority_bundle_validated": true,
+        "ledger_publication_receipt_validated": true,
+        "ledger_runtime_fact_compatible": true
+      }
+    },
+    "compiled_authority": {
+      "approval_requirements": {},
+      "artifact_requirements": {},
+      "authority_ref": "synthetic-deny-only@1.0.0",
+      "authority_requirements": {
+        "required_roles": [
+          "repository-maintainer"
+        ]
+      },
+      "compiled_from": {
+        "resolved_interpretation_count": 0,
+        "schema_version": "semantic_commit_bundle.v1",
+        "semantic_commit_hash": "sha256:26635f9ed3e9fc47faba3dbd8e2a1ed167f4fbb5e0d07d0af0647598c8b23688",
+        "semantic_commit_id": "semantic-commit-26635f9ed3e9",
+        "source_hash": "sha256:e9177d8f33101758a805d01ca0030f781822171dbf899b2bd0d7407a11f39ba6"
+      },
+      "contract_hash": "sha256:c04cc28628b98b682a07f2ccab91421885538c7b8a330afa7a780723306c9773",
+      "contract_id": "synthetic-deny-only",
+      "contract_version": "1.0.0",
+      "invariants": {},
+      "lineage": {
+        "compilation_report_hash": "sha256:7ba29c7d312a71207373146c724a0d4fd32784d087450ee0fc64758dd72c4a1d",
+        "review_id": "domain-interpretation-20c4a1ecc453c787503551a25a714d8db6fae27241e1f3097e4614e9adfd0703",
+        "schema_version": "governance_authority_lineage.v1",
+        "source_hash": "sha256:e9177d8f33101758a805d01ca0030f781822171dbf899b2bd0d7407a11f39ba6"
+      },
+      "schema_version": "compiled_authority_contract.v2",
+      "stage_requirements": {},
+      "target_requirements": {
+        "allow": [],
+        "deny": [
+          {
+            "match": "prefix",
+            "value": "deployment/"
+          }
+        ]
+      }
+    },
+    "evaluated_execution_request": {
+      "action": "modify",
+      "arguments": {},
+      "artifacts": [],
+      "request_id": "deny-only-secrets_prod.key",
+      "schema_version": "normalized_execution_request.v1",
+      "target": "secrets/prod.key"
+    },
+    "execution_request": {
+      "action": "modify",
+      "arguments": {},
+      "artifacts": [],
+      "request_id": "deny-only-secrets_prod.key",
+      "schema_version": "normalized_execution_request.v1",
+      "target": "secrets/prod.key"
+    },
+    "runtime_evidence": {
+      "actor_identity": {
+        "id": "synthetic-agent",
+        "role": "repository-maintainer",
+        "type": "agent"
+      },
+      "approvals": [],
+      "continuity_snapshot": {},
+      "execution_context": {
+        "surface": "guard_sdk",
+        "target_binding": {
+          "adapter_version": "guard.repository-file.v2",
+          "assurance_class": "ntfs-sharing-locks.v1",
+          "authority_contract_hash": "sha256:f0bd37909b9bd4dfaff5651774d7b2768540c4eeab1f2d9d1d6a76a714952242",
+          "domain_resolver": "guard.target-domain-resolver.v1",
+          "schema_version": "guard_target_binding.v1",
+          "target_domain": "repository_path",
+          "workspace_binding_id": "workspace_d69f649c09134ded8c53eb5dd53090d0"
+        }
+      },
+      "replay_evidence": {},
+      "runtime_dependencies": [],
+      "schema_version": "guard_runtime_evidence_model.v1",
+      "timestamp_source": {
+        "source": "caller_supplied",
+        "timestamp": "2026-11-01T12:03:00Z"
+      }
+    },
+    "runtime_facts": {
+      "actor.principal_id": "synthetic-agent",
+      "actor.role": "repository-maintainer",
+      "actor.subject_kind": "agent",
+      "proposal.action": "modify",
+      "proposal.resource.kind": "repository_path",
+      "proposal.resource.path": "secrets/prod.key"
+    },
+    "target_binding": {
+      "adapter_version": "guard.repository-file.v2",
+      "assurance_class": "ntfs-sharing-locks.v1",
+      "authority_contract_hash": "sha256:f0bd37909b9bd4dfaff5651774d7b2768540c4eeab1f2d9d1d6a76a714952242",
+      "domain_resolver": "guard.target-domain-resolver.v1",
+      "schema_version": "guard_target_binding.v1",
+      "target_domain": "repository_path",
+      "workspace_binding_id": "workspace_d69f649c09134ded8c53eb5dd53090d0"
+    }
+  },
+  "receipt": {
+    "authority_ref": "synthetic-deny-only@1.0.0",
+    "chronology_event_ids": [
+      "guard_event_ba2c3721ece67c3faa99c8c3",
+      "guard_event_c683bb090012753aa349d0ed",
+      "guard_event_a5f4b8ae643fcc45e823c65d",
+      "guard_event_ff8c93f252d48606eb2ab1a8",
+      "guard_event_4217ff863eac23848762b6d4",
+      "guard_event_2f717c5e78191cf075cf669d",
+      "guard_event_4c49dc56a4f75ee6b5cad64a"
+    ],
+    "chronology_hash": "sha256:c945bbb1b2e4598de3b877009352205e5bd78bbd0fd00da034ad2344d8ff3297",
+    "contract_hash": "sha256:c04cc28628b98b682a07f2ccab91421885538c7b8a330afa7a780723306c9773",
+    "deterministic_identity_hash": "sha256:3e07c9b47077ae1ae04d9bd7a32d6f0daca512f78afa17cdc407fd14d06b989e",
+    "evaluation_trace_hash": "sha256:95520cd5aedc7accebdd9e8f0f636443513584c5391744c755b4478ebc066b5a",
+    "input_hashes": {
+      "actor_identity_hash": "sha256:eec58ac1645ca23427a9ed9ca02fdd25a37f89154e36954228c2c46d26038842",
+      "approval_evidence_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "authority_evidence_hash": "sha256:f0a8638bcb30d858c3a1122ed11d58ff9472dd37d35481753a43b09479972c18",
+      "compiled_authority_hash": "sha256:f0bd37909b9bd4dfaff5651774d7b2768540c4eeab1f2d9d1d6a76a714952242",
+      "continuity_posture_hash": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "evaluated_execution_request_hash": "sha256:3b7eda5dbeb4b885daf954f8e83dcd5f88a59a7022ec9c2f881cd5c81bdbd37f",
+      "execution_context_hash": "sha256:be3164e3ad6b7e432357519dcfb421f68f85d19afef594d0a188b6c4d73b5b1b",
+      "execution_request_hash": "sha256:3b7eda5dbeb4b885daf954f8e83dcd5f88a59a7022ec9c2f881cd5c81bdbd37f",
+      "replay_posture_hash": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "runtime_dependencies_hash": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "runtime_evidence_hash": "sha256:8ffa4a74d1d664dd4597678e8568ada0a6543b0484a31fd4294f352131e3a736",
+      "runtime_facts_hash": "sha256:6b3f318f3e1a444c4808218f2ff7e474af9450771adf276bab776665be704656",
+      "target_binding_hash": "sha256:e27fa668253083bd6bb2c809a1bc7a6990e5aba30c25f3796748382e672c6908",
+      "timestamp_source_hash": "sha256:c1cc5379bbb8e8464502ea699fa32c058143478acc6cd1e0ee18291c09baf5e4"
+    },
+    "lineage_continuity_hash": "sha256:75249213b892d2754c22b13c02ef3d935e0987169c201e941b7cff99378f9c0a",
+    "outcome_hash": "sha256:84704cc4420d2fba1f166c280f9f4c89c93945fa81925cbf0045c84f9d40be6e",
+    "outcome_id": "enforcement_outcome_7220354251255b85e68d072e",
+    "outcome_status": "admissible",
+    "receipt_hash": "sha256:93a9a0e9e3514c2ceed46ac374a331d727c8a71aaa959ce73bf8fcb1437b44a6",
+    "recorded_at": "2026-11-01T12:03:00Z",
+    "replay_basis_hash": "sha256:068246138dc6f7a4b97188ca7e16e8eff0ac22094affb55295671aa6b7f97bad",
+    "run_id": "guard_run_3e07c9b47077ae1ae04d9bd7",
+    "schema_version": "guard_enforcement_receipt.v1"
+  },
+  "record_hash": "sha256:fe90cb39adda62f8a14ca9933cb8746c57850282ac1091f80b0e92dc2de90347",
+  "recorded_at": "2026-11-01T12:03:00Z",
+  "run_id": "guard_run_3e07c9b47077ae1ae04d9bd7",
+  "schema_version": "guard_saved_evaluation.v1"
+}
