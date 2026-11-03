@@ -1,13 +1,14 @@
-# Waveframe Guard v0.19.0 candidate release notes
+# Waveframe Guard v0.19.1 candidate release notes
 
-**Unreleased candidate. Proposed tag: v0.19.0.** Publication and activation require
+**Unreleased candidate. Proposed tag: v0.19.1.** Publication and activation require
 coordinated authorization; the commands below apply after package availability.
 
-Install `waveframe-guard==0.19.0`, supply an approved authority, protect create and
+Install `waveframe-guard==0.19.1`, supply an approved authority, protect create and
 modify callbacks with `repository_tool(action="create" or "modify", target="path")`,
 and inspect the returned outcome, saved attestation and replay. Creation uses
-`path.create_bytes()`; modification uses `path.write_bytes()`. Supported historical
-authorities retain their existing permissions and cannot acquire creation grants.
+`path.create_bytes()`; modification uses `path.write_bytes()`. Historical explicit
+grants cannot acquire creation permissions. Live compiled v2 authority without
+an affirmative path allow is now refused; its historical evidence remains intact.
 See the [public example](examples/sdk/repository_creation_release.py).
 
 Runtime dependencies: `cricore>=0.13.0,<0.15.0`,
@@ -154,3 +155,40 @@ status-copy follow-up remains Cloud #122; a connection reports one integration.
 
 Real-repository end-to-end acceptance and hosted workflow acceptance are
 separate operator checks; disposable installed-wheel tests do not establish them.
+
+## Affirmative path grants and coordinated upgrade
+
+The 0.9.1 Ledger / 0.19.1 Guard security patch candidates require an affirmative
+path grant. Guard refuses live `compiled_authority_contract.v2` authorization
+when `target_requirements.allow` is empty, including deny-only and role-only
+authority, with an actionable diagnostic. Deny precedence and explicit grants
+remain enforced. Ledger gates new pack-1 repository approval/finalization on
+confirmed, enforceable path allows; candidate controls alone do not count.
+
+Historical bundles, receipts, hashes and approvals remain unchanged and
+verifiable. Replay retains recorded evidence and exposes any current live
+refusal; it does not restore the old permission. Historical v1 and action-scoped
+v3 evaluation semantics are unchanged. Replace missing grants with a new source
+and authority revision and fresh human review/acceptance. Never reuse an old
+approval for changed grants.
+
+Previously published Ledger 0.9.0 and Guard 0.19.0 remain affected in the reproduced
+scope. Dependency ranges still admit older packages. After separate publication
+approval, explicitly upgrade both packages:
+
+```text
+python -m pip install --upgrade governance-ledger==0.9.1 waveframe-guard==0.19.1
+python -m pip check
+```
+
+A Ledger-only upgrade does not patch an older Guard; a Guard-only upgrade does
+not supply Ledger's new-authoring gate. An already satisfied optional extra does
+not establish that both patches are installed. No Cloud activation, production
+consumer upgrade, or automatic repair of existing approvals is claimed.
+
+These are unreleased candidates. Historical action-policy certification remains
+unchanged; separate distribution acceptance must validate these exact artifacts.
+Publishing requires separate owner approval and must use only the accepted
+files, with SHA256 equality checked on PyPI for Ledger before Guard upload.
+Final tags must bind the exact accepted commits (Ledger annotated, Guard
+lightweight). No tags or publication are part of this preparation.
