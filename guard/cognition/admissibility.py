@@ -122,7 +122,8 @@ def _target_scope_constraints(
     deny_rules = requirements["deny"]
     if not isinstance(allow_rules, list) or not isinstance(deny_rules, list):
         return [_target_scope_violation("target_requirements")]
-    if not allow_rules and not deny_rules:
+    is_v2 = authority.get("schema_version") == "compiled_authority_contract.v2"
+    if not allow_rules and not deny_rules and not is_v2:
         return [_target_scope_violation("target_requirements")]
     if not all(_is_target_rule(rule) for rule in [*allow_rules, *deny_rules]):
         return [_target_scope_violation("target_requirements")]
@@ -143,6 +144,16 @@ def _target_scope_constraints(
                 "rationale": "execution target is denied by compiled target scope",
             }
         ]
+    # Execution containment only: retain the immutable legacy compiled bytes,
+    # while refusing to infer a live path grant from a prohibition or role.
+    if is_v2 and not allow_rules:
+        return [{
+            "constraint": "affirmative_path_grant",
+            "rationale": (
+                "legacy v2 authority has no affirmative path grant; obtain a new "
+                "source/authority revision with explicit path allows and fresh human approval"
+            ),
+        }]
     if allow_rules and not any(_target_rule_matches(rule, target) for rule in allow_rules):
         return [
             {

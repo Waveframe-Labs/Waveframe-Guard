@@ -1,0 +1,1254 @@
+{
+  "proposal": {
+    "schema_version": "policy_translation_proposal.v1",
+    "source_policy": {
+      "source_policy_id": "repository-policy",
+      "source_revision": "revision-1",
+      "source_policy_ref": "repository-policy@revision-1",
+      "content_encoding": "base64",
+      "source_bytes_base64": "QWdlbnRzIG1heSBtb2RpZnkgZG9jdW1lbnRhdGlvbiBidXQgbXVzdCBub3QgbW9kaWZ5IGNyeXB0b2dyYXBoaWMgbW9kdWxlcy4=",
+      "snapshot_hash": "sha256:691202d5050753658e1853f684c0789817f4bc9c2a9e7cc469f87d77b02b4c59"
+    },
+    "authority": {
+      "authority_id": "repository-authority",
+      "authority_version": "1.0.0",
+      "authority_ref": "repository-authority@1.0.0"
+    },
+    "capability_catalog": {
+      "catalog_id": "waveframe.coding-agent.repository-change",
+      "catalog_version": "1.0.0",
+      "catalog_hash": "sha256:194bb5564a574236b9018171f8662a9d186bd68cfa68522b51ba3b4197858dc7"
+    },
+    "clauses": [
+      {
+        "clause_id": "policy-clause-305424cad3cbe2a29c9a453c1e47ecfbb9168cb6092351f44d74cdba73f80328",
+        "index": 0,
+        "start_byte": 0,
+        "end_byte": 74,
+        "clause_bytes_base64": "QWdlbnRzIG1heSBtb2RpZnkgZG9jdW1lbnRhdGlvbiBidXQgbXVzdCBub3QgbW9kaWZ5IGNyeXB0b2dyYXBoaWMgbW9kdWxlcy4=",
+        "clause_hash": "sha256:691202d5050753658e1853f684c0789817f4bc9c2a9e7cc469f87d77b02b4c59",
+        "coverage_status": "partially_represented",
+        "candidate_controls": [
+          {
+            "control_type": "prefix_path_access",
+            "actor_kind": "autonomous_agent",
+            "action": "modify",
+            "resource_kind": "repository_path",
+            "fact_id": "proposal.resource.path",
+            "operator": "starts_with",
+            "effect": "deny",
+            "enforcement_point": "waveframe.guard.repository-change.v1",
+            "value": {
+              "kind": "organizational_binding",
+              "binding_id": "cryptographic-modules-path"
+            },
+            "required_runtime_facts": [
+              "actor.subject_kind",
+              "proposal.action",
+              "proposal.resource.kind",
+              "proposal.resource.path"
+            ],
+            "candidate_control_id": "candidate-control-199200950f26fc714e670717bf6085882af35512c9105336f2e8ec41486438b1"
+          }
+        ],
+        "unresolved_binding_ids": [
+          "cryptographic-modules-path"
+        ],
+        "limitation_code": "other",
+        "residual_unsupported_spans": [
+          {
+            "residual_id": "policy-residual-e7106176c5c7be052ce4548ccca7ac7c0f8f688ba38d3971aace98b746132f10",
+            "index": 0,
+            "start_byte": 18,
+            "end_byte": 31,
+            "residual_bytes_base64": "ZG9jdW1lbnRhdGlvbg==",
+            "residual_hash": "sha256:caf9f906b16a91cb0160c50abdac8bd6db9a283fa9751f9801ef991554b46a8a"
+          }
+        ]
+      }
+    ],
+    "organizational_bindings": [
+      {
+        "binding_id": "cryptographic-modules-path",
+        "binding_type": "repository_path_prefix",
+        "symbol": "cryptographic modules",
+        "question": "Which repository path contains cryptographic modules?",
+        "status": "unresolved"
+      }
+    ],
+    "translation_runs": [
+      {
+        "run_id": "translation-run-d7d59efba5e7fd10896132315f910056a3dab441a418a84eb27782426c04006a",
+        "sequence_number": 0,
+        "source_policy_ref": "repository-policy@revision-1",
+        "source_revision": "revision-1",
+        "source_snapshot_hash": "sha256:691202d5050753658e1853f684c0789817f4bc9c2a9e7cc469f87d77b02b4c59",
+        "capability_catalog": {
+          "catalog_id": "waveframe.coding-agent.repository-change",
+          "catalog_version": "1.0.0",
+          "catalog_hash": "sha256:194bb5564a574236b9018171f8662a9d186bd68cfa68522b51ba3b4197858dc7"
+        },
+        "provider_class": "hosted_model",
+        "provider_identifier": "provider/deployment",
+        "translation_template_version": "template-1",
+        "translation_template_hash": "sha256:5cde0f1298f41f7d1c8b907a36992a7a513225a2615bd6e307bf1a9149b06b40",
+        "request_configuration_id": "request-config-1",
+        "request_configuration_hash": "sha256:b7d64a9221007dfd5390f7df6cd5b8f3ea4f82faa1237141e35ebf161f5511a1",
+        "request_hash": "sha256:3286617685bbb1c98a7125614077f484421e8a8c5bd6ac89d433101af9842d2d",
+        "response_hash": "sha256:2e3aa0a786a1ff759948dff712e370cf31f5aa768c5f5ad99645692da8b1cd1b",
+        "explanation_hash": null,
+        "created_at": "2026-09-03T12:00:00Z",
+        "completed_at": "2026-09-03T12:00:01Z",
+        "previous_run_hash": null,
+        "run_hash": "sha256:52427e03cf9431a16f270db7090afc0f89f056a405675adadad3a523adcd0c08"
+      }
+    ],
+    "proposal_id": "policy-translation-proposal-b381ea0f93ea8af8e25fd324287c65348b75e86e87b30314369f8df5dda42d95",
+    "proposal_hash": "sha256:b381ea0f93ea8af8e25fd324287c65348b75e86e87b30314369f8df5dda42d95"
+  },
+  "confirmation": {
+    "schema_version": "policy_translation_confirmation.v1",
+    "proposal_id": "policy-translation-proposal-b381ea0f93ea8af8e25fd324287c65348b75e86e87b30314369f8df5dda42d95",
+    "proposal_hash": "sha256:b381ea0f93ea8af8e25fd324287c65348b75e86e87b30314369f8df5dda42d95",
+    "source_snapshot_hash": "sha256:691202d5050753658e1853f684c0789817f4bc9c2a9e7cc469f87d77b02b4c59",
+    "authority_ref": "repository-authority@1.0.0",
+    "binding_resolutions": [
+      {
+        "binding_id": "cryptographic-modules-path",
+        "binding_type": "repository_path_prefix",
+        "value": "crypto/",
+        "confirmed_by": "policy-owner",
+        "confirmed_at": "2026-09-03T12:00:30Z",
+        "resolution_hash": "sha256:3c82c53db95b69abd9500e2d4d94e03a2017ccf040e74a868d7a1ea7b1f013cf"
+      }
+    ],
+    "control_confirmations": [
+      {
+        "clause_id": "policy-clause-305424cad3cbe2a29c9a453c1e47ecfbb9168cb6092351f44d74cdba73f80328",
+        "candidate_control_id": "candidate-control-199200950f26fc714e670717bf6085882af35512c9105336f2e8ec41486438b1",
+        "confirmed_by": "policy-owner",
+        "confirmed_at": "2026-09-03T12:01:00Z",
+        "confirmation_hash": "sha256:3b954d2438f11a4b6db7682a6de57de15663bcff985cf5a03051aa62f08f6dea"
+      }
+    ],
+    "clause_coverage_decisions": [
+      {
+        "clause_id": "policy-clause-305424cad3cbe2a29c9a453c1e47ecfbb9168cb6092351f44d74cdba73f80328",
+        "coverage_status": "partially_represented",
+        "reason_code": "human-confirmed-partial",
+        "human_reason": null,
+        "acknowledged_unrepresented": true,
+        "confirmed_by": "policy-owner",
+        "confirmed_at": "2026-09-03T12:02:00Z",
+        "decision_hash": "sha256:b0ea14f30d4ce34db328683608e8f6235053e8785acf1f7a38739b2aae460572"
+      }
+    ],
+    "coverage": {
+      "total_clause_count": 1,
+      "enforced_clause_count": 1,
+      "unenforced_clause_count": 1,
+      "unresolved_clause_count": 0,
+      "fully_represented_clause_count": 0,
+      "partially_represented_clause_count": 1,
+      "entirely_unsupported_clause_count": 0,
+      "informational_clause_count": 0,
+      "unrepresented_clause_count": 1,
+      "enforced_clause_ids": [
+        "policy-clause-305424cad3cbe2a29c9a453c1e47ecfbb9168cb6092351f44d74cdba73f80328"
+      ],
+      "unenforced_clause_ids": [
+        "policy-clause-305424cad3cbe2a29c9a453c1e47ecfbb9168cb6092351f44d74cdba73f80328"
+      ],
+      "acknowledged_unrepresented_clause_ids": [
+        "policy-clause-305424cad3cbe2a29c9a453c1e47ecfbb9168cb6092351f44d74cdba73f80328"
+      ],
+      "total_control_count": 1,
+      "confirmed_control_count": 1,
+      "unresolved_control_count": 0,
+      "confirmed_control_ids": [
+        "candidate-control-199200950f26fc714e670717bf6085882af35512c9105336f2e8ec41486438b1"
+      ],
+      "unresolved_control_ids": []
+    },
+    "confirmation_hash": "sha256:d794e8fff8fd1e4e28591de718c0cffd14b147734086998015ec068e0fe613e6"
+  },
+  "approval": {
+    "schema_version": "policy_translation_approval.v1",
+    "proposal_id": "policy-translation-proposal-b381ea0f93ea8af8e25fd324287c65348b75e86e87b30314369f8df5dda42d95",
+    "proposal_hash": "sha256:b381ea0f93ea8af8e25fd324287c65348b75e86e87b30314369f8df5dda42d95",
+    "confirmation_hash": "sha256:d794e8fff8fd1e4e28591de718c0cffd14b147734086998015ec068e0fe613e6",
+    "review_hash": "sha256:564bbb2b402244fb61291cb02d52b45a97f2d18543773464b91d18594549b39e",
+    "source_policy_ref": "repository-policy@revision-1",
+    "source_snapshot_hash": "sha256:691202d5050753658e1853f684c0789817f4bc9c2a9e7cc469f87d77b02b4c59",
+    "authority_ref": "repository-authority@1.0.0",
+    "capability_catalog": {
+      "catalog_id": "waveframe.coding-agent.repository-change",
+      "catalog_version": "1.0.0",
+      "catalog_hash": "sha256:194bb5564a574236b9018171f8662a9d186bd68cfa68522b51ba3b4197858dc7"
+    },
+    "coverage": {
+      "total_clause_count": 1,
+      "enforced_clause_count": 1,
+      "unenforced_clause_count": 1,
+      "unresolved_clause_count": 0,
+      "fully_represented_clause_count": 0,
+      "partially_represented_clause_count": 1,
+      "entirely_unsupported_clause_count": 0,
+      "informational_clause_count": 0,
+      "unrepresented_clause_count": 1,
+      "enforced_clause_ids": [
+        "policy-clause-305424cad3cbe2a29c9a453c1e47ecfbb9168cb6092351f44d74cdba73f80328"
+      ],
+      "unenforced_clause_ids": [
+        "policy-clause-305424cad3cbe2a29c9a453c1e47ecfbb9168cb6092351f44d74cdba73f80328"
+      ],
+      "acknowledged_unrepresented_clause_ids": [
+        "policy-clause-305424cad3cbe2a29c9a453c1e47ecfbb9168cb6092351f44d74cdba73f80328"
+      ],
+      "total_control_count": 1,
+      "confirmed_control_count": 1,
+      "unresolved_control_count": 0,
+      "confirmed_control_ids": [
+        "candidate-control-199200950f26fc714e670717bf6085882af35512c9105336f2e8ec41486438b1"
+      ],
+      "unresolved_control_ids": []
+    },
+    "approved_by": "policy-owner",
+    "approved_at": "2026-09-03T12:03:00Z",
+    "approval_id": "policy-translation-approval-f7f59eabf11fcb1505fff624e034856e4aa461de910e9fb7e734752caa8e6922",
+    "approval_hash": "sha256:f7f59eabf11fcb1505fff624e034856e4aa461de910e9fb7e734752caa8e6922"
+  },
+  "finalization": {
+    "result_type": "policy_translation_publication",
+    "status": {
+      "constraint_ir_valid": true,
+      "runtime_fact_compatible": true,
+      "provenance_complete": true,
+      "publication_ready": true
+    },
+    "policy_translation_commitment": {
+      "schema_version": "policy_translation_commitment.v1",
+      "source_policy_ref": "repository-policy@revision-1",
+      "source_snapshot_hash": "sha256:691202d5050753658e1853f684c0789817f4bc9c2a9e7cc469f87d77b02b4c59",
+      "authority_ref": "repository-authority@1.0.0",
+      "capability_catalog": {
+        "catalog_id": "waveframe.coding-agent.repository-change",
+        "catalog_version": "1.0.0",
+        "catalog_hash": "sha256:194bb5564a574236b9018171f8662a9d186bd68cfa68522b51ba3b4197858dc7"
+      },
+      "customer_bindings": [
+        {
+          "binding_id": "cryptographic-modules-path",
+          "binding_type": "repository_path_prefix",
+          "value": "crypto/",
+          "confirmed_by": "policy-owner",
+          "confirmed_at": "2026-09-03T12:00:30Z",
+          "resolution_hash": "sha256:3c82c53db95b69abd9500e2d4d94e03a2017ccf040e74a868d7a1ea7b1f013cf"
+        }
+      ],
+      "clauses": [
+        {
+          "clause_id": "policy-clause-305424cad3cbe2a29c9a453c1e47ecfbb9168cb6092351f44d74cdba73f80328",
+          "index": 0,
+          "start_byte": 0,
+          "end_byte": 74,
+          "clause_bytes_base64": "QWdlbnRzIG1heSBtb2RpZnkgZG9jdW1lbnRhdGlvbiBidXQgbXVzdCBub3QgbW9kaWZ5IGNyeXB0b2dyYXBoaWMgbW9kdWxlcy4=",
+          "clause_hash": "sha256:691202d5050753658e1853f684c0789817f4bc9c2a9e7cc469f87d77b02b4c59",
+          "customer_coverage_state": "Partially enforceable",
+          "limitation_code": "other",
+          "customer_explanation": "Waveframe cannot enforce the explicitly identified remaining part of this clause yet.",
+          "controls": [
+            {
+              "candidate_control": {
+                "control_type": "prefix_path_access",
+                "actor_kind": "autonomous_agent",
+                "action": "modify",
+                "resource_kind": "repository_path",
+                "fact_id": "proposal.resource.path",
+                "operator": "starts_with",
+                "effect": "deny",
+                "enforcement_point": "waveframe.guard.repository-change.v1",
+                "value": {
+                  "kind": "organizational_binding",
+                  "binding_id": "cryptographic-modules-path"
+                },
+                "required_runtime_facts": [
+                  "actor.subject_kind",
+                  "proposal.action",
+                  "proposal.resource.kind",
+                  "proposal.resource.path"
+                ],
+                "candidate_control_id": "candidate-control-199200950f26fc714e670717bf6085882af35512c9105336f2e8ec41486438b1"
+              },
+              "resolved_value": "crypto/",
+              "constraint_id": "constraint-886bcc08f88786a7d9a254b4ade887d65e0dde9d5f475b053421083a347da0db",
+              "human_confirmation": {
+                "clause_id": "policy-clause-305424cad3cbe2a29c9a453c1e47ecfbb9168cb6092351f44d74cdba73f80328",
+                "candidate_control_id": "candidate-control-199200950f26fc714e670717bf6085882af35512c9105336f2e8ec41486438b1",
+                "confirmed_by": "policy-owner",
+                "confirmed_at": "2026-09-03T12:01:00Z",
+                "confirmation_hash": "sha256:3b954d2438f11a4b6db7682a6de57de15663bcff985cf5a03051aa62f08f6dea"
+              },
+              "customer_explanation": "Automated agents are blocked from modifying files under crypto/."
+            }
+          ],
+          "residuals": [
+            {
+              "residual_id": "policy-residual-e7106176c5c7be052ce4548ccca7ac7c0f8f688ba38d3971aace98b746132f10",
+              "index": 0,
+              "start_byte": 18,
+              "end_byte": 31,
+              "residual_bytes_base64": "ZG9jdW1lbnRhdGlvbg==",
+              "residual_hash": "sha256:caf9f906b16a91cb0160c50abdac8bd6db9a283fa9751f9801ef991554b46a8a",
+              "acknowledgment": {
+                "clause_id": "policy-clause-305424cad3cbe2a29c9a453c1e47ecfbb9168cb6092351f44d74cdba73f80328",
+                "residual_id": "policy-residual-e7106176c5c7be052ce4548ccca7ac7c0f8f688ba38d3971aace98b746132f10",
+                "acknowledged_by": "policy-owner",
+                "acknowledged_at": "2026-09-03T12:02:00Z",
+                "clause_decision_hash": "sha256:b0ea14f30d4ce34db328683608e8f6235053e8785acf1f7a38739b2aae460572",
+                "acknowledgment_hash": "sha256:4923b9bf0ef3e3ec0c544d4e7196a25f76e95f5d7beaf2ce6aa9146b71360248",
+                "acknowledgment_id": "residual-acknowledgment-4923b9bf0ef3e3ec0c544d4e7196a25f76e95f5d7beaf2ce6aa9146b71360248"
+              }
+            }
+          ],
+          "human_coverage_decision": {
+            "clause_id": "policy-clause-305424cad3cbe2a29c9a453c1e47ecfbb9168cb6092351f44d74cdba73f80328",
+            "coverage_status": "partially_represented",
+            "reason_code": "human-confirmed-partial",
+            "human_reason": null,
+            "acknowledged_unrepresented": true,
+            "confirmed_by": "policy-owner",
+            "confirmed_at": "2026-09-03T12:02:00Z",
+            "decision_hash": "sha256:b0ea14f30d4ce34db328683608e8f6235053e8785acf1f7a38739b2aae460572"
+          }
+        }
+      ],
+      "coverage": {
+        "total_clause_count": 1,
+        "full_clause_count": 0,
+        "partial_clause_count": 1,
+        "waiting_clause_count": 0,
+        "needs_answer_clause_count": 0,
+        "needs_connection_clause_count": 0,
+        "unenforced_clause_count": 0,
+        "informational_clause_count": 0,
+        "confirmed_control_count": 1,
+        "acknowledged_residual_count": 1
+      },
+      "commitment_hash": "sha256:55ae2c06620858cc26e825de10de4bf8a6847bb1b69fec478e602deb4235f176",
+      "commitment_id": "policy-translation-commitment-55ae2c06620858cc26e825de10de4bf8a6847bb1b69fec478e602deb4235f176"
+    },
+    "constraint_ir_validation": {
+      "valid": true,
+      "constraint_count": 1,
+      "required_runtime_facts": [
+        "actor.subject_kind",
+        "proposal.action",
+        "proposal.resource.kind",
+        "proposal.resource.path"
+      ],
+      "ir_hash": "sha256:17862fb359ebecb1938e94ee3894ad53b1ee14dd15e188f65a4f76f3a45b511e"
+    },
+    "runtime_fact_compatibility": {
+      "compatible": true,
+      "constraint_ir_hash": "sha256:17862fb359ebecb1938e94ee3894ad53b1ee14dd15e188f65a4f76f3a45b511e",
+      "runtime_fact_schema_hash": "sha256:c1595ef8d77165a7a486151673f01eda5a93000786f47e1f048875f17eb396a1",
+      "diagnostics": []
+    },
+    "approval_record": {
+      "approved_by": "policy-owner",
+      "approved_at": "2026-09-03T12:03:00Z",
+      "approved_policy_translation_commitment_hash": "sha256:55ae2c06620858cc26e825de10de4bf8a6847bb1b69fec478e602deb4235f176",
+      "approved_constraint_ir_hash": "sha256:17862fb359ebecb1938e94ee3894ad53b1ee14dd15e188f65a4f76f3a45b511e",
+      "approved_semantic_commit_hash": "sha256:accbbd3b8b9615a6c1dd8ee9a5820cbda14724717e6ca2aeb3790708cb83ee73",
+      "approval_record_hash": "sha256:7e159024ad25d3a53b30adb77d834f3acf7dd5c4a98b26cf553ab3ec01b3d028",
+      "approval_id": "publication-approval-v3-7e159024ad25d3a53b30adb77d834f3acf7dd5c4a98b26cf553ab3ec01b3d028"
+    },
+    "semantic_commit_bundle": {
+      "schema_version": "semantic_commit_bundle.v1",
+      "source_id": "repository-policy",
+      "source_hash": "sha256:691202d5050753658e1853f684c0789817f4bc9c2a9e7cc469f87d77b02b4c59",
+      "extraction_id": "policy-translation-commitment-55ae2c06620858cc26e825de10de4bf8a6847bb1b69fec478e602deb4235f176",
+      "semantic_commit_id": "semantic-commit-accbbd3b8b96",
+      "semantic_commit_hash": "sha256:accbbd3b8b9615a6c1dd8ee9a5820cbda14724717e6ca2aeb3790708cb83ee73",
+      "committed_at": "2026-09-03T12:04:00Z",
+      "committed_by": "ledger-committer",
+      "committed_capabilities": [],
+      "resolved_interpretations": [
+        {
+          "clause_id": "policy-clause-305424cad3cbe2a29c9a453c1e47ecfbb9168cb6092351f44d74cdba73f80328",
+          "coverage_status": "partially_represented",
+          "reason_code": "human-confirmed-partial",
+          "human_reason": null,
+          "acknowledged_unrepresented": true,
+          "confirmed_by": "policy-owner",
+          "confirmed_at": "2026-09-03T12:02:00Z",
+          "decision_hash": "sha256:b0ea14f30d4ce34db328683608e8f6235053e8785acf1f7a38739b2aae460572"
+        }
+      ],
+      "approved_constraints": {
+        "approval": {
+          "minimum_approvals": null,
+          "independent": false,
+          "required_roles": [],
+          "self_approval_prohibited": false,
+          "attestation_required": false,
+          "human_in_loop_required": false
+        },
+        "escalation": {
+          "threshold": null,
+          "review_role": "escalation_review",
+          "escalation_semantics": ""
+        },
+        "continuity": {
+          "revalidation_required": false,
+          "revocation_invalidates_resume": false,
+          "state_snapshot_required": false,
+          "snapshot_hash_algorithm": null,
+          "snapshot_subject": null,
+          "resume_comparison": null,
+          "drift_result": null,
+          "identity_continuity_required": false
+        },
+        "execution": {
+          "execution_context": {},
+          "temporal_validation": {},
+          "runtime_enforced_by": "Guard/Cloud",
+          "ledger_boundary": "models deterministic runtime representation only"
+        }
+      },
+      "lifecycle_posture": {
+        "revocation_invalidates_resume": false,
+        "supersession_requires_revalidation": false
+      },
+      "continuity_posture": {
+        "revalidation_required": false,
+        "revocation_invalidates_resume": false,
+        "state_snapshot_required": false,
+        "snapshot_hash_algorithm": null,
+        "snapshot_subject": null,
+        "resume_comparison": null,
+        "drift_result": null,
+        "identity_continuity_required": false
+      },
+      "identity_bindings": {
+        "governance_actor": {},
+        "authority_role_binding": {},
+        "approval_chain_semantics": {},
+        "identity_continuity_semantics": {}
+      },
+      "execution_admissibility_semantics": {
+        "execution_context": {},
+        "temporal_validation": {},
+        "runtime_enforced_by": "Guard/Cloud",
+        "ledger_boundary": "models deterministic runtime representation only"
+      },
+      "replay_obligations": [],
+      "committed_semantic_meaning": {
+        "contract_id": "repository-authority",
+        "contract_version": "1.0.0",
+        "governed_targets": [
+          "crypto/"
+        ],
+        "governed_operations": [
+          "modify"
+        ],
+        "required_actor_roles": [],
+        "target_rules": {
+          "allow": [],
+          "deny": [
+            {
+              "match": "prefix",
+              "value": "crypto/"
+            }
+          ]
+        },
+        "approval_thresholds": [],
+        "separation_of_duties_constraints": [],
+        "confirmed_rules": [
+          {
+            "rule_type": "target",
+            "effect": "deny",
+            "match": "prefix",
+            "value": "crypto/",
+            "rule_id": "rule-5801aa92e158af2f80e551b9f2bb616a5a2f6284642f5adaca65d8860aa636dd"
+          }
+        ],
+        "canonical_compiler_input": {
+          "contract_id": "repository-authority",
+          "contract_version": "1.0.0",
+          "targets": {
+            "allow": [],
+            "deny": [
+              {
+                "match": "prefix",
+                "value": "crypto/"
+              }
+            ]
+          }
+        },
+        "policy_translation_commitment": {
+          "commitment_id": "policy-translation-commitment-55ae2c06620858cc26e825de10de4bf8a6847bb1b69fec478e602deb4235f176",
+          "commitment_hash": "sha256:55ae2c06620858cc26e825de10de4bf8a6847bb1b69fec478e602deb4235f176",
+          "coverage": {
+            "total_clause_count": 1,
+            "full_clause_count": 0,
+            "partial_clause_count": 1,
+            "waiting_clause_count": 0,
+            "needs_answer_clause_count": 0,
+            "needs_connection_clause_count": 0,
+            "unenforced_clause_count": 0,
+            "informational_clause_count": 0,
+            "confirmed_control_count": 1,
+            "acknowledged_residual_count": 1
+          },
+          "compiler_binding_hash": "sha256:1e4b6660d3412c89755cd9344b8405881262cabf228055fda7e4243d53701836"
+        }
+      },
+      "non_goals": [
+        "does_not_interpret_raw_policy_text",
+        "does_not_compile_provisional_extraction",
+        "does_not_resolve_ambiguities",
+        "does_not_call_guard",
+        "does_not_determine_runtime_admissibility"
+      ],
+      "bundle_hash": "sha256:8f9b67d23c9ff40a998824f19ffc106e2b2558921e1f20af11bde890b1ff0b7a"
+    },
+    "canonical_compiler_input": {
+      "contract_id": "repository-authority",
+      "contract_version": "1.0.0",
+      "targets": {
+        "allow": [],
+        "deny": [
+          {
+            "match": "prefix",
+            "value": "crypto/"
+          }
+        ]
+      }
+    },
+    "compiled_authority_contract": {
+      "contract_id": "repository-authority",
+      "contract_version": "1.0.0",
+      "authority_requirements": {},
+      "approval_requirements": {},
+      "artifact_requirements": {},
+      "stage_requirements": {},
+      "invariants": {},
+      "target_requirements": {
+        "allow": [],
+        "deny": [
+          {
+            "match": "prefix",
+            "value": "crypto/"
+          }
+        ]
+      },
+      "contract_hash": "sha256:c1e3cebb67d61fd1be30eb91639deaa71d510ad2fc46acda1b4078c572b1b5a7",
+      "schema_version": "compiled_authority_contract.v2",
+      "lineage": {
+        "schema_version": "governance_authority_lineage.v1",
+        "source_hash": "sha256:691202d5050753658e1853f684c0789817f4bc9c2a9e7cc469f87d77b02b4c59",
+        "compilation_report_hash": "sha256:55ae2c06620858cc26e825de10de4bf8a6847bb1b69fec478e602deb4235f176",
+        "review_id": "policy-translation-commitment-55ae2c06620858cc26e825de10de4bf8a6847bb1b69fec478e602deb4235f176"
+      },
+      "authority_ref": "repository-authority@1.0.0",
+      "compiled_from": {
+        "schema_version": "semantic_commit_bundle.v1",
+        "semantic_commit_id": "semantic-commit-accbbd3b8b96",
+        "semantic_commit_hash": "sha256:accbbd3b8b9615a6c1dd8ee9a5820cbda14724717e6ca2aeb3790708cb83ee73",
+        "source_hash": "sha256:691202d5050753658e1853f684c0789817f4bc9c2a9e7cc469f87d77b02b4c59",
+        "resolved_interpretation_count": 1
+      }
+    },
+    "governance_impact_preview": {
+      "schema_version": "governance_impact_preview.v1",
+      "authority_ref": "repository-authority@1.0.0",
+      "contract_id": "repository-authority",
+      "contract_version": "1.0.0",
+      "contract_hash": "sha256:c1e3cebb67d61fd1be30eb91639deaa71d510ad2fc46acda1b4078c572b1b5a7",
+      "governance_summary": "Repository Authority are governed by repository-authority@1.0.0.",
+      "enforcement_behavior": [
+        "Executions follow the published authority contract requirements."
+      ],
+      "operational_consequences": [
+        "Blocked executions generate immutable replay and evidence artifacts."
+      ],
+      "lifecycle_implications": [
+        "Lifecycle continuity follows the authority contract without additional stage constraints."
+      ],
+      "example_governed_outcomes": [
+        {
+          "outcome": "allowed_execution",
+          "description": "Execution proceeds when applicable authority, approval, and evidence requirements are satisfied."
+        },
+        {
+          "outcome": "blocked_execution",
+          "description": "Execution is blocked when required authority evidence is missing."
+        }
+      ]
+    },
+    "publication_manifest": {
+      "schema_version": "publication_manifest.v1",
+      "publication_id": "publication-1",
+      "published_at": "2026-09-03T12:05:00Z",
+      "published_by": "ledger-publisher",
+      "contracts": [
+        {
+          "contract_id": "repository-authority",
+          "contract_version": "1.0.0",
+          "contract_hash": "sha256:c1e3cebb67d61fd1be30eb91639deaa71d510ad2fc46acda1b4078c572b1b5a7",
+          "source_hash": "sha256:691202d5050753658e1853f684c0789817f4bc9c2a9e7cc469f87d77b02b4c59",
+          "path": "contracts/repository-authority-1.0.0.contract.json"
+        }
+      ],
+      "reviews": [
+        {
+          "path": "reviews/repository-policy.policy-translation.json"
+        }
+      ],
+      "snapshots": [
+        {
+          "path": "snapshots/repository-policy.source.json"
+        }
+      ]
+    },
+    "authority_bundle": {
+      "schema_version": "authority_bundle.v3",
+      "provenance_complete": true,
+      "source_policy": {
+        "source_policy_id": "repository-policy",
+        "source_revision": "revision-1",
+        "source_policy_ref": "repository-policy@revision-1",
+        "content_encoding": "base64",
+        "source_bytes_base64": "QWdlbnRzIG1heSBtb2RpZnkgZG9jdW1lbnRhdGlvbiBidXQgbXVzdCBub3QgbW9kaWZ5IGNyeXB0b2dyYXBoaWMgbW9kdWxlcy4=",
+        "snapshot_hash": "sha256:691202d5050753658e1853f684c0789817f4bc9c2a9e7cc469f87d77b02b4c59"
+      },
+      "policy_translation_commitment": {
+        "schema_version": "policy_translation_commitment.v1",
+        "source_policy_ref": "repository-policy@revision-1",
+        "source_snapshot_hash": "sha256:691202d5050753658e1853f684c0789817f4bc9c2a9e7cc469f87d77b02b4c59",
+        "authority_ref": "repository-authority@1.0.0",
+        "capability_catalog": {
+          "catalog_id": "waveframe.coding-agent.repository-change",
+          "catalog_version": "1.0.0",
+          "catalog_hash": "sha256:194bb5564a574236b9018171f8662a9d186bd68cfa68522b51ba3b4197858dc7"
+        },
+        "customer_bindings": [
+          {
+            "binding_id": "cryptographic-modules-path",
+            "binding_type": "repository_path_prefix",
+            "value": "crypto/",
+            "confirmed_by": "policy-owner",
+            "confirmed_at": "2026-09-03T12:00:30Z",
+            "resolution_hash": "sha256:3c82c53db95b69abd9500e2d4d94e03a2017ccf040e74a868d7a1ea7b1f013cf"
+          }
+        ],
+        "clauses": [
+          {
+            "clause_id": "policy-clause-305424cad3cbe2a29c9a453c1e47ecfbb9168cb6092351f44d74cdba73f80328",
+            "index": 0,
+            "start_byte": 0,
+            "end_byte": 74,
+            "clause_bytes_base64": "QWdlbnRzIG1heSBtb2RpZnkgZG9jdW1lbnRhdGlvbiBidXQgbXVzdCBub3QgbW9kaWZ5IGNyeXB0b2dyYXBoaWMgbW9kdWxlcy4=",
+            "clause_hash": "sha256:691202d5050753658e1853f684c0789817f4bc9c2a9e7cc469f87d77b02b4c59",
+            "customer_coverage_state": "Partially enforceable",
+            "limitation_code": "other",
+            "customer_explanation": "Waveframe cannot enforce the explicitly identified remaining part of this clause yet.",
+            "controls": [
+              {
+                "candidate_control": {
+                  "control_type": "prefix_path_access",
+                  "actor_kind": "autonomous_agent",
+                  "action": "modify",
+                  "resource_kind": "repository_path",
+                  "fact_id": "proposal.resource.path",
+                  "operator": "starts_with",
+                  "effect": "deny",
+                  "enforcement_point": "waveframe.guard.repository-change.v1",
+                  "value": {
+                    "kind": "organizational_binding",
+                    "binding_id": "cryptographic-modules-path"
+                  },
+                  "required_runtime_facts": [
+                    "actor.subject_kind",
+                    "proposal.action",
+                    "proposal.resource.kind",
+                    "proposal.resource.path"
+                  ],
+                  "candidate_control_id": "candidate-control-199200950f26fc714e670717bf6085882af35512c9105336f2e8ec41486438b1"
+                },
+                "resolved_value": "crypto/",
+                "constraint_id": "constraint-886bcc08f88786a7d9a254b4ade887d65e0dde9d5f475b053421083a347da0db",
+                "human_confirmation": {
+                  "clause_id": "policy-clause-305424cad3cbe2a29c9a453c1e47ecfbb9168cb6092351f44d74cdba73f80328",
+                  "candidate_control_id": "candidate-control-199200950f26fc714e670717bf6085882af35512c9105336f2e8ec41486438b1",
+                  "confirmed_by": "policy-owner",
+                  "confirmed_at": "2026-09-03T12:01:00Z",
+                  "confirmation_hash": "sha256:3b954d2438f11a4b6db7682a6de57de15663bcff985cf5a03051aa62f08f6dea"
+                },
+                "customer_explanation": "Automated agents are blocked from modifying files under crypto/."
+              }
+            ],
+            "residuals": [
+              {
+                "residual_id": "policy-residual-e7106176c5c7be052ce4548ccca7ac7c0f8f688ba38d3971aace98b746132f10",
+                "index": 0,
+                "start_byte": 18,
+                "end_byte": 31,
+                "residual_bytes_base64": "ZG9jdW1lbnRhdGlvbg==",
+                "residual_hash": "sha256:caf9f906b16a91cb0160c50abdac8bd6db9a283fa9751f9801ef991554b46a8a",
+                "acknowledgment": {
+                  "clause_id": "policy-clause-305424cad3cbe2a29c9a453c1e47ecfbb9168cb6092351f44d74cdba73f80328",
+                  "residual_id": "policy-residual-e7106176c5c7be052ce4548ccca7ac7c0f8f688ba38d3971aace98b746132f10",
+                  "acknowledged_by": "policy-owner",
+                  "acknowledged_at": "2026-09-03T12:02:00Z",
+                  "clause_decision_hash": "sha256:b0ea14f30d4ce34db328683608e8f6235053e8785acf1f7a38739b2aae460572",
+                  "acknowledgment_hash": "sha256:4923b9bf0ef3e3ec0c544d4e7196a25f76e95f5d7beaf2ce6aa9146b71360248",
+                  "acknowledgment_id": "residual-acknowledgment-4923b9bf0ef3e3ec0c544d4e7196a25f76e95f5d7beaf2ce6aa9146b71360248"
+                }
+              }
+            ],
+            "human_coverage_decision": {
+              "clause_id": "policy-clause-305424cad3cbe2a29c9a453c1e47ecfbb9168cb6092351f44d74cdba73f80328",
+              "coverage_status": "partially_represented",
+              "reason_code": "human-confirmed-partial",
+              "human_reason": null,
+              "acknowledged_unrepresented": true,
+              "confirmed_by": "policy-owner",
+              "confirmed_at": "2026-09-03T12:02:00Z",
+              "decision_hash": "sha256:b0ea14f30d4ce34db328683608e8f6235053e8785acf1f7a38739b2aae460572"
+            }
+          }
+        ],
+        "coverage": {
+          "total_clause_count": 1,
+          "full_clause_count": 0,
+          "partial_clause_count": 1,
+          "waiting_clause_count": 0,
+          "needs_answer_clause_count": 0,
+          "needs_connection_clause_count": 0,
+          "unenforced_clause_count": 0,
+          "informational_clause_count": 0,
+          "confirmed_control_count": 1,
+          "acknowledged_residual_count": 1
+        },
+        "commitment_hash": "sha256:55ae2c06620858cc26e825de10de4bf8a6847bb1b69fec478e602deb4235f176",
+        "commitment_id": "policy-translation-commitment-55ae2c06620858cc26e825de10de4bf8a6847bb1b69fec478e602deb4235f176"
+      },
+      "constraint_ir": {
+        "schema_version": "constraint_ir.v1",
+        "domain_pack": {
+          "domain_pack_id": "repository-changes",
+          "domain_pack_version": "1.0.0",
+          "domain_pack_hash": "sha256:4b6ff9a3ebf3b419151fbaa3f899012dca39ff354de8e768da05146ad0c64b80"
+        },
+        "runtime_fact_schema_hash": "sha256:c1595ef8d77165a7a486151673f01eda5a93000786f47e1f048875f17eb396a1",
+        "constraints": [
+          {
+            "constraint_id": "constraint-886bcc08f88786a7d9a254b4ade887d65e0dde9d5f475b053421083a347da0db",
+            "subject": {
+              "kind": "subject_kind",
+              "value": "agent"
+            },
+            "acting_role": null,
+            "action": "modify",
+            "resource": {
+              "kind": "repository_path",
+              "match": "prefix",
+              "value": "crypto/"
+            },
+            "effect": "deny",
+            "condition": null,
+            "obligations": {
+              "approvals": [],
+              "evidence": [],
+              "separation_of_duties": []
+            },
+            "exceptions": [],
+            "required_runtime_facts": [
+              "actor.subject_kind",
+              "proposal.action",
+              "proposal.resource.kind",
+              "proposal.resource.path"
+            ]
+          }
+        ],
+        "ir_hash": "sha256:17862fb359ebecb1938e94ee3894ad53b1ee14dd15e188f65a4f76f3a45b511e"
+      },
+      "runtime_fact_schema": {
+        "schema_version": "runtime_fact_schema.v1",
+        "schema_id": "repository-changes-runtime",
+        "schema_version_number": "1.0.0",
+        "name": "Repository change proposal facts",
+        "facts": [
+          {
+            "fact_id": "actor.subject_kind",
+            "type": "enum",
+            "enum_values": [
+              "agent"
+            ],
+            "canonical_unit": null,
+            "required": true,
+            "derivation": {
+              "kind": "proposal_field",
+              "field_path": "/actor/subject_kind"
+            },
+            "comparison_operators": [
+              "==",
+              "!="
+            ]
+          },
+          {
+            "fact_id": "actor.principal_id",
+            "type": "string",
+            "enum_values": null,
+            "canonical_unit": null,
+            "required": false,
+            "derivation": {
+              "kind": "proposal_field",
+              "field_path": "/actor/principal_id"
+            },
+            "comparison_operators": [
+              "==",
+              "!="
+            ]
+          },
+          {
+            "fact_id": "actor.role",
+            "type": "enum",
+            "enum_values": [
+              "repository-maintainer",
+              "repository-reviewer",
+              "security-reviewer"
+            ],
+            "canonical_unit": null,
+            "required": false,
+            "derivation": {
+              "kind": "proposal_field",
+              "field_path": "/actor/role"
+            },
+            "comparison_operators": [
+              "==",
+              "!="
+            ]
+          },
+          {
+            "fact_id": "proposal.action",
+            "type": "enum",
+            "enum_values": [
+              "modify"
+            ],
+            "canonical_unit": null,
+            "required": true,
+            "derivation": {
+              "kind": "proposal_field",
+              "field_path": "/action"
+            },
+            "comparison_operators": [
+              "==",
+              "!="
+            ]
+          },
+          {
+            "fact_id": "proposal.resource.kind",
+            "type": "enum",
+            "enum_values": [
+              "repository_change",
+              "repository_path"
+            ],
+            "canonical_unit": null,
+            "required": true,
+            "derivation": {
+              "kind": "proposal_field",
+              "field_path": "/resource/kind"
+            },
+            "comparison_operators": [
+              "==",
+              "!="
+            ]
+          },
+          {
+            "fact_id": "proposal.resource.path",
+            "type": "string",
+            "enum_values": null,
+            "canonical_unit": null,
+            "required": false,
+            "derivation": {
+              "kind": "proposal_field",
+              "field_path": "/resource/path"
+            },
+            "comparison_operators": [
+              "==",
+              "!=",
+              "starts_with"
+            ]
+          }
+        ],
+        "schema_hash": "sha256:c1595ef8d77165a7a486151673f01eda5a93000786f47e1f048875f17eb396a1"
+      },
+      "domain_pack": {
+        "domain_pack_id": "repository-changes",
+        "domain_pack_version": "1.0.0",
+        "domain_pack_hash": "sha256:4b6ff9a3ebf3b419151fbaa3f899012dca39ff354de8e768da05146ad0c64b80"
+      },
+      "compiler_binding": {
+        "constraint_ir_schema_version": "constraint_ir.v1",
+        "domain_pack": {
+          "domain_pack_id": "repository-changes",
+          "domain_pack_version": "1.0.0",
+          "domain_pack_hash": "sha256:4b6ff9a3ebf3b419151fbaa3f899012dca39ff354de8e768da05146ad0c64b80"
+        },
+        "grammar_compiler": {
+          "compiler_id": "waveframe.repository-changes.grammar.v1",
+          "compiler_version": "1.0.0"
+        },
+        "compiler_lowering": {
+          "lowering_id": "waveframe.repository-changes.lowering.v1",
+          "lowering_version": "1.0.0"
+        },
+        "control_emitters": [
+          {
+            "mapping_control_id": "prefix-path-access",
+            "emitter_id": "waveframe.repository-changes.emitter.prefix-path-access.v1"
+          }
+        ],
+        "compiled_contract_schema_version": "compiled_authority_contract.v2",
+        "compiler_binding_hash": "sha256:1e4b6660d3412c89755cd9344b8405881262cabf228055fda7e4243d53701836"
+      },
+      "semantic_commit_bundle": {
+        "schema_version": "semantic_commit_bundle.v1",
+        "source_id": "repository-policy",
+        "source_hash": "sha256:691202d5050753658e1853f684c0789817f4bc9c2a9e7cc469f87d77b02b4c59",
+        "extraction_id": "policy-translation-commitment-55ae2c06620858cc26e825de10de4bf8a6847bb1b69fec478e602deb4235f176",
+        "semantic_commit_id": "semantic-commit-accbbd3b8b96",
+        "semantic_commit_hash": "sha256:accbbd3b8b9615a6c1dd8ee9a5820cbda14724717e6ca2aeb3790708cb83ee73",
+        "committed_at": "2026-09-03T12:04:00Z",
+        "committed_by": "ledger-committer",
+        "committed_capabilities": [],
+        "resolved_interpretations": [
+          {
+            "clause_id": "policy-clause-305424cad3cbe2a29c9a453c1e47ecfbb9168cb6092351f44d74cdba73f80328",
+            "coverage_status": "partially_represented",
+            "reason_code": "human-confirmed-partial",
+            "human_reason": null,
+            "acknowledged_unrepresented": true,
+            "confirmed_by": "policy-owner",
+            "confirmed_at": "2026-09-03T12:02:00Z",
+            "decision_hash": "sha256:b0ea14f30d4ce34db328683608e8f6235053e8785acf1f7a38739b2aae460572"
+          }
+        ],
+        "approved_constraints": {
+          "approval": {
+            "minimum_approvals": null,
+            "independent": false,
+            "required_roles": [],
+            "self_approval_prohibited": false,
+            "attestation_required": false,
+            "human_in_loop_required": false
+          },
+          "escalation": {
+            "threshold": null,
+            "review_role": "escalation_review",
+            "escalation_semantics": ""
+          },
+          "continuity": {
+            "revalidation_required": false,
+            "revocation_invalidates_resume": false,
+            "state_snapshot_required": false,
+            "snapshot_hash_algorithm": null,
+            "snapshot_subject": null,
+            "resume_comparison": null,
+            "drift_result": null,
+            "identity_continuity_required": false
+          },
+          "execution": {
+            "execution_context": {},
+            "temporal_validation": {},
+            "runtime_enforced_by": "Guard/Cloud",
+            "ledger_boundary": "models deterministic runtime representation only"
+          }
+        },
+        "lifecycle_posture": {
+          "revocation_invalidates_resume": false,
+          "supersession_requires_revalidation": false
+        },
+        "continuity_posture": {
+          "revalidation_required": false,
+          "revocation_invalidates_resume": false,
+          "state_snapshot_required": false,
+          "snapshot_hash_algorithm": null,
+          "snapshot_subject": null,
+          "resume_comparison": null,
+          "drift_result": null,
+          "identity_continuity_required": false
+        },
+        "identity_bindings": {
+          "governance_actor": {},
+          "authority_role_binding": {},
+          "approval_chain_semantics": {},
+          "identity_continuity_semantics": {}
+        },
+        "execution_admissibility_semantics": {
+          "execution_context": {},
+          "temporal_validation": {},
+          "runtime_enforced_by": "Guard/Cloud",
+          "ledger_boundary": "models deterministic runtime representation only"
+        },
+        "replay_obligations": [],
+        "committed_semantic_meaning": {
+          "contract_id": "repository-authority",
+          "contract_version": "1.0.0",
+          "governed_targets": [
+            "crypto/"
+          ],
+          "governed_operations": [
+            "modify"
+          ],
+          "required_actor_roles": [],
+          "target_rules": {
+            "allow": [],
+            "deny": [
+              {
+                "match": "prefix",
+                "value": "crypto/"
+              }
+            ]
+          },
+          "approval_thresholds": [],
+          "separation_of_duties_constraints": [],
+          "confirmed_rules": [
+            {
+              "rule_type": "target",
+              "effect": "deny",
+              "match": "prefix",
+              "value": "crypto/",
+              "rule_id": "rule-5801aa92e158af2f80e551b9f2bb616a5a2f6284642f5adaca65d8860aa636dd"
+            }
+          ],
+          "canonical_compiler_input": {
+            "contract_id": "repository-authority",
+            "contract_version": "1.0.0",
+            "targets": {
+              "allow": [],
+              "deny": [
+                {
+                  "match": "prefix",
+                  "value": "crypto/"
+                }
+              ]
+            }
+          },
+          "policy_translation_commitment": {
+            "commitment_id": "policy-translation-commitment-55ae2c06620858cc26e825de10de4bf8a6847bb1b69fec478e602deb4235f176",
+            "commitment_hash": "sha256:55ae2c06620858cc26e825de10de4bf8a6847bb1b69fec478e602deb4235f176",
+            "coverage": {
+              "total_clause_count": 1,
+              "full_clause_count": 0,
+              "partial_clause_count": 1,
+              "waiting_clause_count": 0,
+              "needs_answer_clause_count": 0,
+              "needs_connection_clause_count": 0,
+              "unenforced_clause_count": 0,
+              "informational_clause_count": 0,
+              "confirmed_control_count": 1,
+              "acknowledged_residual_count": 1
+            },
+            "compiler_binding_hash": "sha256:1e4b6660d3412c89755cd9344b8405881262cabf228055fda7e4243d53701836"
+          }
+        },
+        "non_goals": [
+          "does_not_interpret_raw_policy_text",
+          "does_not_compile_provisional_extraction",
+          "does_not_resolve_ambiguities",
+          "does_not_call_guard",
+          "does_not_determine_runtime_admissibility"
+        ],
+        "bundle_hash": "sha256:8f9b67d23c9ff40a998824f19ffc106e2b2558921e1f20af11bde890b1ff0b7a"
+      },
+      "compiled_authority_contract": {
+        "contract_id": "repository-authority",
+        "contract_version": "1.0.0",
+        "authority_requirements": {},
+        "approval_requirements": {},
+        "artifact_requirements": {},
+        "stage_requirements": {},
+        "invariants": {},
+        "target_requirements": {
+          "allow": [],
+          "deny": [
+            {
+              "match": "prefix",
+              "value": "crypto/"
+            }
+          ]
+        },
+        "contract_hash": "sha256:c1e3cebb67d61fd1be30eb91639deaa71d510ad2fc46acda1b4078c572b1b5a7",
+        "schema_version": "compiled_authority_contract.v2",
+        "lineage": {
+          "schema_version": "governance_authority_lineage.v1",
+          "source_hash": "sha256:691202d5050753658e1853f684c0789817f4bc9c2a9e7cc469f87d77b02b4c59",
+          "compilation_report_hash": "sha256:55ae2c06620858cc26e825de10de4bf8a6847bb1b69fec478e602deb4235f176",
+          "review_id": "policy-translation-commitment-55ae2c06620858cc26e825de10de4bf8a6847bb1b69fec478e602deb4235f176"
+        },
+        "authority_ref": "repository-authority@1.0.0",
+        "compiled_from": {
+          "schema_version": "semantic_commit_bundle.v1",
+          "semantic_commit_id": "semantic-commit-accbbd3b8b96",
+          "semantic_commit_hash": "sha256:accbbd3b8b9615a6c1dd8ee9a5820cbda14724717e6ca2aeb3790708cb83ee73",
+          "source_hash": "sha256:691202d5050753658e1853f684c0789817f4bc9c2a9e7cc469f87d77b02b4c59",
+          "resolved_interpretation_count": 1
+        }
+      },
+      "authority": {
+        "authority_id": "repository-authority",
+        "authority_version": "1.0.0",
+        "authority_ref": "repository-authority@1.0.0",
+        "authority_identity_hash": "sha256:60d4cf29460f8cb5aae50bc67aa695d6e007bf6c64dca039ef37b659a107ea78"
+      },
+      "approval_record": {
+        "approved_by": "policy-owner",
+        "approved_at": "2026-09-03T12:03:00Z",
+        "approved_policy_translation_commitment_hash": "sha256:55ae2c06620858cc26e825de10de4bf8a6847bb1b69fec478e602deb4235f176",
+        "approved_constraint_ir_hash": "sha256:17862fb359ebecb1938e94ee3894ad53b1ee14dd15e188f65a4f76f3a45b511e",
+        "approved_semantic_commit_hash": "sha256:accbbd3b8b9615a6c1dd8ee9a5820cbda14724717e6ca2aeb3790708cb83ee73",
+        "approval_record_hash": "sha256:7e159024ad25d3a53b30adb77d834f3acf7dd5c4a98b26cf553ab3ec01b3d028",
+        "approval_id": "publication-approval-v3-7e159024ad25d3a53b30adb77d834f3acf7dd5c4a98b26cf553ab3ec01b3d028"
+      },
+      "publication_manifest": {
+        "schema_version": "publication_manifest.v1",
+        "publication_id": "publication-1",
+        "published_at": "2026-09-03T12:05:00Z",
+        "published_by": "ledger-publisher",
+        "contracts": [
+          {
+            "contract_id": "repository-authority",
+            "contract_version": "1.0.0",
+            "contract_hash": "sha256:c1e3cebb67d61fd1be30eb91639deaa71d510ad2fc46acda1b4078c572b1b5a7",
+            "source_hash": "sha256:691202d5050753658e1853f684c0789817f4bc9c2a9e7cc469f87d77b02b4c59",
+            "path": "contracts/repository-authority-1.0.0.contract.json"
+          }
+        ],
+        "reviews": [
+          {
+            "path": "reviews/repository-policy.policy-translation.json"
+          }
+        ],
+        "snapshots": [
+          {
+            "path": "snapshots/repository-policy.source.json"
+          }
+        ]
+      },
+      "provenance_bindings": {
+        "source_snapshot_hash": "sha256:691202d5050753658e1853f684c0789817f4bc9c2a9e7cc469f87d77b02b4c59",
+        "source_clauses_hash": "sha256:8f386c2cd7c56a9817f327b1e621af77adbda8c17f5ca7e01c5d6ffc48210e59",
+        "policy_translation_commitment_hash": "sha256:55ae2c06620858cc26e825de10de4bf8a6847bb1b69fec478e602deb4235f176",
+        "confirmed_controls_hash": "sha256:46b84098bd6f3f0c17bb351b207123c7681b6d6c66ebe867f34506f0ba823e3c",
+        "acknowledged_residuals_hash": "sha256:7c6ce37b373acb0e17c5135c4971e800400b69cd2319afb5226dc9531751b69c",
+        "customer_bindings_hash": "sha256:e44b8756d87f5bd1a3e3aaa4a06963bccf5f588b71fd87958ccaa86979e7bb4a",
+        "coverage_hash": "sha256:4c01a9487fa06f2142d33c96387f92e3a75084c5f48fe1d3dbe6010b6e41da09",
+        "capability_catalog_hash": "sha256:194bb5564a574236b9018171f8662a9d186bd68cfa68522b51ba3b4197858dc7",
+        "constraint_ir_hash": "sha256:17862fb359ebecb1938e94ee3894ad53b1ee14dd15e188f65a4f76f3a45b511e",
+        "runtime_fact_schema_hash": "sha256:c1595ef8d77165a7a486151673f01eda5a93000786f47e1f048875f17eb396a1",
+        "domain_pack_hash": "sha256:4b6ff9a3ebf3b419151fbaa3f899012dca39ff354de8e768da05146ad0c64b80",
+        "compiler_binding_hash": "sha256:1e4b6660d3412c89755cd9344b8405881262cabf228055fda7e4243d53701836",
+        "semantic_commit_id": "semantic-commit-accbbd3b8b96",
+        "semantic_commit_hash": "sha256:accbbd3b8b9615a6c1dd8ee9a5820cbda14724717e6ca2aeb3790708cb83ee73",
+        "semantic_commit_bundle_hash": "sha256:8f9b67d23c9ff40a998824f19ffc106e2b2558921e1f20af11bde890b1ff0b7a",
+        "compiled_contract_hash": "sha256:c1e3cebb67d61fd1be30eb91639deaa71d510ad2fc46acda1b4078c572b1b5a7",
+        "authority_identity_hash": "sha256:60d4cf29460f8cb5aae50bc67aa695d6e007bf6c64dca039ef37b659a107ea78",
+        "approval_record_hash": "sha256:7e159024ad25d3a53b30adb77d834f3acf7dd5c4a98b26cf553ab3ec01b3d028",
+        "publication_manifest_hash": "sha256:192805208ab1bac324d3278dc4f74de08c82082cb7c2f5b0bb004475720e056c"
+      },
+      "bundle_hash": "sha256:285deb35cc5114857e90404f1a10e48186fc0001fb34f8220d9c90b5adbc175d"
+    },
+    "publication_receipt": {
+      "schema_version": "publication_receipt.v3",
+      "receipt_id": "receipt-v3-285deb35cc5114857e90404f1a10e48186fc0001fb34f8220d9c90b5adbc175d",
+      "publication_id": "publication-1",
+      "authority_ref": "repository-authority@1.0.0",
+      "published_at": "2026-09-03T12:05:00Z",
+      "published_by": "ledger-publisher",
+      "bundle_hash": "sha256:285deb35cc5114857e90404f1a10e48186fc0001fb34f8220d9c90b5adbc175d",
+      "source_snapshot_hash": "sha256:691202d5050753658e1853f684c0789817f4bc9c2a9e7cc469f87d77b02b4c59",
+      "source_clauses_hash": "sha256:8f386c2cd7c56a9817f327b1e621af77adbda8c17f5ca7e01c5d6ffc48210e59",
+      "policy_translation_commitment_hash": "sha256:55ae2c06620858cc26e825de10de4bf8a6847bb1b69fec478e602deb4235f176",
+      "confirmed_controls_hash": "sha256:46b84098bd6f3f0c17bb351b207123c7681b6d6c66ebe867f34506f0ba823e3c",
+      "acknowledged_residuals_hash": "sha256:7c6ce37b373acb0e17c5135c4971e800400b69cd2319afb5226dc9531751b69c",
+      "customer_bindings_hash": "sha256:e44b8756d87f5bd1a3e3aaa4a06963bccf5f588b71fd87958ccaa86979e7bb4a",
+      "coverage_hash": "sha256:4c01a9487fa06f2142d33c96387f92e3a75084c5f48fe1d3dbe6010b6e41da09",
+      "capability_catalog_hash": "sha256:194bb5564a574236b9018171f8662a9d186bd68cfa68522b51ba3b4197858dc7",
+      "constraint_ir_hash": "sha256:17862fb359ebecb1938e94ee3894ad53b1ee14dd15e188f65a4f76f3a45b511e",
+      "runtime_fact_schema_hash": "sha256:c1595ef8d77165a7a486151673f01eda5a93000786f47e1f048875f17eb396a1",
+      "domain_pack_hash": "sha256:4b6ff9a3ebf3b419151fbaa3f899012dca39ff354de8e768da05146ad0c64b80",
+      "compiler_binding_hash": "sha256:1e4b6660d3412c89755cd9344b8405881262cabf228055fda7e4243d53701836",
+      "semantic_commit_id": "semantic-commit-accbbd3b8b96",
+      "semantic_commit_hash": "sha256:accbbd3b8b9615a6c1dd8ee9a5820cbda14724717e6ca2aeb3790708cb83ee73",
+      "semantic_commit_bundle_hash": "sha256:8f9b67d23c9ff40a998824f19ffc106e2b2558921e1f20af11bde890b1ff0b7a",
+      "compiled_contract_hash": "sha256:c1e3cebb67d61fd1be30eb91639deaa71d510ad2fc46acda1b4078c572b1b5a7",
+      "authority_identity_hash": "sha256:60d4cf29460f8cb5aae50bc67aa695d6e007bf6c64dca039ef37b659a107ea78",
+      "approval_record_hash": "sha256:7e159024ad25d3a53b30adb77d834f3acf7dd5c4a98b26cf553ab3ec01b3d028",
+      "publication_manifest_hash": "sha256:192805208ab1bac324d3278dc4f74de08c82082cb7c2f5b0bb004475720e056c",
+      "domain_pack": {
+        "domain_pack_id": "repository-changes",
+        "domain_pack_version": "1.0.0",
+        "domain_pack_hash": "sha256:4b6ff9a3ebf3b419151fbaa3f899012dca39ff354de8e768da05146ad0c64b80"
+      },
+      "compiled_contract_ref": "repository-authority@1.0.0",
+      "provenance_complete": true,
+      "receipt_hash": "sha256:ba56947069e96c54b1ae3b88b54d17e5d4bb6f98cb695bd446dc80eeb08ce468"
+    },
+    "authority_bundle_validation": {
+      "schema_version": "authority_bundle.v3",
+      "profile": "policy_translation_provenance_complete_v1",
+      "provenance_complete": true,
+      "bundle_hash": "sha256:285deb35cc5114857e90404f1a10e48186fc0001fb34f8220d9c90b5adbc175d",
+      "coverage": {
+        "total_clause_count": 1,
+        "full_clause_count": 0,
+        "partial_clause_count": 1,
+        "waiting_clause_count": 0,
+        "needs_answer_clause_count": 0,
+        "needs_connection_clause_count": 0,
+        "unenforced_clause_count": 0,
+        "informational_clause_count": 0,
+        "confirmed_control_count": 1,
+        "acknowledged_residual_count": 1
+      }
+    },
+    "publication_receipt_validation": {
+      "schema_version": "publication_receipt.v3",
+      "profile": "policy_translation_provenance_complete_v1",
+      "provenance_complete": true,
+      "bundle_hash": "sha256:285deb35cc5114857e90404f1a10e48186fc0001fb34f8220d9c90b5adbc175d",
+      "coverage": {
+        "total_clause_count": 1,
+        "full_clause_count": 0,
+        "partial_clause_count": 1,
+        "waiting_clause_count": 0,
+        "needs_answer_clause_count": 0,
+        "needs_connection_clause_count": 0,
+        "unenforced_clause_count": 0,
+        "informational_clause_count": 0,
+        "confirmed_control_count": 1,
+        "acknowledged_residual_count": 1
+      },
+      "receipt_hash": "sha256:ba56947069e96c54b1ae3b88b54d17e5d4bb6f98cb695bd446dc80eeb08ce468"
+    },
+    "private_translation_evidence_required": false,
+    "canonical_hashes": {
+      "source_snapshot_hash": "sha256:691202d5050753658e1853f684c0789817f4bc9c2a9e7cc469f87d77b02b4c59",
+      "policy_translation_commitment_hash": "sha256:55ae2c06620858cc26e825de10de4bf8a6847bb1b69fec478e602deb4235f176",
+      "constraint_ir_hash": "sha256:17862fb359ebecb1938e94ee3894ad53b1ee14dd15e188f65a4f76f3a45b511e",
+      "runtime_fact_schema_hash": "sha256:c1595ef8d77165a7a486151673f01eda5a93000786f47e1f048875f17eb396a1",
+      "domain_pack_hash": "sha256:4b6ff9a3ebf3b419151fbaa3f899012dca39ff354de8e768da05146ad0c64b80",
+      "compiler_binding_hash": "sha256:1e4b6660d3412c89755cd9344b8405881262cabf228055fda7e4243d53701836",
+      "semantic_commit_hash": "sha256:accbbd3b8b9615a6c1dd8ee9a5820cbda14724717e6ca2aeb3790708cb83ee73",
+      "semantic_commit_bundle_hash": "sha256:8f9b67d23c9ff40a998824f19ffc106e2b2558921e1f20af11bde890b1ff0b7a",
+      "compiled_contract_hash": "sha256:c1e3cebb67d61fd1be30eb91639deaa71d510ad2fc46acda1b4078c572b1b5a7",
+      "authority_bundle_hash": "sha256:285deb35cc5114857e90404f1a10e48186fc0001fb34f8220d9c90b5adbc175d",
+      "publication_receipt_hash": "sha256:ba56947069e96c54b1ae3b88b54d17e5d4bb6f98cb695bd446dc80eeb08ce468"
+    }
+  }
+}

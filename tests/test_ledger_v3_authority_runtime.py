@@ -43,7 +43,8 @@ def multi_publication():
 def partial_publication():
     if not _has_ledger_v3():
         pytest.skip("Ledger 0.8 v3 publication APIs are not installed")
-    return _publication("partial")
+    # Historical compiled-v2 envelope remains verifiable after authoring closes.
+    return json.loads((Path(__file__).parent / "fixtures/deny_only_v2/historical-partial-v3.json").read_text(encoding="utf-8"))["finalization"]
 
 
 def _request(path: str) -> dict:
@@ -404,7 +405,9 @@ def test_v3_partial_coverage_enforces_only_control_and_residual_is_not_executabl
         actor_identity={"id": "agent", "type": "agent"},
     )
     boundary = guard.boundary_for()
-    assert boundary.evaluate(_request("docs/guide.md"), save=False)["status"] == "admissible"
+    result = boundary.evaluate(_request("docs/guide.md"), save=False)
+    assert result["status"] == "blocked"
+    assert result["violated_constraints"][0]["constraint"] == "affirmative_path_grant"
     assert boundary.evaluate(_request("crypto/key.py"), save=False)["status"] == "blocked"
     commitment = boundary.loaded_authority.authority_bundle["policy_translation_commitment"]
     clause = commitment["clauses"][0]
