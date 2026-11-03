@@ -19,7 +19,10 @@ credential, or API path are outside that enforcement guarantee.
 Candidate: 0.19.1 (unreleased; proposed tag v0.19.1). Published release: 0.19.0.
 
 The 0.19.1 install and versioned download commands below apply after coordinated
-publication. See [candidate acceptance and remaining gates](docs/RELEASE_019_ACCEPTANCE.md).
+publication. Historical action-policy acceptance is retained in
+[the earlier acceptance record](docs/RELEASE_019_ACCEPTANCE.md); it does not certify
+this patch. Live compiled v2 authority now requires an affirmative path allow,
+including when role or deny rules exist. See the coordinated upgrade guidance below.
 
 ```text
 Guard does not generate actions.
@@ -296,7 +299,8 @@ Guard enforces the compiler-defined target requirements against the
 normalized target from the actual tool call before the callback runs. Rules
 are literal and case-sensitive; deny rules win. Missing or malformed scope, or
 a missing/invalid target when scope is present, fails closed. Authorities with
-no target requirements retain their legacy target-free behavior.
+no target requirements retain their legacy target-free behavior only under v1.
+Compiled v2 authority requires a nonempty affirmative path allow list.
 
 CRI-CORE Contract Compiler v0.4.0 defines deterministic target requirements;
 Guard consumes the compiled authority artifact unchanged and enforces it. It

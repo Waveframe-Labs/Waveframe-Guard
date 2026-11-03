@@ -6,8 +6,9 @@ coordinated authorization; the commands below apply after package availability.
 Install `waveframe-guard==0.19.1`, supply an approved authority, protect create and
 modify callbacks with `repository_tool(action="create" or "modify", target="path")`,
 and inspect the returned outcome, saved attestation and replay. Creation uses
-`path.create_bytes()`; modification uses `path.write_bytes()`. Supported historical
-authorities retain their existing permissions and cannot acquire creation grants.
+`path.create_bytes()`; modification uses `path.write_bytes()`. Historical explicit
+grants cannot acquire creation permissions. Live compiled v2 authority without
+an affirmative path allow is now refused; its historical evidence remains intact.
 See the [public example](examples/sdk/repository_creation_release.py).
 
 Runtime dependencies: `cricore>=0.13.0,<0.15.0`,
