@@ -1,4 +1,4 @@
-> Guard 0.19.0 is an unreleased candidate (proposed tag v0.19.0). The install
+> Guard 0.19.1 is an unreleased candidate (proposed tag v0.19.1). The install
 > and download commands apply after coordinated publication. See
 > [release acceptance](../RELEASE_019_ACCEPTANCE.md).
 
@@ -21,7 +21,7 @@ credential, or API path are outside that enforcement guarantee.
 For application use:
 
 ```bash
-pip install waveframe-guard==0.19.0
+pip install waveframe-guard==0.19.1
 ```
 
 For local development and clean-checkout test runs:
@@ -77,8 +77,8 @@ From an empty directory:
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install waveframe-guard==0.19.0
-Invoke-WebRequest https://raw.githubusercontent.com/Waveframe-Labs/Waveframe-Guard/v0.19.0/examples/external_agent_quickstart.py -OutFile quickstart.py
+python -m pip install waveframe-guard==0.19.1
+Invoke-WebRequest https://raw.githubusercontent.com/Waveframe-Labs/Waveframe-Guard/v0.19.1/examples/external_agent_quickstart.py -OutFile quickstart.py
 ```
 
 Configure the hosted boundary:
@@ -138,7 +138,7 @@ acceptance runner:
 
 ```powershell
 python -m build
-$wheel=(Resolve-Path .\dist\waveframe_guard-0.19.0-py3-none-any.whl).Path
+$wheel=(Resolve-Path .\dist\waveframe_guard-0.19.1-py3-none-any.whl).Path
 python .\tools\acceptance\external_agent_clean_machine.py --install-spec $wheel
 ```
 
@@ -158,7 +158,7 @@ and [licensing details](../LICENSING.md).
 
 ## Dependency Compatibility Matrix
 
-Guard 0.19.0 requires Python >=3.10 and the following runtime ranges.
+Guard 0.19.1 requires Python >=3.10 and the following runtime ranges.
 Candidate acceptance covers Windows/Linux with Python 3.10 and 3.14.
 
 | Component | Runtime range | Acceptance version |
@@ -316,3 +316,40 @@ Cloud preservation runs only after Guard has completed local evaluation and writ
 - Ledger publishes authority; Guard consumes verified Published Authority bundles.
 - CRI-CORE and the existing enforcement pipeline remain unchanged.
 - Cloud preservation metadata is post-decision durability evidence, not runtime admissibility.
+
+## Affirmative path grants and coordinated upgrade
+
+The 0.9.1 Ledger / 0.19.1 Guard security patch candidates require an affirmative
+path grant. Guard refuses live `compiled_authority_contract.v2` authorization
+when `target_requirements.allow` is empty, including deny-only and role-only
+authority, with an actionable diagnostic. Deny precedence and explicit grants
+remain enforced. Ledger gates new pack-1 repository approval/finalization on
+confirmed, enforceable path allows; candidate controls alone do not count.
+
+Historical bundles, receipts, hashes and approvals remain unchanged and
+verifiable. Replay retains recorded evidence and exposes any current live
+refusal; it does not restore the old permission. Historical v1 and action-scoped
+v3 evaluation semantics are unchanged. Replace missing grants with a new source
+and authority revision and fresh human review/acceptance. Never reuse an old
+approval for changed grants.
+
+Previously published Ledger 0.9.0 and Guard 0.19.0 remain affected in the reproduced
+scope. Dependency ranges still admit older packages. After separate publication
+approval, explicitly upgrade both packages:
+
+```text
+python -m pip install --upgrade governance-ledger==0.9.1 waveframe-guard==0.19.1
+python -m pip check
+```
+
+A Ledger-only upgrade does not patch an older Guard; a Guard-only upgrade does
+not supply Ledger's new-authoring gate. An already satisfied optional extra does
+not establish that both patches are installed. No Cloud activation, production
+consumer upgrade, or automatic repair of existing approvals is claimed.
+
+These are unreleased candidates. Historical action-policy certification remains
+unchanged; separate distribution acceptance must validate these exact artifacts.
+Publishing requires separate owner approval and must use only the accepted
+files, with SHA256 equality checked on PyPI for Ledger before Guard upload.
+Final tags must bind the exact accepted commits (Ledger annotated, Guard
+lightweight). No tags or publication are part of this preparation.
